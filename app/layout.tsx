@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Roboto, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import { Sidebar } from '@/components/layout/sidebar';
 
 const roboto = Roboto({
     weight: ['300', '400', '500', '700'],
@@ -26,7 +27,8 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${roboto.variable} ${geistMono.variable} antialiased min-h-screen flex`}>
-                <div></div>
+                <Sidebar />
+                <div className="flex-1 bg-[#eef0fc] p-8">{children}</div>
             </body>
         </html>
     );
