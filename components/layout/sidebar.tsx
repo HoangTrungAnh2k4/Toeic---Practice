@@ -15,7 +15,7 @@ const ITEM_H = 64;
 type NavItem = { label: string; href: string; icon: IconType };
 
 const items: NavItem[] = [
-    { label: 'Dashboard', href: '/dashboard', icon: IoHome },
+    { label: 'Overview', href: '/overview', icon: IoHome },
     { label: 'Explore', href: '/explore', icon: IoCompass },
     { label: 'Dictionary', href: '/dictionary', icon: IoBook },
     { label: 'Schedule', href: '/schedule', icon: IoCalendar },
@@ -29,7 +29,7 @@ export function Sidebar() {
 
     return (
         <aside
-            className={`sidebar-root relative z-10 flex shrink-0 flex-col bg-gradient-to-br from-[#4b3f72] via-[#3d3460] to-[#2c2547] transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+            className={`sidebar-root relative z-10 flex shrink-0 flex-col bg-linear-to-br from-[#4b3f72] via-[#3d3460] to-[#2c2547] transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
                 collapsed ? 'w-24' : 'w-72'
             }`}
         >
@@ -102,7 +102,7 @@ export function Sidebar() {
                                 <Link
                                     href={item.href}
                                     aria-current={active ? 'page' : undefined}
-                                    className={`group relative z-10 flex h-16 items-center gap-4 transition-[padding] duration-500 ${
+                                    className={`group relative z-10 flex h-16 items-center gap-4 transition-[padding] duration-500 ${!active ? 'hover:bg-white/10' : ''} ${
                                         collapsed ? 'pl-11' : 'pl-9'
                                     }`}
                                 >
