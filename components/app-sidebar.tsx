@@ -29,9 +29,9 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="bg-sidebar-accent hover:bg-sidebar-accent h-10 text-cyan-400 hover:text-cyan-400" render={<Link href="/dashboard" />}>
+              <SidebarMenuButton className="bg-sidebar-accent hover:bg-sidebar-accent h-10 text-cyan-400 hover:text-cyan-400" render={<Link href="/overview" />}>
                 <LuBox className="size-5!" />
-                <span className="text-base">Orders</span>
+                <span className="text-base">Overview</span>
               </SidebarMenuButton>
             </SidebarMenuItem>            
           </SidebarMenu>
