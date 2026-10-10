@@ -5,6 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-main: var(--main);
+  --color-sub1: var(--sub1);
+  --color-sub2: var(--sub2);
+  --color-sub3: var(--sub3);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-roboto);
@@ -49,6 +53,10 @@
 }
 
 :root {
+  --main:#3C3454;
+  --sub1:#E8E5F5;
+  --sub2:#8B84B8;
+  --sub3:#F5B841;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -122,6 +130,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background font-sans text-foreground;
   }
 }

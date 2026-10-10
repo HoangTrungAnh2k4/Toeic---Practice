@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { IoBook, IoCalendar, IoChevronBack, IoCompass, IoHome } from 'react-icons/io5';
+import { IoBook, IoCalendar } from 'react-icons/io5';
+import { TbLayoutDashboardFilled } from 'react-icons/tb';
+import { FaMicrophoneAlt } from 'react-icons/fa';
+import { FaPenNib } from 'react-icons/fa6';
 
 /**
  * Chiều cao mỗi mục. PHẢI khớp với class `h-16` (64px) bên dưới,
@@ -15,9 +19,9 @@ const ITEM_H = 64;
 type NavItem = { label: string; href: string; icon: IconType };
 
 const items: NavItem[] = [
-    { label: 'Overview', href: '/overview', icon: IoHome },
-    { label: 'Explore', href: '/explore', icon: IoCompass },
-    { label: 'Dictionary', href: '/dictionary', icon: IoBook },
+    { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
+    { label: 'Explore', href: '/explore', icon: FaPenNib },
+    { label: 'Dictionary', href: '/dictionary', icon: FaMicrophoneAlt },
     { label: 'Schedule', href: '/schedule', icon: IoCalendar },
 ];
 
@@ -29,8 +33,8 @@ export function Sidebar() {
 
     return (
         <aside
-            className={`sidebar-root relative z-10 flex shrink-0 flex-col bg-linear-to-br from-[#4b3f72] via-[#3d3460] to-[#2c2547] transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
-                collapsed ? 'w-24' : 'w-72'
+            className={`sidebar-root relative z-10 flex shrink-0 flex-col bg-linear-to-b from-main via-[#3d3460] to-main transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                collapsed ? 'w-20' : 'w-64'
             }`}
         >
             <style>{`
@@ -52,28 +56,55 @@ export function Sidebar() {
       `}</style>
 
             {/* Header: logo + nút thu gọn */}
-            <div className="flex justify-between items-center px-6 pt-4 h-24">
-                <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="flex justify-center items-center bg-white/15 rounded-xl w-10 h-10 font-bold text-white text-lg shrink-0">
-                        L
-                    </div>
-                    <span
-                        className={`whitespace-nowrap text-lg font-semibold text-white transition-all duration-300 ${
-                            collapsed ? 'w-0 opacity-0' : 'opacity-100'
-                        }`}
-                    >
-                        Learnly
-                    </span>
-                </div>
+            <div className="flex justify-end items-center pt-4 h-24">
+                {/*
+                  Cả 2 logo luôn được render chồng lên nhau và chuyển đổi bằng transition
+                  (crossfade + trượt + scale) theo `collapsed`. Nhờ vậy cả logo đầy đủ lẫn
+                  logo thu gọn đều có animation cả khi hiện lẫn khi ẩn, đồng bộ với độ rộng sidebar.
+                */}
                 <button
                     type="button"
                     onClick={() => setCollapsed((v) => !v)}
-                    aria-label={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-all duration-300 hover:scale-110 hover:bg-white/20 active:scale-90 ${
-                        collapsed ? 'absolute right-2 top-9 rotate-180' : ''
-                    }`}
+                    aria-label={collapsed ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên'}
+                    aria-expanded={!collapsed}
+                    className="group relative w-full h-13 cursor-pointer"
+                    style={{ animation: 'sidebar-in 500ms ease-out both' }}
                 >
-                    <IoChevronBack className="w-4 h-4" />
+                    {/* Logo đầy đủ */}
+                    <span
+                        aria-hidden={collapsed}
+                        className={`absolute inset-0 transition-all duration-1000 ease-[cubic-bezier(0.34,1.4,0.64,1)] ${
+                            collapsed
+                                ? 'pointer-events-none -translate-x-6 scale-75 opacity-0'
+                                : 'translate-x-0 scale-100 opacity-100'
+                        }`}
+                    >
+                        <Image
+                            src="/img/logo.png"
+                            alt="Learnly Logo"
+                            fill
+                            sizes="10"
+                            className="outline-none focus-visible:outline-none focus:outline-none object-contain group-hover:scale-102 transition-transform duration-300"
+                        />
+                    </span>
+
+                    {/* Logo thu gọn */}
+                    <span
+                        aria-hidden={!collapsed}
+                        className={`absolute inset-x-0 inset-y-1 transition-all duration-1000 ease-[cubic-bezier(0.34,1.4,0.64,1)] ${
+                            collapsed
+                                ? 'translate-x-0 scale-100 rotate-0 opacity-100'
+                                : 'pointer-events-none translate-x-6 scale-50 -rotate-12 opacity-0'
+                        }`}
+                    >
+                        <Image
+                            src="/img/sub_logo.png"
+                            alt="Learnly Logo"
+                            fill
+                            sizes="10"
+                            className="object-contain group-hover:rotate-6 group-hover:scale-110 transition-transform"
+                        />
+                    </span>
                 </button>
             </div>
 
@@ -81,7 +112,7 @@ export function Sidebar() {
                 {/* Thanh trượt: pill sáng + 2 góc bo ngược (trên & dưới) nối liền với nội dung */}
                 <div
                     aria-hidden
-                    className={`pointer-events-none absolute -right-px left-4 top-0 h-16 rounded-l-full bg-[#eef0fc] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.4,0.64,1)] before:absolute before:-top-8 before:right-0 before:h-8 before:w-8 before:bg-[radial-gradient(circle_at_0_0,transparent_31.5px,#eef0fc_32px)] before:content-[''] after:absolute after:-bottom-8 after:right-0 after:h-8 after:w-8 after:bg-[radial-gradient(circle_at_0_100%,transparent_31.5px,#eef0fc_32px)] after:content-[''] ${
+                    className={`pointer-events-none absolute -right-px left-1 top-0 h-16 rounded-l-full bg-[#eef0fc] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.4,0.64,1)] before:absolute before:-top-8 before:right-0 before:h-8 before:w-8 before:bg-[radial-gradient(circle_at_0_0,transparent_31.5px,#eef0fc_32px)] before:content-[''] after:absolute after:-bottom-8 after:right-0 after:h-8 after:w-8 after:bg-[radial-gradient(circle_at_0_100%,transparent_31.5px,#eef0fc_32px)] after:content-[''] ${
                         activeIndex < 0 ? 'opacity-0' : 'opacity-100'
                     }`}
                     style={{ transform: `translateY(${Math.max(activeIndex, 0) * ITEM_H}px)` }}
@@ -103,20 +134,20 @@ export function Sidebar() {
                                     href={item.href}
                                     aria-current={active ? 'page' : undefined}
                                     className={`group relative z-10 flex h-16 items-center gap-4 transition-[padding] duration-500 ${!active ? 'hover:bg-white/10' : ''} ${
-                                        collapsed ? 'pl-11' : 'pl-9'
+                                        collapsed ? 'pl-6' : 'pl-9'
                                     }`}
                                 >
                                     <Icon
                                         // key đổi theo active để chạy lại animation "pop" mỗi lần được chọn
                                         key={active ? 'on' : 'off'}
                                         className={`h-6 w-6 shrink-0 transition-all duration-300 group-hover:-rotate-12 group-hover:scale-125 ${
-                                            active ? 'text-[#1f1b2e]' : 'text-[#a29db8]'
+                                            active ? 'text-[#1f1b2e]' : 'text-white'
                                         }`}
                                         style={active ? { animation: 'sidebar-pop 500ms ease-out both' } : undefined}
                                     />
                                     <span
-                                        className={`whitespace-nowrap text-[15px] font-medium transition-all duration-300 group-hover:translate-x-1 ${
-                                            active ? 'text-[#1f1b2e]' : 'text-white/90'
+                                        className={`whitespace-nowrap text-base font-medium transition-all duration-300 group-hover:translate-x-1 ${
+                                            active ? 'text-[#1f1b2e]' : 'text-white'
                                         } ${collapsed ? 'pointer-events-none -translate-x-3 opacity-0' : 'opacity-100'}`}
                                     >
                                         {item.label}

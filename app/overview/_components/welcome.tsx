@@ -1,59 +1,42 @@
+import Image from 'next/image';
+import { GiBookmarklet } from 'react-icons/gi';
+import { LuRoute } from 'react-icons/lu';
 import { MdSchool } from 'react-icons/md';
 
 export default function WelcomeBanner() {
     return (
-        <div className="relative bg-white shadow-sm p-8 rounded-[0.5rem] overflow-hidden">
-            <div className="-top-12 -right-12 absolute bg-gradient-to-br from-[#0037b0]/10 via-[#e5eeff] to-transparent blur-3xl rounded-[0.75rem] w-96 h-96 pointer-events-none" />
-            <div className="z-10 relative flex lg:flex-row flex-col justify-between lg:items-center gap-6">
-                <div className="flex flex-col gap-1 max-w-2xl">
-                    <div className="flex items-center gap-1 font-semibold text-[#0037b0] text-[0.6875rem] uppercase leading-3.5 tracking-widest">
-                        <MdSchool className="text-[18px]" />
-                        <span>TOEIC Speaking & Writing Acceleration</span>
+        <div className="bg-main px-12 rounded-xl w-full">
+            <div className="flex gap-4 h-full">
+                <div className="flex flex-col flex-1 justify-between gap-2 pt-4 pb-6 text-white">
+                    <div className="flex justify-center items-center gap-2 bg-sub2 px-3 py-1 rounded-full w-fit font-medium text-sm">
+                        <GiBookmarklet size={18} className="mt-0.5" />
+                        TOEIC Speaking and Writing
                     </div>
-                    <h1 className="font-semibold text-[#0b1c2f] text-[2rem] leading-[2.5rem] tracking-tight">
-                        Chào Minh Anh, sẵn sàng cho buổi luyện hôm nay!
-                    </h1>
-                    <p className="text-[#434655] text-[1rem] leading-[1.625rem]">
-                        Bạn đã hoàn thành 4 chuỗi luyện liên tiếp. Hãy duy trì nhịp độ phản xạ nói và tư duy mạch lạc
-                        cho cấu trúc bài viết Email & Essay.
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-4 shrink-0">
-                    <div className="flex flex-col gap-1 bg-[#eef4ff] shadow-sm p-4 rounded-[0.5rem] min-w-[130px]">
-                        <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
-                            Chuỗi ngày học
-                        </span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="font-bold text-[#0037b0] text-[1.375rem] leading-7 tracking-[-0.015em]">
-                                12
-                            </span>
-                            <span className="font-semibold text-[#434655] text-[0.75rem] leading-4 tracking-[0.04em]">
-                                ngày
-                            </span>
-                        </div>
-                        <span className="font-semibold text-[#006a63] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
-                            Kỷ lục: 15 ngày
-                        </span>
+                    <div className="flex flex-col gap-4 mt-2 xl:-mt-4">
+                        <p className="font-bold text-4xl tracking-wide">Chào Trung Anh, sẵn sàng luyện tập hôm nay?</p>
+                        <p className="text-sub1">
+                            Luyện tập mỗi ngày, nâng cao kỹ năng Speaking & Writing và tự tin chinh phục mục tiêu TOEIC
+                            SW.
+                        </p>
                     </div>
-                    <div className="flex flex-col gap-1 bg-[#eef4ff] shadow-sm p-4 rounded-[0.5rem] min-w-[130px]">
-                        <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
-                            Thời gian tích lũy
-                        </span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="font-bold text-[#0b1c2f] text-[1.375rem] leading-7 tracking-[-0.015em]">
-                                28.5
-                            </span>
-                            <span className="font-semibold text-[#434655] text-[0.75rem] leading-4 tracking-[0.04em]">
-                                giờ
-                            </span>
-                        </div>
-                        <span className="font-semibold text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
-                            +3.2h tuần này
-                        </span>
+                    <div className="flex flex-wrap gap-4">
+                        <button className="hover:bg-sub3 px-4 py-2 border-2 border-sub3 rounded-xl font-medium text-sub3 hover:text-white duration-300 ease-in-out cursor-pointer">
+                            Bắt đầu luyện tập
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 border-2 border-white/20 hover:border-white rounded-xl font-medium text-white/80 hover:text-white duration-300 ease-in-out cursor-pointer">
+                            <LuRoute /> Xem lộ trình
+                        </button>
                     </div>
                 </div>
+                <Image
+                    src="/img/banner.png"
+                    alt="Learnly Logo"
+                    width={250}
+                    height={200}
+                    className="object-contain group-hover:scale-102 transition-transform duration-300"
+                />
             </div>
+            <div className=""></div>
         </div>
     );
 }
