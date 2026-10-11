@@ -9,6 +9,7 @@
   --color-sub1: var(--sub1);
   --color-sub2: var(--sub2);
   --color-sub3: var(--sub3);
+  --color-subText: var(--subText);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-roboto);
@@ -57,6 +58,7 @@
   --sub1:#E8E5F5;
   --sub2:#8B84B8;
   --sub3:#F5B841;
+  --subText:#5c596a;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

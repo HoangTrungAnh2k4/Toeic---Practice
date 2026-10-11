@@ -1,12 +1,12 @@
 import NoticeBanner from './_components/noticeBanner';
 import WelcomeBanner from './_components/welcome';
-import HeroBanner from './_components/heroBanner';
-import SkillGoals_Chart from './_components/skillGoals_+_Chart';
 import PriorityError from './_components/priorityError';
 import RecentAttempt from './_components/recentAttempt';
 import FooterAssurance from './_components/footerAssurance';
+import SkillGoals from './_components/skillGoal';
+import { Chart } from './_components/chart';
 
-export default function Dashboard() {
+export default function Overview() {
     return (
         <div className="flex flex-col gap-8 mx-auto w-full max-w-360">
             {/* Offline / local cache notice */}
@@ -15,11 +15,11 @@ export default function Dashboard() {
             {/* Welcome banner */}
             <WelcomeBanner />
 
-            {/* Hero: next task */}
-            <HeroBanner />
-
             {/* Skill goals + progress chart */}
-            <SkillGoals_Chart />
+            <div className="flex gap-2">
+                <SkillGoals />
+                <Chart />
+            </div>
 
             {/* Priority errors */}
             <PriorityError />

@@ -92,11 +92,11 @@ export default function RecentAttempt() {
 
     function SkillBadge({ skill }: { skill: Skill }) {
         return skill === 'S' ? (
-            <span className="bg-[#0037b0]/10 px-1 py-0.5 rounded-xs font-semibold text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+            <span className="bg-[#0037b0]/10 px-1 py-0.5 rounded-xs font-semibold text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-wider">
                 S
             </span>
         ) : (
-            <span className="bg-[#006a63]/15 px-1 py-0.5 rounded-xs font-semibold text-[#006a63] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+            <span className="bg-[#006a63]/15 px-1 py-0.5 rounded-xs font-semibold text-[#006a63] text-[0.6875rem] leading-3.5 tracking-wider">
                 W
             </span>
         );
@@ -108,8 +108,8 @@ export default function RecentAttempt() {
             onClick={() => setFilter(key)}
             className={
                 filter === key
-                    ? 'px-1 py-1 rounded-xs bg-[#0037b0] text-white text-[0.6875rem] leading-3.5 tracking-[0.05em] font-semibold'
-                    : 'px-1 py-1 rounded-xs bg-[#e5eeff] text-[#434655] hover:bg-[#dbe9ff] text-[0.6875rem] leading-3.5 tracking-[0.05em] font-semibold'
+                    ? 'px-1 py-1 rounded-xs bg-[#0037b0] text-white text-[0.6875rem] leading-3.5 tracking-wider font-semibold'
+                    : 'px-1 py-1 rounded-xs bg-[#e5eeff] text-[#434655] hover:bg-[#dbe9ff] text-[0.6875rem] leading-3.5 tracking-wider font-semibold'
             }
         >
             {label}
@@ -129,7 +129,7 @@ export default function RecentAttempt() {
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
-                    <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                    <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider">
                         Lọc kỹ năng:
                     </span>
                     {filterBtn('all', 'Tất cả')}
@@ -162,7 +162,7 @@ export default function RecentAttempt() {
                                                 <span className="font-semibold text-[#0b1c2f] text-[0.875rem] leading-[1.25rem] tracking-[0.01em]">
                                                     {a.title}
                                                 </span>
-                                                <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                                <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider">
                                                     {a.subtitle}
                                                 </span>
                                             </div>
@@ -171,12 +171,12 @@ export default function RecentAttempt() {
                                             <div className="flex items-center gap-1">
                                                 {a.skills.length === 1 ? (
                                                     a.skills[0] === 'S' ? (
-                                                        <span className="inline-flex items-center gap-1 bg-[#0037b0]/10 px-1 py-0.5 rounded-xs font-semibold text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                                        <span className="inline-flex items-center gap-1 bg-[#0037b0]/10 px-1 py-0.5 rounded-xs font-semibold text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-wider">
                                                             <MdMic className="text-[14px]" />
                                                             Speaking
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 bg-[#006a63]/15 px-1 py-0.5 rounded-xs font-semibold text-[#006a63] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                                        <span className="inline-flex items-center gap-1 bg-[#006a63]/15 px-1 py-0.5 rounded-xs font-semibold text-[#006a63] text-[0.6875rem] leading-3.5 tracking-wider">
                                                             <MdEditNote className="text-[14px]" />
                                                             Writing
                                                         </span>
@@ -195,8 +195,8 @@ export default function RecentAttempt() {
                                             <span
                                                 className={
                                                     a.retake
-                                                        ? 'px-1 py-0.5 rounded-xs bg-[#dbe9ff] text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-[0.05em] font-semibold'
-                                                        : 'px-1 py-0.5 rounded-xs bg-[#e5eeff] text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em] font-semibold'
+                                                        ? 'px-1 py-0.5 rounded-xs bg-[#dbe9ff] text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-wider font-semibold'
+                                                        : 'px-1 py-0.5 rounded-xs bg-[#e5eeff] text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider font-semibold'
                                                 }
                                             >
                                                 {a.examType}
@@ -204,7 +204,7 @@ export default function RecentAttempt() {
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap">
                                             <span
-                                                className={`inline-flex items-center gap-1.5 px-1 py-0.5 rounded-xs text-[0.6875rem] leading-3.5 tracking-[0.05em] font-semibold ${st.badge}`}
+                                                className={`inline-flex items-center gap-1.5 px-1 py-0.5 rounded-xs text-[0.6875rem] leading-3.5 tracking-wider font-semibold ${st.badge}`}
                                             >
                                                 <span className={`w-1.5 h-1.5 rounded-[0.75rem] ${st.dot}`} />
                                                 {st.label}
@@ -238,7 +238,7 @@ export default function RecentAttempt() {
                 </div>
 
                 <div className="flex sm:flex-row flex-col justify-between items-center gap-2 bg-[#eef4ff] px-4 py-2">
-                    <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                    <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider">
                         Hiển thị 22 trong tổng số 28 lượt làm bài đã ghi nhận
                     </span>
                     <div className="flex items-center gap-1">
@@ -250,7 +250,7 @@ export default function RecentAttempt() {
                         >
                             <MdChevronLeft className="text-[18px]" />
                         </button>
-                        <span className="px-2 font-semibold text-[#0b1c2f] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                        <span className="px-2 font-semibold text-[#0b1c2f] text-[0.6875rem] leading-3.5 tracking-wider">
                             Trang 1 / 7
                         </span>
                         <button

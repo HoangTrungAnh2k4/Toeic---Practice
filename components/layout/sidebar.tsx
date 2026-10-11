@@ -140,7 +140,7 @@ export function Sidebar() {
                                     <Icon
                                         // key đổi theo active để chạy lại animation "pop" mỗi lần được chọn
                                         key={active ? 'on' : 'off'}
-                                        className={`h-6 w-6 shrink-0 transition-all duration-300 group-hover:-rotate-12 group-hover:scale-125 ${
+                                        className={`h-6 w-6 shrink-0 transition-all duration-300 group-hover:-rotate-12 group-hover:scale-110 ${
                                             active ? 'text-[#1f1b2e]' : 'text-white'
                                         }`}
                                         style={active ? { animation: 'sidebar-pop 500ms ease-out both' } : undefined}

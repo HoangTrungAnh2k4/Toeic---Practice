@@ -19,7 +19,7 @@ export default function NoticeBanner() {
                                         Cảnh báo hệ thống
                                     </span>
                                     <span className="bg-[#733100] rounded-[0.75rem] w-1.5 h-1.5" />
-                                    <span className="font-semibold text-[#733100] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                    <span className="font-semibold text-[#733100] text-[0.6875rem] leading-3.5 tracking-wider">
                                         Chế độ Offline First
                                     </span>
                                 </div>

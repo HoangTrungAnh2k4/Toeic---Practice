@@ -31,14 +31,14 @@ export default function PriorityError() {
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-1">
-                                <span className="bg-[#0037b0]/10 px-1 py-0.5 rounded-xs font-semibold text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                <span className="bg-[#0037b0]/10 px-1 py-0.5 rounded-xs font-semibold text-[#0037b0] text-[0.6875rem] leading-3.5 tracking-wider">
                                     Speaking Q3-4
                                 </span>
-                                <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider">
                                     • Describe a picture
                                 </span>
                             </div>
-                            <span className="bg-[#ffdad6] px-1 py-0.5 rounded-xs font-semibold text-[#93000a] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                            <span className="bg-[#ffdad6] px-1 py-0.5 rounded-xs font-semibold text-[#93000a] text-[0.6875rem] leading-3.5 tracking-wider">
                                 Tần suất: 3/4 bài
                             </span>
                         </div>
@@ -51,7 +51,7 @@ export default function PriorityError() {
                         </p>
                     </div>
                     <div className="flex justify-between items-center pt-2">
-                        <div className="flex items-center gap-1 font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                        <div className="flex items-center gap-1 font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider">
                             <MdBolt className="text-[#733100] text-[16px]" />
                             <span>Mất điểm tiêu chí Lexical Resource</span>
                         </div>
@@ -70,14 +70,14 @@ export default function PriorityError() {
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-1">
-                                <span className="bg-[#006a63]/15 px-1 py-0.5 rounded-xs font-semibold text-[#006a63] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                <span className="bg-[#006a63]/15 px-1 py-0.5 rounded-xs font-semibold text-[#006a63] text-[0.6875rem] leading-3.5 tracking-wider">
                                     Writing Q6-7
                                 </span>
-                                <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                                <span className="font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider">
                                     • Respond to an email
                                 </span>
                             </div>
-                            <span className="bg-[#ffdad6] px-1 py-0.5 rounded-xs font-semibold text-[#93000a] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                            <span className="bg-[#ffdad6] px-1 py-0.5 rounded-xs font-semibold text-[#93000a] text-[0.6875rem] leading-3.5 tracking-wider">
                                 Tần suất: 2/3 bài
                             </span>
                         </div>
@@ -90,7 +90,7 @@ export default function PriorityError() {
                         </p>
                     </div>
                     <div className="flex justify-between items-center pt-2">
-                        <div className="flex items-center gap-1 font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-[0.05em]">
+                        <div className="flex items-center gap-1 font-semibold text-[#434655] text-[0.6875rem] leading-3.5 tracking-wider">
                             <MdWarning className="text-[#733100] text-[16px]" />
                             <span>Hạ trần điểm Task Completion từ 4 xuống 2</span>
                         </div>

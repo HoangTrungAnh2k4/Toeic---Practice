@@ -1,3 +1,4 @@
+import Button from '@/components/ui/button';
 import Image from 'next/image';
 import { GiBookmarklet } from 'react-icons/gi';
 import { LuRoute } from 'react-icons/lu';
@@ -20,12 +21,10 @@ export default function WelcomeBanner() {
                         </p>
                     </div>
                     <div className="flex flex-wrap gap-4">
-                        <button className="hover:bg-sub3 px-4 py-2 border-2 border-sub3 rounded-xl font-medium text-sub3 hover:text-white duration-300 ease-in-out cursor-pointer">
-                            Bắt đầu luyện tập
-                        </button>
-                        <button className="flex items-center gap-2 px-4 py-2 border-2 border-white/20 hover:border-white rounded-xl font-medium text-white/80 hover:text-white duration-300 ease-in-out cursor-pointer">
-                            <LuRoute /> Xem lộ trình
-                        </button>
+                        <Button variant={'primary'}>Bắt đầu luyện tập</Button>
+                        <Button variant={'secondary'}>
+                            <LuRoute className="mr-2" /> Xem lộ trình
+                        </Button>
                     </div>
                 </div>
                 <Image
