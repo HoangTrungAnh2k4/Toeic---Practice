@@ -20,8 +20,8 @@ type NavItem = { label: string; href: string; icon: IconType };
 
 const items: NavItem[] = [
     { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
-    { label: 'Explore', href: '/explore', icon: FaPenNib },
-    { label: 'Dictionary', href: '/dictionary', icon: FaMicrophoneAlt },
+    { label: 'Speaking', href: '/speaking', icon: FaMicrophoneAlt },
+    { label: 'Writing', href: '/writing', icon: FaPenNib },
     { label: 'Schedule', href: '/schedule', icon: IoCalendar },
 ];
 
@@ -141,13 +141,13 @@ export function Sidebar() {
                                         // key đổi theo active để chạy lại animation "pop" mỗi lần được chọn
                                         key={active ? 'on' : 'off'}
                                         className={`h-6 w-6 shrink-0 transition-all duration-300 group-hover:-rotate-12 group-hover:scale-110 ${
-                                            active ? 'text-[#1f1b2e]' : 'text-white'
+                                            active ? 'text-black' : 'text-white'
                                         }`}
                                         style={active ? { animation: 'sidebar-pop 500ms ease-out both' } : undefined}
                                     />
                                     <span
                                         className={`whitespace-nowrap text-base font-medium transition-all duration-300 group-hover:translate-x-1 ${
-                                            active ? 'text-[#1f1b2e]' : 'text-white'
+                                            active ? 'text-black' : 'text-white'
                                         } ${collapsed ? 'pointer-events-none -translate-x-3 opacity-0' : 'opacity-100'}`}
                                     >
                                         {item.label}
