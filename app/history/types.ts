@@ -1,3 +1,5 @@
+import type { ResponseAnnotation } from '@/app/mistakes/types';
+
 export type SkillType = 'all' | 'speaking' | 'writing' | 'full_mock';
 
 export type ExamModeType = 'all' | 'cbt' | 'timed' | 'guided';
@@ -77,4 +79,28 @@ export interface HistoryAttemptPage {
     total: number;
     page: number;
     totalPages: number;
+}
+
+/** Nội dung một câu hỏi trong bài làm, kèm câu trả lời và nhận xét. */
+export interface ReviewQuestion {
+    number: number;
+    task: string;
+    /** Yêu cầu / Directions của đề. */
+    prompt: string;
+    /** Ngữ liệu đi kèm: mô tả tranh, email đề bài, đoạn văn cần đọc... */
+    stimulus?: string;
+    /** Từ khoá bắt buộc (Writing Q1-5). */
+    keywords?: string[];
+    score?: { value: number; max: number };
+    /** Writing: bài viết; Speaking: transcript do AI nhận dạng. */
+    response: string;
+    /** Thời lượng trả lời tối đa (giây) — chỉ Speaking. */
+    responseTime?: number;
+    annotations: ResponseAnnotation[];
+    strengths: string[];
+}
+
+export interface AttemptReview {
+    attempt: HistoryAttempt;
+    questions: ReviewQuestion[];
 }
