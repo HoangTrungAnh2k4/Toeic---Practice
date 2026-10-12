@@ -1,41 +1,86 @@
 import Button from '@/components/ui/button';
 import Image from 'next/image';
-import { GiBookmarklet } from 'react-icons/gi';
-import { LuRoute } from 'react-icons/lu';
-import { MdSchool } from 'react-icons/md';
+import type { IconType } from 'react-icons';
+import { LuMic, LuPenLine, LuRoute } from 'react-icons/lu';
+
+type ExamFormat = {
+    icon: IconType;
+    skill: string;
+    detail: string;
+};
+
+const EXAM_FORMATS: ExamFormat[] = [
+    { icon: LuMic, skill: 'Speaking', detail: '11 câu trong 20 phút' },
+    { icon: LuPenLine, skill: 'Writing', detail: '8 câu trong 60 phút' },
+];
 
 export default function WelcomeBanner() {
     return (
-        <div className="bg-main px-8 rounded-xl w-full">
-            <div className="flex gap-4 h-full">
-                <div className="flex flex-col flex-1 justify-between gap-2 pt-4 pb-6 text-white">
-                    <div className="flex justify-center items-center gap-2 bg-sub2 px-3 py-1 rounded-full w-fit font-medium text-sm">
-                        <GiBookmarklet size={18} className="mt-0.5" />
-                        TOEIC Speaking and Writing
-                    </div>
-                    <div className="flex flex-col gap-4 mt-2 xl:-mt-4">
-                        <p className="font-bold text-4xl tracking-wide">Chào Trung Anh, sẵn sàng luyện tập hôm nay?</p>
-                        <p className="text-sub1">
-                            Luyện tập mỗi ngày, nâng cao kỹ năng Speaking & Writing và tự tin chinh phục mục tiêu TOEIC
-                            SW.
+        <section
+            aria-labelledby="welcome-heading"
+            className="isolate relative bg-main rounded-2xl w-full overflow-hidden text-white"
+        >
+            <Image
+                src="/svg/banner-decor.svg"
+                alt=""
+                fill
+                priority
+                sizes="100vw"
+                className="-z-10 object-center object-cover sm:object-left pointer-events-none select-none"
+            />
+
+            <div className="flex">
+                <div className="flex flex-col flex-1 gap-5 px-6 sm:px-10 py-8">
+                    <div className="flex flex-col gap-2">
+                        <h1
+                            id="welcome-heading"
+                            className="max-w-2xl font-bold text-3xl sm:text-4xl text-balance leading-tight tracking-tight"
+                        >
+                            <span className="sm:block">Luyện như thi thật,</span> để ngày thi nhẹ như một buổi tập.
+                        </h1>
+                        <p className="mt-1 max-w-xl text-sub1/80 text-pretty leading-relaxed">
+                            Đề sát format ETS, chấm đúng tiêu chí và chỉ rõ lỗi cần sửa sau mỗi bài.
                         </p>
                     </div>
+
                     <div className="flex flex-wrap gap-4">
-                        <Button variant={'primary'}>Bắt đầu luyện tập</Button>
-                        <Button variant={'secondary'}>
-                            <LuRoute className="mr-2" /> Xem lộ trình
+                        <Button variant="primary">Bắt đầu luyện tập</Button>
+                        <Button variant="secondary">
+                            <LuRoute aria-hidden="true" className="mr-2 size-4" />
+                            Xem lộ trình
                         </Button>
                     </div>
+
+                    <ul
+                        aria-label="Cấu trúc đề thi TOEIC Speaking & Writing"
+                        className="flex flex-wrap gap-x-8 gap-y-3 pt-4 border-white/10 border-t max-w-2xl"
+                    >
+                        {EXAM_FORMATS.map(({ icon: Icon, skill, detail }) => (
+                            <li key={skill} className="flex items-center gap-3 text-sm">
+                                <span className="flex justify-center items-center bg-white/10 rounded-lg size-9 shrink-0">
+                                    <Icon aria-hidden="true" className="size-4 text-sub3" />
+                                </span>
+                                <span className="flex flex-col">
+                                    <span className="font-semibold">TOEIC {skill}</span>
+                                    <span className="text-sub1/70">{detail}</span>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-                <Image
-                    src="/img/banner.png"
-                    alt="Learnly Logo"
-                    width={250}
-                    height={200}
-                    className="w-auto h-auto object-contain group-hover:scale-102 transition-transform duration-300"
-                />
+
+                <div className="hidden lg:flex items-end w-56 xl:w-80 shrink-0">
+                    <Image
+                        src="/img/banner.png"
+                        alt=""
+                        width={934}
+                        height={934}
+                        priority
+                        sizes="(min-width: 1280px) 320px, 224px"
+                        className="mask-l-from-75% mask-t-from-80% w-full h-auto translate-y-4"
+                    />
+                </div>
             </div>
-            <div className=""></div>
-        </div>
+        </section>
     );
 }

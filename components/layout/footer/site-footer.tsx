@@ -23,11 +23,6 @@ export function SiteFooter() {
 
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
                             <div className="flex items-center gap-3">
-                                <Avatar size="lg" className="after:hidden">
-                                    <AvatarFallback className="bg-sub2 font-semibold text-white">
-                                        {author.initials}
-                                    </AvatarFallback>
-                                </Avatar>
                                 <div className="flex flex-col">
                                     <span className="font-semibold text-white text-sm">{author.name}</span>
                                     <span className="text-sub1/75 text-xs">{author.role}</span>
@@ -36,7 +31,7 @@ export function SiteFooter() {
                             <ul className="flex items-center gap-2">
                                 {author.links.map(({ label, href, icon: Icon }) => (
                                     <li key={href}>
-                                        <a
+                                        <Link
                                             href={href}
                                             aria-label={label}
                                             target={href.startsWith('http') ? '_blank' : undefined}
@@ -46,8 +41,8 @@ export function SiteFooter() {
                                                 focusRing,
                                             )}
                                         >
-                                            <Icon aria-hidden="true" className="size-4" />
-                                        </a>
+                                            <Icon aria-hidden="true" size={22} />
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>
