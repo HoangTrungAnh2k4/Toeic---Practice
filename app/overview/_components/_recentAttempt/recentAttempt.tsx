@@ -1,29 +1,39 @@
+'use client';
+
 import { MdPlayArrow, MdVisibility } from 'react-icons/md';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 import { cn } from '@/lib/utils';
 import Button from '@/components/ui/button';
-import { STATUS_STYLE } from './types';
+import { ATTEMPTS, SkillFilter, STATUS_STYLE } from './types';
 import Header from './_components/Header';
 import Footer from './_components/Footer';
 import { SkillBadge } from './helpers';
+import { useState } from 'react';
 
 export default function RecentAttempt() {
+    const [filter, setFilter] = useState<SkillFilter>('all');
+    const visibleAttempts = ATTEMPTS.filter((a) => {
+        if (filter === 'speaking') return a.skills.includes('S');
+        if (filter === 'writing') return a.skills.includes('W');
+        return true;
+    });
+
     return (
         <section className="flex flex-col gap-5">
             {/* Header */}
-            <Header />
+            <Header filter={filter} setFilter={setFilter} />
 
             {/* Table */}
             <div className="bg-white shadow-sm border border-[#8B84B8]/30 rounded-xl overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-[#E8E5F5]">
-                        <TableRow className="hover:bg-[#E8E5F5] border-[#8B84B8]/30">
+                    <TableHeader className="bg-main">
+                        <TableRow className="border-[#8B84B8]/30">
                             {['Bài luyện', 'Kỹ năng', 'Chế độ', 'Loại đề', 'Trạng thái', 'Ngày thực hiện'].map((h) => (
                                 <TableHead
                                     key={h}
-                                    className="px-4 h-11 font-semibold text-[#3C3454] text-xs uppercase tracking-wider"
+                                    className="px-4 h-11 font-bold text-[13px] text-white uppercase tracking-wider"
                                 >
                                     {h}
                                 </TableHead>
@@ -53,23 +63,19 @@ export default function RecentAttempt() {
                                     <TableCell className="px-4 py-4 min-w-[260px] whitespace-normal">
                                         <div className="flex flex-col gap-0.5">
                                             <span className="font-semibold text-[#3C3454] text-sm">{a.title}</span>
-                                            <span className="text-[#8B84B8] text-xs">{a.subtitle}</span>
+                                            <span className="font-medium text-subText text-xs">{a.subtitle}</span>
                                         </div>
                                     </TableCell>
 
                                     <TableCell className="px-4 py-4">
-                                        <div className="flex items-center gap-1">
-                                            {a.skills.length === 1 ? (
-                                                <SkillBadge skill={a.skills[0]} />
-                                            ) : (
-                                                a.skills.map((s) => <SkillBadge key={s} skill={s} compact />)
-                                            )}
+                                        <div className="flex flex-col gap-1">
+                                            {a.skills.map((s) => (
+                                                <SkillBadge key={s} skill={s} />
+                                            ))}
                                         </div>
                                     </TableCell>
 
-                                    <TableCell className="px-4 py-4 font-medium text-[#3C3454] text-sm">
-                                        {a.mode}
-                                    </TableCell>
+                                    <TableCell className="px-4 py-4 font-medium text-main text-sm">{a.mode}</TableCell>
 
                                     <TableCell className="px-4 py-4">
                                         <span
@@ -94,26 +100,15 @@ export default function RecentAttempt() {
                                         </span>
                                     </TableCell>
 
-                                    <TableCell className="px-4 py-4 text-[#8B84B8] text-sm">{a.date}</TableCell>
+                                    <TableCell className="px-4 py-4 font-medium text-main text-sm">{a.date}</TableCell>
 
                                     <TableCell className="px-4 py-4 text-right">
                                         {a.status === 'interrupted' ? (
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                className="bg-[#F5B841] hover:bg-[#F5B841]/85 shadow-sm font-semibold text-[#3C3454]"
-                                            >
-                                                <MdPlayArrow className="size-4" />
+                                            <Button type="button" size="sm" variant="third">
                                                 Làm tiếp
                                             </Button>
                                         ) : (
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                variant="outline"
-                                                className="hover:bg-[#3C3454] border-[#3C3454]/30 font-semibold text-[#3C3454] hover:text-white"
-                                            >
-                                                <MdVisibility className="size-4" />
+                                            <Button type="button" size="sm" variant="third">
                                                 Xem lại &amp; Sửa lỗi
                                             </Button>
                                         )}

@@ -7,7 +7,7 @@ import { Chart } from './_components/chart';
 
 export default function Overview() {
     return (
-        <div className="flex flex-col gap-8 mx-auto w-full max-w-360">
+        <div className="flex flex-col gap-10 mx-auto w-full max-w-360">
             {/* Offline / local cache notice */}
             {/* <NoticeBanner /> */}
 

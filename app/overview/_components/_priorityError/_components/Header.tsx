@@ -10,7 +10,7 @@ export default function Header() {
             <div className="flex items-start gap-3">
                 <MdError className="text-sub3" size={32} />
                 <div>
-                    <h3 className="font-semibold text-[1.125rem] text-main leading-6 tracking-[-0.01em]">
+                    <h3 className="font-semibold text-[1.125rem] text-main leading-6 tracking-wide">
                         {ERRORS.length} lỗi ưu tiên cần khắc phục ngay
                     </h3>
                     <p className="mt-0.5 font-medium text-[0.75rem] text-subText leading-4.5">

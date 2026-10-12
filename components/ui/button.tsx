@@ -12,9 +12,10 @@ export const buttonVariants = cva(
     {
         variants: {
             variant: {
-                primary: 'bg-sub3 text-[#333]',
-                secondary: 'bg-sub2 text-white',
-                outline: 'bg-transparent border-sub3 border-2 text-sub3',
+                primary: 'bg-sub3 text-[#333] duration-100',
+                secondary: 'bg-sub2 text-white duration-100',
+                third: 'hover:bg-main hover:text-white duration-100',
+                outline: 'bg-transparent border-sub3 border-2 text-main duration-100',
             },
             size: {
                 sm: 'h-9 px-3',
