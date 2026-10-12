@@ -1,28 +1,32 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
-import { Bar, BarChart, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 
-export const description = 'A horizontal bar chart';
-
 const chartData = [
-    { month: 'January', desktop: 186 },
-    { month: 'February', desktop: 305 },
-    { month: 'March', desktop: 237 },
-    { month: 'April', desktop: 73 },
-    { month: 'May', desktop: 209 },
-    { month: 'June', desktop: 214 },
-    { month: 'June', desktop: 214 },
-    { month: 'June', desktop: 214 },
+    { part: 'Writing_Part_1', Value: 214, fill: 'url(#fillWriting)' },
+    { part: 'Writing_Part_2', Value: 214, fill: 'url(#fillWriting)' },
+    { part: 'Writing_Part_3', Value: 214, fill: 'url(#fillWriting)' },
+    { part: 'Speaking_Part_1', Value: 186, fill: 'url(#fillSpeaking)' },
+    { part: 'Speaking_Part_2', Value: 305, fill: 'url(#fillSpeaking)' },
+    { part: 'Speaking_Part_3', Value: 237, fill: 'url(#fillSpeaking)' },
+    { part: 'Speaking_Part_4', Value: 73, fill: 'url(#fillSpeaking)' },
+    { part: 'Speaking_Part_5', Value: 209, fill: 'url(#fillSpeaking)' },
 ];
 
 const chartConfig = {
-    desktop: {
-        label: 'Desktop',
-        color: 'var(--chart-1)',
+    Value: {
+        label: 'Lượt',
+    },
+    writing: {
+        label: 'Writing',
+        color: '#3b3556', // đổi theo theme của bạn
+    },
+    speaking: {
+        label: 'Speaking',
+        color: '#e8a33d',
     },
 } satisfies ChartConfig;
 
@@ -30,39 +34,45 @@ export function Chart() {
     return (
         <Card className="w-[40%]">
             <CardHeader>
-                <CardTitle>Bar Chart - Horizontal</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
+                <CardTitle className="font-medium text-lg">Thống kê số lượt làm bài</CardTitle>
+                <CardDescription>Tháng 10 - 2026</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig}>
-                    <BarChart
-                        accessibilityLayer
-                        data={chartData}
-                        layout="vertical"
-                        margin={{
-                            left: -20,
-                        }}
-                    >
-                        <XAxis type="number" dataKey="desktop" hide />
+                <ChartContainer config={chartConfig} className="w-full h-72">
+                    <BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ left: 60, right: 40 }}>
+                        <defs>
+                            <linearGradient id="fillWriting" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#3b3556" stopOpacity={0.6} />
+                                <stop offset="100%" stopColor="#3b3556" stopOpacity={1} />
+                            </linearGradient>
+                            <linearGradient id="fillSpeaking" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#e8a33d" stopOpacity={0.6} />
+                                <stop offset="100%" stopColor="#e8a33d" stopOpacity={1} />
+                            </linearGradient>
+                        </defs>
+
+                        <XAxis type="number" dataKey="Value" hide />
                         <YAxis
-                            dataKey="month"
+                            dataKey="part"
                             type="category"
                             tickLine={false}
                             tickMargin={10}
                             axisLine={false}
-                            tickFormatter={(value) => value.slice(0, 3)}
+                            tick={{ fill: '#3b3556', fontSize: 13, fontWeight: 500 }}
                         />
                         <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={5} />
+                        <Bar dataKey="Value" radius={5} barSize={28}>
+                            <LabelList
+                                dataKey="Value"
+                                position="right"
+                                offset={8}
+                                className="fill-foreground"
+                                fontSize={12}
+                            />
+                        </Bar>
                     </BarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this tracking-wider <TrendingUp className="w-4 h-4" />
-                </div>
-                <div className="text-muted-foreground leading-none">Showing total visitors for the last 6 months</div>
-            </CardFooter>
         </Card>
     );
 }
