@@ -1,6 +1,6 @@
 import WelcomeBanner from './_components/welcome';
 import PriorityError from './_components/_priorityError/priorityError';
-import RecentAttempt from './_components/recentAttempt';
+import RecentAttempt from './_components/_recentAttempt/recentAttempt';
 import FooterAssurance from './_components/footerAssurance';
 import SkillGoals from './_components/skillGoal';
 import { Chart } from './_components/chart';
