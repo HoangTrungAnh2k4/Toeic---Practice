@@ -31,11 +31,11 @@ export default function SpeakingPage() {
     };
 
     return (
-        <div className="flex flex-col bg-background shadow-sm border border-border rounded-2xl min-h-[calc(100vh-2rem)] overflow-hidden">
+        <div className="flex flex-col bg-transparent min-h-[calc(100vh-2rem)] overflow-hidden">
             <ExamHeader onOpenExitModal={() => setIsExitModalOpen(true)} secondsRemaining={secondsRemaining} />
 
             {/* Central Test Stage */}
-            <main className="flex flex-col flex-1 gap-6 mx-auto p-6 w-full max-w-6xl">
+            <main className="flex flex-col flex-1 gap-6 mt-6 w-full max-w-6xl">
                 {/* Directions Banner */}
                 <DirectionsBanner />
 
@@ -54,7 +54,9 @@ export default function SpeakingPage() {
             </main>
 
             {/* Footer Question Progression Grid */}
-            <QuestionProgression canProceed={secondsRemaining === 0} />
+            <div>
+                <QuestionProgression canProceed={secondsRemaining === 0} />
+            </div>
 
             {/* Exit Confirmation Dialog */}
             <ExitConfirmDialog

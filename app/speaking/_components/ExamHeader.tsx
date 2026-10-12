@@ -12,7 +12,7 @@ export default function ExamHeader({ secondsRemaining, onOpenExitModal }: ExamHe
     const isFinished = secondsRemaining <= 0;
 
     return (
-        <header className="w-full">
+        <header className="border rounded-xl w-full overflow-hidden">
             {/* ===== Thanh trên: tên bài thi + trạng thái + thoát ===== */}
             <div className="flex flex-wrap justify-between items-center gap-x-6 gap-y-3 bg-[#3C3454] shadow-[#3C3454]/20 shadow-lg px-4 sm:px-6 py-3">
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -64,7 +64,7 @@ export default function ExamHeader({ secondsRemaining, onOpenExitModal }: ExamHe
             </div>
 
             {/* ===== Ribbon: tiến trình các bước + đồng hồ ===== */}
-            <div className="bg-[#E8E5F5] px-4 sm:px-6 py-3.5 border-[#8B84B8]/30 border-b">
+            <div className="bg-white shadow-2xl px-4 sm:px-6 py-3.5 border-[#8B84B8]/30 border-b">
                 <div className="flex md:flex-row flex-col justify-between items-center gap-4 mx-auto max-w-6xl">
                     <ol className="flex items-center gap-2 pb-1 md:pb-0 w-full md:w-auto overflow-x-auto text-xs">
                         <li className="flex items-center gap-1.5 font-medium text-[#3C3454]/70 shrink-0">
