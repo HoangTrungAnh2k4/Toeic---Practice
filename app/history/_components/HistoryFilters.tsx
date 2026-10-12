@@ -1,198 +1,134 @@
-'use client';
-
-import {
-    LuCalendar,
-    LuClipboardList,
-    LuMic,
-    LuPenLine,
-    LuRotateCcw,
-    LuSearch,
-} from 'react-icons/lu';
-import { CategoryFilterType, ExamModeType, SkillType, StatusFilterType } from '../types';
-import { DATE_SCOPE_OPTIONS, SKILL_TABS } from '../utils';
+import Link from 'next/link';
+import type { IconType } from 'react-icons';
+import { LuCalendar, LuClipboardList, LuMic, LuPenLine, LuRotateCcw } from 'react-icons/lu';
+import { cn } from '@/lib/utils';
+import { buildHistoryHref, DEFAULT_HISTORY_QUERY } from '../_lib/searchParams';
+import { HistoryQuery, SkillType } from '../types';
+import { CATEGORY_OPTIONS, DATE_SCOPE_OPTIONS, MODE_OPTIONS, SKILL_OPTIONS, STATUS_OPTIONS } from '../utils';
+import HistoryParamSelect from './HistoryParamSelect';
+import HistorySearchInput from './HistorySearchInput';
 
 interface HistoryFiltersProps {
-    selectedSkill: SkillType;
-    onSkillChange: (skill: SkillType) => void;
-    searchQuery: string;
-    onSearchChange: (query: string) => void;
-    selectedMode: ExamModeType;
-    onModeChange: (mode: ExamModeType) => void;
-    selectedCategory: CategoryFilterType;
-    onCategoryChange: (cat: CategoryFilterType) => void;
-    selectedStatus: StatusFilterType;
-    onStatusChange: (status: StatusFilterType) => void;
-    selectedDateScope: string;
-    onDateScopeChange: (scope: string) => void;
+    query: HistoryQuery;
+    skillCounts: Record<SkillType, number>;
     displayedCount: number;
-    totalCount: number;
-    onResetFilters: () => void;
 }
 
-export default function HistoryFilters({
-    selectedSkill,
-    onSkillChange,
-    searchQuery,
-    onSearchChange,
-    selectedMode,
-    onModeChange,
-    selectedCategory,
-    onCategoryChange,
-    selectedStatus,
-    onStatusChange,
-    selectedDateScope,
-    onDateScopeChange,
-    displayedCount,
-    totalCount,
-    onResetFilters,
-}: HistoryFiltersProps) {
-    const getSkillIcon = (id: SkillType) => {
-        switch (id) {
-            case 'speaking':
-                return <LuMic className="size-4 text-primary" aria-hidden="true" />;
-            case 'writing':
-                return <LuPenLine className="size-4 text-emerald-600" aria-hidden="true" />;
-            case 'full_mock':
-                return <LuClipboardList className="size-4 text-amber-600" aria-hidden="true" />;
-            default:
-                return null;
-        }
-    };
+const SELECT_CLASS =
+    'bg-white px-3 border border-sub2/40 focus:border-main rounded-lg w-full h-10 font-medium text-main text-xs transition-colors';
+
+const FOCUS_RING_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
+
+const SKILL_ICONS: Partial<Record<SkillType, IconType>> = {
+    speaking: LuMic,
+    writing: LuPenLine,
+    full_mock: LuClipboardList,
+};
+
+const SELECT_FILTERS = [
+    { name: 'mode', label: 'Lọc theo chế độ', options: MODE_OPTIONS },
+    { name: 'category', label: 'Lọc theo phân loại đề', options: CATEGORY_OPTIONS },
+    { name: 'status', label: 'Lọc theo trạng thái', options: STATUS_OPTIONS },
+] as const;
+
+export default function HistoryFilters({ query, skillCounts, displayedCount }: HistoryFiltersProps) {
+    const resetHref = buildHistoryHref(DEFAULT_HISTORY_QUERY, { pageSize: query.pageSize });
 
     return (
-        <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-xs">
-            {/* Primary Skill Tabs & Filter Reset */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-                <div className="flex flex-wrap items-center gap-2">
-                    {SKILL_TABS.map((tab) => {
-                        const isActive = selectedSkill === tab.id;
+        <section
+            aria-label="Bộ lọc lịch sử làm bài"
+            className="flex flex-col gap-4 bg-white shadow-sm p-4 sm:p-5 border border-sub2/30 rounded-xl"
+        >
+            {/* Skill tabs & reset */}
+            <div className="flex flex-wrap justify-between items-center gap-3 pb-4 border-sub2/20 border-b">
+                <nav aria-label="Lọc theo kỹ năng" className="flex flex-wrap gap-1 bg-main p-1 rounded-lg">
+                    {SKILL_OPTIONS.map(({ value, label }) => {
+                        const Icon = SKILL_ICONS[value];
+                        const isActive = query.skill === value;
                         return (
-                            <button
-                                key={tab.id}
-                                type="button"
-                                onClick={() => onSkillChange(tab.id)}
-                                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
-                                    isActive
-                                        ? 'bg-primary text-primary-foreground shadow-xs'
-                                        : 'bg-muted text-foreground hover:bg-accent'
-                                }`}
+                            <Link
+                                key={value}
+                                href={buildHistoryHref(query, { skill: value })}
+                                scroll={false}
+                                aria-current={isActive ? 'true' : undefined}
+                                className={cn(
+                                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs transition-colors duration-200',
+                                    FOCUS_RING_CLASS,
+                                    isActive ? 'bg-sub3 text-main' : 'text-white hover:bg-white/15',
+                                )}
                             >
-                                {!isActive && getSkillIcon(tab.id)}
-                                <span>
-                                    {tab.label} ({tab.count})
+                                {Icon && <Icon className="size-3.5" aria-hidden="true" />}
+                                <span>{label}</span>
+                                <span
+                                    className={cn(
+                                        'px-1.5 rounded-full font-semibold text-[11px] leading-4',
+                                        isActive ? 'bg-main text-sub3' : 'bg-white text-main',
+                                    )}
+                                >
+                                    {skillCounts[value]}
                                 </span>
-                            </button>
+                            </Link>
                         );
                     })}
-                </div>
+                </nav>
 
-                <div className="ml-auto flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground">
-                        Hiển thị <strong className="font-semibold text-foreground">{displayedCount}</strong> /{' '}
-                        {totalCount} lượt làm bài
+                <div className="flex items-center gap-3 ml-auto">
+                    <span className="font-medium text-subText text-xs" aria-live="polite">
+                        Hiển thị <strong className="font-semibold text-main">{displayedCount}</strong> /{' '}
+                        {skillCounts.all} lượt làm bài
                     </span>
-                    <button
-                        type="button"
-                        onClick={onResetFilters}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary/80"
+                    <Link
+                        href={resetHref}
+                        scroll={false}
+                        className={cn(
+                            'inline-flex items-center gap-1.5 hover:bg-sub1 px-2.5 py-1.5 rounded-lg font-semibold text-main text-xs transition-colors',
+                            FOCUS_RING_CLASS,
+                        )}
                     >
                         <LuRotateCcw className="size-3.5" aria-hidden="true" />
-                        <span>Đặt lại bộ lọc</span>
-                    </button>
+                        <span>Đặt lại</span>
+                    </Link>
                 </div>
             </div>
 
-            {/* Secondary Multi-faceted Filters Grid */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
-                {/* Search Input */}
-                <div className="relative lg:col-span-2">
-                    <LuSearch
-                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                        aria-hidden="true"
+            {/* Search & dropdown filters */}
+            <div className="gap-3 grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-5">
+                <HistorySearchInput query={query} className="sm:col-span-3 xl:col-span-2" />
+                {SELECT_FILTERS.map((filter) => (
+                    <HistoryParamSelect
+                        key={filter.name}
+                        query={query}
+                        name={filter.name}
+                        options={filter.options}
+                        label={filter.label}
+                        className={SELECT_CLASS}
                     />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => onSearchChange(e.target.value)}
-                        placeholder="Tìm theo mã ID, tên Test, task (ví dụ: Test 04, Essay)..."
-                        className="w-full rounded-lg border border-border bg-muted py-2 pr-3 pl-9 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-card focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
-                </div>
-
-                {/* Mode Select */}
-                <div>
-                    <select
-                        value={selectedMode}
-                        onChange={(e) => onModeChange(e.target.value as ExamModeType)}
-                        className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-medium text-foreground focus:border-primary focus:bg-card focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="all">Chế độ: Tất cả chế độ</option>
-                        <option value="cbt">Thi thử chuẩn (CBT Mode)</option>
-                        <option value="timed">Luyện có thời gian</option>
-                        <option value="guided">Học có hướng dẫn</option>
-                    </select>
-                </div>
-
-                {/* Question Origin / Retake Select */}
-                <div>
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => onCategoryChange(e.target.value as CategoryFilterType)}
-                        className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-medium text-foreground focus:border-primary focus:bg-card focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="all">Phân loại: Đề & Trợ giúp</option>
-                        <option value="fresh">Đề mới (Chưa gặp)</option>
-                        <option value="retake">Làm lại (Retake)</option>
-                        <option value="sample_viewed">Đã xem mẫu gợi ý</option>
-                        <option value="independent">Độc lập hoàn toàn</option>
-                    </select>
-                </div>
-
-                {/* Evaluation & Sync State Select */}
-                <div>
-                    <select
-                        value={selectedStatus}
-                        onChange={(e) => onStatusChange(e.target.value as StatusFilterType)}
-                        className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-medium text-foreground focus:border-primary focus:bg-card focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="all">Trạng thái: Tất cả</option>
-                        <option value="completed">Đã hoàn thành & Chấm điểm</option>
-                        <option value="scoring">Đang chờ AI chấm</option>
-                        <option value="sync_pending">Chờ đồng bộ cục bộ</option>
-                        <option value="interrupted">Bị gián đoạn</option>
-                    </select>
-                </div>
+                ))}
             </div>
 
-            {/* Quick Date Scope Pills */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">Khoảng thời gian:</span>
-                {DATE_SCOPE_OPTIONS.map((scope) => {
-                    const isSelected = selectedDateScope === scope.id;
+            {/* Date scope pills */}
+            <nav aria-label="Khoảng thời gian" className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="mr-1 font-semibold text-main">Khoảng thời gian:</span>
+                {DATE_SCOPE_OPTIONS.map(({ value, label }) => {
+                    const isActive = query.dateScope === value;
                     return (
-                        <button
-                            key={scope.id}
-                            type="button"
-                            onClick={() => onDateScopeChange(scope.id)}
-                            className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-                                isSelected
-                                    ? 'bg-primary/10 font-semibold text-primary'
-                                    : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
-                            }`}
+                        <Link
+                            key={value}
+                            href={buildHistoryHref(query, { dateScope: value })}
+                            scroll={false}
+                            aria-current={isActive ? 'true' : undefined}
+                            className={cn(
+                                'inline-flex items-center gap-1 px-3 py-1 rounded-full font-medium text-xs transition-colors duration-200',
+                                FOCUS_RING_CLASS,
+                                isActive ? 'bg-main font-semibold text-white' : 'bg-sub1 text-main hover:bg-sub2 hover:text-white',
+                            )}
                         >
-                            {scope.label}
-                        </button>
+                            {value === 'custom' && <LuCalendar className="size-3.5" aria-hidden="true" />}
+                            {label}
+                        </Link>
                     );
                 })}
-                <button
-                    type="button"
-                    onClick={() => onDateScopeChange('custom')}
-                    className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
-                >
-                    <LuCalendar className="size-3.5" aria-hidden="true" />
-                    <span>Tuỳ chọn ngày...</span>
-                </button>
-            </div>
-        </div>
+            </nav>
+        </section>
     );
 }

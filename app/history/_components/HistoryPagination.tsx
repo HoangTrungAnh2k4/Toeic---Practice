@@ -1,90 +1,101 @@
-'use client';
-
+import Link from 'next/link';
+import { ReactNode } from 'react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { buildHistoryHref } from '../_lib/searchParams';
+import { HistoryQuery } from '../types';
+import { PAGE_SIZE_OPTIONS } from '../utils';
+import HistoryParamSelect from './HistoryParamSelect';
 
 interface HistoryPaginationProps {
-    currentPage: number;
+    query: HistoryQuery;
+    page: number;
     totalPages: number;
     totalRecords: number;
-    pageSize: number;
-    onPageChange: (page: number) => void;
-    onPageSizeChange: (size: number) => void;
 }
 
-export default function HistoryPagination({
-    currentPage = 1,
-    totalPages = 3,
-    totalRecords = 28,
-    pageSize = 10,
-    onPageChange,
-    onPageSizeChange,
-}: HistoryPaginationProps) {
-    const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+interface StepLinkProps {
+    href: string;
+    disabled: boolean;
+    label: string;
+    children: ReactNode;
+}
+
+const STEP_CLASS = cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'px-2.5 h-8');
+
+function StepLink({ href, disabled, label, children }: StepLinkProps) {
+    if (disabled) {
+        return (
+            <span aria-disabled="true" aria-label={label} className={cn(STEP_CLASS, 'opacity-50 pointer-events-none')}>
+                {children}
+            </span>
+        );
+    }
 
     return (
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-border bg-muted/40 p-4 sm:flex-row">
-            {/* Rows per page & record count summary */}
-            <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>Hiển thị mỗi trang:</span>
-                    <select
-                        value={pageSize}
-                        onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                        className="rounded border border-border bg-card px-2 py-0.5 text-xs font-semibold text-foreground focus:outline-none"
-                    >
-                        <option value={10}>10 dòng</option>
-                        <option value={25}>25 dòng</option>
-                        <option value={50}>50 dòng</option>
-                    </select>
+        <Link href={href} scroll={false} aria-label={label} className={STEP_CLASS}>
+            {children}
+        </Link>
+    );
+}
+
+export default function HistoryPagination({ query, page, totalPages, totalRecords }: HistoryPaginationProps) {
+    const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    const hrefFor = (target: number) => buildHistoryHref(query, { page: target });
+
+    return (
+        <div className="flex sm:flex-row flex-col justify-between items-center gap-3 bg-sub1/60 px-4 py-3 border-sub2/20 border-t">
+            {/* Rows per page & record summary */}
+            <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 font-medium text-subText text-xs">
+                <div className="flex items-center gap-2">
+                    <span aria-hidden="true">Mỗi trang:</span>
+                    <HistoryParamSelect
+                        query={query}
+                        name="pageSize"
+                        options={PAGE_SIZE_OPTIONS}
+                        label="Số dòng mỗi trang"
+                        className="bg-white px-2 py-1 border border-sub2/40 focus:border-main rounded-md font-semibold text-main text-xs"
+                    />
                 </div>
-                <span className="text-border">|</span>
-                <span className="text-xs text-muted-foreground">
-                    Trang <strong className="font-semibold text-foreground">{currentPage}</strong> trên{' '}
-                    <strong className="font-semibold text-foreground">{totalPages}</strong> (Tổng {totalRecords} bản
-                    ghi)
+                <span className="hidden sm:block bg-sub2/40 w-px h-4" aria-hidden="true" />
+                <span>
+                    Trang <strong className="font-semibold text-main">{page}</strong> /{' '}
+                    <strong className="font-semibold text-main">{totalPages}</strong> · Tổng {totalRecords} bản ghi
                 </span>
             </div>
 
-            {/* Pagination Controls */}
-            <div className="flex items-center gap-1.5">
-                <button
-                    type="button"
-                    disabled={currentPage <= 1}
-                    onClick={() => onPageChange(currentPage - 1)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    <LuChevronLeft className="size-3.5" aria-hidden="true" />
-                    <span>Trước</span>
-                </button>
+            {/* Page navigation */}
+            <nav aria-label="Phân trang" className="flex items-center gap-2">
+                <StepLink href={hrefFor(page - 1)} disabled={page <= 1} label="Trang trước">
+                    <LuChevronLeft className="size-4" aria-hidden="true" />
+                </StepLink>
 
                 {pages.map((p) => {
-                    const isActive = p === currentPage;
+                    const isActive = p === page;
                     return (
-                        <button
+                        <Link
                             key={p}
-                            type="button"
-                            onClick={() => onPageChange(p)}
-                            className={`flex size-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                            href={hrefFor(p)}
+                            scroll={false}
+                            aria-current={isActive ? 'page' : undefined}
+                            className={cn(
+                                'flex justify-center items-center rounded-lg size-8 font-semibold text-xs transition-colors duration-200',
+                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3',
                                 isActive
-                                    ? 'bg-primary text-primary-foreground shadow-xs'
-                                    : 'border border-border bg-card text-foreground hover:bg-accent'
-                            }`}
+                                    ? 'bg-main text-sub3 shadow-sm'
+                                    : 'bg-white text-main border border-sub2/40 hover:bg-sub1',
+                            )}
                         >
                             {p}
-                        </button>
+                        </Link>
                     );
                 })}
 
-                <button
-                    type="button"
-                    disabled={currentPage >= totalPages}
-                    onClick={() => onPageChange(currentPage + 1)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    <span>Tiếp</span>
-                    <LuChevronRight className="size-3.5" aria-hidden="true" />
-                </button>
-            </div>
+                <StepLink href={hrefFor(page + 1)} disabled={page >= totalPages} label="Trang tiếp">
+                    <LuChevronRight className="size-4" aria-hidden="true" />
+                </StepLink>
+            </nav>
         </div>
     );
 }

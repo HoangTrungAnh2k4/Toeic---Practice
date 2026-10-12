@@ -1,51 +1,43 @@
-'use client';
+import { LuChevronRight, LuDownload, LuHistory, LuRefreshCw } from 'react-icons/lu';
+import Button from '@/components/ui/button';
 
-import { LuChevronRight, LuDownload, LuRefreshCw } from 'react-icons/lu';
-
-interface HistoryPageHeaderProps {
-    onExportPdf?: () => void;
-    onSyncServer?: () => void;
-}
-
-export default function HistoryPageHeader({ onExportPdf, onSyncServer }: HistoryPageHeaderProps) {
+export default function HistoryPageHeader() {
     return (
-        <div className="flex flex-col gap-3">
-            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-                {/* Title & Breadcrumb */}
-                <div className="space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="flex xl:flex-row flex-col justify-between xl:items-end gap-4">
+            {/* Title & Breadcrumb */}
+            <div className="flex items-start gap-3">
+                <span className="hidden sm:flex justify-center items-center bg-main shadow-sm rounded-xl size-12 text-sub3 shrink-0">
+                    <LuHistory className="size-6" aria-hidden="true" />
+                </span>
+                <div className="flex flex-col gap-1.5">
+                    <nav
+                        aria-label="Breadcrumb"
+                        className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
+                    >
                         <span>TOEIC Speaking & Writing</span>
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
-                        <span className="text-primary">Nhật ký nỗ lực học viên</span>
-                    </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                        <span className="text-main">Nhật ký nỗ lực</span>
+                    </nav>
+                    <h1 className="font-bold text-main text-2xl sm:text-3xl tracking-tight">
                         Lịch sử làm bài & Nhật ký nỗ lực
                     </h1>
-                    <p className="max-w-3xl text-sm text-muted-foreground leading-relaxed">
-                        Theo dõi toàn bộ các lượt làm bài Speaking, Writing và Thi thử hoàn chỉnh. Phân biệt rõ lượt
-                        làm độc lập, làm lại và các bài chờ đồng bộ cục bộ theo chuẩn khảo thí ETS.
+                    <p className="max-w-3xl font-medium text-subText text-sm leading-relaxed">
+                        Theo dõi toàn bộ các lượt làm bài Speaking, Writing và Thi thử hoàn chỉnh. Phân biệt rõ lượt làm
+                        độc lập, làm lại và các bài chờ đồng bộ cục bộ theo chuẩn khảo thí ETS.
                     </p>
                 </div>
+            </div>
 
-                {/* Header Actions */}
-                <div className="flex shrink-0 items-center gap-2 self-start md:self-auto">
-                    <button
-                        type="button"
-                        onClick={onExportPdf}
-                        className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-accent"
-                    >
-                        <LuDownload className="size-4" aria-hidden="true" />
-                        <span>Báo cáo nỗ lực (PDF)</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onSyncServer}
-                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
-                    >
-                        <LuRefreshCw className="size-4" aria-hidden="true" />
-                        <span>Đồng bộ máy chủ</span>
-                    </button>
-                </div>
+            {/* Header Actions */}
+            <div className="flex flex-wrap items-center gap-3 self-start xl:self-auto shrink-0">
+                <Button type="button" size="md" variant="third" className="gap-2 bg-white">
+                    <LuDownload className="size-4" aria-hidden="true" />
+                    <span>Báo cáo (PDF)</span>
+                </Button>
+                <Button type="button" size="md" variant="primary" className="gap-2">
+                    <LuRefreshCw className="size-4" aria-hidden="true" />
+                    <span>Đồng bộ máy chủ</span>
+                </Button>
             </div>
         </div>
     );

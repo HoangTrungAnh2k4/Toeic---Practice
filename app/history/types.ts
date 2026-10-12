@@ -6,7 +6,14 @@ export type CategoryFilterType = 'all' | 'fresh' | 'retake' | 'sample_viewed' | 
 
 export type StatusFilterType = 'all' | 'completed' | 'scoring' | 'sync_pending' | 'interrupted';
 
+export type DateScopeType = '7d' | '30d' | 'this_month' | 'custom';
+
 export type StorageType = 'cloud' | 'sync_pending' | 'local_cache';
+
+export interface Option<T extends string | number> {
+    value: T;
+    label: string;
+}
 
 export interface KpiMetricItem {
     id: string;
@@ -53,11 +60,21 @@ export interface HistoryAttempt {
     isPendingRow?: boolean;
 }
 
-export interface HistoryFilterState {
+/** Toàn bộ trạng thái lọc & phân trang, được đồng bộ với URL search params. */
+export interface HistoryQuery {
     skill: SkillType;
     searchQuery: string;
     mode: ExamModeType;
     category: CategoryFilterType;
     status: StatusFilterType;
-    dateScope: string;
+    dateScope: DateScopeType;
+    page: number;
+    pageSize: number;
+}
+
+export interface HistoryAttemptPage {
+    items: HistoryAttempt[];
+    total: number;
+    page: number;
+    totalPages: number;
 }

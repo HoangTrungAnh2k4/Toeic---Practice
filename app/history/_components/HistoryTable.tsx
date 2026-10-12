@@ -1,5 +1,3 @@
-'use client';
-
 import {
     LuBadgeCheck,
     LuBrain,
@@ -10,294 +8,285 @@ import {
     LuEllipsisVertical,
     LuEye,
     LuGraduationCap,
+    LuInbox,
     LuMic,
     LuPenLine,
     LuRefreshCw,
     LuSave,
     LuTriangleAlert,
 } from 'react-icons/lu';
+import type { IconType } from 'react-icons';
+import Button from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 import { HistoryAttempt } from '../types';
+import { isRetakeAttempt } from '../utils';
 
 interface HistoryTableProps {
     attempts: HistoryAttempt[];
-    onActionClick?: (attempt: HistoryAttempt) => void;
 }
 
-export default function HistoryTable({ attempts, onActionClick }: HistoryTableProps) {
-    const getSkillIcon = (skill: HistoryAttempt['skill']) => {
-        switch (skill) {
-            case 'speaking':
-                return (
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <LuMic className="size-5" aria-hidden="true" />
-                    </div>
-                );
-            case 'writing':
-                return (
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
-                        <LuPenLine className="size-5" aria-hidden="true" />
-                    </div>
-                );
-            case 'full_mock':
-                return (
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
-                        <LuClipboardList className="size-5" aria-hidden="true" />
-                    </div>
-                );
-        }
-    };
+const COLUMNS = [
+    'Mã lượt & Tên đề thi',
+    'Chế độ làm',
+    'Phân loại & Hỗ trợ',
+    'Điểm số / Đánh giá',
+    'Thời gian & Lưu trữ',
+];
 
-    const getModeIcon = (modeType: HistoryAttempt['modeType']) => {
-        switch (modeType) {
-            case 'cbt':
-                return <LuBadgeCheck className="size-3.5 text-primary" aria-hidden="true" />;
-            case 'timed':
-                return <LuClock className="size-3.5 text-emerald-600" aria-hidden="true" />;
-            case 'guided':
-                return <LuGraduationCap className="size-3.5 text-muted-foreground" aria-hidden="true" />;
-        }
-    };
+const SKILL_STYLE: Record<HistoryAttempt['skill'], { Icon: IconType; className: string; label: string }> = {
+    speaking: { Icon: LuMic, className: 'bg-main text-sub3', label: 'Speaking' },
+    writing: { Icon: LuPenLine, className: 'bg-sub3 text-main', label: 'Writing' },
+    full_mock: { Icon: LuClipboardList, className: 'bg-sub2 text-white', label: 'Full Mock Test' },
+};
 
-    const getStorageBadge = (storage: HistoryAttempt['storage']) => {
-        switch (storage) {
-            case 'cloud':
-                return (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-                        <LuCloud className="size-3.5 text-emerald-600" aria-hidden="true" />
-                        <span>Đã lưu cloud</span>
-                    </span>
-                );
-            case 'sync_pending':
-                return (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-1 text-xs text-amber-700">
-                        <LuRefreshCw className="size-3.5 text-amber-600" aria-hidden="true" />
-                        <span>Chờ đồng bộ cloud</span>
-                    </span>
-                );
-            case 'local_cache':
-                return (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-                        <LuSave className="size-3.5 text-primary" aria-hidden="true" />
-                        <span>Lưu cache cục bộ</span>
-                    </span>
-                );
-        }
-    };
+const MODE_ICON: Record<HistoryAttempt['modeType'], IconType> = {
+    cbt: LuBadgeCheck,
+    timed: LuClock,
+    guided: LuGraduationCap,
+};
 
+const STORAGE_STYLE: Record<HistoryAttempt['storage'], { Icon: IconType; label: string; className: string }> = {
+    cloud: { Icon: LuCloud, label: 'Đã lưu cloud', className: 'bg-sub1 text-main' },
+    sync_pending: { Icon: LuRefreshCw, label: 'Chờ đồng bộ', className: 'bg-sub3/25 text-main' },
+    local_cache: { Icon: LuSave, label: 'Cache cục bộ', className: 'bg-white text-main ring-1 ring-inset ring-sub2' },
+};
+
+const PRIMARY_ACTIONS = ['Xem lại chi tiết', 'Tiếp tục làm tiếp'];
+
+export default function HistoryTable({ attempts }: HistoryTableProps) {
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-                <thead>
-                    <tr className="border-b border-border bg-muted/60 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <th className="px-4 py-3">Mã lượt & Tên đề thi</th>
-                        <th className="px-4 py-3">Chế độ làm</th>
-                        <th className="px-4 py-3">Phân loại & Hỗ trợ</th>
-                        <th className="px-4 py-3">Điểm số / Đánh giá</th>
-                        <th className="px-4 py-3">Thời gian nộp</th>
-                        <th className="px-4 py-3">Lưu trữ</th>
-                        <th className="px-4 py-3 text-right">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-border text-xs">
-                    {attempts.length === 0 ? (
-                        <tr>
-                            <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                                Không tìm thấy lượt làm bài nào phù hợp với bộ lọc.
-                            </td>
-                        </tr>
-                    ) : (
-                        attempts.map((item) => {
-                            const isWarning = item.isWarningRow;
-                            const isPending = item.isPendingRow;
+        <Table>
+            <TableHeader className="bg-main">
+                <TableRow className="hover:bg-main border-sub2/30">
+                    {COLUMNS.map((h) => (
+                        <TableHead
+                            key={h}
+                            className="px-3 h-11 font-bold text-[12px] text-white uppercase tracking-wider"
+                        >
+                            {h}
+                        </TableHead>
+                    ))}
+                    <TableHead className="px-3 h-11 font-bold text-[12px] text-white text-right uppercase tracking-wider">
+                        Thao tác
+                    </TableHead>
+                </TableRow>
+            </TableHeader>
 
-                            return (
-                                <tr
-                                    key={item.id}
-                                    className={`group transition-colors hover:bg-muted/50 ${
-                                        isWarning
-                                            ? 'bg-destructive/5'
-                                            : isPending
-                                              ? 'bg-amber-500/5'
-                                              : ''
-                                    }`}
-                                >
-                                    {/* Column 1: Test Identity */}
-                                    <td className="px-4 py-4">
-                                        <div className="flex items-start gap-3">
-                                            {getSkillIcon(item.skill)}
-                                            <div className="space-y-0.5">
-                                                <div className="flex items-center gap-1.5">
-                                                    <span
-                                                        className={`font-semibold ${
-                                                            isWarning
-                                                                ? 'text-destructive'
-                                                                : isPending
-                                                                  ? 'text-amber-700'
-                                                                  : 'text-primary'
-                                                        }`}
-                                                    >
-                                                        {item.code}
-                                                    </span>
-                                                    <span
-                                                        className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${
-                                                            isWarning
-                                                                ? 'bg-destructive/15 text-destructive'
-                                                                : 'bg-muted text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {item.part}
-                                                    </span>
-                                                </div>
-                                                <div className="text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
-                                                    {item.title}
-                                                </div>
-                                                <div
-                                                    className={`text-xs ${
-                                                        isWarning
-                                                            ? 'flex items-center gap-1 font-medium text-destructive'
-                                                            : 'text-muted-foreground'
-                                                    }`}
-                                                >
-                                                    {isWarning && (
-                                                        <LuTriangleAlert className="size-3.5" aria-hidden="true" />
-                                                    )}
-                                                    <span>{item.topic}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
+            <TableBody className="text-xs">
+                {attempts.length === 0 ? (
+                    <TableRow className="hover:bg-transparent">
+                        <TableCell colSpan={6} className="py-12">
+                            <div className="flex flex-col items-center gap-2 text-center">
+                                <span className="flex justify-center items-center bg-sub1 rounded-full size-12 text-sub2">
+                                    <LuInbox className="size-6" aria-hidden="true" />
+                                </span>
+                                <p className="font-semibold text-main text-sm">Không tìm thấy lượt làm bài nào</p>
+                                <p className="text-subText text-xs">Thử thay đổi hoặc đặt lại bộ lọc để xem thêm.</p>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                ) : (
+                    attempts.map((item) => {
+                        const isWarning = item.isWarningRow;
+                        const isPending = item.isPendingRow;
+                        const skill = SKILL_STYLE[item.skill];
+                        const ModeIcon = MODE_ICON[item.modeType];
+                        const storage = STORAGE_STYLE[item.storage];
+                        const isRetake = isRetakeAttempt(item);
 
-                                    {/* Column 2: Exam Mode */}
-                                    <td className="px-4 py-4 align-middle">
-                                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-foreground">
-                                            {getModeIcon(item.modeType)}
-                                            <span>{item.mode}</span>
-                                        </span>
-                                    </td>
-
-                                    {/* Column 3: Category & Assistance */}
-                                    <td className="px-4 py-4 align-middle">
-                                        <div className="flex flex-col items-start gap-1">
-                                            <span
-                                                className={`rounded px-2 py-0.5 text-[11px] font-semibold ${
-                                                    item.categoryBadge.includes('Làm lại')
-                                                        ? 'bg-primary/10 text-primary'
-                                                        : 'bg-emerald-500/10 text-emerald-700'
-                                                }`}
-                                            >
-                                                {item.categoryBadge}
-                                            </span>
-                                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                                                {item.hasSampleViewed ? (
-                                                    <LuEye className="size-3.5 text-amber-600" aria-hidden="true" />
-                                                ) : (
-                                                    <span className="size-1.5 rounded-full bg-emerald-500" />
-                                                )}
-                                                <span>{item.assistBadge}</span>
-                                            </span>
-                                        </div>
-                                    </td>
-
-                                    {/* Column 4: Score & Evaluation */}
-                                    <td className="px-4 py-4 align-middle">
-                                        <div className="space-y-0.5">
-                                            {item.scoreInfo.isScoring ? (
-                                                <>
-                                                    <span className="inline-flex items-center gap-1.5 animate-pulse rounded bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-800">
-                                                        <LuBrain className="size-3.5" aria-hidden="true" />
-                                                        <span>
-                                                            AI đang chấm điểm ({item.scoreInfo.scoringProgress}%)
-                                                        </span>
-                                                    </span>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        Dự kiến: {item.scoreInfo.estimatedTimeRemaining}
-                                                    </div>
-                                                </>
-                                            ) : item.scoreInfo.isInterrupted ? (
-                                                <>
-                                                    <span className="inline-flex items-center rounded bg-destructive/15 px-2 py-0.5 text-[11px] font-bold text-destructive">
-                                                        Chưa hoàn thành
-                                                    </span>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        {item.scoreInfo.interruptedReason}
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span
-                                                            className={`text-base font-bold ${
-                                                                item.skill === 'speaking'
-                                                                    ? 'text-primary'
-                                                                    : 'text-emerald-600'
-                                                            }`}
-                                                        >
-                                                            {item.scoreInfo.score}
-                                                        </span>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            / {item.scoreInfo.maxScore}
-                                                        </span>
-                                                        {item.scoreInfo.level && (
-                                                            <span className="ml-1 inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                                                                {item.scoreInfo.level}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    {item.scoreInfo.feedbackSummary && (
-                                                        <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                                                            <LuCircleCheck className="size-3" aria-hidden="true" />
-                                                            <span>{item.scoreInfo.feedbackSummary}</span>
-                                                        </div>
-                                                    )}
-                                                    {item.scoreInfo.retakeComparison && (
-                                                        <div className="text-[11px] font-medium text-emerald-600">
-                                                            {item.scoreInfo.retakeComparison}
-                                                        </div>
-                                                    )}
-                                                </>
+                        return (
+                            <TableRow
+                                key={item.id}
+                                className={cn(
+                                    'group border-sub2/20 hover:bg-sub1/50 transition-colors',
+                                    isWarning && 'bg-sub3/10 hover:bg-sub3/15',
+                                    isPending && 'bg-sub1/40',
+                                )}
+                            >
+                                {/* Column 1: Test Identity */}
+                                <TableCell className="px-3 py-4 min-w-64 whitespace-normal">
+                                    <div className="flex items-start gap-3">
+                                        <span
+                                            className={cn(
+                                                'flex justify-center items-center shadow-sm rounded-lg size-9 shrink-0',
+                                                skill.className,
                                             )}
-                                        </div>
-                                    </td>
-
-                                    {/* Column 5: Submitted At & Duration */}
-                                    <td className="px-4 py-4 align-middle text-muted-foreground">
-                                        <div className="font-medium text-foreground">{item.submittedAt}</div>
-                                        <div>Thời lượng: {item.duration}</div>
-                                    </td>
-
-                                    {/* Column 6: Storage status */}
-                                    <td className="px-4 py-4 align-middle">{getStorageBadge(item.storage)}</td>
-
-                                    {/* Column 7: Actions */}
-                                    <td className="px-4 py-4 align-middle text-right">
-                                        <div className="inline-flex items-center gap-1.5">
-                                            <button
-                                                type="button"
-                                                onClick={() => onActionClick?.(item)}
-                                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors ${
-                                                    item.actionText === 'Xem lại chi tiết' ||
-                                                    item.actionText === 'Tiếp tục làm tiếp'
-                                                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                                                        : 'bg-muted text-foreground hover:bg-accent'
-                                                }`}
+                                            title={skill.label}
+                                        >
+                                            <skill.Icon className="size-4" aria-hidden="true" />
+                                            <span className="sr-only">{skill.label}</span>
+                                        </span>
+                                        <div className="flex flex-col gap-0.5">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="font-semibold text-sub2 tabular-nums">
+                                                    {item.code}
+                                                </span>
+                                                <span className="bg-sub1 px-1.5 py-0.5 rounded font-semibold text-[11px] text-main">
+                                                    {item.part}
+                                                </span>
+                                            </div>
+                                            <span className="font-semibold text-main text-sm">{item.title}</span>
+                                            <span
+                                                className={cn(
+                                                    'flex items-center gap-1 text-xs',
+                                                    isWarning ? 'font-semibold text-main' : 'font-medium text-subText',
+                                                )}
                                             >
-                                                {item.actionText}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                aria-label="Thao tác khác"
-                                                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                                            >
-                                                <LuEllipsisVertical className="size-4" aria-hidden="true" />
-                                            </button>
+                                                {isWarning && (
+                                                    <LuTriangleAlert
+                                                        className="size-3.5 text-sub3 shrink-0"
+                                                        aria-hidden="true"
+                                                    />
+                                                )}
+                                                {item.topic}
+                                            </span>
                                         </div>
-                                    </td>
-                                </tr>
-                            );
-                        })
-                    )}
-                </tbody>
-            </table>
-        </div>
+                                    </div>
+                                </TableCell>
+
+                                {/* Column 2: Exam Mode */}
+                                <TableCell className="px-3 py-4">
+                                    <span className="inline-flex items-center gap-1.5 font-medium text-main text-xs">
+                                        <ModeIcon className="size-4 text-sub2" aria-hidden="true" />
+                                        {item.mode}
+                                    </span>
+                                </TableCell>
+
+                                {/* Column 3: Category & Assistance */}
+                                <TableCell className="px-3 py-4">
+                                    <div className="flex flex-col items-start gap-1.5">
+                                        <span
+                                            className={cn(
+                                                'px-2 py-0.5 rounded-md font-semibold text-[11px]',
+                                                isRetake ? 'bg-sub2 text-white' : 'bg-sub1 text-main',
+                                            )}
+                                        >
+                                            {item.categoryBadge}
+                                        </span>
+                                        <span className="flex items-center gap-1 font-medium text-[11px] text-subText">
+                                            {item.hasSampleViewed ? (
+                                                <LuEye className="size-3.5 text-sub3" aria-hidden="true" />
+                                            ) : (
+                                                <span className="bg-main rounded-full size-1.5" aria-hidden="true" />
+                                            )}
+                                            {item.assistBadge}
+                                        </span>
+                                    </div>
+                                </TableCell>
+
+                                {/* Column 4: Score & Evaluation */}
+                                <TableCell className="px-3 py-4 whitespace-normal">
+                                    <div className="flex flex-col gap-1 min-w-40">
+                                        {item.scoreInfo.isScoring ? (
+                                            <>
+                                                <span className="inline-flex items-center gap-1.5 bg-sub3/25 px-2 py-0.5 rounded-full w-fit font-semibold text-[11px] text-main">
+                                                    <LuBrain className="size-3.5 animate-pulse" aria-hidden="true" />
+                                                    AI đang chấm ({item.scoreInfo.scoringProgress}%)
+                                                </span>
+                                                <div
+                                                    role="progressbar"
+                                                    aria-label="Tiến độ chấm điểm"
+                                                    aria-valuemin={0}
+                                                    aria-valuemax={100}
+                                                    aria-valuenow={item.scoreInfo.scoringProgress}
+                                                    className="bg-sub1 rounded-full w-full h-1 overflow-hidden"
+                                                >
+                                                    <div
+                                                        className="bg-sub3 rounded-full h-full"
+                                                        style={{ width: `${item.scoreInfo.scoringProgress ?? 0}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-[11px] text-subText">
+                                                    Dự kiến: {item.scoreInfo.estimatedTimeRemaining}
+                                                </span>
+                                            </>
+                                        ) : item.scoreInfo.isInterrupted ? (
+                                            <>
+                                                <span className="inline-flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-full ring-1 ring-sub2 ring-inset w-fit font-semibold text-[11px] text-main">
+                                                    <span className="bg-sub2 rounded-full size-1.5" aria-hidden="true" />
+                                                    Chưa hoàn thành
+                                                </span>
+                                                <span className="text-[11px] text-subText">
+                                                    {item.scoreInfo.interruptedReason}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="font-bold tabular-nums text-main text-lg">
+                                                        {item.scoreInfo.score}
+                                                    </span>
+                                                    <span className="text-sub2 text-xs">
+                                                        / {item.scoreInfo.maxScore}
+                                                    </span>
+                                                    {item.scoreInfo.level && (
+                                                        <span className="bg-sub3 ml-1 px-1.5 py-0.5 rounded font-bold text-[10px] text-main">
+                                                            {item.scoreInfo.level}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {item.scoreInfo.feedbackSummary && (
+                                                    <span className="flex items-center gap-1 font-medium text-[11px] text-subText">
+                                                        <LuCircleCheck
+                                                            className="size-3 text-sub2 shrink-0"
+                                                            aria-hidden="true"
+                                                        />
+                                                        {item.scoreInfo.feedbackSummary}
+                                                    </span>
+                                                )}
+                                                {item.scoreInfo.retakeComparison && (
+                                                    <span className="font-semibold text-[11px] text-main">
+                                                        {item.scoreInfo.retakeComparison}
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </TableCell>
+
+                                {/* Column 5: Submitted At, Duration & Storage */}
+                                <TableCell className="px-3 py-4">
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span className="font-semibold text-main">{item.submittedAt}</span>
+                                        <span className="text-subText">Thời lượng: {item.duration}</span>
+                                        <span
+                                            className={cn(
+                                                'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-semibold text-[11px]',
+                                                storage.className,
+                                            )}
+                                        >
+                                            <storage.Icon className="size-3" aria-hidden="true" />
+                                            {storage.label}
+                                        </span>
+                                    </div>
+                                </TableCell>
+
+                                {/* Column 6: Actions */}
+                                <TableCell className="px-3 py-4 text-right">
+                                    <div className="inline-flex items-center gap-2">
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            variant={PRIMARY_ACTIONS.includes(item.actionText) ? 'primary' : 'third'}
+                                            className="justify-center px-3 w-36 h-8 text-xs"
+                                        >
+                                            {item.actionText}
+                                        </Button>
+                                        <button
+                                            type="button"
+                                            aria-label="Thao tác khác"
+                                            className="hover:bg-sub1 p-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3 text-sub2 hover:text-main transition-colors cursor-pointer"
+                                        >
+                                            <LuEllipsisVertical className="size-4" aria-hidden="true" />
+                                        </button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })
+                )}
+            </TableBody>
+        </Table>
     );
 }

@@ -31,7 +31,7 @@ export default function RootLayout({
         <html lang="en">
             <body className={`${roboto.variable} ${geistMono.variable} antialiased min-h-screen flex`}>
                 <Sidebar />
-                <div className="flex-1 bg-[#eef0fc] px-8 pt-4 pb-6">{children}</div>
+                <div className="flex-1 bg-[#eef0fc] px-4 sm:px-8 pt-4 pb-6 min-w-0">{children}</div>
             </body>
         </html>
     );

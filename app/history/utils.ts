@@ -1,4 +1,12 @@
-import { HistoryAttempt } from './types';
+import {
+    CategoryFilterType,
+    DateScopeType,
+    ExamModeType,
+    HistoryAttempt,
+    Option,
+    SkillType,
+    StatusFilterType,
+} from './types';
 
 export const MOCK_ATTEMPTS: HistoryAttempt[] = [
     {
@@ -115,15 +123,47 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
     },
 ];
 
-export const SKILL_TABS = [
-    { id: 'all' as const, label: 'Tất cả kỹ năng', count: 28 },
-    { id: 'speaking' as const, label: 'Speaking', count: 16 },
-    { id: 'writing' as const, label: 'Writing', count: 12 },
-    { id: 'full_mock' as const, label: 'Full Mock Test', count: 3 },
+export const SKILL_OPTIONS: Option<SkillType>[] = [
+    { value: 'all', label: 'Tất cả kỹ năng' },
+    { value: 'speaking', label: 'Speaking' },
+    { value: 'writing', label: 'Writing' },
+    { value: 'full_mock', label: 'Full Mock Test' },
 ];
 
-export const DATE_SCOPE_OPTIONS = [
-    { id: '7d', label: '7 ngày gần nhất' },
-    { id: '30d', label: '30 ngày qua' },
-    { id: 'this_month', label: 'Tháng này (Tháng 5/2025)' },
+export const MODE_OPTIONS: Option<ExamModeType>[] = [
+    { value: 'all', label: 'Chế độ: Tất cả' },
+    { value: 'cbt', label: 'Thi thử chuẩn (CBT)' },
+    { value: 'timed', label: 'Luyện có thời gian' },
+    { value: 'guided', label: 'Học có hướng dẫn' },
 ];
+
+export const CATEGORY_OPTIONS: Option<CategoryFilterType>[] = [
+    { value: 'all', label: 'Phân loại: Đề & Trợ giúp' },
+    { value: 'fresh', label: 'Đề mới (Chưa gặp)' },
+    { value: 'retake', label: 'Làm lại (Retake)' },
+    { value: 'sample_viewed', label: 'Đã xem mẫu gợi ý' },
+    { value: 'independent', label: 'Độc lập hoàn toàn' },
+];
+
+export const STATUS_OPTIONS: Option<StatusFilterType>[] = [
+    { value: 'all', label: 'Trạng thái: Tất cả' },
+    { value: 'completed', label: 'Đã hoàn thành & Chấm điểm' },
+    { value: 'scoring', label: 'Đang chờ AI chấm' },
+    { value: 'sync_pending', label: 'Chờ đồng bộ cục bộ' },
+    { value: 'interrupted', label: 'Bị gián đoạn' },
+];
+
+export const DATE_SCOPE_OPTIONS: Option<DateScopeType>[] = [
+    { value: '7d', label: '7 ngày gần nhất' },
+    { value: '30d', label: '30 ngày qua' },
+    { value: 'this_month', label: 'Tháng này (Tháng 5/2025)' },
+    { value: 'custom', label: 'Tuỳ chọn ngày...' },
+];
+
+export const PAGE_SIZE_OPTIONS: Option<number>[] = [
+    { value: 10, label: '10 dòng' },
+    { value: 25, label: '25 dòng' },
+    { value: 50, label: '50 dòng' },
+];
+
+export const isRetakeAttempt = (attempt: HistoryAttempt) => attempt.categoryBadge.includes('Làm lại');

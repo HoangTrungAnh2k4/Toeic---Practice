@@ -1,6 +1,7 @@
 'use client';
 
-import { LuArrowRight, LuCheck } from 'react-icons/lu';
+import { LuArrowRight, LuCheck, LuLock, LuTimer } from 'react-icons/lu';
+import { cn } from '@/lib/utils';
 import { SPEAKING_QUESTIONS } from '../utils';
 
 interface QuestionProgressionProps {
@@ -8,78 +9,98 @@ interface QuestionProgressionProps {
     canProceed?: boolean;
 }
 
-export default function QuestionProgression({
-    onNextQuestion,
-    canProceed = false,
-}: QuestionProgressionProps) {
+export default function QuestionProgression({ onNextQuestion, canProceed = false }: QuestionProgressionProps) {
+    const total = SPEAKING_QUESTIONS.length;
+    const completedCount = SPEAKING_QUESTIONS.filter((q) => q.status === 'completed').length;
+    const activeQuestion = SPEAKING_QUESTIONS.find((q) => q.status === 'active');
+    const progressPercent = Math.round((completedCount / total) * 100);
+
     return (
-        <div className="mt-auto border-t border-border bg-card px-6 py-4 shadow-xs">
-            <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
-                {/* 11 Questions Status Ribbon */}
-                <div className="flex w-full flex-col gap-2 md:w-auto">
-                    <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                            Bảng tiến độ 11 câu hỏi Speaking:
-                        </span>
-                        <span className="text-[11px] text-muted-foreground sm:inline">
-                            (Khóa tự chọn câu theo quy chế ETS)
+        <div className="bg-white mt-auto px-4 sm:px-6 py-4 border-[#E8E5F5] border-t">
+            <div className="flex md:flex-row flex-col justify-between md:items-center gap-4 mx-auto max-w-6xl">
+                {/* Questions Status Ribbon */}
+                <div className="flex flex-col gap-3 w-full md:w-auto">
+                    <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-1">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-[#3C3454] text-xs uppercase tracking-wider">
+                                Tiến độ bài thi
+                            </span>
+                            <span className="bg-[#E8E5F5] px-2 py-0.5 rounded-full font-semibold tabular-nums text-[#3C3454] text-[11px]">
+                                {completedCount}/{total}
+                            </span>
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-[#8B84B8] text-[11px]">
+                            <LuLock className="size-3" aria-hidden="true" />
+                            Khóa tự chọn câu theo quy chế ETS
                         </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <ol className="flex flex-wrap items-center gap-1.5" aria-label="Danh sách câu hỏi Speaking">
                         {SPEAKING_QUESTIONS.map((q) => {
-                            if (q.status === 'completed') {
-                                return (
-                                    <div
-                                        key={q.id}
-                                        title={`Câu ${q.id}: ${q.title} (${q.description})`}
-                                        className="flex size-9 cursor-not-allowed items-center justify-center rounded-lg bg-emerald-100 text-xs font-semibold text-emerald-800 shadow-xs"
-                                    >
-                                        <LuCheck className="mr-0.5 size-3" aria-hidden="true" />
-                                        {q.id}
-                                    </div>
-                                );
-                            }
-
-                            if (q.status === 'active') {
-                                return (
-                                    <div
-                                        key={q.id}
-                                        title={`Câu ${q.id}: ${q.title} (${q.description})`}
-                                        className="flex size-9 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground shadow-sm ring-2 ring-primary ring-offset-2"
-                                    >
-                                        {q.id}
-                                    </div>
-                                );
-                            }
+                            const isCompleted = q.status === 'completed';
+                            const isActive = q.status === 'active';
 
                             return (
-                                <div
+                                <li
                                     key={q.id}
                                     title={`Câu ${q.id}: ${q.title} (${q.description})`}
-                                    className="flex size-9 cursor-not-allowed items-center justify-center rounded-lg bg-muted text-xs font-medium text-muted-foreground"
+                                    aria-current={isActive ? 'step' : undefined}
+                                    aria-label={`Câu ${q.id}${isCompleted ? ', đã hoàn thành' : isActive ? ', đang làm' : ', chưa làm'}`}
+                                    className={cn(
+                                        'flex justify-center items-center rounded-lg size-9 font-semibold tabular-nums text-xs transition-colors duration-200',
+                                        isCompleted && 'gap-0.5 bg-[#8B84B8] text-white',
+                                        isActive &&
+                                            'bg-[#3C3454] text-[#F5B841] font-bold ring-2 ring-[#F5B841] ring-offset-2 ring-offset-white shadow-md shadow-[#3C3454]/25',
+                                        !isCompleted && !isActive && 'bg-[#E8E5F5] text-[#8B84B8] cursor-not-allowed'
+                                    )}
                                 >
+                                    {isCompleted && <LuCheck className="size-3" aria-hidden="true" />}
                                     {q.id}
-                                </div>
+                                </li>
                             );
                         })}
+                    </ol>
+
+                    <div
+                        className="bg-[#E8E5F5] rounded-full w-full h-1 overflow-hidden"
+                        role="progressbar"
+                        aria-valuemin={0}
+                        aria-valuemax={total}
+                        aria-valuenow={completedCount}
+                        aria-label="Tiến độ hoàn thành"
+                    >
+                        <div
+                            className="bg-linear-to-r from-[#8B84B8] to-[#F5B841] rounded-full h-full transition-all duration-500"
+                            style={{ width: `${progressPercent}%` }}
+                        />
                     </div>
                 </div>
 
-                {/* Action Navigation Button */}
-                <div className="flex w-full items-center justify-end gap-3 md:w-auto">
-                    <div className="hidden text-right sm:block">
-                        <div className="text-[11px] text-muted-foreground">Trạng thái nút chuyển:</div>
-                        <div className="text-xs font-semibold text-destructive">Tự động khi hết 30s</div>
+                {/* Action Navigation */}
+                <div className="flex justify-between md:justify-end items-center gap-3 w-full md:w-auto">
+                    <div className="flex items-center gap-2 bg-[#F5B841]/10 px-3 py-2 border border-[#F5B841]/40 rounded-lg">
+                        <LuTimer className="size-4 text-[#F5B841]" aria-hidden="true" />
+                        <div className="leading-tight">
+                            <div className="text-[#8B84B8] text-[11px]">
+                                {activeQuestion ? `Đang làm câu ${activeQuestion.id}` : 'Chuyển câu'}
+                            </div>
+                            <div className="font-semibold text-[#3C3454] text-xs">Tự động khi hết 30s</div>
+                        </div>
                     </div>
 
                     <button
                         type="button"
                         disabled={!canProceed}
                         onClick={onNextQuestion}
-                        className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-muted px-5 py-2.5 text-xs font-semibold text-muted-foreground shadow-none disabled:opacity-50"
+                        className={cn(
+                            'inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-xs transition-colors duration-200',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5B841] focus-visible:ring-offset-2',
+                            canProceed
+                                ? 'bg-[#3C3454] text-[#E8E5F5] shadow-md shadow-[#3C3454]/20 hover:bg-[#F5B841] hover:text-[#3C3454] cursor-pointer'
+                                : 'bg-[#E8E5F5] text-[#8B84B8] cursor-not-allowed'
+                        )}
                     >
-                        <span>Tiếp tục (Next)</span>
+                        <span>Tiếp tục</span>
                         <LuArrowRight className="size-4" aria-hidden="true" />
                     </button>
                 </div>

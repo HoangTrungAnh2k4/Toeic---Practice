@@ -11,10 +11,38 @@ interface AudioCaptureHudProps {
 
 // Mỗi cột là một mốc thời gian: cột đã qua tô vàng, cột chưa tới để mờ.
 const WAVE_BARS = [
-    'h-5', 'h-8', 'h-12', 'h-7', 'h-14', 'h-10', 'h-6', 'h-12',
-    'h-16', 'h-9', 'h-5', 'h-11', 'h-14', 'h-8', 'h-6', 'h-10',
-    'h-13', 'h-16', 'h-7', 'h-9', 'h-12', 'h-5', 'h-8', 'h-14',
-    'h-10', 'h-6', 'h-12', 'h-9', 'h-7', 'h-11', 'h-5', 'h-8',
+    'h-5',
+    'h-8',
+    'h-12',
+    'h-7',
+    'h-14',
+    'h-10',
+    'h-6',
+    'h-12',
+    'h-16',
+    'h-9',
+    'h-5',
+    'h-11',
+    'h-14',
+    'h-8',
+    'h-6',
+    'h-10',
+    'h-13',
+    'h-16',
+    'h-7',
+    'h-9',
+    'h-12',
+    'h-5',
+    'h-8',
+    'h-14',
+    'h-10',
+    'h-6',
+    'h-12',
+    'h-9',
+    'h-7',
+    'h-11',
+    'h-5',
+    'h-8',
 ];
 
 const METER_SEGMENTS = 10;
@@ -36,8 +64,8 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
                     <div className="flex flex-col gap-1">
                         <span className="flex items-center gap-2 font-medium text-sm">
                             <span className="relative flex size-2.5">
-                                <span className="absolute inline-flex bg-[#F5B841] opacity-60 rounded-full size-full motion-safe:animate-ping" />
-                                <span className="relative inline-flex bg-[#F5B841] rounded-full size-2.5" />
+                                <span className="inline-flex absolute bg-[#F5B841] opacity-60 rounded-full size-full motion-safe:animate-ping" />
+                                <span className="inline-flex relative bg-[#F5B841] rounded-full size-2.5" />
                             </span>
                             Đang ghi âm
                         </span>
@@ -48,7 +76,7 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
                     </div>
 
                     <div className="text-right">
-                        <p className="font-semibold text-[#F5B841] text-3xl tabular-nums leading-none">
+                        <p className="font-semibold tabular-nums text-[#F5B841] text-3xl leading-none">
                             {remainingSeconds}s
                         </p>
                         <p className="mt-1 text-[#8B84B8] text-xs">còn lại</p>
@@ -83,7 +111,7 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
                             );
                         })}
                     </div>
-                    <div className="flex justify-between mt-2 text-[#8B84B8] text-xs tabular-nums">
+                    <div className="flex justify-between mt-2 tabular-nums text-[#8B84B8] text-xs">
                         <span>0s</span>
                         <span>{Math.round(totalSeconds / 2)}s</span>
                         <span>{totalSeconds}s</span>
@@ -116,10 +144,9 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
 
             {/* Auto-submit notice */}
             <div className="flex items-start gap-2.5 bg-[#E8E5F5]/60 mt-auto p-3 border-[#F5B841] border-l-4 rounded-r-lg">
-                <LuClock className="mt-0.5 size-4 text-[#3C3454] shrink-0" aria-hidden="true" />
                 <p className="text-[#3C3454]/80 text-xs leading-relaxed">
-                    <span className="font-semibold text-[#3C3454]">Tự động nộp khi hết giờ.</span> Bài nói được chốt
-                    lúc 00:00 và chuyển sang Câu 4, bạn không thể thu âm lại.
+                    <span className="font-semibold text-[#3C3454]">Tự động nộp khi hết giờ.</span> Bài nói được chốt lúc
+                    00:00 và chuyển sang Câu 4, bạn không thể thu âm lại.
                 </p>
             </div>
         </div>
