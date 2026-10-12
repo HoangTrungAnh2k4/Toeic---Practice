@@ -14,7 +14,6 @@ export default function PriorityError() {
             {/* Cards */}
             <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
                 {ERRORS.map((err) => {
-                    const ImpactIcon = err.impactIcon;
                     const isSpeaking = err.skill === 'Speaking';
 
                     return (
@@ -58,7 +57,7 @@ export default function PriorityError() {
                                     <BiErrorAlt className="text-sub3" size={20} />
                                     <span>{err.impact}</span>
                                 </div>
-                                <Button type="button" variant={'primary'}>
+                                <Button type="button" size={'sm'} variant={'primary'}>
                                     <span>{err.ctaLabel}</span>
                                 </Button>
                             </div>

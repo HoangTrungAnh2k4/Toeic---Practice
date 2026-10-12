@@ -32,7 +32,7 @@ export default function WelcomeBanner() {
                     alt="Learnly Logo"
                     width={250}
                     height={200}
-                    className="object-contain group-hover:scale-102 transition-transform duration-300"
+                    className="w-auto h-auto object-contain group-hover:scale-102 transition-transform duration-300"
                 />
             </div>
             <div className=""></div>

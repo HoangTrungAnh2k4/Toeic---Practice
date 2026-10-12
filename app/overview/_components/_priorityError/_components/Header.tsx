@@ -18,7 +18,7 @@ export default function Header() {
                     </p>
                 </div>
             </div>
-            <Button onClick={() => {}} variant="primary">
+            <Button onClick={() => {}} variant="primary" size={'sm'}>
                 <span>Xem sổ lỗi</span>
                 <MdArrowForward className="text-[16px] transition-transform group-hover:translate-x-0.5" />
             </Button>
