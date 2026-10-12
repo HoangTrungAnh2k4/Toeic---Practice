@@ -1,69 +1,31 @@
-'use client';
+import { Suspense } from 'react';
+import SpeakingHeroCard from './_components/SpeakingHeroCard';
+import SpeakingKpiCards from './_components/SpeakingKpiCards';
+import SpeakingPageHeader from './_components/SpeakingPageHeader';
+import SpeakingResults from './_components/SpeakingResults';
+import SpeakingResultsSkeleton from './_components/SpeakingResultsSkeleton';
+import SpeakingRubricGuide from './_components/SpeakingRubricGuide';
+import SpeakingStrategyTips from './_components/SpeakingStrategyTips';
+import { RawSearchParams } from './_lib/searchParams';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import DirectionsBanner from './_components/DirectionsBanner';
-import PictureStimulus from './_components/PictureStimulus';
-import AudioCaptureHud from './_components/AudioCaptureHud';
-import QuestionProgression from './_components/QuestionProgression';
-import ExitConfirmDialog from './_components/ExitConfirmDialog';
-import ExamHeader from './_components/ExamHeader';
+interface SpeakingPageProps {
+    searchParams: Promise<RawSearchParams>;
+}
 
-export default function SpeakingPage() {
-    const router = useRouter();
-    const [secondsRemaining, setSecondsRemaining] = useState(18);
-    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
-
-    // Live countdown timer simulation
-    useEffect(() => {
-        if (secondsRemaining <= 0) return;
-
-        const timer = setInterval(() => {
-            setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [secondsRemaining]);
-
-    const handleConfirmExit = () => {
-        setIsExitModalOpen(false);
-        router.back();
-    };
-
+export default function SpeakingPage({ searchParams }: SpeakingPageProps) {
     return (
-        <div className="flex flex-col bg-transparent min-h-[calc(100vh-2rem)] overflow-hidden">
-            <ExamHeader onOpenExitModal={() => setIsExitModalOpen(true)} secondsRemaining={secondsRemaining} />
+        <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
+            <SpeakingPageHeader />
+            <SpeakingHeroCard />
+            <SpeakingKpiCards />
 
-            {/* Central Test Stage */}
-            <main className="flex flex-col flex-1 gap-6 mt-6 w-full max-w-6xl">
-                {/* Directions Banner */}
-                <DirectionsBanner />
+            {/* Phụ thuộc searchParams → stream riêng, phần tĩnh xung quanh vẫn được prerender */}
+            <Suspense fallback={<SpeakingResultsSkeleton />}>
+                <SpeakingResults searchParams={searchParams} />
+            </Suspense>
 
-                {/* Dual Pane Exam Content */}
-                <div className="items-stretch gap-6 grid grid-cols-1 lg:grid-cols-12">
-                    {/* Left: Picture Stimulus (Part 2) */}
-                    <div className="lg:col-span-7">
-                        <PictureStimulus />
-                    </div>
-
-                    {/* Right: Audio Capture & Waveform HUD */}
-                    <div className="lg:col-span-5">
-                        <AudioCaptureHud currentSeconds={30 - secondsRemaining} totalSeconds={30} />
-                    </div>
-                </div>
-            </main>
-
-            {/* Footer Question Progression Grid */}
-            <div>
-                <QuestionProgression canProceed={secondsRemaining === 0} />
-            </div>
-
-            {/* Exit Confirmation Dialog */}
-            <ExitConfirmDialog
-                isOpen={isExitModalOpen}
-                onClose={() => setIsExitModalOpen(false)}
-                onConfirm={handleConfirmExit}
-            />
-        </div>
+            <SpeakingRubricGuide />
+            <SpeakingStrategyTips />
+        </main>
     );
 }

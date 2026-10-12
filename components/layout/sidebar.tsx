@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { IoBook, IoCalendar } from 'react-icons/io5';
+import { IoBook, IoCalendar, IoSettings } from 'react-icons/io5';
 import { TbLayoutDashboardFilled } from 'react-icons/tb';
 import { FaHistory, FaMicrophoneAlt } from 'react-icons/fa';
 import { FaPenNib } from 'react-icons/fa6';
@@ -22,7 +22,9 @@ const items: NavItem[] = [
     { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
     { label: 'Speaking', href: '/speaking', icon: FaMicrophoneAlt },
     { label: 'Writing', href: '/writing', icon: FaPenNib },
+    { label: 'Schedule', href: '/schedule', icon: IoCalendar },
     { label: 'History', href: '/history', icon: FaHistory },
+    { label: 'Setting', href: '/setting', icon: IoSettings },
 ];
 
 export function Sidebar() {
@@ -33,7 +35,7 @@ export function Sidebar() {
 
     return (
         <aside
-            className={`sidebar-root relative z-10 flex shrink-0 flex-col bg-linear-to-b from-main via-[#3d3460] to-main transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+            className={`sidebar-root sticky top-0 z-10 flex h-dvh shrink-0 flex-col self-start bg-main to-main transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
                 collapsed ? 'w-20' : 'w-64'
             }`}
         >

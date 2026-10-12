@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Roboto, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Sidebar } from '@/components/layout/sidebar';
+import { SiteFooter } from '@/components/layout/footer/site-footer';
+import { HideOnExam } from '@/components/layout/footer/hide-on-exam';
 
 const roboto = Roboto({
     weight: ['300', '400', '500', '700'],
@@ -31,7 +33,12 @@ export default function RootLayout({
         <html lang="en">
             <body className={`${roboto.variable} ${geistMono.variable} antialiased min-h-screen flex`}>
                 <Sidebar />
-                <div className="flex-1 bg-[#eef0fc] px-4 sm:px-8 pt-4 pb-6 min-w-0">{children}</div>
+                <div className="flex flex-col flex-1 bg-[#eef0fc] min-w-0">
+                    <div className="flex-1 px-4 sm:px-8 pt-4 pb-10">{children}</div>
+                    <HideOnExam>
+                        <SiteFooter />
+                    </HideOnExam>
+                </div>
             </body>
         </html>
     );

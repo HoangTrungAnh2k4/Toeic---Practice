@@ -3,7 +3,7 @@ import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 
 export default function Footer() {
     return (
-        <div className="flex sm:flex-row flex-col justify-between items-center gap-2 bg-[#E8E5F5]/60 px-4 py-3 border-[#8B84B8]/20 border-t">
+        <div className="flex sm:flex-row flex-col justify-between items-center gap-2 bg-white px-4 py-3 border-[#8B84B8]/20 border-t">
             <div></div>
             <div className="flex items-center gap-1">
                 <Button className="px-2.5 py-0 h-7" type="button" variant="secondary" aria-label="Trang trước">
