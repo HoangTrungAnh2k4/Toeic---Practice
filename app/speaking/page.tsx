@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ExamTopBar from './_components/ExamTopBar';
-import ExamPhaseRibbon from './_components/ExamPhaseRibbon';
 import DirectionsBanner from './_components/DirectionsBanner';
 import PictureStimulus from './_components/PictureStimulus';
 import AudioCaptureHud from './_components/AudioCaptureHud';
 import QuestionProgression from './_components/QuestionProgression';
 import ExitConfirmDialog from './_components/ExitConfirmDialog';
+import ExamHeader from './_components/ExamHeader';
 
 export default function SpeakingPage() {
     const router = useRouter();
@@ -33,11 +32,7 @@ export default function SpeakingPage() {
 
     return (
         <div className="flex flex-col bg-background shadow-sm border border-border rounded-2xl min-h-[calc(100vh-2rem)] overflow-hidden">
-            {/* Exam Top Bar */}
-            <ExamTopBar onOpenExitModal={() => setIsExitModalOpen(true)} />
-
-            {/* Phase Progression & Live Countdown */}
-            <ExamPhaseRibbon secondsRemaining={secondsRemaining} />
+            <ExamHeader onOpenExitModal={() => setIsExitModalOpen(true)} secondsRemaining={secondsRemaining} />
 
             {/* Central Test Stage */}
             <main className="flex flex-col flex-1 gap-6 mx-auto p-6 w-full max-w-6xl">

@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
 import { IoBook, IoCalendar } from 'react-icons/io5';
 import { TbLayoutDashboardFilled } from 'react-icons/tb';
-import { FaMicrophoneAlt } from 'react-icons/fa';
+import { FaHistory, FaMicrophoneAlt } from 'react-icons/fa';
 import { FaPenNib } from 'react-icons/fa6';
 
 /**
@@ -22,7 +22,7 @@ const items: NavItem[] = [
     { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
     { label: 'Speaking', href: '/speaking', icon: FaMicrophoneAlt },
     { label: 'Writing', href: '/writing', icon: FaPenNib },
-    { label: 'Schedule', href: '/schedule', icon: IoCalendar },
+    { label: 'History', href: '/history', icon: FaHistory },
 ];
 
 export function Sidebar() {
