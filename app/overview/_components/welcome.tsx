@@ -6,7 +6,7 @@ import { MdSchool } from 'react-icons/md';
 
 export default function WelcomeBanner() {
     return (
-        <div className="bg-main px-12 rounded-xl w-full">
+        <div className="bg-main px-8 rounded-xl w-full">
             <div className="flex gap-4 h-full">
                 <div className="flex flex-col flex-1 justify-between gap-2 pt-4 pb-6 text-white">
                     <div className="flex justify-center items-center gap-2 bg-sub2 px-3 py-1 rounded-full w-fit font-medium text-sm">
