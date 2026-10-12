@@ -1,6 +1,5 @@
-import NoticeBanner from './_components/noticeBanner';
 import WelcomeBanner from './_components/welcome';
-import PriorityError from './_components/priorityError';
+import PriorityError from './_components/_priorityError/priorityError';
 import RecentAttempt from './_components/recentAttempt';
 import FooterAssurance from './_components/footerAssurance';
 import SkillGoals from './_components/skillGoal';
