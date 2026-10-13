@@ -10,88 +10,106 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Project Rules & Skills Context
 
-Dưới đây là các quy tắc bắt buộc phải tuân theo. Áp dụng cho Codex, Antigravity và mọi AI agent làm việc trong dự án frontend này.
+Mandatory rules for every AI agent working in this frontend project.
 
 ---
 
-## 1. Quy tắc phản hồi
+## 1. Response rules
 
-### Câu xác nhận đầu phản hồi (BẮT BUỘC)
+### Opening confirmation (MANDATORY)
 
-- **Mọi phản hồi** phải bắt đầu bằng đúng một dòng: `✅ Đã áp dụng rules.`
-- Dòng này đứng đầu tiên, trước mọi nội dung khác, không thay đổi chữ, không bỏ qua trong bất kỳ trường hợp nào (kể cả câu trả lời rất ngắn hoặc chỉ gọi tool).
-- Đây là ngoại lệ duy nhất của quy tắc "không câu dẫn dắt" bên dưới. Sau dòng này, vào thẳng nội dung.
+- **Every response** must start with exactly this line: `! Used rules.`
+- It comes first, before any other content, verbatim, never skipped (even for very short answers or tool-only turns).
+- This is the only exception to the "no lead-in" rule below. After this line, go straight to the content.
 
-### Tối ưu hóa độ dài (Tiết kiệm Quota)
+### Keep it short (save quota)
 
-- **Khi sửa code hoặc fix bug:** Chỉ giải thích nguyên nhân và cách khắc phục một cách ngắn gọn nhất. **TUYỆT ĐỐI KHÔNG** viết code minh họa.
-- **Khi giải thích vấn đề:** Đi thẳng vào trọng tâm, trình bày ngắn gọn, súc tích. **KHÔNG** đưa ra các ví dụ minh họa.
+- **When editing code or fixing bugs:** state the cause and the fix as briefly as possible. **NEVER** write illustrative code.
+- **When explaining:** get to the point, be concise. **NO** illustrative examples.
 
-### Ngôn ngữ sử dụng
+### Language
 
-- Luôn trả lời bằng tiếng Việt, kể cả khi tôi hỏi bằng tiếng Anh.
-- Chỉ dùng tiếng Anh cho thuật ngữ chuyên ngành hoặc đoạn code (khi thực sự cần output code).
+- Always reply in Vietnamese, even if the user writes in English.
+- Use English only for technical terms and code (when code output is actually needed).
 
-### Tối ưu hóa Token mở rộng
+### Token economy
 
-- **Không từ ngữ dư thừa:** Bỏ qua mọi câu chào hỏi, cảm ơn, xin lỗi, câu dẫn dắt (trừ câu xác nhận bắt buộc ở trên).
-- **Không lặp lại context:** Không in lại câu hỏi hay đoạn code lỗi của tôi. Chỉ ghi rõ tên hàm/dòng lỗi và cách khắc phục.
-
----
-
-## 2. Codebase Access Strategy
-
-- **Minimal Context:** Chỉ đọc các file được chỉ định trực tiếp hoặc các file liên quan mật thiết (imports/exports) đến module đang sửa.
-- **Ignore Unrelated:** Tuyệt đối không tự ý quét toàn bộ codebase hoặc đọc folder không liên quan đến tác vụ (ví dụ: không đọc `assets`, `docs` khi đang sửa logic API).
-- **Targeted Scope:** Khi sửa một Component cụ thể, chỉ tập trung vào file đó cùng file types hoặc hooks đi kèm.
-- **Verification:** Trước khi đọc file mới, xác nhận file đó thực sự cần thiết cho bug/tính năng hiện tại.
+- **No filler:** no greetings, thanks, apologies or lead-ins (except the mandatory confirmation above).
+- **Don't repeat context:** don't echo the user's question or broken code. Name the function/line and the fix.
 
 ---
 
-## 3. UI Stack bắt buộc
+## 2. Codebase access
 
-Khi tạo hoặc sửa giao diện, **chỉ** dùng các công cụ sau:
+- Read only files named directly or closely tied to the module being changed (imports/exports, its types/hooks).
+- Never scan the whole codebase or unrelated folders (e.g. `assets`, `docs` while fixing API logic).
+- Before opening a new file, confirm the current task actually needs it.
 
-| Mục đích      | Công cụ      |
-| ------------- | ------------ |
-| Styling       | Tailwind CSS |
-| UI components | shadcn/ui    |
-| Icons         | react-icons  |
+---
+
+## 3. UI stack and frontend rules
+
+Use **only** Tailwind CSS (styling), shadcn/ui (components) and react-icons (icons). Add no other UI/CSS/icon library without permission.
 
 ### Tailwind CSS
 
-- Chỉ style bằng utility class của Tailwind. **KHÔNG** viết CSS thuần, CSS module, styled-components hay inline `style` (trừ giá trị động không thể biểu diễn bằng class).
-- Dùng design token của shadcn (`bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `ring-ring`...) thay vì hard-code màu (`bg-[#fff]`, `text-gray-500`).
-- Hạn chế arbitrary value (`w-[137px]`); ưu tiên thang spacing/size có sẵn.
-- Responsive theo hướng mobile-first (`sm:`, `md:`, `lg:`). Hỗ trợ dark mode qua token, không dùng `dark:` lặp lại khi token đã xử lý.
-- Gộp class có điều kiện bằng helper `cn()` (`@/lib/utils`). Không nối chuỗi class thủ công.
-- Giữ thứ tự class nhất quán (layout → spacing → typography → color → state). Dùng `prettier-plugin-tailwindcss` nếu đã cài.
+- Utility classes only. **NO** plain CSS, CSS modules, styled-components or inline `style` (except dynamic values classes can't express).
+- Use shadcn/brand tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-main`...) instead of hard-coded colors (`bg-[#fff]`, `text-gray-500`).
+- Avoid arbitrary values (`w-[137px]`); prefer the built-in scale.
+- Mobile-first (`sm:`, `md:`, `lg:`). Dark mode via tokens; don't repeat `dark:` where tokens already handle it.
+- Merge conditional classes with `cn()` (`@/lib/utils`), never by string concatenation.
+- Consistent class order (layout → spacing → typography → color → state); `prettier-plugin-tailwindcss` if installed.
 
 ### shadcn/ui
 
-- **Ưu tiên component shadcn có sẵn** (Button, Input, Dialog, Card, Select, Table, Form, Tabs, Sheet, Dropdown Menu, Toast/Sonner...) trước khi tự viết component mới.
-- Thêm component bằng CLI: `npx shadcn@latest add <component>`. **KHÔNG** copy/viết tay lại component shadcn.
-- Component shadcn nằm ở `components/ui/`. **Không sửa trực tiếp** trừ khi bắt buộc; ưu tiên tùy biến qua `className`, `variant` (cva) hoặc bọc lại ở component riêng.
-- Form dùng `Form` của shadcn kết hợp `react-hook-form` + `zod`.
-- Giữ nguyên các thuộc tính accessibility mà Radix/shadcn cung cấp (aria, focus, keyboard).
+- Prefer existing shadcn components (Button, Input, Dialog, Card, Select, Table, Form, Tabs, Sheet, Dropdown Menu, Sonner...) before writing new ones.
+- Add via `npx shadcn@latest add <component>`; **DO NOT** hand-write shadcn components.
+- They live in `components/ui/`. Don't edit them unless necessary; customize via `className`, `variant` (cva) or a wrapper.
+- Forms: shadcn `Form` + `react-hook-form` + `zod`.
+- Keep the aria/focus/keyboard attributes Radix/shadcn provide.
 
 ### react-icons
 
-- Chỉ dùng `react-icons` cho mọi icon. **KHÔNG** dùng emoji, SVG tự chèn, hay thư viện icon khác (lucide-react, heroicons...).
-- Import theo từng bộ, đúng đường dẫn con: `react-icons/fi`, `react-icons/lu`, `react-icons/md`...
-- Chỉ import đúng icon cần dùng. **KHÔNG** `import *`.
-- Trong cùng một dự án, ưu tiên **một bộ icon chủ đạo** để giao diện đồng nhất (mặc định: `react-icons/lu`; đổi sang bộ khác chỉ khi bộ chính không có icon cần thiết).
-- Chỉnh kích thước/màu bằng class Tailwind (`size-4`, `text-muted-foreground`), không dùng prop `size`/`color`.
-- Icon thuần trang trí thêm `aria-hidden="true"`. Nút chỉ có icon phải có `aria-label`.
+- Every icon from `react-icons`. **NO** emoji, hand-inserted SVG or other icon libraries (lucide-react, heroicons...).
+- Import named icons from the exact subpath (`react-icons/lu`...), never `import *`.
+- One primary set project-wide (default `react-icons/lu`); use another only if it lacks the icon.
+- Size/color via Tailwind (`size-4`, `text-muted-foreground`), not `size`/`color` props.
+- Decorative icons get `aria-hidden="true"`; icon-only buttons need `aria-label`.
+
+### Code
+
+- Function components + hooks, TypeScript, explicit prop types, `@/` import alias.
+- One responsibility per component; split when a file gets long or UI repeats.
+- PascalCase component names; follow existing file naming.
+- Handle loading, empty and error states; responsive with keyboard/screen-reader support.
 
 ---
 
-## 4. Quy tắc code frontend
+## 4. Design tokens & identity (Toeco)
 
-- Dùng function component + hooks, TypeScript, khai báo type rõ ràng cho props.
-- Mỗi component một trách nhiệm; tách component khi file quá dài hoặc lặp lại UI.
-- Đặt tên component PascalCase, file theo quy ước hiện có của dự án.
-- Dùng import alias `@/` thay cho đường dẫn tương đối dài.
-- Luôn xử lý đủ trạng thái UI: loading, empty, error.
-- Đảm bảo giao diện responsive và hỗ trợ bàn phím/screen reader.
-- **KHÔNG** tự cài thêm thư viện UI/CSS/icon ngoài stack ở mục 3 khi chưa được tôi cho phép.
+Full design system: https://claude.ai/artifact/42kRpQ9mPJUBEZMyMF85PE (read `project/README.md`, `project/tokens.json` for detail). Tokens live in `app/globals.css`.
+
+### Brand colors (via Tailwind classes, never hard-coded hex)
+
+| Token     | Hex       | Role                                                                            |
+| --------- | --------- | ------------------------------------------------------------------------------- |
+| `main`    | `#3C3454` | Sidebar, banners, headings, emphasis text on light surfaces                     |
+| `sub1`    | `#E8E5F5` | Chips, tags, "resolved" wash, text on `main`                                    |
+| `sub2`    | `#8B84B8` | Secondary button, 30–60% alpha borders. Only 3.5:1 on white: not for small text |
+| `sub3`    | `#F5B841` | Primary button, active/hit states. Text on it is `#333` or `main`, never white  |
+| `subText` | `#5c596a` | Secondary text                                                                  |
+| `success` | `#5FD99A` | Positive state, always paired with an icon or text                              |
+| canvas    | `#eef0fc` | Page background and sidebar active pill (currently hard-coded `bg-[#eef0fc]`)   |
+
+- When touching code with `text-[#3C3454]`, `bg-[#F5B841]`..., switch to `text-main`, `bg-sub3`.
+- Never distinguish states by color alone.
+
+### Type & shape
+
+- Fonts: Roboto (`font-sans`), Geist Mono (`font-mono`). Headings 700 + `tracking-tight`; card titles 600 in `main`; descriptions `text-sm font-medium text-subText`; badges/tags `text-[0.6875rem] font-semibold tracking-wider`.
+- Button (`components/ui/button.tsx`): neo-brutalist, 2px black border, 4px hard shadow, hover shifts (2,2), active shifts (4,4). Don't override shadow/border. Variants: `primary`, `secondary`, `third`, `outline`; sizes `sm`/`md`/`lg`.
+- Card: `bg-card`, `border-sub2/30`, `rounded-xl`, `shadow-sm hover:shadow-md`, 6px left accent bar by skill (Speaking `bg-main`, Writing `bg-sub2`).
+- Radius: base `--radius` 0.625rem; buttons/inputs `rounded-lg`, tags `rounded-md`, cards `rounded-xl`, banners `rounded-2xl`.
+- Spacing on the Tailwind scale; page gutter `px-4 sm:px-8`.
+- Logos (`public/img/logo.png`, `sub_logo.png`) are white text: place only on `main` or dark backgrounds.
+- UI copy is Vietnamese, short and action-oriented; keep English for Speaking/Writing/Part/TOEIC.
