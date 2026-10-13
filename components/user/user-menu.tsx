@@ -40,7 +40,7 @@ export function UserMenu({ collapsed }: UserMenuProps) {
         <DropdownMenu>
             <DropdownMenuTrigger
                 className={cn(
-                    'flex items-center gap-3 hover:bg-white/10 data-popup-open:bg-white/10 p-2 rounded-lg w-full overflow-hidden text-left transition-colors cursor-pointer',
+                    'flex items-center gap-3 data-popup-open:bg-white/10 hover:bg-white/10 p-2 rounded-lg w-full overflow-hidden text-left transition-colors cursor-pointer',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sub3',
                 )}
             >
@@ -56,7 +56,10 @@ export function UserMenu({ collapsed }: UserMenuProps) {
                 </span>
                 <LuChevronsUpDown
                     aria-hidden="true"
-                    className={cn('size-4 text-sub1/70 transition-opacity duration-300 shrink-0', collapsed && 'opacity-0')}
+                    className={cn(
+                        'size-4 text-sub1/70 transition-opacity duration-300 shrink-0',
+                        collapsed && 'opacity-0',
+                    )}
                 />
             </DropdownMenuTrigger>
 
@@ -64,7 +67,8 @@ export function UserMenu({ collapsed }: UserMenuProps) {
             <DropdownMenuContent
                 side={isMobile ? 'top' : 'right'}
                 align={isMobile ? 'start' : 'end'}
-                sideOffset={isMobile ? 8 : 20}
+                sideOffset={isMobile ? 28 : 20}
+                alignOffset={isMobile ? 0 : 50}
                 className="w-60"
             >
                 <DropdownMenuGroup>
@@ -78,7 +82,7 @@ export function UserMenu({ collapsed }: UserMenuProps) {
                     <DropdownMenuSeparator />
                     {ACCOUNT_LINKS.map(({ label, href, Icon }) => (
                         <DropdownMenuItem key={href} render={<Link href={href} />}>
-                            <Icon aria-hidden="true" />
+                            <Icon aria-hidden="true" className="text-gray-00" />
                             {label}
                         </DropdownMenuItem>
                     ))}
