@@ -105,6 +105,11 @@ export const SORT_OPTIONS: Option<MistakeSort>[] = [
     { value: 'recent', label: 'Sắp xếp: Gặp gần nhất' },
 ];
 
+export const RESPONSE_VERB: Record<MistakeSkill, string> = {
+    speaking: 'Bạn đã nói',
+    writing: 'Bạn đã viết',
+};
+
 /** Thư viện đề lọc sẵn chế độ "Luyện theo Part" của kỹ năng tương ứng. */
 export function getPracticeHref(skill: MistakeSkill) {
     return `/${skill}?tab=by_part`;

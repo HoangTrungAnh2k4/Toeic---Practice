@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import { LuChevronRight, LuDownload, LuHistory, LuRefreshCw } from 'react-icons/lu';
 import Button from '@/components/ui/button';
+import { SETTING_BASE_PATH } from '@/app/setting/utils';
 
 export default function HistoryPageHeader() {
     return (
@@ -16,7 +18,16 @@ export default function HistoryPageHeader() {
                     >
                         <span>TOEIC Speaking & Writing</span>
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
-                        <span className="text-main">Nhật ký nỗ lực</span>
+                        <Link
+                            href={SETTING_BASE_PATH}
+                            className="hover:text-main rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                        >
+                            Cài đặt
+                        </Link>
+                        <LuChevronRight className="size-3.5" aria-hidden="true" />
+                        <span className="text-main" aria-current="page">
+                            Nhật ký nỗ lực
+                        </span>
                     </nav>
                     <h1 className="font-bold text-main text-2xl sm:text-3xl tracking-tight">
                         Lịch sử làm bài & Nhật ký nỗ lực

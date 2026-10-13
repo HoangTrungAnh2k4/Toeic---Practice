@@ -1,3 +1,5 @@
+import type { IconType } from 'react-icons';
+import { LuClipboardList, LuCloud, LuMic, LuPenLine, LuRefreshCw, LuSave } from 'react-icons/lu';
 import {
     CategoryFilterType,
     DateScopeType,
@@ -277,3 +279,19 @@ export const PAGE_SIZE_OPTIONS: Option<number>[] = [
 ];
 
 export const isRetakeAttempt = (attempt: HistoryAttempt) => attempt.categoryBadge.includes('Làm lại');
+
+/** Link tới trang xem lại bài; `annotationId` cuộn thẳng tới đoạn bị nhận xét. */
+export const getAttemptHref = (attemptId: string, annotationId?: string) =>
+    `/setting/history/${attemptId}${annotationId ? `#ann-${annotationId}` : ''}`;
+
+export const SKILL_STYLE: Record<HistoryAttempt['skill'], { Icon: IconType; className: string; label: string }> = {
+    speaking: { Icon: LuMic, className: 'bg-main text-sub3', label: 'Speaking' },
+    writing: { Icon: LuPenLine, className: 'bg-sub3 text-main', label: 'Writing' },
+    full_mock: { Icon: LuClipboardList, className: 'bg-sub2 text-white', label: 'Full Mock Test' },
+};
+
+export const STORAGE_STYLE: Record<HistoryAttempt['storage'], { Icon: IconType; label: string; className: string }> = {
+    cloud: { Icon: LuCloud, label: 'Đã lưu cloud', className: 'bg-sub1 text-main' },
+    sync_pending: { Icon: LuRefreshCw, label: 'Chờ đồng bộ', className: 'bg-sub3/25 text-main' },
+    local_cache: { Icon: LuSave, label: 'Cache cục bộ', className: 'bg-white text-main ring-1 ring-inset ring-sub2' },
+};

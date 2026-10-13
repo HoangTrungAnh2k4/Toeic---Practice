@@ -18,7 +18,7 @@ export default async function MistakesSummary() {
             <div className="flex flex-col justify-between gap-4 bg-main shadow-main/20 shadow-md p-5 rounded-xl">
                 <div className="flex justify-between items-start gap-3">
                     <div className="space-y-1 min-w-0">
-                        <span className="font-semibold text-sub2 text-xs uppercase tracking-wider">Lỗi cần khắc phục</span>
+                        <span className="font-semibold text-sub1 text-xs uppercase tracking-wider">Lỗi cần khắc phục</span>
                         <div className="flex items-baseline gap-2">
                             <span className="font-bold text-sub1 text-3xl tracking-tight">{open}</span>
                             <span className="font-semibold text-sub3 text-xs">/ {summary.total} mẫu lỗi</span>
@@ -46,7 +46,7 @@ export default async function MistakesSummary() {
                         <span className={LABEL_CLASS}>Đã khắc phục</span>
                         <div className="flex items-baseline gap-2">
                             <span className="font-bold text-main text-3xl tracking-tight">{resolved}</span>
-                            <span className="font-semibold text-sub2 text-xs">{resolvedRate}% sổ lỗi</span>
+                            <span className="font-semibold text-subText text-xs">{resolvedRate}% sổ lỗi</span>
                         </div>
                     </div>
                     <div className="flex justify-center items-center bg-sub1 rounded-lg size-10 text-main shrink-0">
@@ -85,7 +85,7 @@ export default async function MistakesSummary() {
                     <span className="bg-sub3 rounded-full size-2" aria-hidden="true" />
                     <span>
                         {summary.weakestCriterion
-                            ? `${summary.weakestCriterion.count} lỗi chưa khắc phục ảnh hưởng tiêu chí này`
+                            ? `${summary.weakestCriterion.count} lỗi chưa khắc phục, lặp lại ${summary.weakestCriterion.hits} lần gần đây`
                             : 'Không còn lỗi nào cần khắc phục'}
                     </span>
                 </div>

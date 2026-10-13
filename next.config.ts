@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
                 destination: '/overview',
                 permanent: false,
             },
+            {
+                source: '/history/:path*',
+                destination: '/setting/history/:path*',
+                permanent: true,
+            },
         ];
     },
 };

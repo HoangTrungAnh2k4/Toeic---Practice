@@ -48,7 +48,7 @@ export default function MistakeCard({ item }: MistakeCardProps) {
             <div className="flex flex-wrap justify-between items-center gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                     <SkillPartBadge skill={item.skill} partLabel={item.partLabel} />
-                    <span className="font-medium text-sub2 text-xs tracking-wider">{item.task}</span>
+                    <span className="font-medium text-subText text-xs tracking-wider">{item.task}</span>
                 </div>
                 <MistakeStatusBadge status={item.status} />
             </div>

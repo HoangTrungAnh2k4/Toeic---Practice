@@ -2,25 +2,20 @@ import {
     LuBadgeCheck,
     LuBrain,
     LuCircleCheck,
-    LuClipboardList,
     LuClock,
-    LuCloud,
     LuEllipsisVertical,
     LuEye,
     LuGraduationCap,
     LuInbox,
-    LuMic,
-    LuPenLine,
-    LuRefreshCw,
-    LuSave,
     LuTriangleAlert,
 } from 'react-icons/lu';
 import type { IconType } from 'react-icons';
-import Button from '@/components/ui/button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { HistoryAttempt } from '../types';
-import { isRetakeAttempt } from '../utils';
+import { getAttemptHref, isRetakeAttempt, SKILL_STYLE, STORAGE_STYLE } from '../utils';
 
 interface HistoryTableProps {
     attempts: HistoryAttempt[];
@@ -34,22 +29,10 @@ const COLUMNS = [
     'Thời gian & Lưu trữ',
 ];
 
-const SKILL_STYLE: Record<HistoryAttempt['skill'], { Icon: IconType; className: string; label: string }> = {
-    speaking: { Icon: LuMic, className: 'bg-main text-sub3', label: 'Speaking' },
-    writing: { Icon: LuPenLine, className: 'bg-sub3 text-main', label: 'Writing' },
-    full_mock: { Icon: LuClipboardList, className: 'bg-sub2 text-white', label: 'Full Mock Test' },
-};
-
 const MODE_ICON: Record<HistoryAttempt['modeType'], IconType> = {
     cbt: LuBadgeCheck,
     timed: LuClock,
     guided: LuGraduationCap,
-};
-
-const STORAGE_STYLE: Record<HistoryAttempt['storage'], { Icon: IconType; label: string; className: string }> = {
-    cloud: { Icon: LuCloud, label: 'Đã lưu cloud', className: 'bg-sub1 text-main' },
-    sync_pending: { Icon: LuRefreshCw, label: 'Chờ đồng bộ', className: 'bg-sub3/25 text-main' },
-    local_cache: { Icon: LuSave, label: 'Cache cục bộ', className: 'bg-white text-main ring-1 ring-inset ring-sub2' },
 };
 
 const PRIMARY_ACTIONS = ['Xem lại chi tiết', 'Tiếp tục làm tiếp'];
@@ -265,14 +248,18 @@ export default function HistoryTable({ attempts }: HistoryTableProps) {
                                 {/* Column 6: Actions */}
                                 <TableCell className="px-3 py-4 text-right">
                                     <div className="inline-flex items-center gap-2">
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant={PRIMARY_ACTIONS.includes(item.actionText) ? 'primary' : 'third'}
-                                            className="justify-center px-3 w-36 h-8 text-xs"
+                                        <Link
+                                            href={getAttemptHref(item.id)}
+                                            className={cn(
+                                                buttonVariants({
+                                                    size: 'sm',
+                                                    variant: PRIMARY_ACTIONS.includes(item.actionText) ? 'primary' : 'third',
+                                                }),
+                                                'justify-center px-3 w-36 h-8 text-xs',
+                                            )}
                                         >
                                             {item.actionText}
-                                        </Button>
+                                        </Link>
                                         <button
                                             type="button"
                                             aria-label="Thao tác khác"

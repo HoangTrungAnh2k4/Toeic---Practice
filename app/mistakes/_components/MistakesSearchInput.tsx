@@ -26,7 +26,7 @@ export default function MistakesSearchInput({ query, className }: MistakesSearch
                 onChange={(e) => setValue(e.target.value)}
                 aria-label="Tìm kiếm lỗi"
                 placeholder="Tìm theo tên lỗi, dạng câu (vd: email, picture, Q11)..."
-                className="bg-sub1/50 focus-visible:bg-card pl-9 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 h-10 text-main md:text-xs placeholder:text-sub2"
+                className="bg-sub1/50 focus-visible:bg-card pl-9 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 h-10 text-main md:text-xs placeholder:text-subText"
             />
         </div>
     );

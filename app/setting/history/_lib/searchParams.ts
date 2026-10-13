@@ -10,7 +10,7 @@ import {
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
 
-export const HISTORY_PATH = '/history';
+export const HISTORY_PATH = '/setting/history';
 
 export const DEFAULT_HISTORY_QUERY: HistoryQuery = {
     skill: 'all',

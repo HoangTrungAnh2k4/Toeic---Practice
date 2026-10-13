@@ -31,7 +31,7 @@ export default function SettingSectionCard({ section }: SettingSectionCardProps)
             <Link
                 href={href}
                 aria-describedby={titleId}
-                className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 self-start bg-white mt-auto')}
+                className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 self-end bg-white mt-auto')}
             >
                 <span>{actionLabel}</span>
                 <LuArrowRight className="size-4" aria-hidden="true" />

@@ -7,8 +7,9 @@ import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
 import { IoBook, IoCalendar, IoSettings } from 'react-icons/io5';
 import { TbLayoutDashboardFilled } from 'react-icons/tb';
-import { FaHistory, FaMicrophoneAlt } from 'react-icons/fa';
+import { FaMicrophoneAlt } from 'react-icons/fa';
 import { FaPenNib } from 'react-icons/fa6';
+import { UserMenu } from '@/components/user/user-menu';
 
 /**
  * Chiều cao mỗi mục. PHẢI khớp với class `h-16` (64px) bên dưới,
@@ -22,8 +23,8 @@ const items: NavItem[] = [
     { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
     { label: 'Speaking', href: '/speaking', icon: FaMicrophoneAlt },
     { label: 'Writing', href: '/writing', icon: FaPenNib },
+    { label: 'Mistakes', href: '/mistakes', icon: IoBook },
     { label: 'Schedule', href: '/schedule', icon: IoCalendar },
-    { label: 'History', href: '/history', icon: FaHistory },
     { label: 'Setting', href: '/setting', icon: IoSettings },
 ];
 
@@ -160,6 +161,24 @@ export function Sidebar() {
                     })}
                 </ul>
             </nav>
+
+            {/* Tài khoản: ghim đáy sidebar, xuất hiện ngay sau mục nav cuối */}
+            <div
+                className="mt-auto p-3"
+                style={{
+                    animation: `sidebar-in 600ms ${150 + items.length * 90}ms cubic-bezier(0.22,1,0.36,1) both`,
+                }}
+            >
+                <UserMenu collapsed={collapsed} />
+            </div>
         </aside>
     );
+}
+
+/**
+ * Khung giữ chỗ khi `usePathname` chưa resolve (route có param động như `/mistakes/[id]`),
+ * cùng kích thước sidebar mở rộng để không bị giật layout.
+ */
+export function SidebarFallback() {
+    return <div aria-hidden="true" className="top-0 sticky self-start bg-main w-64 h-dvh shrink-0" />;
 }

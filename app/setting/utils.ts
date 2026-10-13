@@ -1,10 +1,18 @@
-import { LuFileCog, LuHeadset } from 'react-icons/lu';
+import { LuFileCog, LuHeadset, LuHistory, LuUserRound } from 'react-icons/lu';
 import { SettingSection } from './types';
 
 export const SETTING_BASE_PATH = '/setting';
 
 /** Danh mục trang con của /setting. Thêm trang mới chỉ cần bổ sung một phần tử vào mảng này. */
 export const SETTING_SECTIONS: SettingSection[] = [
+    {
+        id: 'profile',
+        title: 'Hồ sơ cá nhân',
+        description: 'Xem thông tin tài khoản, thói quen học cùng điểm mục tiêu và lịch thi TOEIC Speaking & Writing.',
+        href: `${SETTING_BASE_PATH}/profile`,
+        actionLabel: 'Xem hồ sơ',
+        Icon: LuUserRound,
+    },
     {
         id: 'device-check',
         title: 'Kiểm tra thiết bị',
@@ -20,5 +28,13 @@ export const SETTING_SECTIONS: SettingSection[] = [
         href: `${SETTING_BASE_PATH}/exam-management`,
         actionLabel: 'Mở trình quản trị',
         Icon: LuFileCog,
+    },
+    {
+        id: 'history',
+        title: 'Lịch sử làm bài',
+        description: 'Xem lại toàn bộ lượt làm bài Speaking, Writing và Thi thử, kèm điểm số và nhận xét chi tiết.',
+        href: `${SETTING_BASE_PATH}/history`,
+        actionLabel: 'Xem lịch sử',
+        Icon: LuHistory,
     },
 ];

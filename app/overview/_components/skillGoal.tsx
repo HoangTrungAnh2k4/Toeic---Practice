@@ -7,7 +7,7 @@ export default function SkillGoals() {
     return (
         <div className="flex flex-col flex-1 gap-4 lg:col-span-7">
             {/* Writing */}
-            <div className="flex flex-col gap-4 bg-white shadow-sm hover:shadow-md p-4 border border-sub1/50 rounded-xl transition-shadow">
+            <div className="flex flex-col gap-4 bg-white shadow-sm hover:shadow-md p-4 border border-sub1/50 rounded-xl transition-shadow motion-safe:animate-rise motion-safe:delay-100">
                 <div className="flex justify-between items-start gap-4">
                     <div className="flex items-center gap-2">
                         <div className="flex justify-center items-center bg-sub3/15 rounded-[0.5rem] size-10 text-sub2">
@@ -41,7 +41,7 @@ export default function SkillGoals() {
                     </div>
                     <div className="bg-sub3/15 rounded-[0.75rem] w-full h-3 overflow-hidden">
                         <div
-                            className="bg-sub3 rounded-[0.75rem] h-full transition-all duration-700 ease-out"
+                            className="bg-sub3 rounded-[0.75rem] h-full origin-left motion-safe:animate-grow-x motion-safe:delay-300"
                             style={{ width: '70%' }}
                         />
                     </div>
@@ -58,7 +58,7 @@ export default function SkillGoals() {
             </div>
 
             {/* Speaking */}
-            <div className="flex flex-col gap-4 bg-white shadow-sm hover:shadow-md p-4 border border-sub1/50 rounded-xl transition-shadow">
+            <div className="flex flex-col gap-4 bg-white shadow-sm hover:shadow-md p-4 border border-sub1/50 rounded-xl transition-shadow motion-safe:animate-rise motion-safe:delay-200">
                 <div className="flex justify-between items-start gap-4">
                     <div className="flex items-center gap-2">
                         <div className="flex justify-center items-center bg-sub1 rounded-[0.5rem] size-10 text-sub2">
@@ -92,7 +92,7 @@ export default function SkillGoals() {
                     </div>
                     <div className="bg-sub1 rounded-[0.75rem] w-full h-3 overflow-hidden">
                         <div
-                            className="bg-main rounded-[0.75rem] h-full transition-all duration-700 ease-out"
+                            className="bg-main rounded-[0.75rem] h-full origin-left motion-safe:animate-grow-x motion-safe:delay-500"
                             style={{ width: '70%' }}
                         />
                     </div>

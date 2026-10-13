@@ -1,6 +1,6 @@
-import { MOCK_REVIEWS } from '@/app/history/_lib/reviews';
-import { HistoryAttempt } from '@/app/history/types';
-import { MOCK_ATTEMPTS } from '@/app/history/utils';
+import { MOCK_REVIEWS } from '@/app/setting/history/_lib/reviews';
+import { HistoryAttempt } from '@/app/setting/history/types';
+import { MOCK_ATTEMPTS } from '@/app/setting/history/utils';
 import {
     Criterion,
     MistakeCheck,
@@ -162,15 +162,19 @@ export async function getMistakes(query: MistakeQuery): Promise<MistakeItem[]> {
 export async function getMistakeSummary(): Promise<MistakeSummary> {
     const items = computeAll().map(({ item }) => item);
     const byStatus: Record<MistakeStatus, number> = { active: 0, improving: 0, resolved: 0 };
-    const criterionCount = new Map<Criterion, number>();
+    const criterionStats = new Map<Criterion, { count: number; hits: number }>();
 
     for (const item of items) {
         byStatus[item.status] += 1;
         if (!isOpen(item.status)) continue;
-        for (const criterion of item.criteria) criterionCount.set(criterion, (criterionCount.get(criterion) ?? 0) + 1);
+        for (const criterion of item.criteria) {
+            const stat = criterionStats.get(criterion) ?? { count: 0, hits: 0 };
+            criterionStats.set(criterion, { count: stat.count + 1, hits: stat.hits + item.frequency.hit });
+        }
     }
 
-    const [weakest] = [...criterionCount.entries()].sort((a, b) => b[1] - a[1]);
+    // Xếp theo số lần lặp lại thực tế, không chỉ số mẫu lỗi — tránh hoà điểm vô nghĩa
+    const [weakest] = [...criterionStats.entries()].sort((a, b) => b[1].hits - a[1].hits || b[1].count - a[1].count);
 
     return {
         total: items.length,
@@ -180,7 +184,7 @@ export async function getMistakeSummary(): Promise<MistakeSummary> {
             speaking: items.filter((item) => item.skill === 'speaking').length,
             writing: items.filter((item) => item.skill === 'writing').length,
         },
-        weakestCriterion: weakest && { criterion: weakest[0], count: weakest[1] },
+        weakestCriterion: weakest && { criterion: weakest[0], ...weakest[1] },
         analyzedAttempts: MOCK_ATTEMPTS.filter(isScored).length,
         scoringAttempts: MOCK_ATTEMPTS.filter((attempt) => attempt.scoreInfo.isScoring).length,
         interruptedAttempts: MOCK_ATTEMPTS.filter((attempt) => attempt.scoreInfo.isInterrupted).length,

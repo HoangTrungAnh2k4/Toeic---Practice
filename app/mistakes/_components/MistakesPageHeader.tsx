@@ -13,7 +13,7 @@ export default function MistakesPageHeader() {
                 <div className="flex flex-col gap-1.5">
                     <nav
                         aria-label="Breadcrumb"
-                        className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
+                        className="flex flex-wrap items-center gap-1.5 font-semibold text-subText text-xs uppercase tracking-wider"
                     >
                         <span>TOEIC Speaking & Writing</span>
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
@@ -28,7 +28,7 @@ export default function MistakesPageHeader() {
             </div>
 
             <Link
-                href="/history"
+                href="/setting/history"
                 className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-card self-start xl:self-auto shrink-0')}
             >
                 <LuHistory className="size-4" aria-hidden="true" />

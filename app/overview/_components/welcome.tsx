@@ -2,6 +2,7 @@ import Button from '@/components/ui/button';
 import Image from 'next/image';
 import type { IconType } from 'react-icons';
 import { LuMic, LuPenLine, LuRoute } from 'react-icons/lu';
+import { cn } from '@/lib/utils';
 
 type ExamFormat = {
     icon: IconType;
@@ -14,11 +15,13 @@ const EXAM_FORMATS: ExamFormat[] = [
     { icon: LuPenLine, skill: 'Writing', detail: '8 câu trong 60 phút' },
 ];
 
+const ENTER = 'motion-safe:animate-rise';
+
 export default function WelcomeBanner() {
     return (
         <section
             aria-labelledby="welcome-heading"
-            className="isolate relative bg-main rounded-2xl w-full overflow-hidden text-white"
+            className="isolate relative bg-main rounded-2xl w-full overflow-hidden text-white motion-safe:animate-fade"
         >
             <Image
                 src="/svg/banner-decor.svg"
@@ -31,7 +34,7 @@ export default function WelcomeBanner() {
 
             <div className="flex">
                 <div className="flex flex-col flex-1 gap-5 px-6 sm:px-10 py-8">
-                    <div className="flex flex-col gap-2">
+                    <div className={cn('flex flex-col gap-2', ENTER, 'motion-safe:delay-150')}>
                         <h1
                             id="welcome-heading"
                             className="max-w-2xl font-bold text-3xl sm:text-4xl text-balance leading-tight tracking-tight"
@@ -43,7 +46,7 @@ export default function WelcomeBanner() {
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-4">
+                    <div className={cn('flex flex-wrap gap-4', ENTER, 'motion-safe:delay-300')}>
                         <Button variant="primary">Bắt đầu luyện tập</Button>
                         <Button variant="secondary">
                             <LuRoute aria-hidden="true" className="mr-2 size-4" />
@@ -53,7 +56,11 @@ export default function WelcomeBanner() {
 
                     <ul
                         aria-label="Cấu trúc đề thi TOEIC Speaking & Writing"
-                        className="flex flex-wrap gap-x-8 gap-y-3 pt-4 border-white/10 border-t max-w-2xl"
+                        className={cn(
+                            'flex flex-wrap gap-x-8 gap-y-3 pt-4 border-white/10 border-t max-w-2xl',
+                            ENTER,
+                            'motion-safe:delay-500',
+                        )}
                     >
                         {EXAM_FORMATS.map(({ icon: Icon, skill, detail }) => (
                             <li key={skill} className="flex items-center gap-3 text-sm">
@@ -69,7 +76,7 @@ export default function WelcomeBanner() {
                     </ul>
                 </div>
 
-                <div className="hidden lg:flex items-end w-56 xl:w-80 shrink-0">
+                <div className="hidden lg:flex items-end w-56 xl:w-80 motion-safe:animate-slide-left motion-safe:delay-300 shrink-0">
                     <Image
                         src="/img/banner.png"
                         alt=""

@@ -112,7 +112,7 @@ export default function WritingKpiCards() {
                     </ul>
                 </div>
                 <Link
-                    href="/history?skill=writing"
+                    href="/setting/history?skill=writing"
                     className="inline-flex items-center gap-1 self-end px-1 rounded-md font-semibold text-main text-xs hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"
                 >
                     Xem lại lỗi trong lịch sử Writing

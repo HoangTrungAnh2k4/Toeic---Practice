@@ -19,7 +19,7 @@ export default function MistakesHowItWorks() {
             className="flex flex-col gap-5 bg-card shadow-sm p-5 sm:p-6 border border-sub2/30 rounded-xl"
         >
             <div className="flex flex-col gap-1">
-                <span className="font-semibold text-sub2 text-xs uppercase tracking-wider">Cách sổ lỗi hoạt động</span>
+                <span className="font-semibold text-subText text-xs uppercase tracking-wider">Cách sổ lỗi hoạt động</span>
                 <h2 id="mistakes-how-title" className="font-bold text-main text-xl tracking-tight">
                     Trạng thái được cập nhật tự động sau mỗi bài nộp
                 </h2>

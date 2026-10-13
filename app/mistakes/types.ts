@@ -127,7 +127,8 @@ export interface MistakeSummary {
     total: number;
     byStatus: Record<MistakeStatus, number>;
     bySkill: Record<MistakeSkillFilter, number>;
-    weakestCriterion?: { criterion: Criterion; count: number };
+    /** Tiêu chí có nhiều lần lặp lại nhất trong các lỗi chưa khắc phục. */
+    weakestCriterion?: { criterion: Criterion; count: number; hits: number };
     analyzedAttempts: number;
     scoringAttempts: number;
     interruptedAttempts: number;

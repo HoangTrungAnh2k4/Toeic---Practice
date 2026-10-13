@@ -179,7 +179,7 @@ export const AI_INSIGHTS: AiInsight[] = [
         conclusion: ' để hình thành thói quen rà checklist trước khi nộp.',
         tag: 'Bài thi độc lập, không trợ giúp',
         linkLabel: 'Xem báo cáo chi tiết',
-        href: '/history',
+        href: '/setting/history',
     },
     {
         id: 'speaking-latency',
@@ -192,7 +192,7 @@ export const AI_INSIGHTS: AiInsight[] = [
         conclusion: ' vào Thứ 2 và Thứ 5 để giảm áp lực phản xạ tức thời.',
         tag: 'Có kịch bản hướng dẫn mở câu',
         linkLabel: 'Xem biểu đồ phản xạ',
-        href: '/history',
+        href: '/setting/history',
     },
 ];
 
@@ -206,7 +206,7 @@ export const WEEKLY_TASKS: WeeklyTask[] = [
         duration: 20,
         status: 'done',
         actionLabel: 'Xem lại bản ghi',
-        href: '/history',
+        href: '/setting/history',
     },
     {
         id: 'w2',
@@ -217,7 +217,7 @@ export const WEEKLY_TASKS: WeeklyTask[] = [
         duration: 25,
         status: 'done',
         actionLabel: 'Xem bài sửa',
-        href: '/history',
+        href: '/setting/history',
     },
     {
         id: 'w3',
