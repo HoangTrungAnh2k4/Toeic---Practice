@@ -36,7 +36,6 @@ export function GuestMenu({ collapsed }: GuestMenuProps) {
             </div>
 
             <Link href="/login" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 w-full')}>
-                <LuLogIn aria-hidden="true" className="size-4" />
                 Đăng nhập
             </Link>
             <p className="text-sub1/70 text-xs text-center">

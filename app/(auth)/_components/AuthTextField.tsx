@@ -21,7 +21,7 @@ export default function AuthTextField({ label, icon, description, error, ...inpu
 
     return (
         <Field data-invalid={invalid}>
-            <FieldLabel htmlFor={id} className="text-main">
+            <FieldLabel htmlFor={id} className="font-medium text-main">
                 {label}
             </FieldLabel>
             <AuthInput

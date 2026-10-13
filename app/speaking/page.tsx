@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import SpeakingHeroCard from './_components/SpeakingHeroCard';
 import SpeakingKpiCards from './_components/SpeakingKpiCards';
-import SpeakingPageHeader from './_components/SpeakingPageHeader';
 import SpeakingResults from './_components/SpeakingResults';
 import SpeakingResultsSkeleton from './_components/SpeakingResultsSkeleton';
 import SpeakingRubricGuide from './_components/SpeakingRubricGuide';
@@ -15,7 +14,6 @@ interface SpeakingPageProps {
 export default function SpeakingPage({ searchParams }: SpeakingPageProps) {
     return (
         <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
-            <SpeakingPageHeader />
             <SpeakingHeroCard />
             <SpeakingKpiCards />
 

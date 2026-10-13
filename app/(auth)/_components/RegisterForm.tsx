@@ -129,7 +129,7 @@ export default function RegisterForm() {
                         </Alert>
                     )}
 
-                    <Button type="submit" variant="primary" disabled={isPending} className="gap-2 mt-2 w-full">
+                    <Button type="submit" variant="primary" disabled={isPending} className="gap-2 w-full h-13">
                         {pendingMethod === 'email' && (
                             <LuLoaderCircle aria-hidden="true" className="size-4 motion-safe:animate-spin" />
                         )}

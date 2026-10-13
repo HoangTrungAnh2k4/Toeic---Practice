@@ -1,5 +1,4 @@
 import WelcomeBanner from './_components/welcome';
-import PriorityError from './_components/_priorityError/priorityError';
 import RecentAttempt from './_components/_recentAttempt/recentAttempt';
 import FooterAssurance from './_components/footerAssurance';
 import SkillGoals from './_components/skillGoal';
@@ -19,9 +18,6 @@ export default function Overview() {
                 <SkillGoals />
                 <Chart />
             </div>
-
-            {/* Priority errors */}
-            <PriorityError />
 
             {/* Recent attempts */}
             <RecentAttempt />

@@ -73,6 +73,12 @@
   }
 }
 
+/* Nền chấm bi neo-brutalist (trang auth) */
+@utility bg-dots {
+  background-image: radial-gradient(color-mix(in srgb, var(--main) 14%, transparent) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
 :root {
   --main:#3C3454;
   --sub1:#E8E5F5;

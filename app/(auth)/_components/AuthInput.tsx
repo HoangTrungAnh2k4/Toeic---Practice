@@ -19,14 +19,14 @@ export default function AuthInput({ icon: Icon, type, disabled, className, ...pr
         <div className="relative">
             <Icon
                 aria-hidden="true"
-                className="top-1/2 left-3.5 absolute size-4 text-sub2 -translate-y-1/2 pointer-events-none"
+                className="top-1/2 left-4 absolute size-4.5 text-subText -translate-y-1/2 pointer-events-none"
             />
             <Input
                 type={isPassword && revealed ? 'text' : type}
                 disabled={disabled}
                 className={cn(
-                    'bg-sub1/50 focus-visible:bg-card pl-10 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 h-11 text-main',
-                    isPassword && 'pr-11',
+                    'bg-sub1/50 pl-11 border-sub2/45 focus-visible:border-main rounded-lg focus-visible:ring-3 focus-visible:ring-sub2/35 h-11 text-foreground',
+                    isPassword && 'pr-12',
                     className,
                 )}
                 {...props}
@@ -38,7 +38,7 @@ export default function AuthInput({ icon: Icon, type, disabled, className, ...pr
                     disabled={disabled}
                     aria-label="Hiện mật khẩu"
                     aria-pressed={revealed}
-                    className="top-1/2 right-1.5 absolute flex justify-center items-center rounded-md size-8 text-subText hover:text-main -translate-y-1/2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main disabled:pointer-events-none disabled:opacity-50"
+                    className="top-1/2 right-1 absolute flex justify-center items-center disabled:opacity-50 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main size-11 text-subText hover:text-main -translate-y-1/2 cursor-pointer disabled:pointer-events-none"
                 >
                     {revealed ? (
                         <LuEyeOff aria-hidden="true" className="size-4" />

@@ -17,7 +17,8 @@ export default function GoogleAuthButton({ label, pending, disabled, onClick }: 
             onClick={onClick}
             disabled={disabled}
             aria-busy={pending}
-            className="gap-3 bg-card hover:bg-sub1 w-full text-main hover:text-main"
+            size={'lg'}
+            className="hover:bg-white hover:text-black"
         >
             {pending ? (
                 <LuLoaderCircle aria-hidden="true" className="size-5 motion-safe:animate-spin" />

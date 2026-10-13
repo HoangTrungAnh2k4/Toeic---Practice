@@ -89,7 +89,7 @@ export default function LoginForm() {
                         </Alert>
                     )}
 
-                    <Button type="submit" variant="primary" disabled={isPending} className="gap-2 mt-2 w-full">
+                    <Button type="submit" variant="primary" disabled={isPending} className="gap-2 mt-2" size={'lg'}>
                         {pendingMethod === 'email' && (
                             <LuLoaderCircle aria-hidden="true" className="size-4 motion-safe:animate-spin" />
                         )}

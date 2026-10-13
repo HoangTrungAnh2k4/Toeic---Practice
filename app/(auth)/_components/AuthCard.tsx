@@ -12,22 +12,22 @@ export default function AuthCard({ title, description, alternate, children }: Au
     return (
         <section
             aria-labelledby="auth-title"
-            className="bg-card shadow-sm p-6 sm:p-8 border border-sub2/30 rounded-xl w-full max-w-md motion-safe:animate-rise"
+            className="bg-card shadow-[8px_8px_0_0_#000] p-6 px-8 border-2 border-black rounded-2xl w-full max-w-105 motion-safe:animate-rise"
         >
-            <header className="flex flex-col gap-1.5 mb-6">
+            <header className="flex flex-col gap-2 mb-5">
                 <h1 id="auth-title" className="font-bold text-main text-2xl sm:text-3xl tracking-tight">
                     {title}
                 </h1>
-                <p className="font-medium text-subText text-sm leading-relaxed">{description}</p>
+                <p className="font-medium text-subText text-sm sm:text-base leading-relaxed">{description}</p>
             </header>
 
             {children}
 
-            <p className="mt-6 pt-5 border-sub2/20 border-t font-medium text-subText text-sm text-center">
+            <p className="mt-5 pt-5 border-border border-t text-subText text-sm sm:text-base text-center">
                 {alternate.prompt}{' '}
                 <Link
                     href={alternate.href}
-                    className="rounded-sm font-bold text-main hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-main focus-visible:outline-offset-2"
+                    className="rounded-sm focus-visible:outline-2 focus-visible:outline-main focus-visible:outline-offset-2 font-bold text-main hover:underline underline-offset-4"
                 >
                     {alternate.label}
                 </Link>

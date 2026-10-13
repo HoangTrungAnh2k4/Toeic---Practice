@@ -16,16 +16,16 @@ export default function AuthCheckboxField({ label, error, className, ...props }:
     const invalid = Boolean(error);
 
     return (
-        <Field orientation="horizontal" data-invalid={invalid}>
+        <Field orientation="horizontal" data-invalid={invalid} className="cursor-pointer">
             <Checkbox
                 id={id}
                 aria-invalid={invalid}
                 aria-describedby={invalid ? errorId : undefined}
-                className={cn('border-sub2 data-checked:border-main data-checked:bg-main', className)}
+                className={cn('data-checked:bg-main border-sub2 data-checked:border-main', className)}
                 {...props}
             />
             <FieldContent>
-                <FieldLabel htmlFor={id} className="font-normal text-subText leading-snug">
+                <FieldLabel htmlFor={id} className="font-normal text-main leading-snug cursor-pointer">
                     {label}
                 </FieldLabel>
                 {invalid && <FieldError id={errorId}>{error}</FieldError>}
