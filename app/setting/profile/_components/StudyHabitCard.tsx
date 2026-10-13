@@ -1,5 +1,6 @@
 import { LuCalendarCog } from 'react-icons/lu';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ProfileField, StudyDay } from '../types';
@@ -64,7 +65,10 @@ export default function StudyHabitCard({ days, goalMinutes, fields, className }:
                         {days.map((day) => (
                             <span
                                 key={day.id}
-                                className={cn('text-[0.6875rem] text-main text-center', day.isToday ? 'font-bold' : 'font-medium')}
+                                className={cn(
+                                    'text-[0.6875rem] text-main text-center',
+                                    day.isToday ? 'font-bold' : 'font-medium',
+                                )}
                             >
                                 {day.label}
                             </span>
@@ -74,12 +78,13 @@ export default function StudyHabitCard({ days, goalMinutes, fields, className }:
 
                 <ProfileFieldList fields={fields} />
 
-                <LinkButton
-                    href="/schedule" variant="secondary" size="md" className="gap-2 mt-auto w-full"
+                <Link
+                    href="/schedule"
+                    className={cn(buttonVariants({ variant: 'secondary', size: 'md' }), 'gap-2 mt-auto w-full')}
                 >
                     <LuCalendarCog className="size-4" aria-hidden="true" />
                     <span>Chỉnh lịch học</span>
-                </LinkButton>
+                </Link>
             </CardContent>
         </Card>
     );

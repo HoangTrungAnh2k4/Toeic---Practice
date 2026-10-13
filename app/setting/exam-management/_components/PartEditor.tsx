@@ -1,6 +1,7 @@
 import { LuEye, LuRotateCcw, LuSave, LuTimer } from 'react-icons/lu';
-import Button from '@/components/ui/button';
-import LinkButton from '@/components/ui/link-button';
+import Button, { buttonVariants } from '@/components/ui/button';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { PartContent, StudioPart } from '../types';
 import QuestionEditorCard from './QuestionEditorCard';
@@ -109,10 +110,13 @@ export default function PartEditor({
                     Khôi phục dữ liệu Study4
                 </Button>
                 <div className="flex sm:flex-row flex-col gap-3">
-                    <LinkButton href="/speaking/test" variant="third" size="sm" className="gap-1.5 bg-white text-xs">
+                    <Link
+                        href="/speaking/test"
+                        className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-1.5 bg-white text-xs')}
+                    >
                         <LuEye className="size-3.5" aria-hidden="true" />
                         Thử trong phòng thi
-                    </LinkButton>
+                    </Link>
                     <Button
                         type="button"
                         variant="primary"

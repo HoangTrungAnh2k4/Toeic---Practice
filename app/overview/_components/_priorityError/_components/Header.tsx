@@ -1,5 +1,6 @@
 import { MISTAKES_PATH } from '@/app/mistakes/utils';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 
 type HeaderProps = {
     shownCount: number;
@@ -18,9 +19,9 @@ export default function Header({ shownCount, openCount, analyzedAttempts }: Head
                     Trong {openCount} lỗi chưa khắc phục, trích xuất từ {analyzedAttempts} bài đã chấm theo rubric ETS
                 </p>
             </div>
-            <LinkButton href={MISTAKES_PATH} variant="primary" size="sm">
+            <Link href={MISTAKES_PATH} className={buttonVariants({ variant: 'primary', size: 'sm' })}>
                 Xem sổ lỗi
-            </LinkButton>
+            </Link>
         </div>
     );
 }

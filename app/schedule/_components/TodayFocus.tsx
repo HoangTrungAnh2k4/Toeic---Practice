@@ -1,5 +1,6 @@
 import { LuClock, LuCoffee, LuPlay } from 'react-icons/lu';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE } from '../_lib/skillStyle';
 import { StudyDay } from '../types';
@@ -81,10 +82,10 @@ export default function TodayFocus({ day }: TodayFocusProps) {
                     Tổng dự kiến:{' '}
                     <strong className="font-semibold text-white">{formatMinutes(getTotalDuration(day.tasks))}</strong>
                 </span>
-                <LinkButton href={startHref} variant="primary" size="md" className="gap-2">
+                <Link href={startHref} className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
                     <LuPlay className="size-4" aria-hidden="true" />
                     <span>Bắt đầu học ngay</span>
-                </LinkButton>
+                </Link>
             </div>
         </section>
     );

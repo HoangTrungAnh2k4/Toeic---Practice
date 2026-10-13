@@ -5,7 +5,9 @@ import { MdPlayArrow, MdVisibility } from 'react-icons/md';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 import { cn } from '@/lib/utils';
-import Button from '@/components/ui/button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { getAttemptHref } from '@/app/setting/history/utils';
 import { ATTEMPTS, SkillFilter, STATUS_STYLE } from './types';
 import Header from './_components/Header';
 import Footer from './_components/Footer';
@@ -104,13 +106,19 @@ export default function RecentAttempt() {
 
                                     <TableCell className="px-4 py-4 text-right">
                                         {a.status === 'interrupted' ? (
-                                            <Button type="button" size="sm" variant="third">
+                                            <Link
+                                                href={getAttemptHref(a.id)}
+                                                className={buttonVariants({ variant: 'third', size: 'sm' })}
+                                            >
                                                 Làm tiếp
-                                            </Button>
+                                            </Link>
                                         ) : (
-                                            <Button type="button" size="sm" variant="third">
+                                            <Link
+                                                href={getAttemptHref(a.id)}
+                                                className={buttonVariants({ variant: 'third', size: 'sm' })}
+                                            >
                                                 Xem lại &amp; Sửa lỗi
-                                            </Button>
+                                            </Link>
                                         )}
                                     </TableCell>
                                 </TableRow>

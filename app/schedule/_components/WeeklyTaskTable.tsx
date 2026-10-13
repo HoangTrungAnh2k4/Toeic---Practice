@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { LuCalendarClock, LuCircle, LuCircleCheck, LuCirclePlay, LuInbox } from 'react-icons/lu';
 import type { IconType } from 'react-icons';
-import LinkButton from '@/components/ui/link-button';
+import { buttonVariants } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE } from '../_lib/skillStyle';
@@ -117,14 +117,15 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                                     </TableCell>
                                     <TableCell className="px-3 py-4 text-right">
                                         {isToday ? (
-                                            <LinkButton
+                                            <Link
                                                 href={task.href}
-                                                variant="primary"
-                                                size="sm"
-                                                className="text-xs"
+                                                className={cn(
+                                                    buttonVariants({ variant: 'primary', size: 'sm' }),
+                                                    'text-xs',
+                                                )}
                                             >
                                                 {task.actionLabel}
-                                            </LinkButton>
+                                            </Link>
                                         ) : (
                                             <Link
                                                 href={task.href}

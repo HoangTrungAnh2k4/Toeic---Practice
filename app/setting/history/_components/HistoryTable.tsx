@@ -10,7 +10,8 @@ import {
     LuTriangleAlert,
 } from 'react-icons/lu';
 import type { IconType } from 'react-icons';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { HistoryAttempt } from '../types';
@@ -250,14 +251,20 @@ export default function HistoryTable({ attempts }: HistoryTableProps) {
                                 {/* Column 6: Actions */}
                                 <TableCell className="px-3 py-4 text-right">
                                     <div className="inline-flex items-center gap-2">
-                                        <LinkButton
+                                        <Link
                                             href={getAttemptHref(item.id)}
-                                            size="sm"
-                                            variant={PRIMARY_ACTIONS.includes(item.actionText) ? 'primary' : 'third'}
-                                            className="justify-center px-3 w-36 h-8 text-xs"
+                                            className={cn(
+                                                buttonVariants({
+                                                    variant: PRIMARY_ACTIONS.includes(item.actionText)
+                                                        ? 'primary'
+                                                        : 'third',
+                                                    size: 'sm',
+                                                }),
+                                                'justify-center px-3 w-36 h-8 text-xs',
+                                            )}
                                         >
                                             {item.actionText}
-                                        </LinkButton>
+                                        </Link>
                                         <button
                                             type="button"
                                             aria-label="Thao tác khác"

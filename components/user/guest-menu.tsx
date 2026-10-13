@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { LuLogIn, LuUserRound } from 'react-icons/lu';
-import LinkButton from '@/components/ui/link-button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface GuestMenuProps {
     /** Sidebar đang thu gọn: chỉ còn nút đăng nhập dạng icon. */
@@ -11,13 +12,14 @@ interface GuestMenuProps {
 export function GuestMenu({ collapsed }: GuestMenuProps) {
     if (collapsed) {
         return (
-            <LinkButton
+            <Link
                 href="/login"
                 aria-label="Đăng nhập"
-                title="Đăng nhập" variant="primary" size="md" className="mx-auto size-10 px-0"
+                title="Đăng nhập"
+                className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'mx-auto size-10 px-0')}
             >
                 <LuLogIn aria-hidden="true" className="size-5" />
-            </LinkButton>
+            </Link>
         );
     }
 
@@ -33,10 +35,10 @@ export function GuestMenu({ collapsed }: GuestMenuProps) {
                 </span>
             </div>
 
-            <LinkButton href="/login" variant="primary" size="sm" className="gap-2 w-full">
+            <Link href="/login" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 w-full')}>
                 <LuLogIn aria-hidden="true" className="size-4" />
                 Đăng nhập
-            </LinkButton>
+            </Link>
             <p className="text-sub1/70 text-xs text-center">
                 Chưa có tài khoản?{' '}
                 <Link

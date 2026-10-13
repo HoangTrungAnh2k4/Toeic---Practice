@@ -1,4 +1,5 @@
-import Button from '@/components/ui/button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import Image from 'next/image';
 import type { IconType } from 'react-icons';
 import { LuMic, LuPenLine, LuRoute } from 'react-icons/lu';
@@ -47,11 +48,13 @@ export default function WelcomeBanner() {
                     </div>
 
                     <div className={cn('flex flex-wrap gap-4', ENTER, 'motion-safe:delay-300')}>
-                        <Button variant="primary">Bắt đầu luyện tập</Button>
-                        <Button variant="secondary">
+                        <Link href="/speaking" className={buttonVariants({ variant: 'primary' })}>
+                            Bắt đầu luyện tập
+                        </Link>
+                        <Link href="/schedule" className={buttonVariants({ variant: 'secondary' })}>
                             <LuRoute aria-hidden="true" className="mr-2 size-4" />
                             Xem lộ trình
-                        </Button>
+                        </Link>
                     </div>
 
                     <ul

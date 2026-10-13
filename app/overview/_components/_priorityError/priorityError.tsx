@@ -3,7 +3,8 @@ import { getPriorityMistakes } from '@/app/mistakes/_lib/data';
 import { getMistakeHref, SEVERITY_META, SKILL_META } from '@/app/mistakes/utils';
 import { FrequencyMeter } from '@/components/mistakes/frequency-meter';
 import { SkillPartBadge } from '@/components/mistakes/mistake-badges';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Header from './_components/Header';
 
@@ -62,14 +63,13 @@ export default async function PriorityError() {
                                         <ImpactIcon aria-hidden="true" className="size-5 text-sub3 shrink-0" />
                                         <span>{item.impact}</span>
                                     </div>
-                                    <LinkButton
+                                    <Link
                                         href={getMistakeHref(item.id)}
                                         aria-label={`Xem cách khắc phục: ${item.title}`}
-                                        variant="primary"
-                                        size="sm"
+                                        className={buttonVariants({ variant: 'primary', size: 'sm' })}
                                     >
                                         Xem cách khắc phục
-                                    </LinkButton>
+                                    </Link>
                                 </div>
                             </article>
                         );

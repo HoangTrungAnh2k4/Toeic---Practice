@@ -1,6 +1,6 @@
-'use client';
-
-import Button from '@/components/ui/button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { MdVerifiedUser } from 'react-icons/md';
 
 export default function FooterAssurance() {
@@ -19,9 +19,12 @@ export default function FooterAssurance() {
                     </span>
                 </div>
             </div>
-            <Button type="button" size={'sm'} variant={'primary'} className="py-0" onClick={() => {}}>
+            <Link
+                href="/setting/device-check"
+                className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'py-0')}
+            >
                 Kiểm tra âm thanh
-            </Button>
+            </Link>
         </div>
     );
 }

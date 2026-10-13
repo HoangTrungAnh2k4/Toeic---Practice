@@ -1,6 +1,7 @@
 import { LuArrowRight } from 'react-icons/lu';
 import type { SkillProgress } from '@/app/schedule/types';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ScorePoint } from '../types';
@@ -105,10 +106,13 @@ export default function ProfileGoalCard({ skills, history, className }: ProfileG
                         'Làm thêm bài thi thử để thấy xu hướng điểm'
                     )}
                 </span>
-                <LinkButton href="/schedule" variant="third" size="sm" className="gap-2 bg-white">
+                <Link
+                    href="/schedule"
+                    className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-2 bg-white')}
+                >
                     <span>Xem lộ trình</span>
                     <LuArrowRight className="size-4" aria-hidden="true" />
-                </LinkButton>
+                </Link>
             </CardFooter>
         </Card>
     );

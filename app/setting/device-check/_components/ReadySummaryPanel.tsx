@@ -1,6 +1,7 @@
 import { LuArrowLeft, LuRotateCcw } from 'react-icons/lu';
-import Button from '@/components/ui/button';
-import LinkButton from '@/components/ui/link-button';
+import Button, { buttonVariants } from '@/components/ui/button';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { SETTING_BASE_PATH } from '@/app/setting/utils';
 import { CheckStatuses, StepId } from '../types';
 import { CHECK_IDS, SKILL_READINESS } from '../utils';
@@ -46,10 +47,13 @@ export default function ReadySummaryPanel({ statuses, onSelectStep, onRestart }:
                     <LuRotateCcw className="size-4" aria-hidden="true" />
                     Kiểm tra lại từ đầu
                 </Button>
-                <LinkButton href={SETTING_BASE_PATH} variant="third" size="md" className="gap-2 bg-white">
+                <Link
+                    href={SETTING_BASE_PATH}
+                    className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-white')}
+                >
                     <LuArrowLeft className="size-4" aria-hidden="true" />
                     Quay lại Cài đặt
-                </LinkButton>
+                </Link>
             </div>
         </div>
     );

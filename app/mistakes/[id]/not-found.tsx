@@ -1,5 +1,7 @@
 import { LuArrowLeft, LuSearch } from 'react-icons/lu';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { MISTAKES_PATH } from '../utils';
 
 export default function MistakeNotFound() {
@@ -12,10 +14,13 @@ export default function MistakeNotFound() {
             <p className="max-w-md text-subText text-xs">
                 Lỗi có thể đã được gộp vào một mẫu lỗi khác, hoặc đường dẫn không còn đúng.
             </p>
-            <LinkButton href={MISTAKES_PATH} variant="primary" size="sm" className="gap-2 mt-2 text-xs">
+            <Link
+                href={MISTAKES_PATH}
+                className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 mt-2 text-xs')}
+            >
                 <LuArrowLeft className="size-4" aria-hidden="true" />
                 Về sổ lỗi
-            </LinkButton>
+            </Link>
         </div>
     );
 }

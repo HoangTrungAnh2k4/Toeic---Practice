@@ -13,7 +13,8 @@ import {
     LuSlidersHorizontal,
     LuTimer,
 } from 'react-icons/lu';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { buildSpeakingTestHref, RECOMMENDED_TEST } from '../utils';
 
@@ -95,24 +96,20 @@ export default function SpeakingHeroCard() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <LinkButton
+                    <Link
                         href={buildSpeakingTestHref(RECOMMENDED_TEST.id)}
-                        variant="primary"
-                        size="md"
-                        className="gap-2"
+                        className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}
                     >
                         <LuCirclePlay className="size-4" aria-hidden="true" />
                         <span>Bắt đầu làm bài thi</span>
-                    </LinkButton>
-                    <LinkButton
+                    </Link>
+                    <Link
                         href={`${buildSpeakingTestHref(RECOMMENDED_TEST.id)}&mode=guided`}
-                        variant="third"
-                        size="md"
-                        className="gap-2 bg-white text-main"
+                        className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-white text-main')}
                     >
                         <LuGraduationCap className="size-4" aria-hidden="true" />
                         <span>Luyện có hướng dẫn</span>
-                    </LinkButton>
+                    </Link>
                     <a href="#rubric-guide" className={cn(LINK_FOCUS_CLASS, 'text-sub3')}>
                         Xem cấu trúc & tiêu chí chấm
                         <LuArrowRight className="size-3.5" aria-hidden="true" />

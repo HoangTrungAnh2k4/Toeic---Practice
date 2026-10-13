@@ -1,5 +1,7 @@
 import { LuCalendarClock, LuCalendarDays, LuChevronRight, LuSparkles } from 'react-icons/lu';
-import Button from '@/components/ui/button';
+import Button, { buttonVariants } from '@/components/ui/button';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export default function SchedulePageHeader() {
     return (
@@ -31,10 +33,13 @@ export default function SchedulePageHeader() {
 
             {/* Header Actions */}
             <div className="flex flex-wrap items-center gap-3 self-start xl:self-auto shrink-0">
-                <Button type="button" size="md" variant="third" className="gap-2 bg-white">
+                <Link
+                    href="/setting/profile"
+                    className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-white')}
+                >
                     <LuCalendarClock className="size-4" aria-hidden="true" />
                     <span>Mục tiêu & Lịch thi</span>
-                </Button>
+                </Link>
                 <Button type="button" size="md" variant="primary" className="gap-2">
                     <LuSparkles className="size-4" aria-hidden="true" />
                     <span>Tối ưu lộ trình (AI)</span>

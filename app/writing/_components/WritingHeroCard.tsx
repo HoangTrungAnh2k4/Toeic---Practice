@@ -13,8 +13,9 @@ import {
     LuLockKeyhole,
     LuTimer,
 } from 'react-icons/lu';
-import Button from '@/components/ui/button';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { RECOMMENDED_TEST, WRITING_TEST_PATH } from '../utils';
 
 interface RoomCheck {
@@ -89,14 +90,20 @@ export default function WritingHeroCard() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <LinkButton href={WRITING_TEST_PATH} variant="primary" size="md" className="gap-2">
+                    <Link
+                        href={WRITING_TEST_PATH}
+                        className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}
+                    >
                         <LuCirclePlay className="size-4" aria-hidden="true" />
                         <span>Bắt đầu làm bài thi</span>
-                    </LinkButton>
-                    <Button type="button" size="md" variant="third" className="gap-2 bg-white text-main">
+                    </Link>
+                    <Link
+                        href={`${WRITING_TEST_PATH}?mode=guided`}
+                        className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-white text-main')}
+                    >
                         <LuGraduationCap className="size-4" aria-hidden="true" />
                         <span>Luyện có hướng dẫn</span>
-                    </Button>
+                    </Link>
                     <a
                         href="#rubric-guide"
                         className="inline-flex items-center gap-1 px-1 rounded-md font-semibold text-sub3 text-xs hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"

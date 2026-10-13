@@ -12,8 +12,9 @@ import {
     LuStar,
     LuStepForward,
 } from 'react-icons/lu';
-import Button from '@/components/ui/button';
-import LinkButton from '@/components/ui/link-button';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { buildHistoryHref, DEFAULT_HISTORY_QUERY } from '@/app/setting/history/_lib/searchParams';
 import { cn } from '@/lib/utils';
 import {
     AttemptedSpeakingTest,
@@ -113,15 +114,17 @@ function FreshCard({ test }: { test: FreshSpeakingTest }) {
                         <span>{test.summary}</span>
                         <span className="font-semibold text-main">{test.statusLabel}</span>
                     </div>
-                    <LinkButton
+                    <Link
                         href={buildSpeakingTestHref(test.id)}
-                        variant={test.isRecommended ? 'primary' : 'third'}
-                        size="sm"
-                        className={cn('gap-2 w-full', !test.isRecommended && 'bg-white')}
+                        className={cn(
+                            buttonVariants({ variant: test.isRecommended ? 'primary' : 'third', size: 'sm' }),
+                            'gap-2 w-full',
+                            !test.isRecommended && 'bg-white',
+                        )}
                     >
                         <LuPlay className="size-4" aria-hidden="true" />
                         <span>Bắt đầu thi</span>
-                    </LinkButton>
+                    </Link>
                 </>
             }
         >
@@ -155,19 +158,26 @@ function AttemptedCard({ test }: { test: AttemptedSpeakingTest }) {
                         ))}
                     </dl>
                     <div className="gap-2 grid grid-cols-2">
-                        <Button type="button" size="sm" variant="third" className="gap-1.5 bg-white px-2 text-xs">
+                        <Link
+                            href={buildHistoryHref(DEFAULT_HISTORY_QUERY, {
+                                skill: 'speaking',
+                                searchQuery: test.title,
+                            })}
+                            className={cn(
+                                buttonVariants({ variant: 'third', size: 'sm' }),
+                                'gap-1.5 bg-white px-2 text-xs',
+                            )}
+                        >
                             <LuEye className="size-4" aria-hidden="true" />
                             <span>Nghe & xem nhận xét</span>
-                        </Button>
-                        <LinkButton
+                        </Link>
+                        <Link
                             href={buildSpeakingTestHref(test.id)}
-                            variant="primary"
-                            size="sm"
-                            className="gap-1.5 px-2 text-xs"
+                            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5 px-2 text-xs')}
                         >
                             <LuRotateCcw className="size-4" aria-hidden="true" />
                             <span>Làm lại (lần {test.attemptCount + 1})</span>
-                        </LinkButton>
+                        </Link>
                     </div>
                 </>
             }
@@ -206,15 +216,13 @@ function InProgressCard({ test }: { test: InProgressSpeakingTest }) {
             footer={
                 <>
                     <p className="text-subText text-xs">Phiên thi tự động hết hạn sau 48h nếu không tiếp tục.</p>
-                    <LinkButton
+                    <Link
                         href={buildSpeakingTestHref(test.id)}
-                        variant="primary"
-                        size="sm"
-                        className="gap-2 w-full"
+                        className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 w-full')}
                     >
                         <LuStepForward className="size-4" aria-hidden="true" />
                         <span>Tiếp tục làm bài</span>
-                    </LinkButton>
+                    </Link>
                 </>
             }
         >
@@ -261,15 +269,13 @@ function GuidedCard({ test }: { test: GuidedSpeakingTest }) {
                         <span>{test.summary}</span>
                         <span className="font-semibold text-main">{test.statusLabel}</span>
                     </div>
-                    <LinkButton
+                    <Link
                         href={`${buildSpeakingTestHref(test.id)}&mode=guided`}
-                        variant="secondary"
-                        size="sm"
-                        className="gap-2 w-full"
+                        className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-2 w-full')}
                     >
                         <LuGraduationCap className="size-4" aria-hidden="true" />
                         <span>Luyện có hướng dẫn</span>
-                    </LinkButton>
+                    </Link>
                 </>
             }
         >
