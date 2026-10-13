@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { LuInfo, LuTarget } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { MistakeDetail } from '../../types';
 import { getPracticeHref, SKILL_META } from '../../utils';
 
@@ -31,12 +29,9 @@ export default function MistakePracticeCard({ mistake }: MistakePracticeCardProp
                 </div>
             </div>
 
-            <Link
-                href={getPracticeHref(mistake.skill)}
-                className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'w-full')}
-            >
+            <LinkButton href={getPracticeHref(mistake.skill)} variant="primary" size="md" className="w-full">
                 Luyện {skillLabel} {mistake.partLabel}
-            </Link>
+            </LinkButton>
 
             <p className="flex items-start gap-2 font-medium text-sub1/80 text-xs leading-relaxed">
                 <LuInfo className="mt-px size-4 text-sub3 shrink-0" aria-hidden="true" />

@@ -10,6 +10,8 @@ import { TbLayoutDashboardFilled } from 'react-icons/tb';
 import { FaMicrophoneAlt } from 'react-icons/fa';
 import { FaPenNib } from 'react-icons/fa6';
 import { UserMenu } from '@/components/user/user-menu';
+import { GuestMenu } from '@/components/user/guest-menu';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 /**
  * Chiều cao mỗi mục. PHẢI khớp với class `h-16` (64px) bên dưới,
@@ -31,6 +33,7 @@ const items: NavItem[] = [
 export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
+    const user = useCurrentUser();
 
     const activeIndex = items.findIndex((item) => pathname === item.href || pathname.startsWith(item.href + '/'));
 
@@ -42,7 +45,7 @@ export function Sidebar() {
         >
             <style>{`
         @keyframes sidebar-in {
-          from { opacity: 0; transform: translateX(-24px); }
+          from { opacity: 0; transform: translateX(-12px); }
           to   { opacity: 1; transform: none; }
         }
         @keyframes sidebar-pop {
@@ -169,7 +172,7 @@ export function Sidebar() {
                     animation: `sidebar-in 600ms ${150 + items.length * 90}ms cubic-bezier(0.22,1,0.36,1) both`,
                 }}
             >
-                <UserMenu collapsed={collapsed} />
+                {user ? <UserMenu collapsed={collapsed} user={user} /> : <GuestMenu collapsed={collapsed} />}
             </div>
         </aside>
     );

@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import type { IconType } from 'react-icons';
 import { LuInbox, LuMic, LuPartyPopper, LuPenLine, LuSearch } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { buildMistakesHref, DEFAULT_MISTAKE_QUERY } from '../_lib/searchParams';
 import { MistakeQuery } from '../types';
 import { getPracticeHref } from '../utils';
@@ -48,33 +46,42 @@ export default function MistakesEmptyState({ variant, query }: MistakesEmptyStat
             <div className="flex flex-wrap justify-center gap-3 mt-2">
                 {variant === 'no-data' && (
                     <>
-                        <Link href={getPracticeHref('speaking')} className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), LINK_CLASS)}>
+                        <LinkButton
+                            href={getPracticeHref('speaking')}
+                            variant="primary"
+                            size="sm"
+                            className={LINK_CLASS}
+                        >
                             <LuMic className="size-4" aria-hidden="true" />
                             Luyện Speaking
-                        </Link>
-                        <Link href={getPracticeHref('writing')} className={cn(buttonVariants({ variant: 'third', size: 'sm' }), LINK_CLASS)}>
+                        </LinkButton>
+                        <LinkButton href={getPracticeHref('writing')} variant="third" size="sm" className={LINK_CLASS}>
                             <LuPenLine className="size-4" aria-hidden="true" />
                             Luyện Writing
-                        </Link>
+                        </LinkButton>
                     </>
                 )}
                 {variant === 'all-clear' && (
-                    <Link
+                    <LinkButton
                         href={buildMistakesHref(query, { status: 'resolved' })}
                         scroll={false}
-                        className={cn(buttonVariants({ variant: 'third', size: 'sm' }), LINK_CLASS)}
+                        variant="third"
+                        size="sm"
+                        className={LINK_CLASS}
                     >
                         Xem lỗi đã khắc phục
-                    </Link>
+                    </LinkButton>
                 )}
                 {variant === 'no-match' && (
-                    <Link
+                    <LinkButton
                         href={buildMistakesHref(DEFAULT_MISTAKE_QUERY)}
                         scroll={false}
-                        className={cn(buttonVariants({ variant: 'third', size: 'sm' }), LINK_CLASS)}
+                        variant="third"
+                        size="sm"
+                        className={LINK_CLASS}
                     >
                         Đặt lại bộ lọc
-                    </Link>
+                    </LinkButton>
                 )}
             </div>
         </div>

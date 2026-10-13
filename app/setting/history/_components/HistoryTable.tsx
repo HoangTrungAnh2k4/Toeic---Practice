@@ -10,8 +10,7 @@ import {
     LuTriangleAlert,
 } from 'react-icons/lu';
 import type { IconType } from 'react-icons';
-import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button';
+import LinkButton from '@/components/ui/link-button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { HistoryAttempt } from '../types';
@@ -187,7 +186,10 @@ export default function HistoryTable({ attempts }: HistoryTableProps) {
                                         ) : item.scoreInfo.isInterrupted ? (
                                             <>
                                                 <span className="inline-flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-full ring-1 ring-sub2 ring-inset w-fit font-semibold text-[11px] text-main">
-                                                    <span className="bg-sub2 rounded-full size-1.5" aria-hidden="true" />
+                                                    <span
+                                                        className="bg-sub2 rounded-full size-1.5"
+                                                        aria-hidden="true"
+                                                    />
                                                     Chưa hoàn thành
                                                 </span>
                                                 <span className="text-[11px] text-subText">
@@ -248,18 +250,14 @@ export default function HistoryTable({ attempts }: HistoryTableProps) {
                                 {/* Column 6: Actions */}
                                 <TableCell className="px-3 py-4 text-right">
                                     <div className="inline-flex items-center gap-2">
-                                        <Link
+                                        <LinkButton
                                             href={getAttemptHref(item.id)}
-                                            className={cn(
-                                                buttonVariants({
-                                                    size: 'sm',
-                                                    variant: PRIMARY_ACTIONS.includes(item.actionText) ? 'primary' : 'third',
-                                                }),
-                                                'justify-center px-3 w-36 h-8 text-xs',
-                                            )}
+                                            size="sm"
+                                            variant={PRIMARY_ACTIONS.includes(item.actionText) ? 'primary' : 'third'}
+                                            className="justify-center px-3 w-36 h-8 text-xs"
                                         >
                                             {item.actionText}
-                                        </Link>
+                                        </LinkButton>
                                         <button
                                             type="button"
                                             aria-label="Thao tác khác"

@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { LuCirclePause, LuPlay, LuSave } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { HistoryAttempt } from '../../types';
 
 interface ReviewInterruptedStateProps {
@@ -46,13 +44,13 @@ export default function ReviewInterruptedState({ attempt }: ReviewInterruptedSta
             )}
 
             <div className="flex flex-wrap gap-3">
-                <Link href={RESUME_HREF[attempt.skill]} className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
+                <LinkButton href={RESUME_HREF[attempt.skill]} variant="primary" size="md" className="gap-2">
                     <LuPlay className="size-4" aria-hidden="true" />
                     Tiếp tục làm bài
-                </Link>
-                <Link href="/setting/history" className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'bg-card')}>
+                </LinkButton>
+                <LinkButton href="/setting/history" variant="third" size="md" className="bg-card">
                     Về lịch sử làm bài
-                </Link>
+                </LinkButton>
             </div>
         </section>
     );

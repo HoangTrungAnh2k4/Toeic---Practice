@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { LuChevronRight, LuHistory, LuNotebookPen } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 
 export default function MistakesPageHeader() {
     return (
@@ -27,13 +25,15 @@ export default function MistakesPageHeader() {
                 </div>
             </div>
 
-            <Link
+            <LinkButton
                 href="/setting/history"
-                className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-card self-start xl:self-auto shrink-0')}
+                variant="third"
+                size="md"
+                className="gap-2 bg-card self-start xl:self-auto shrink-0"
             >
                 <LuHistory className="size-4" aria-hidden="true" />
                 <span>Lịch sử làm bài</span>
-            </Link>
+            </LinkButton>
         </div>
     );
 }

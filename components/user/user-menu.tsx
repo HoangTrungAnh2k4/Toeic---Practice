@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CURRENT_USER } from '@/app/setting/profile/utils';
+import type { CurrentUser } from '@/app/setting/profile/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { UserAvatar } from './user-avatar';
@@ -25,13 +25,13 @@ const ACCOUNT_LINKS = [
 interface UserMenuProps {
     /** Sidebar đang thu gọn: chỉ còn avatar, tên & email ẩn đi giống nhãn các mục nav. */
     collapsed: boolean;
+    user: CurrentUser;
 }
 
 /** Khối tài khoản ở đáy sidebar (kiểu NavUser của shadcn): avatar + tên, bấm để mở menu tài khoản. */
-export function UserMenu({ collapsed }: UserMenuProps) {
+export function UserMenu({ collapsed, user }: UserMenuProps) {
     const router = useRouter();
     const isMobile = useIsMobile();
-    const user = CURRENT_USER;
 
     // TODO: gọi API đăng xuất & xoá phiên khi có hệ thống đăng nhập; hiện chỉ đưa về trang chủ.
     const handleLogout = () => router.replace('/');

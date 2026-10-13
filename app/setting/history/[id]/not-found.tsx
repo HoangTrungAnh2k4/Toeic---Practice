@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { LuArrowLeft, LuSearch } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 
 export default function AttemptNotFound() {
     return (
@@ -13,10 +11,10 @@ export default function AttemptNotFound() {
             <p className="max-w-md text-subText text-xs">
                 Lượt làm bài có thể đã bị xoá, chưa được đồng bộ lên thiết bị này, hoặc đường dẫn không đúng.
             </p>
-            <Link href="/setting/history" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 mt-2 text-xs')}>
+            <LinkButton href="/setting/history" variant="primary" size="sm" className="gap-2 mt-2 text-xs">
                 <LuArrowLeft className="size-4" aria-hidden="true" />
                 Về lịch sử làm bài
-            </Link>
+            </LinkButton>
         </div>
     );
 }

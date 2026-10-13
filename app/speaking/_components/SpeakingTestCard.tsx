@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { ReactNode } from 'react';
 import type { IconType } from 'react-icons';
 import {
@@ -13,7 +12,8 @@ import {
     LuStar,
     LuStepForward,
 } from 'react-icons/lu';
-import Button, { buttonVariants } from '@/components/ui/button';
+import Button from '@/components/ui/button';
+import LinkButton from '@/components/ui/link-button';
 import { cn } from '@/lib/utils';
 import {
     AttemptedSpeakingTest,
@@ -113,17 +113,15 @@ function FreshCard({ test }: { test: FreshSpeakingTest }) {
                         <span>{test.summary}</span>
                         <span className="font-semibold text-main">{test.statusLabel}</span>
                     </div>
-                    <Link
+                    <LinkButton
                         href={buildSpeakingTestHref(test.id)}
-                        className={cn(
-                            buttonVariants({ variant: test.isRecommended ? 'primary' : 'third', size: 'sm' }),
-                            'gap-2 w-full',
-                            !test.isRecommended && 'bg-white',
-                        )}
+                        variant={test.isRecommended ? 'primary' : 'third'}
+                        size="sm"
+                        className={cn('gap-2 w-full', !test.isRecommended && 'bg-white')}
                     >
                         <LuPlay className="size-4" aria-hidden="true" />
                         <span>Bắt đầu thi</span>
-                    </Link>
+                    </LinkButton>
                 </>
             }
         >
@@ -161,13 +159,15 @@ function AttemptedCard({ test }: { test: AttemptedSpeakingTest }) {
                             <LuEye className="size-4" aria-hidden="true" />
                             <span>Nghe & xem nhận xét</span>
                         </Button>
-                        <Link
+                        <LinkButton
                             href={buildSpeakingTestHref(test.id)}
-                            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5 px-2 text-xs')}
+                            variant="primary"
+                            size="sm"
+                            className="gap-1.5 px-2 text-xs"
                         >
                             <LuRotateCcw className="size-4" aria-hidden="true" />
                             <span>Làm lại (lần {test.attemptCount + 1})</span>
-                        </Link>
+                        </LinkButton>
                     </div>
                 </>
             }
@@ -206,13 +206,15 @@ function InProgressCard({ test }: { test: InProgressSpeakingTest }) {
             footer={
                 <>
                     <p className="text-subText text-xs">Phiên thi tự động hết hạn sau 48h nếu không tiếp tục.</p>
-                    <Link
+                    <LinkButton
                         href={buildSpeakingTestHref(test.id)}
-                        className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 w-full')}
+                        variant="primary"
+                        size="sm"
+                        className="gap-2 w-full"
                     >
                         <LuStepForward className="size-4" aria-hidden="true" />
                         <span>Tiếp tục làm bài</span>
-                    </Link>
+                    </LinkButton>
                 </>
             }
         >
@@ -259,13 +261,15 @@ function GuidedCard({ test }: { test: GuidedSpeakingTest }) {
                         <span>{test.summary}</span>
                         <span className="font-semibold text-main">{test.statusLabel}</span>
                     </div>
-                    <Link
+                    <LinkButton
                         href={`${buildSpeakingTestHref(test.id)}&mode=guided`}
-                        className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-2 w-full')}
+                        variant="secondary"
+                        size="sm"
+                        className="gap-2 w-full"
                     >
                         <LuGraduationCap className="size-4" aria-hidden="true" />
                         <span>Luyện có hướng dẫn</span>
-                    </Link>
+                    </LinkButton>
                 </>
             }
         >

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { LuArrowLeft, LuChevronRight, LuHeadset, LuShieldCheck } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { SETTING_BASE_PATH } from '@/app/setting/utils';
 
 export default function DeviceCheckHeader() {
@@ -39,23 +38,22 @@ export default function DeviceCheckHeader() {
                     </div>
                     <p className="max-w-3xl font-medium text-subText text-sm leading-relaxed">
                         Kiểm tra lần lượt <strong className="text-main">tai nghe, micro</strong> và{' '}
-                        <strong className="text-main">bàn phím</strong> trước khi vào phòng thi Speaking & Writing.
-                        Đoạn ghi âm thử chỉ dùng để bạn nghe lại và không được tải lên máy chủ.
+                        <strong className="text-main">bàn phím</strong> trước khi vào phòng thi Speaking & Writing. Đoạn
+                        ghi âm thử chỉ dùng để bạn nghe lại và không được tải lên máy chủ.
                     </p>
                 </div>
             </div>
 
             {/* Header Actions */}
-            <Link
+            <LinkButton
                 href={SETTING_BASE_PATH}
-                className={cn(
-                    buttonVariants({ variant: 'third', size: 'md' }),
-                    'gap-2 self-start xl:self-auto bg-white shrink-0',
-                )}
+                variant="third"
+                size="md"
+                className="gap-2 self-start xl:self-auto bg-white shrink-0"
             >
                 <LuArrowLeft className="size-4" aria-hidden="true" />
                 <span>Quay lại Cài đặt</span>
-            </Link>
+            </LinkButton>
         </div>
     );
 }

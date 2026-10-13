@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { LuSearchX } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { getTabCounts, getWritingTests } from '../_lib/data';
 import {
     buildWritingHref,
@@ -41,13 +39,15 @@ export default async function WritingResults({ searchParams }: WritingResultsPro
                             <p className="font-semibold text-main text-sm">Không tìm thấy bộ đề phù hợp</p>
                             <p className="text-subText text-xs">Thử đổi từ khóa hoặc bỏ bớt điều kiện lọc.</p>
                         </div>
-                        <Link
+                        <LinkButton
                             href={buildWritingHref(DEFAULT_WRITING_QUERY)}
                             scroll={false}
-                            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'text-xs')}
+                            variant="primary"
+                            size="sm"
+                            className="text-xs"
                         >
                             Xóa bộ lọc
-                        </Link>
+                        </LinkButton>
                     </div>
                 ) : (
                     <div className="gap-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">

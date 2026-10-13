@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { IconType } from 'react-icons';
 import {
     LuArrowRight,
@@ -14,7 +13,7 @@ import {
     LuSlidersHorizontal,
     LuTimer,
 } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
+import LinkButton from '@/components/ui/link-button';
 import { cn } from '@/lib/utils';
 import { buildSpeakingTestHref, RECOMMENDED_TEST } from '../utils';
 
@@ -73,7 +72,10 @@ export default function SpeakingHeroCard() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <h2 id="speaking-hero-title" className="font-bold text-white text-xl sm:text-2xl tracking-tight">
+                        <h2
+                            id="speaking-hero-title"
+                            className="font-bold text-white text-xl sm:text-2xl tracking-tight"
+                        >
                             {RECOMMENDED_TEST.title}
                         </h2>
                         <p className="max-w-2xl text-sub1 text-sm leading-relaxed">
@@ -93,20 +95,24 @@ export default function SpeakingHeroCard() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Link
+                    <LinkButton
                         href={buildSpeakingTestHref(RECOMMENDED_TEST.id)}
-                        className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}
+                        variant="primary"
+                        size="md"
+                        className="gap-2"
                     >
                         <LuCirclePlay className="size-4" aria-hidden="true" />
                         <span>Bắt đầu làm bài thi</span>
-                    </Link>
-                    <Link
+                    </LinkButton>
+                    <LinkButton
                         href={`${buildSpeakingTestHref(RECOMMENDED_TEST.id)}&mode=guided`}
-                        className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-white text-main')}
+                        variant="third"
+                        size="md"
+                        className="gap-2 bg-white text-main"
                     >
                         <LuGraduationCap className="size-4" aria-hidden="true" />
                         <span>Luyện có hướng dẫn</span>
-                    </Link>
+                    </LinkButton>
                     <a href="#rubric-guide" className={cn(LINK_FOCUS_CLASS, 'text-sub3')}>
                         Xem cấu trúc & tiêu chí chấm
                         <LuArrowRight className="size-3.5" aria-hidden="true" />

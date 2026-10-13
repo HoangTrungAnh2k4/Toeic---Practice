@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { LuArrowLeft, LuChevronRight, LuUserRound } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { SETTING_BASE_PATH } from '@/app/setting/utils';
 
 export default function ProfileHeader() {
@@ -39,16 +38,15 @@ export default function ProfileHeader() {
             </div>
 
             {/* Header Actions */}
-            <Link
+            <LinkButton
                 href={SETTING_BASE_PATH}
-                className={cn(
-                    buttonVariants({ variant: 'third', size: 'md' }),
-                    'gap-2 self-start xl:self-auto bg-white shrink-0',
-                )}
+                variant="third"
+                size="md"
+                className="gap-2 self-start xl:self-auto bg-white shrink-0"
             >
                 <LuArrowLeft className="size-4" aria-hidden="true" />
                 <span>Quay lại Cài đặt</span>
-            </Link>
+            </LinkButton>
         </div>
     );
 }

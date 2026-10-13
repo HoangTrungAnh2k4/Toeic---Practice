@@ -1,10 +1,9 @@
-import Link from 'next/link';
 import { LuPartyPopper } from 'react-icons/lu';
 import { getPriorityMistakes } from '@/app/mistakes/_lib/data';
 import { getMistakeHref, SEVERITY_META, SKILL_META } from '@/app/mistakes/utils';
 import { FrequencyMeter } from '@/components/mistakes/frequency-meter';
 import { SkillPartBadge } from '@/components/mistakes/mistake-badges';
-import { buttonVariants } from '@/components/ui/button';
+import LinkButton from '@/components/ui/link-button';
 import { cn } from '@/lib/utils';
 import Header from './_components/Header';
 
@@ -45,12 +44,16 @@ export default async function PriorityError() {
                                     <div className="flex flex-wrap justify-between items-center gap-2">
                                         <div className="flex items-center gap-2">
                                             <SkillPartBadge skill={item.skill} partLabel={item.partLabel} />
-                                            <span className="font-medium text-subText text-xs tracking-wider">{item.task}</span>
+                                            <span className="font-medium text-subText text-xs tracking-wider">
+                                                {item.task}
+                                            </span>
                                         </div>
                                         <FrequencyMeter hit={item.frequency.hit} total={item.frequency.total} />
                                     </div>
 
-                                    <h4 className="font-semibold text-main text-lg leading-6 tracking-[-0.01em]">{item.title}</h4>
+                                    <h4 className="font-semibold text-main text-lg leading-6 tracking-[-0.01em]">
+                                        {item.title}
+                                    </h4>
                                     <p className="font-medium text-subText text-sm leading-5.5">{item.summary}</p>
                                 </div>
 
@@ -59,13 +62,14 @@ export default async function PriorityError() {
                                         <ImpactIcon aria-hidden="true" className="size-5 text-sub3 shrink-0" />
                                         <span>{item.impact}</span>
                                     </div>
-                                    <Link
+                                    <LinkButton
                                         href={getMistakeHref(item.id)}
                                         aria-label={`Xem cách khắc phục: ${item.title}`}
-                                        className={buttonVariants({ variant: 'primary', size: 'sm' })}
+                                        variant="primary"
+                                        size="sm"
                                     >
                                         Xem cách khắc phục
-                                    </Link>
+                                    </LinkButton>
                                 </div>
                             </article>
                         );

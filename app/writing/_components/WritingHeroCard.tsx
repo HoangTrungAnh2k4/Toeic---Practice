@@ -13,9 +13,8 @@ import {
     LuLockKeyhole,
     LuTimer,
 } from 'react-icons/lu';
-import Link from 'next/link';
-import Button, { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import Button from '@/components/ui/button';
+import LinkButton from '@/components/ui/link-button';
 import { RECOMMENDED_TEST, WRITING_TEST_PATH } from '../utils';
 
 interface RoomCheck {
@@ -90,10 +89,10 @@ export default function WritingHeroCard() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Link href={WRITING_TEST_PATH} className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
+                    <LinkButton href={WRITING_TEST_PATH} variant="primary" size="md" className="gap-2">
                         <LuCirclePlay className="size-4" aria-hidden="true" />
                         <span>Bắt đầu làm bài thi</span>
-                    </Link>
+                    </LinkButton>
                     <Button type="button" size="md" variant="third" className="gap-2 bg-white text-main">
                         <LuGraduationCap className="size-4" aria-hidden="true" />
                         <span>Luyện có hướng dẫn</span>

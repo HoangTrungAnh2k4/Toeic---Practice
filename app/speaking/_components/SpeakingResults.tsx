@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { LuSearchX } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { getSpeakingTests, getTabCounts } from '../_lib/data';
 import {
     buildSpeakingHref,
@@ -41,13 +39,15 @@ export default async function SpeakingResults({ searchParams }: SpeakingResultsP
                             <p className="font-semibold text-main text-sm">Không tìm thấy bộ đề phù hợp</p>
                             <p className="text-subText text-xs">Thử đổi từ khóa hoặc bỏ bớt điều kiện lọc.</p>
                         </div>
-                        <Link
+                        <LinkButton
                             href={buildSpeakingHref(DEFAULT_SPEAKING_QUERY)}
                             scroll={false}
-                            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'text-xs')}
+                            variant="primary"
+                            size="sm"
+                            className="text-xs"
                         >
                             Xóa bộ lọc
-                        </Link>
+                        </LinkButton>
                     </div>
                 ) : (
                     <div className="gap-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">

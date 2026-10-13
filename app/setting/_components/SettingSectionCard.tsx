@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { LuArrowRight } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import LinkButton from '@/components/ui/link-button';
 import { SettingSection } from '../types';
 
 interface SettingSectionCardProps {
@@ -28,14 +26,16 @@ export default function SettingSectionCard({ section }: SettingSectionCardProps)
                 <p className="text-subText text-sm leading-relaxed">{description}</p>
             </div>
 
-            <Link
+            <LinkButton
                 href={href}
                 aria-describedby={titleId}
-                className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 self-end bg-white mt-auto')}
+                variant="third"
+                size="md"
+                className="gap-2 self-end bg-white mt-auto"
             >
                 <span>{actionLabel}</span>
                 <LuArrowRight className="size-4" aria-hidden="true" />
-            </Link>
+            </LinkButton>
         </article>
     );
 }

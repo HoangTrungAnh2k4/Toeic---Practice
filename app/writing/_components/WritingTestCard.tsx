@@ -12,8 +12,8 @@ import {
     LuStar,
     LuStepForward,
 } from 'react-icons/lu';
-import Link from 'next/link';
-import Button, { buttonVariants } from '@/components/ui/button';
+import Button from '@/components/ui/button';
+import LinkButton from '@/components/ui/link-button';
 import { cn } from '@/lib/utils';
 import { WRITING_TEST_PATH } from '../utils';
 import {
@@ -113,17 +113,15 @@ function FreshCard({ test }: { test: FreshWritingTest }) {
                         <span>{test.summary}</span>
                         <span className="font-semibold text-main">{test.statusLabel}</span>
                     </div>
-                    <Link
+                    <LinkButton
                         href={WRITING_TEST_PATH}
-                        className={cn(
-                            buttonVariants({ variant: test.isRecommended ? 'primary' : 'third', size: 'sm' }),
-                            'gap-2 w-full',
-                            !test.isRecommended && 'bg-white',
-                        )}
+                        variant={test.isRecommended ? 'primary' : 'third'}
+                        size="sm"
+                        className={cn('gap-2 w-full', !test.isRecommended && 'bg-white')}
                     >
                         <LuPlay className="size-4" aria-hidden="true" />
                         <span>Bắt đầu thi</span>
-                    </Link>
+                    </LinkButton>
                 </>
             }
         >
@@ -161,13 +159,15 @@ function AttemptedCard({ test }: { test: AttemptedWritingTest }) {
                             <LuEye className="size-4" aria-hidden="true" />
                             <span>Xem & sửa lỗi</span>
                         </Button>
-                        <Link
+                        <LinkButton
                             href={WRITING_TEST_PATH}
-                            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5 px-2 text-xs')}
+                            variant="primary"
+                            size="sm"
+                            className="gap-1.5 px-2 text-xs"
                         >
                             <LuRotateCcw className="size-4" aria-hidden="true" />
                             <span>Làm lại (lần {test.attemptCount + 1})</span>
-                        </Link>
+                        </LinkButton>
                     </div>
                 </>
             }
@@ -206,13 +206,10 @@ function InProgressCard({ test }: { test: InProgressWritingTest }) {
             footer={
                 <>
                     <p className="text-subText text-xs">Phiên thi tự động hết hạn sau 48h nếu không tiếp tục.</p>
-                    <Link
-                        href={WRITING_TEST_PATH}
-                        className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 w-full')}
-                    >
+                    <LinkButton href={WRITING_TEST_PATH} variant="primary" size="sm" className="gap-2 w-full">
                         <LuStepForward className="size-4" aria-hidden="true" />
                         <span>Tiếp tục làm bài</span>
-                    </Link>
+                    </LinkButton>
                 </>
             }
         >

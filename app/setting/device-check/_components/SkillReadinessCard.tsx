@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import { LuArrowRight } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
+import LinkButton from '@/components/ui/link-button';
 import { cn } from '@/lib/utils';
 import { CheckStatuses, SkillReadiness, StepId } from '../types';
 import { DEVICE_CHECK_STEPS } from '../utils';
@@ -65,17 +64,15 @@ export default function SkillReadinessCard({ skill, statuses, onSelectStep }: Sk
                 })}
             </ul>
 
-            <Link
+            <LinkButton
                 href={href}
-                className={cn(
-                    buttonVariants({ variant: isReady ? 'primary' : 'third', size: 'md' }),
-                    'gap-2 mt-auto',
-                    !isReady && 'bg-white',
-                )}
+                variant={isReady ? 'primary' : 'third'}
+                size="md"
+                className={cn('gap-2 mt-auto', !isReady && 'bg-white')}
             >
                 {actionLabel}
                 <LuArrowRight className="size-4" aria-hidden="true" />
-            </Link>
+            </LinkButton>
         </article>
     );
 }

@@ -2,7 +2,7 @@ import { AiInsight, DayTask, ExamGoal, MonthlyProgress, SkillProgress, StudyWeek
 
 export const EXAM_GOAL: ExamGoal = {
     daysLeft: 24,
-    examDate: '18/06/2025',
+    examDate: '06/11/2026',
     minutesPerDay: 45,
     daysPerWeek: 5,
     streakDays: 12,
