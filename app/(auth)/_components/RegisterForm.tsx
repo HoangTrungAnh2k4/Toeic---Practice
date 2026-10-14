@@ -2,33 +2,26 @@
 
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LuCircleAlert, LuLoaderCircle, LuLockKeyhole, LuMail, LuUserRound } from 'react-icons/lu';
+import { LuLockKeyhole, LuMail, LuUserRound } from 'react-icons/lu';
 import Button from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup, FieldSeparator } from '@/components/ui/field';
-import { continueWithGoogle, signUpWithEmail } from '../_lib/auth';
 import { registerSchema } from '../_lib/schemas';
-import { useAuthAction } from '../_lib/useAuthAction';
 import AuthCheckboxField from './AuthCheckboxField';
 import AuthTextField from './AuthTextField';
 import GoogleAuthButton from './GoogleAuthButton';
 
 export default function RegisterForm() {
-    const { run, error, isPending, pendingMethod } = useAuthAction();
     const form = useForm({
         resolver: zodResolver(registerSchema),
         defaultValues: { fullName: '', email: '', password: '', confirmPassword: '', acceptTerms: false },
     });
 
-    const onSubmit = form.handleSubmit((values) => run('email', () => signUpWithEmail(values)));
+    const onSubmit = form.handleSubmit(() => {});
 
     return (
         <div className="flex flex-col gap-6">
             <GoogleAuthButton
                 label="Đăng ký bằng Google"
-                pending={pendingMethod === 'google'}
-                disabled={isPending}
-                onClick={() => run('google', continueWithGoogle)}
             />
 
             <FieldSeparator>hoặc đăng ký bằng email</FieldSeparator>
@@ -46,7 +39,6 @@ export default function RegisterForm() {
                                 autoComplete="name"
                                 placeholder="Nguyễn Văn An"
                                 error={fieldState.error?.message}
-                                disabled={isPending}
                             />
                         )}
                     />
@@ -62,7 +54,6 @@ export default function RegisterForm() {
                                 autoComplete="email"
                                 placeholder="ban@email.com"
                                 error={fieldState.error?.message}
-                                disabled={isPending}
                             />
                         )}
                     />
@@ -81,7 +72,6 @@ export default function RegisterForm() {
                                 placeholder="Tạo mật khẩu"
                                 description="Tối thiểu 8 ký tự, gồm cả chữ và số."
                                 error={fieldState.error?.message}
-                                disabled={isPending}
                             />
                         )}
                     />
@@ -97,7 +87,6 @@ export default function RegisterForm() {
                                 autoComplete="new-password"
                                 placeholder="Nhập lại mật khẩu"
                                 error={fieldState.error?.message}
-                                disabled={isPending}
                             />
                         )}
                     />
@@ -117,23 +106,12 @@ export default function RegisterForm() {
                                     </span>
                                 }
                                 error={fieldState.error?.message}
-                                disabled={isPending}
                             />
                         )}
                     />
 
-                    {error && (
-                        <Alert variant="destructive" className="bg-destructive/5 border-destructive/30">
-                            <LuCircleAlert aria-hidden="true" />
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
-
-                    <Button type="submit" variant="primary" disabled={isPending} className="gap-2 w-full h-13">
-                        {pendingMethod === 'email' && (
-                            <LuLoaderCircle aria-hidden="true" className="size-4 motion-safe:animate-spin" />
-                        )}
-                        {pendingMethod === 'email' ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+                    <Button type="submit" variant="primary" className="gap-2 w-full h-13">
+                        Tạo tài khoản
                     </Button>
                 </FieldGroup>
             </form>

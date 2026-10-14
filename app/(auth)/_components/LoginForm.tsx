@@ -2,33 +2,26 @@
 
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LuCircleAlert, LuLoaderCircle, LuLockKeyhole, LuMail } from 'react-icons/lu';
+import { LuLockKeyhole, LuMail } from 'react-icons/lu';
 import Button from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup, FieldSeparator } from '@/components/ui/field';
-import { continueWithGoogle, signInWithEmail } from '../_lib/auth';
 import { loginSchema } from '../_lib/schemas';
-import { useAuthAction } from '../_lib/useAuthAction';
 import AuthCheckboxField from './AuthCheckboxField';
 import AuthTextField from './AuthTextField';
 import GoogleAuthButton from './GoogleAuthButton';
 
 export default function LoginForm() {
-    const { run, error, isPending, pendingMethod } = useAuthAction();
     const form = useForm({
         resolver: zodResolver(loginSchema),
         defaultValues: { email: '', password: '', remember: true },
     });
 
-    const onSubmit = form.handleSubmit((values) => run('email', () => signInWithEmail(values)));
+    const onSubmit = form.handleSubmit(() => {});
 
     return (
         <div className="flex flex-col gap-6">
             <GoogleAuthButton
                 label="Tiếp tục với Google"
-                pending={pendingMethod === 'google'}
-                disabled={isPending}
-                onClick={() => run('google', continueWithGoogle)}
             />
 
             <FieldSeparator>hoặc đăng nhập bằng email</FieldSeparator>
@@ -47,7 +40,6 @@ export default function LoginForm() {
                                 autoComplete="email"
                                 placeholder="ban@email.com"
                                 error={fieldState.error?.message}
-                                disabled={isPending}
                             />
                         )}
                     />
@@ -63,7 +55,6 @@ export default function LoginForm() {
                                 autoComplete="current-password"
                                 placeholder="Nhập mật khẩu"
                                 error={fieldState.error?.message}
-                                disabled={isPending}
                             />
                         )}
                     />
@@ -77,23 +68,12 @@ export default function LoginForm() {
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
                                 label="Ghi nhớ đăng nhập"
-                                disabled={isPending}
                             />
                         )}
                     />
 
-                    {error && (
-                        <Alert variant="destructive" className="bg-destructive/5 border-destructive/30">
-                            <LuCircleAlert aria-hidden="true" />
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
-
-                    <Button type="submit" variant="primary" disabled={isPending} className="gap-2 mt-2" size={'lg'}>
-                        {pendingMethod === 'email' && (
-                            <LuLoaderCircle aria-hidden="true" className="size-4 motion-safe:animate-spin" />
-                        )}
-                        {pendingMethod === 'email' ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                    <Button type="submit" variant="primary" className="gap-2 mt-2" size={'lg'}>
+                        Đăng nhập
                     </Button>
                 </FieldGroup>
             </form>
