@@ -4,15 +4,11 @@ import { getMistakeSummary } from '@/app/mistakes/_lib/data';
 import { CURRENT_WEEK, EXAM_GOAL, MONTHLY_PROGRESS, SKILL_PROGRESS } from '@/app/schedule/utils';
 import PartScoreCard from './_components/PartScoreCard';
 import ProfileGoalCard from './_components/ProfileGoalCard';
-import ProfileHeader from './_components/ProfileHeader';
 import ProfileIdentityCard from './_components/ProfileIdentityCard';
 import ProfileMistakesCard from './_components/ProfileMistakesCard';
-import ProfileStatGrid from './_components/ProfileStatGrid';
 import StudyHabitCard from './_components/StudyHabitCard';
-import { ProfileField, ProfileStat } from './types';
+import { ProfileField } from './types';
 import {
-    ACCOUNT_FIELDS,
-    BEST_STREAK_DAYS,
     COMPLETED_EXERCISES,
     CURRENT_USER,
     formatDuration,
@@ -35,41 +31,6 @@ export default async function ProfilePage() {
     const { speaking, writing } = COMPLETED_EXERCISES;
     const { resolved, active, improving } = mistakeSummary.byStatus;
 
-    const stats: ProfileStat[] = [
-        {
-            id: 'streak',
-            label: 'Chuỗi ngày học',
-            value: String(EXAM_GOAL.streakDays),
-            unit: 'ngày',
-            hint: `Kỷ lục của bạn: ${BEST_STREAK_DAYS} ngày`,
-            Icon: LuFlame,
-        },
-        {
-            id: 'time',
-            label: 'Thời gian luyện tháng này',
-            value: studyTime.value,
-            unit: studyTime.unit,
-            hint: `Trung bình ${Math.round(MONTHLY_STUDY_MINUTES / Math.max(1, sessionCount))} phút mỗi buổi`,
-            Icon: LuClock,
-        },
-        {
-            id: 'exercises',
-            label: 'Bài đã hoàn thành',
-            value: String(speaking + writing),
-            unit: 'bài',
-            hint: `Speaking ${speaking} · Writing ${writing}`,
-            Icon: LuListChecks,
-        },
-        {
-            id: 'mistakes',
-            label: 'Lỗi đã khắc phục',
-            value: String(resolved),
-            unit: `/ ${mistakeSummary.total} lỗi`,
-            hint: `${active + improving} lỗi đang được theo dõi`,
-            Icon: LuBookOpenCheck,
-        },
-    ];
-
     const habitFields: ProfileField[] = [
         {
             id: 'schedule',
@@ -83,8 +44,6 @@ export default async function ProfilePage() {
 
     return (
         <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
-            <ProfileHeader />
-
             <ProfileIdentityCard
                 user={CURRENT_USER}
                 weekIndex={CURRENT_WEEK.index}
@@ -92,8 +51,6 @@ export default async function ProfilePage() {
                 daysLeft={getDaysUntil(EXAM_GOAL.examDate)}
                 sessions={MONTHLY_PROGRESS}
             />
-
-            <ProfileStatGrid stats={stats} />
 
             <div className="items-stretch gap-6 grid grid-cols-1 xl:grid-cols-3">
                 <ProfileGoalCard skills={SKILL_PROGRESS} history={SCORE_HISTORY} className="xl:col-span-2" />

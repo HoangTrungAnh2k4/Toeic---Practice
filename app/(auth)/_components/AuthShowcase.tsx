@@ -2,6 +2,7 @@ import type { IconType } from 'react-icons';
 import { LuBookCheck, LuGraduationCap, LuMic, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type Highlight = {
     icon: IconType;
@@ -44,7 +45,10 @@ export default function AuthShowcase() {
             className="flex flex-col flex-1 gap-5 lg:gap-7 pt-6 min-w-0 motion-safe:animate-fade"
         >
             <header className="flex items-center gap-2.5 mx-auto w-full max-w-6xl">
-                <span className="place-items-center grid bg-main shadow-[3px_3px_0_0_#000] border-2 border-black rounded-lg size-12 text-white">
+                <Link
+                    href="/overview"
+                    className="place-items-center grid bg-main shadow-[3px_3px_0_0_#000] border-2 border-black rounded-lg size-12 text-white"
+                >
                     {/* <LuGraduationCap aria-hidden="true" className="size-5" /> */}
                     <Image
                         src="/img/sub_logo.png"
@@ -54,7 +58,7 @@ export default function AuthShowcase() {
                         className="size-10"
                         aria-hidden="true"
                     />
-                </span>
+                </Link>
                 <span className="font-bold text-main text-2xl tracking-tight">TOECO</span>
             </header>
             <p className="font-bold text-main text-3xl sm:text-5xl xl:text-6xl text-balance leading-tight tracking-tight">

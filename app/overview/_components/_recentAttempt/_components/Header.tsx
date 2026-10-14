@@ -44,13 +44,13 @@ export default function Header({
                         <TabsTrigger
                             key={key}
                             value={key}
-                            className="gap-2 data-[state=active]:bg-main hover:bg-white/20 data-[state=active]:shadow-sm px-1.5 text-white data-[state=active]:text-white hover:text-white duration-200 cursor-pointer"
+                            className="gap-2 hover:bg-white/20 data-active:bg-sub3 dark:data-active:bg-sub3 data-active:shadow-sm px-1.5 text-white hover:text-white data-active:text-main dark:data-active:text-main duration-200 cursor-pointer"
                         >
                             {label}
                             <span
                                 className={cn(
                                     'px-1.5 rounded-full font-semibold text-[0.6875rem] leading-4',
-                                    filter === key ? 'bg-sub3 text-main' : 'bg-white text-[#333]',
+                                    filter === key ? 'bg-main text-sub1' : 'bg-white text-[#333]',
                                 )}
                             >
                                 {counts[key]}
