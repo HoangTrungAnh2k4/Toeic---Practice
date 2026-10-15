@@ -18,9 +18,11 @@ Mandatory rules for every AI agent working in this frontend project.
 
 ### Opening confirmation (MANDATORY)
 
-- **Every response** must start with exactly this line: `! Used rules.`
-- It comes first, before any other content, verbatim, never skipped (even for very short answers or tool-only turns).
-- This is the only exception to the "no lead-in" rule below. After this line, go straight to the content.
+- **Every response** must start with a one-line greeting, then the list of rules applied to this prompt. Never skipped (even for very short answers or tool-only turns).
+- Greeting: `Xin chào! Các rule áp dụng cho yêu cầu này:`
+- List format: one bullet per rule, `- §<section> <rule name>`. Rule name max 5 words, no explanation.
+- List only rules actually used for the current prompt. Max 8 bullets. Do not invent rule names; use the headings in this file.
+- After the list, go straight to the content. This is the only exception to the "no lead-in" rule below.
 
 ### Keep it short (save quota)
 
