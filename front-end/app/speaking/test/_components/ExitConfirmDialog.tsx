@@ -1,6 +1,6 @@
 'use client';
 
-import { LucideAlertTriangle } from 'lucide-react';
+import { LuTriangleAlert } from 'react-icons/lu';
 
 interface ExitConfirmDialogProps {
     isOpen: boolean;
@@ -20,7 +20,7 @@ export default function ExitConfirmDialog({ isOpen, onClose, onConfirm }: ExitCo
         >
             <div className="flex flex-col gap-4 bg-card shadow-xl p-6 border border-border rounded-xl w-full max-w-md animate-in duration-200 fade-in zoom-in-95">
                 <div className="flex justify-center items-center bg-destructive/10 rounded-full size-12 text-destructive">
-                    <LucideAlertTriangle className="size-6" aria-hidden="true" />
+                    <LuTriangleAlert className="size-6" aria-hidden="true" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">

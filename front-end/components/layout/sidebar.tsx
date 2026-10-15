@@ -147,7 +147,7 @@ function SidebarNav({ activeIndex, collapsed, onNavigate }: SidebarNavProps) {
             {/* Thanh trượt: pill sáng + 2 góc bo ngược (trên & dưới) nối liền với nội dung */}
             <div
                 aria-hidden
-                className={`pointer-events-none absolute -right-px left-1 top-0 h-16 rounded-l-full bg-[#eef0fc] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.4,0.64,1)] before:absolute before:-top-8 before:right-0 before:h-8 before:w-8 before:bg-[radial-gradient(circle_at_0_0,transparent_31.5px,#eef0fc_32px)] before:content-[''] after:absolute after:-bottom-8 after:right-0 after:h-8 after:w-8 after:bg-[radial-gradient(circle_at_0_100%,transparent_31.5px,#eef0fc_32px)] after:content-[''] ${
+                className={`pointer-events-none absolute -right-px left-1 top-0 h-16 rounded-l-full bg-canvas transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.4,0.64,1)] before:absolute before:-top-8 before:right-0 before:h-8 before:w-8 before:bg-[radial-gradient(circle_at_0_0,transparent_31.5px,var(--canvas)_32px)] before:content-[''] after:absolute after:-bottom-8 after:right-0 after:h-8 after:w-8 after:bg-[radial-gradient(circle_at_0_100%,transparent_31.5px,var(--canvas)_32px)] after:content-[''] ${
                     activeIndex < 0 ? 'opacity-0' : 'opacity-100'
                 }`}
                 style={{ transform: `translateY(${Math.max(activeIndex, 0) * ITEM_H}px)` }}

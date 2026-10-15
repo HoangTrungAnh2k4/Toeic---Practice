@@ -1,135 +1,96 @@
 # Project Rules (Supabase Backend)
 
-Mandatory rules for every AI agent working in this project.
+Project conventions for AI agents. Works alongside the `ponytail` skill (minimal-solution mindset).
 
----
+## 0. Precedence
 
-## 1. Response rules
+1. The user's explicit instruction in the current prompt.
+2. The **non-negotiables** below. No skill may relax them:
+   RLS on exposed tables, key/secret handling, validation at trust boundaries, error handling that prevents data loss, destructive-command permission (section 4).
+3. Active skills (e.g. ponytail) decide **how much to build**, the workflow, and the output shape.
+4. Everything else in this file is a default for how the code you write should look. It never requires writing extra code, layers, files, or docs that the task does not need.
 
-### Opening (MANDATORY)
+## 1. Communication and output
 
-- **Every response** must start with a one-line greeting, then the list of rules applied to this prompt. Never skipped (even for very short answers or tool-only turns).
-- Greeting: `Xin chào!`
-- List only rules actually used for the current prompt. Max 8 bullets. Do not invent rule names; use the headings in this file.
-- After the list, go straight to the content. This is the only exception to the "no lead-in" rule below.
+- Reply in Vietnamese. Keep code, identifiers, comments, and commit messages in English.
+- No greetings, thanks, apologies, or restating the question.
+- Output shape: code/diff first, then at most 3 short lines covering, as relevant: root cause (for bugs), what was skipped and when to add it, what was run, what could not be verified.
+- Explanations only when asked. Then be direct, with no filler and no illustrative examples.
+- No demo or "for reference" snippets. Output only the actual change.
+- Bug fix: find the root cause. Grep every caller of the function you are about to change. Fix once where all callers route through, not per caller.
 
-### Keep it short (save quota)
-
-- **When editing code or fixing bugs:** state the cause and the fix as briefly as possible. **NEVER** write illustrative code.
-- **When explaining:** get to the point, be concise. **NO** illustrative examples.
-
-### Language
-
-- Always reply in Vietnamese, even if the user writes in English.
-- Use English only for technical terms and code (when code output is actually needed).
-
-### Token economy
-
-- **No filler:** no thanks, apologies or lead-ins (except the mandatory opening above).
-- **Don't repeat context:** don't echo the user's question or broken code. Name the file/function/line and the fix.
-
----
-
-## 2. Codebase access
-
-- Read only files named directly or closely tied to the change (the migration, the function, its `_shared` imports, related types).
-- Never scan the whole repo or unrelated folders (`node_modules`, `supabase/.temp`, `supabase/.branches`, old migrations, generated types) unless the task needs them.
-- Never hand-edit generated files (e.g. `database.types.ts`). Change the schema and regenerate with `supabase gen types typescript`.
-- Before opening a new file, confirm the current task actually needs it.
-
----
-
-## 3. Supabase stack and conventions
-
-### Stack
-
-- Core: Postgres, Supabase Auth, Storage, Realtime, Edge Functions (Deno + TypeScript), Supabase CLI.
-- Use only packages already in `deno.json` / import map. Add a new dependency only with permission.
-- Core libs (fill in): client `<supabase-js>`, validation `<zod|valibot>`.
+## 2. Supabase conventions
 
 ### Database & migrations
 
-- Every schema change goes through a new migration (`supabase migration new <name>`). Never edit an applied migration.
-- Never change the remote/production schema via the Dashboard; the repo is the source of truth.
-- Naming: `snake_case` for tables, columns, functions. Consistent singular/plural across tables.
-- Primary keys `uuid` (or `bigint identity`), timestamps `timestamptz`, `created_at`/`updated_at` on every table.
-- Put integrity in the DB: `NOT NULL`, `CHECK`, `UNIQUE`, foreign keys with explicit `ON DELETE`.
-- Add indexes for foreign keys and new filter/sort columns.
-- Avoid N+1, no `select *`, select only needed columns, paginate list queries.
+- Every schema change is a new migration (`supabase migration new <name>`). Never edit an applied migration.
+- Never change the remote/production schema via the Dashboard. The repo is the source of truth.
+- Never hand-edit generated files (e.g. `database.types.ts`). Change the schema, then run `supabase gen types typescript`.
+- `snake_case` for tables, columns, functions. Keep singular/plural consistent.
+- Primary keys `uuid` (or `bigint identity`). Timestamps `timestamptz`. `created_at`/`updated_at` on new tables.
+- Enforce integrity in the DB: `NOT NULL`, `CHECK`, `UNIQUE`, foreign keys with explicit `ON DELETE`.
+- Index foreign keys and new filter/sort columns.
+- No `select *`. Select needed columns, paginate lists, avoid N+1.
 - Parameterized queries only. Never build SQL by string concatenation (including inside functions).
+- SQL style: lowercase keywords, one statement per concern, comment non-obvious policies and functions.
 
-### Row Level Security (CRITICAL)
+### Row Level Security (non-negotiable)
 
-- Enable RLS on **every** table in exposed schemas (`public`). A table without RLS is a bug.
-- Write separate policies per operation (`select`/`insert`/`update`/`delete`) and per role (`anon`/`authenticated`). Default deny.
-- Use `(select auth.uid())` instead of bare `auth.uid()` in policies (performance).
+- Enable RLS on every table in exposed schemas (`public`). A table without RLS is a bug.
+- Separate policies per operation (`select`/`insert`/`update`/`delete`) and per role (`anon`/`authenticated`). Default deny.
+- Use `(select auth.uid())`, not bare `auth.uid()`. Add `WITH CHECK` on insert/update policies.
 - Never base authorization on `user_metadata` (user-editable). Use `app_metadata`, claims, or a roles table.
-- Never use `using (true)` / `with check (true)` on non-public data.
-- Views must use `security_invoker = true`.
-- Add `WITH CHECK` on insert/update policies.
+- No `using (true)` / `with check (true)` on non-public data.
+- Views use `security_invoker = true`.
 - Index columns used in policies.
 
 ### Database functions
 
-- Default `SECURITY INVOKER`. Use `SECURITY DEFINER` only when required, with `set search_path = ''`, fully qualified names, and `revoke execute ... from public, anon` as needed.
-- Do not put `SECURITY DEFINER` functions in exposed schemas.
-- Multi-step business logic that must be atomic goes into a Postgres function (RPC) or a single transaction. Never rely on client-side multi-call sequences.
+- Default `SECURITY INVOKER`. Use `SECURITY DEFINER` only when required: `set search_path = ''`, fully qualified names, `revoke execute ... from public, anon` as needed, and never in an exposed schema.
+- Atomic multi-step logic goes in a Postgres function (RPC) or one transaction, never in client-side call sequences.
 
-### Auth & keys
+### Auth & keys (non-negotiable)
 
 - Use Supabase Auth. No custom password/token handling or hashing.
-- `service_role` key only inside Edge Functions/server env. Never in client code, logs, or commits. It bypasses RLS: use only with a stated reason.
-- `anon` key is public; assume anyone has it.
-- Validate JWT/claims server-side; never trust user ids from request bodies, take them from the verified token.
+- `service_role` only inside Edge Functions/server env, with a stated reason. Never in client code, logs, or commits.
+- Assume the `anon` key is public.
+- Validate JWT/claims server-side. Take user ids from the verified token, never from the request body.
+- Authn/authz lives in a shared helper/middleware, not scattered across handlers.
+- Never log passwords, tokens, keys, or PII.
 
 ### Edge Functions
 
-- One function per purpose: `supabase/functions/<name>/index.ts`. Shared code in `supabase/functions/_shared/`.
-- Keep `verify_jwt = true` by default. Disable only for webhooks, and then verify the signature.
-- Layering: handler (parse/validate/respond) → service (business logic) → data access. No business logic in the handler.
-- Validate all input at the boundary with the project schema lib. Keep request/response DTOs separate from DB row types.
+- One function per purpose: `supabase/functions/<name>/index.ts`. Shared code in `_shared/`.
+- Keep `verify_jwt = true`. Disable only for webhooks, and then verify the signature.
+- Validate all input at the boundary with the project's schema lib (check `deno.json`).
 - Handle CORS and `OPTIONS` explicitly.
-- Set timeouts on all external calls. Respect execution time/memory limits.
-- Secrets via `supabase secrets` / env, loaded once into a typed config. No secrets in code.
-- Always `await` promises; no floating promises.
+- Timeouts on every external call. Respect execution time/memory limits.
+- Secrets via `supabase secrets`/env, loaded once into a typed config. None in code.
+- Always `await` promises. No floating promises.
 
 ### Errors & API
 
-- Never swallow errors. Check `{ data, error }` from every Supabase call.
-- Define domain errors in the service layer; map them to HTTP status only in the handler.
-- One consistent JSON response/error envelope. Use correct HTTP status codes.
+- Never swallow errors. Check `{ data, error }` on every Supabase call.
+- Domain errors live with the logic. Map them to HTTP status only in the handler.
+- One consistent JSON response/error envelope with correct status codes.
 - Never leak internal errors, SQL errors, or stack traces to clients.
-- Version Edge Function routes (`/v1/...`) when they are public APIs.
+- Version routes (`/v1/...`) only for public APIs.
 - Log OR rethrow, never both.
 
-### Storage & Realtime
+## 3. Verification & testing
 
-- Buckets are private by default. Public only with justification.
-- Access control via policies on `storage.objects`. Validate file type and size before upload.
-- Enable Realtime only on tables that need it; remember RLS applies to it.
+- Run only what is relevant to the change:
+    - Functions: `deno check`, `deno lint`, `deno test` on the affected function.
+    - Database: `supabase db lint`, and `supabase db reset` on the **local** stack to confirm migrations apply cleanly.
+    - Schema changed: re-run `supabase gen types typescript`.
+- Non-trivial logic (a branch, loop, parser, money, permissions, validation, RLS policy/function) leaves **one** minimal test behind: pgTAP (`supabase test db`) for policies/functions, `Deno.test` for logic. No frameworks, fixtures, or per-function suites unless asked. No tests for trivial code or plain CRUD wiring.
+- Temporary check scripts go in `/tmp`, are deleted after use, and are never committed.
 
-### Logging & security
+## 4. Ask before
 
-- Structured logging only (JSON, with request ID and consistent levels). No `console.log` of raw objects in production paths.
-- Never log passwords, tokens, keys, or PII.
-- Authn/authz in a shared middleware/helper, not scattered in handlers.
+Ask only for the items below. For anything else, choose a sensible default and note it in the closing lines instead of stopping to ask.
 
-### Code style
-
-- TypeScript `strict`. No `any` (use `unknown` + narrowing). No non-null `!` without a comment.
-- Code must pass `deno fmt` and `deno lint`.
-- Early return, short functions, descriptive names. Doc comments on exported identifiers.
-- SQL: lowercase keywords, one statement per concern, comment non-obvious policies and functions.
-
----
-
-## 4. Verification & testing
-
-- After changing code, run only what is relevant:
-    - Functions: `deno check`, `deno lint`, `deno test` on the affected function only.
-    - Database: `supabase db lint`, and `supabase db reset` on the **local** stack to verify migrations apply cleanly.
-    - Types: re-run `supabase gen types typescript` if the schema changed.
-- Never run destructive commands (`db reset`, `db push`, truncate, delete) against a linked/production project without explicit permission.
-- Only write tests for core business logic (e.g. pricing, permissions, RLS policies, data validation): pgTAP (`supabase test db`) for policies/functions, `deno test` for logic. Do not create test files for anything else unless I ask.
-- Temporary check scripts go in `/tmp` and are deleted after use. Never commit them.
-- Report what was run, the result, and what could not be verified.
+- Destructive commands (`db reset`, `db push`, truncate, delete) against a linked/production project.
+- Adding a dependency.
+- Using `service_role`, disabling `verify_jwt`, or making a bucket public.
+- Editing an already-applied migration.

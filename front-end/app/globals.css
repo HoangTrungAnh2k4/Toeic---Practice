@@ -11,6 +11,7 @@
   --color-sub3: var(--sub3);
   --color-subText: var(--subText);
   --color-success: var(--success);
+  --color-canvas: var(--canvas);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-roboto);
@@ -86,6 +87,7 @@
   --sub3:#F5B841;
   --subText:#5c596a;
   --success:#5FD99A;
+  --canvas:#eef0fc;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

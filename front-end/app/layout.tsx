@@ -40,7 +40,7 @@ export default function RootLayout({
                         <Sidebar />
                     </HideOnAuth>
                 </Suspense>
-                <div className="flex flex-col flex-1 bg-[#eef0fc] min-w-0">
+                <div className="flex flex-col flex-1 bg-canvas min-w-0">
                     {/* Không bọc children trong Suspense: fallback → nội dung thật sẽ remount trang và chạy lại animation */}
                     <div className="flex-1 has-data-[slot=auth-shell]:p-0 px-4 sm:px-8 pt-4 pb-10">{children}</div>
                     <Suspense>
