@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { IconType } from 'react-icons';
-import { LuCalendar, LuClipboardList, LuMic, LuPenLine, LuRotateCcw } from 'react-icons/lu';
+import { LuMic, LuPenLine, LuRotateCcw } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import { buildHistoryHref, DEFAULT_HISTORY_QUERY } from '../_lib/searchParams';
 import { HistoryQuery, SkillType } from '../types';
@@ -22,7 +22,6 @@ const FOCUS_RING_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-
 const SKILL_ICONS: Partial<Record<SkillType, IconType>> = {
     speaking: LuMic,
     writing: LuPenLine,
-    full_mock: LuClipboardList,
 };
 
 const SELECT_FILTERS = [
@@ -123,7 +122,6 @@ export default function HistoryFilters({ query, skillCounts, displayedCount }: H
                                 isActive ? 'bg-main font-semibold text-white' : 'bg-sub1 text-main hover:bg-sub2 hover:text-white',
                             )}
                         >
-                            {value === 'custom' && <LuCalendar className="size-3.5" aria-hidden="true" />}
                             {label}
                         </Link>
                     );

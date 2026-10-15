@@ -1,17 +1,9 @@
 import type { IconType } from 'react-icons';
-import type { Criterion, MistakeRemedy, Severity, Skill } from '@/lib/domain/types';
+import type { Criterion, MistakeRemedy, MistakeStatus, Severity, Skill } from '@/lib/domain/types';
 
-export type { Criterion, MistakeRemedy, Severity };
+export type { Criterion, MistakeRemedy, MistakeStatus, Severity };
 
 export type MistakeSkill = Skill;
-
-/**
- * Trạng thái được TÍNH TỰ ĐỘNG từ các bài gần nhất, người học không tự đánh dấu:
- * - active: lặp lại ở bài gần nhất trong phạm vi.
- * - improving: đã có ít nhất 1 bài độc lập liên tiếp không lặp lại.
- * - resolved: đủ RESOLVE_STREAK bài độc lập liên tiếp không lặp lại.
- */
-export type MistakeStatus = 'active' | 'improving' | 'resolved';
 
 export interface Option<T extends string | number> {
     value: T;

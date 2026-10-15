@@ -32,9 +32,9 @@ export default function SubmitSectionDialog({ open, onOpenChange, answers, isTim
                     <AlertDialogMedia className="bg-sub3 text-main">
                         <LuCircleCheckBig aria-hidden="true" />
                     </AlertDialogMedia>
-                    <AlertDialogTitle className="font-bold text-main text-lg">Xác nhận nộp nhóm 1</AlertDialogTitle>
+                    <AlertDialogTitle className="font-bold text-main text-lg">Xác nhận nộp bài Câu 1–5</AlertDialogTitle>
                     <AlertDialogDescription className="text-subText">
-                        Chuyển sang phần viết phản hồi Email (Câu 6–7).
+                        Phòng thi hiện mới có nhóm Câu 1–5; phần Email (Câu 6–7) và Essay (Câu 8) sẽ được bổ sung sau.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -59,12 +59,6 @@ export default function SubmitSectionDialog({ open, onOpenChange, answers, isTim
                         <li>
                             Bạn <strong className="text-main">không thể quay lại</strong> chỉnh sửa Câu 1–5 sau khi nộp.
                         </li>
-                        {!isTimeUp && (
-                            <li>
-                                Thời gian còn lại của nhóm 1 <strong className="text-main">không được cộng dồn</strong> sang
-                                phần Email.
-                            </li>
-                        )}
                     </ul>
                 </div>
 
@@ -75,7 +69,7 @@ export default function SubmitSectionDialog({ open, onOpenChange, answers, isTim
                         </AlertDialogCancel>
                     )}
                     <AlertDialogAction variant="primary" size="md" onClick={onConfirm}>
-                        Đồng ý nộp nhóm 1
+                        Đồng ý nộp bài
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

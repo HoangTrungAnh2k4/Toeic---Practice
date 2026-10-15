@@ -1,10 +1,14 @@
 import { LuCheck, LuCloudAlert, LuLoaderCircle, LuLock, LuLogOut, LuPenLine, LuSave, LuTimer } from 'react-icons/lu';
+import type { AttemptMode } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
 import { SaveStatus } from '../types';
-import { EXAM_SECTIONS, EXAM_TITLE, formatTime, TIME_WARNING_SECONDS } from '../utils';
+import { EXAM_SECTIONS, formatTime, TIME_WARNING_SECONDS } from '../utils';
 
 interface WritingExamHeaderProps {
-    secondsLeft: number;
+    title: string;
+    mode: AttemptMode;
+    /** `null` = không giới hạn giờ (chế độ có hướng dẫn). */
+    secondsLeft: number | null;
     saveStatus: SaveStatus;
     savedAt: number | null;
     isRestored: boolean;
@@ -12,6 +16,12 @@ interface WritingExamHeaderProps {
 }
 
 const ACTIVE_SECTION_INDEX = 0;
+
+const MODE_LABEL: Record<AttemptMode, string> = {
+    cbt: 'Thi thử chuẩn CBT',
+    timed: 'Luyện có thời gian',
+    guided: 'Học có hướng dẫn',
+};
 
 function SaveIndicator({ saveStatus, savedAt, isRestored }: Pick<WritingExamHeaderProps, 'saveStatus' | 'savedAt' | 'isRestored'>) {
     if (saveStatus === 'saving') {
@@ -47,9 +57,19 @@ function SaveIndicator({ saveStatus, savedAt, isRestored }: Pick<WritingExamHead
     );
 }
 
-export default function WritingExamHeader({ secondsLeft, saveStatus, savedAt, isRestored, onExit }: WritingExamHeaderProps) {
+export default function WritingExamHeader({
+    title,
+    mode,
+    secondsLeft,
+    saveStatus,
+    savedAt,
+    isRestored,
+    onExit,
+}: WritingExamHeaderProps) {
+    const isUntimed = secondsLeft === null;
     const isTimeUp = secondsLeft === 0;
-    const isWarning = !isTimeUp && secondsLeft <= TIME_WARNING_SECONDS;
+    const isWarning = !isUntimed && !isTimeUp && secondsLeft <= TIME_WARNING_SECONDS;
+    const timeLabel = isUntimed ? 'Không giới hạn' : formatTime(secondsLeft);
 
     return (
         <header className="shadow-sm border border-sub2/30 rounded-xl w-full overflow-hidden">
@@ -62,7 +82,7 @@ export default function WritingExamHeader({ secondsLeft, saveStatus, savedAt, is
                         </span>
                         <div className="leading-tight">
                             <p className="font-medium text-[11px] text-sub2 uppercase tracking-widest">Bài thi Writing</p>
-                            <h1 className="font-semibold text-sub1 text-base sm:text-lg tracking-tight">{EXAM_TITLE}</h1>
+                            <h1 className="font-semibold text-sub1 text-base sm:text-lg tracking-tight">{title}</h1>
                         </div>
                     </div>
 
@@ -71,7 +91,7 @@ export default function WritingExamHeader({ secondsLeft, saveStatus, savedAt, is
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="inline-flex items-center gap-1.5 bg-sub3/15 px-3 py-1 border border-sub3/40 rounded-full font-semibold text-sub3 text-xs uppercase tracking-wider">
                             <LuTimer className="size-3.5" aria-hidden="true" />
-                            Luyện có thời gian
+                            {MODE_LABEL[mode]}
                         </span>
                         <span className="inline-flex items-center gap-1.5 bg-sub1/10 px-2.5 py-1 rounded-full font-medium text-sub1/80 text-xs">
                             <LuLock className="size-3.5 text-sub2" aria-hidden="true" />
@@ -137,7 +157,11 @@ export default function WritingExamHeader({ secondsLeft, saveStatus, savedAt, is
                                 Thời gian còn lại (Q1–5)
                             </span>
                             <span className="text-subText text-xs">
-                                {isTimeUp ? 'Đã hết giờ — bài làm bị khóa' : '8 phút dùng chung cho 5 câu'}
+                                {isUntimed
+                                    ? 'Tự do thời gian, có thể làm lại nhiều lần'
+                                    : isTimeUp
+                                      ? 'Đã hết giờ — bài làm bị khóa'
+                                      : '8 phút dùng chung cho 5 câu'}
                             </span>
                         </div>
 
@@ -159,13 +183,13 @@ export default function WritingExamHeader({ secondsLeft, saveStatus, savedAt, is
                             />
                             <span
                                 role="timer"
-                                aria-label={`Còn lại ${formatTime(secondsLeft)}`}
+                                aria-label={isUntimed ? 'Không giới hạn thời gian' : `Còn lại ${timeLabel}`}
                                 className={cn(
                                     'font-mono font-bold tabular-nums text-xl tracking-tight',
                                     isTimeUp ? 'text-main' : isWarning ? 'text-white' : 'text-sub3',
                                 )}
                             >
-                                {formatTime(secondsLeft)}
+                                {timeLabel}
                             </span>
                         </div>
                     </div>

@@ -1,21 +1,19 @@
 import { LuCirclePause, LuPlay } from 'react-icons/lu';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
+import { buildTestHref } from '@/lib/exam-library/search-params';
 import { cn } from '@/lib/utils';
-import { HistoryAttempt } from '../../types';
+import { HistoryRow } from '../../types';
 
 interface ReviewInterruptedStateProps {
-    attempt: HistoryAttempt;
+    row: HistoryRow;
 }
 
-/** Full mock bắt đầu bằng Speaking nên quay lại phòng thi Speaking. */
-const RESUME_HREF: Record<HistoryAttempt['skill'], string> = {
-    speaking: '/speaking/test',
-    writing: '/writing/test',
-    full_mock: '/speaking/test',
-};
+/** Lượt chưa nộp: đang làm dở thì tiếp tục được, bị gián đoạn thì chỉ làm lại từ đầu. */
+export default function ReviewInterruptedState({ row }: ReviewInterruptedStateProps) {
+    const { attempt, exam, answeredCount, questionCount } = row;
+    const isInProgress = attempt.status === 'in_progress';
 
-export default function ReviewInterruptedState({ attempt }: ReviewInterruptedStateProps) {
     return (
         <section
             aria-labelledby="interrupted-title"
@@ -27,22 +25,22 @@ export default function ReviewInterruptedState({ attempt }: ReviewInterruptedSta
                 </span>
                 <div className="flex flex-col gap-1">
                     <h2 id="interrupted-title" className="font-bold text-main text-lg tracking-tight">
-                        Bài làm chưa hoàn thành nên chưa được chấm
+                        {isInProgress ? 'Bài làm đang dở nên chưa được chấm' : 'Bài làm bị gián đoạn nên chưa được chấm'}
                     </h2>
                     <p className="font-medium text-subText text-sm">
-                        {attempt.topic}. {attempt.scoreInfo.interruptedReason}. Bài chưa nộp không có nhận xét và không
-                        được tính vào sổ lỗi.
+                        Đã lưu {answeredCount}/{questionCount} câu. Bài chưa nộp không có nhận xét và không được tính
+                        vào sổ lỗi.
                     </p>
                 </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
                 <Link
-                    href={RESUME_HREF[attempt.skill]}
+                    href={buildTestHref(exam.skill, exam.id, attempt.mode)}
                     className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}
                 >
                     <LuPlay className="size-4" aria-hidden="true" />
-                    Tiếp tục làm bài
+                    {isInProgress ? 'Tiếp tục làm bài' : 'Làm lại đề này'}
                 </Link>
                 <Link
                     href="/setting/history"

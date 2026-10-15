@@ -1,62 +1,29 @@
-import type { ResponseAnnotation } from '@/app/mistakes/types';
+import type { Annotation, Attempt, AttemptResponse, PartTemplate, Question, Skill } from '@/lib/domain/types';
+import type { ExamSummary } from '@/lib/exam-library/types';
 
-export type SkillType = 'all' | 'speaking' | 'writing' | 'full_mock';
-
-export type ExamModeType = 'all' | 'cbt' | 'timed' | 'guided';
-
+export type SkillType = 'all' | Skill;
+export type ExamModeType = 'all' | Attempt['mode'];
 export type CategoryFilterType = 'all' | 'fresh' | 'retake' | 'sample_viewed' | 'independent';
-
-export type StatusFilterType = 'all' | 'completed' | 'scoring' | 'interrupted';
-
-export type DateScopeType = '7d' | '30d' | 'this_month' | 'custom';
+export type StatusFilterType = 'all' | 'scored' | 'pending' | 'in_progress' | 'interrupted';
+export type DateScopeType = 'all' | '7d' | '30d' | 'this_month';
 
 export interface Option<T extends string | number> {
     value: T;
     label: string;
 }
 
-export interface KpiMetricItem {
-    id: string;
-    title: string;
-    value: string | number;
-    subValue?: string;
-    badgeText?: string;
-    badgeVariant?: 'primary' | 'secondary' | 'warning' | 'neutral';
-    icon: string;
-    footerContent?: React.ReactNode;
-}
-
-export interface AttemptScore {
-    score?: number;
-    maxScore: number;
-    level?: string;
-    feedbackSummary?: string;
-    scoringProgress?: number;
-    isScoring?: boolean;
-    estimatedTimeRemaining?: string;
-    isInterrupted?: boolean;
-    interruptedReason?: string;
-    retakeComparison?: string;
-}
-
-export interface HistoryAttempt {
-    id: string;
-    code: string;
-    title: string;
-    part: string;
-    topic: string;
-    skill: 'speaking' | 'writing' | 'full_mock';
-    mode: string;
-    modeType: 'cbt' | 'timed' | 'guided';
-    categoryBadge: string;
-    assistBadge: string;
-    hasSampleViewed?: boolean;
-    scoreInfo: AttemptScore;
-    submittedAt: string;
-    duration: string;
-    actionText: string;
-    isWarningRow?: boolean;
-    isPendingRow?: boolean;
+/** Một lượt làm bài kèm đề và các giá trị suy ra từ lịch sử của người dùng. */
+export interface HistoryRow {
+    attempt: Attempt;
+    exam: ExamSummary;
+    /** Lần làm thứ mấy của đề, đếm từ 1 theo thời gian bắt đầu. */
+    attemptNo: number;
+    /** Chênh điểm so với lượt đã chấm liền trước của cùng đề; `null` khi không có để so. */
+    scoreDelta: number | null;
+    /** Số câu thuộc phạm vi lượt làm (cả đề hoặc một Part). */
+    questionCount: number;
+    /** Số câu đã có câu trả lời. */
+    answeredCount: number;
 }
 
 /** Toàn bộ trạng thái lọc & phân trang, được đồng bộ với URL search params. */
@@ -71,33 +38,32 @@ export interface HistoryQuery {
     pageSize: number;
 }
 
-export interface HistoryAttemptPage {
-    items: HistoryAttempt[];
+export interface HistoryRowPage {
+    items: HistoryRow[];
     total: number;
     page: number;
     totalPages: number;
 }
 
-/** Nội dung một câu hỏi trong bài làm, kèm câu trả lời và nhận xét. */
-export interface ReviewQuestion {
-    number: number;
-    task: string;
-    /** Yêu cầu / Directions của đề. */
-    prompt: string;
-    /** Ngữ liệu đi kèm: mô tả tranh, email đề bài, đoạn văn cần đọc... */
-    stimulus?: string;
-    /** Từ khoá bắt buộc (Writing Q1-5). */
-    keywords?: string[];
-    score?: { value: number; max: number };
-    /** Writing: bài viết; Speaking: transcript do AI nhận dạng. */
-    response: string;
-    /** Thời lượng trả lời tối đa (giây) — chỉ Speaking. */
-    responseTime?: number;
-    annotations: ResponseAnnotation[];
-    strengths: string[];
+export interface HistoryKpis {
+    total: number;
+    thisWeek: number;
+    bySkill: Record<Skill, number>;
+    /** Điểm trung bình các lượt đã chấm theo kỹ năng; `null` khi chưa có lượt nào. */
+    avgScore: Record<Skill, number | null>;
+    /** Lượt đã nộp không xem bài mẫu / tổng lượt đã nộp. */
+    independent: { count: number; total: number };
+    pendingCount: number;
+    inProgressCount: number;
+    interruptedCount: number;
 }
 
-export interface AttemptReview {
-    attempt: HistoryAttempt;
-    questions: ReviewQuestion[];
+/** Một câu trong bài làm, kèm câu trả lời và nhận xét. */
+export interface ReviewQuestion {
+    question: Question;
+    template: PartTemplate;
+    /** Ngữ liệu chung của cả cụm câu (`exam_parts.context`). */
+    context: string | null;
+    response: AttemptResponse | null;
+    annotations: Annotation[];
 }

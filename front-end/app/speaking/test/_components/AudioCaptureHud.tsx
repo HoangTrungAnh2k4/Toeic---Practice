@@ -54,32 +54,32 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
     const remainingSeconds = Math.max(0, totalSeconds - currentSeconds);
 
     return (
-        <div className="flex flex-col gap-4 bg-white p-4 border border-[#E8E5F5] rounded-2xl h-full">
+        <div className="flex flex-col gap-4 bg-white p-4 border border-sub1 rounded-2xl h-full">
             {/* Recording console: waveform đóng vai trò timeline */}
             <section
                 aria-label="Bản ghi âm đang thực hiện"
-                className="flex flex-col gap-5 bg-[#3C3454] p-5 rounded-xl text-[#E8E5F5]"
+                className="flex flex-col gap-5 bg-main p-5 rounded-xl text-sub1"
             >
                 <div className="flex justify-between items-start gap-4">
                     <div className="flex flex-col gap-1">
                         <span className="flex items-center gap-2 font-medium text-sm">
                             <span className="relative flex size-2.5">
-                                <span className="inline-flex absolute bg-[#F5B841] opacity-60 rounded-full size-full motion-safe:animate-ping" />
-                                <span className="inline-flex relative bg-[#F5B841] rounded-full size-2.5" />
+                                <span className="inline-flex absolute bg-sub3 opacity-60 rounded-full size-full motion-safe:animate-ping" />
+                                <span className="inline-flex relative bg-sub3 rounded-full size-2.5" />
                             </span>
                             Đang ghi âm
                         </span>
-                        <span className="flex items-center gap-1.5 text-[#8B84B8] text-xs">
+                        <span className="flex items-center gap-1.5 text-sub2 text-xs">
                             <LuMic className="size-3.5" aria-hidden="true" />
                             Tín hiệu ổn định, 48 kHz
                         </span>
                     </div>
 
                     <div className="text-right">
-                        <p className="font-semibold tabular-nums text-[#F5B841] text-3xl leading-none">
+                        <p className="font-semibold tabular-nums text-sub3 text-3xl leading-none">
                             {remainingSeconds}s
                         </p>
-                        <p className="mt-1 text-[#8B84B8] text-xs">còn lại</p>
+                        <p className="mt-1 text-sub2 text-xs">còn lại</p>
                     </div>
                 </div>
 
@@ -103,15 +103,15 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
                                     className={cn(
                                         'flex-1 rounded-full transition-colors duration-300',
                                         heightClass,
-                                        isPlayed && 'bg-[#F5B841]',
-                                        isCurrent && 'bg-[#E8E5F5] motion-safe:animate-pulse',
-                                        !isPlayed && !isCurrent && 'bg-[#8B84B8]/40',
+                                        isPlayed && 'bg-sub3',
+                                        isCurrent && 'bg-sub1 motion-safe:animate-pulse',
+                                        !isPlayed && !isCurrent && 'bg-sub2/40',
                                     )}
                                 />
                             );
                         })}
                     </div>
-                    <div className="flex justify-between mt-2 tabular-nums text-[#8B84B8] text-xs">
+                    <div className="flex justify-between mt-2 tabular-nums text-sub2 text-xs">
                         <span>0s</span>
                         <span>{Math.round(totalSeconds / 2)}s</span>
                         <span>{totalSeconds}s</span>
@@ -121,7 +121,7 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
 
             {/* Input level */}
             <div className="flex flex-col gap-2 px-1">
-                <div className="flex justify-between items-center text-[#3C3454] text-xs">
+                <div className="flex justify-between items-center text-main text-xs">
                     <span className="font-semibold">Âm lượng micro</span>
                     <span className="font-semibold">-12 dB, mức tốt</span>
                 </div>
@@ -131,22 +131,22 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
                             key={idx}
                             className={cn(
                                 'flex-1 rounded-sm h-2',
-                                idx < METER_ACTIVE ? 'bg-[#3C3454]' : 'bg-[#E8E5F5]',
-                                idx >= METER_SEGMENTS - 2 && 'bg-[#F5B841]/40',
+                                idx < METER_ACTIVE ? 'bg-main' : 'bg-sub1',
+                                idx >= METER_SEGMENTS - 2 && 'bg-sub3/40',
                             )}
                         />
                     ))}
                 </div>
-                <p className="text-[#3C3454]/70 text-xs leading-relaxed">
+                <p className="text-main/70 text-xs leading-relaxed">
                     Giữ tay xa micro để tránh tiếng ồn lẫn vào bài nói.
                 </p>
             </div>
 
             {/* Auto-submit notice */}
-            <div className="flex items-start gap-2.5 bg-[#E8E5F5]/60 mt-auto p-3 border-[#F5B841] border-l-4 rounded-r-lg">
-                <p className="text-[#3C3454]/80 text-xs leading-relaxed">
-                    <span className="font-semibold text-[#3C3454]">Tự động nộp khi hết giờ.</span> Bài nói được chốt lúc
-                    00:00 và chuyển sang Câu 4, bạn không thể thu âm lại.
+            <div className="flex items-start gap-2.5 bg-sub1/60 mt-auto p-3 border-sub3 border-l-4 rounded-r-lg">
+                <p className="text-main/80 text-xs leading-relaxed">
+                    <span className="font-semibold text-main">Tự động nộp khi hết giờ.</span> Bài nói được chốt lúc
+                    00:00 và chuyển sang câu tiếp theo, bạn không thể thu âm lại.
                 </p>
             </div>
         </div>

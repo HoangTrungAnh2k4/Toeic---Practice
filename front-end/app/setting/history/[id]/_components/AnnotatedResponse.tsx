@@ -16,7 +16,7 @@ export default function AnnotatedResponse({ segments }: AnnotatedResponseProps) 
             {segments.map(({ text, placed }, i) => {
                 if (!placed) return <Fragment key={i}>{text}</Fragment>;
                 const { annotation, number } = placed;
-                const isRecurring = Boolean(annotation.mistakeId);
+                const isRecurring = annotation.mistake_pattern_id !== null;
 
                 return (
                     <a

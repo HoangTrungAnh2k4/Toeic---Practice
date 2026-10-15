@@ -1,69 +1,32 @@
-'use client';
+import type { Metadata } from 'next';
+import { notFound, redirect } from 'next/navigation';
+import { Suspense } from 'react';
+import { getExamRoom, parseRoomParams } from '@/lib/exam-library/room';
+import { RawSearchParams } from '@/lib/exam-library/search-params';
+import SpeakingExamRoom from './_components/SpeakingExamRoom';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import DirectionsBanner from './_components/DirectionsBanner';
-import PictureStimulus from './_components/PictureStimulus';
-import AudioCaptureHud from './_components/AudioCaptureHud';
-import QuestionProgression from './_components/QuestionProgression';
-import ExitConfirmDialog from './_components/ExitConfirmDialog';
-import ExamHeader from './_components/ExamHeader';
+export const metadata: Metadata = {
+    title: 'Phòng thi Speaking | Toeco',
+};
 
-export default function SpeakingTestPage() {
-    const router = useRouter();
-    const [secondsRemaining, setSecondsRemaining] = useState(18);
-    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+interface SpeakingTestPageProps {
+    searchParams: Promise<RawSearchParams>;
+}
 
-    // Live countdown timer simulation
-    useEffect(() => {
-        if (secondsRemaining <= 0) return;
+async function SpeakingExamRoomContent({ searchParams }: SpeakingTestPageProps) {
+    const { examId, mode } = parseRoomParams(await searchParams);
+    if (!examId) redirect('/speaking');
 
-        const timer = setInterval(() => {
-            setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
+    const room = await getExamRoom('speaking', examId);
+    if (!room || room.parts.every((part) => part.questions.length === 0)) notFound();
 
-        return () => clearInterval(timer);
-    }, [secondsRemaining]);
+    return <SpeakingExamRoom exam={room.exam} parts={room.parts} mode={mode} />;
+}
 
-    const handleConfirmExit = () => {
-        setIsExitModalOpen(false);
-        router.back();
-    };
-
+export default function SpeakingTestPage({ searchParams }: SpeakingTestPageProps) {
     return (
-        <div className="flex flex-col bg-transparent min-h-[calc(100vh-2rem)] overflow-hidden">
-            <ExamHeader onOpenExitModal={() => setIsExitModalOpen(true)} secondsRemaining={secondsRemaining} />
-
-            {/* Central Test Stage */}
-            <main className="flex flex-col flex-1 gap-6 mt-6 w-full max-w-6xl">
-                {/* Directions Banner */}
-                <DirectionsBanner />
-
-                {/* Dual Pane Exam Content */}
-                <div className="items-stretch gap-6 grid grid-cols-1 lg:grid-cols-12">
-                    {/* Left: Picture Stimulus (Part 2) */}
-                    <div className="lg:col-span-7">
-                        <PictureStimulus />
-                    </div>
-
-                    {/* Right: Audio Capture & Waveform HUD */}
-                    <div className="lg:col-span-5">
-                        <AudioCaptureHud currentSeconds={30 - secondsRemaining} totalSeconds={30} />
-                    </div>
-                </div>
-            </main>
-
-            {/* Footer Question Progression Grid */}
-            <div>
-                <QuestionProgression canProceed={secondsRemaining === 0} />
-            </div>
-
-            {/* Exit Confirmation Dialog */}
-            <ExitConfirmDialog
-                isOpen={isExitModalOpen}
-                onClose={() => setIsExitModalOpen(false)}
-                onConfirm={handleConfirmExit}
-            />
-        </div>
+        <Suspense fallback={<p className="p-6 text-subText text-sm">Đang chuẩn bị phòng thi Speaking...</p>}>
+            <SpeakingExamRoomContent searchParams={searchParams} />
+        </Suspense>
     );
 }

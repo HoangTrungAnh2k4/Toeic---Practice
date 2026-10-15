@@ -1,5 +1,6 @@
-import type { Exam, ExamPart, ExamStats } from '@/lib/domain/types';
+import type { Exam, ExamPart, ExamStats, Question } from '@/lib/domain/types';
 import { getPartTemplates } from '@/lib/domain/parts';
+import { PART_CONTEXTS, QUESTION_SEEDS } from './mock-questions';
 
 /**
  * Nội dung dùng chung cho mọi người dùng (ngân hàng đề). Hiện là mock trong bộ nhớ;
@@ -312,11 +313,30 @@ const fullParts = ({ id, skill }: Exam): ExamPart[] =>
         exam_id: id,
         part_template_id: part.id,
         description: null,
-        context: null,
+        context: PART_CONTEXTS[part.id] ?? null,
         context_media_path: null,
     }));
 
 const EXAM_PARTS: ExamPart[] = EXAMS.flatMap(fullParts);
+
+const EXAM_QUESTIONS: Question[] = EXAMS.flatMap((exam) =>
+    getPartTemplates(exam.skill).flatMap((part) =>
+        QUESTION_SEEDS[exam.skill]
+            .filter((seed) => seed.number >= part.q_from && seed.number <= part.q_to)
+            .map((seed) => ({
+                id: `${exam.id}-q${seed.number}`,
+                exam_part_id: `${exam.id}-p${part.id}`,
+                stimulus: null,
+                image_path: null,
+                image_alt: null,
+                audio_path: null,
+                keywords: null,
+                sample_answer: null,
+                hint: null,
+                ...seed,
+            })),
+    ),
+);
 
 const EXAM_STATS: ExamStats[] = [
     { exam_id: 'sp-01', attempt_count: 640, completion_rate: 89.2 },
@@ -343,8 +363,19 @@ export async function listExams(): Promise<Exam[]> {
     return EXAMS;
 }
 
-export async function listExamParts(): Promise<ExamPart[]> {
-    return EXAM_PARTS;
+export async function getExam(id: string): Promise<Exam | null> {
+    return EXAMS.find((exam) => exam.id === id) ?? null;
+}
+
+/** Bỏ trống `examId` để lấy Part của mọi đề. */
+export async function listExamParts(examId?: string): Promise<ExamPart[]> {
+    return examId ? EXAM_PARTS.filter((part) => part.exam_id === examId) : EXAM_PARTS;
+}
+
+/** Câu hỏi của một đề, theo thứ tự số câu. */
+export async function listQuestions(examId: string): Promise<Question[]> {
+    const partIds = new Set(EXAM_PARTS.filter((part) => part.exam_id === examId).map((part) => part.id));
+    return EXAM_QUESTIONS.filter((question) => partIds.has(question.exam_part_id)).sort((a, b) => a.number - b.number);
 }
 
 export async function listExamStats(): Promise<ExamStats[]> {

@@ -18,7 +18,7 @@ export default function AnnotationList({ placed, mistakeIndex }: AnnotationListP
             <span className="font-semibold text-subText text-xs uppercase tracking-wider">Nhận xét & cách sửa</span>
             <ol className="flex flex-col gap-2">
                 {placed.map(({ annotation, number, isHighlighted }) => {
-                    const mistake = annotation.mistakeId ? mistakeIndex[annotation.mistakeId] : undefined;
+                    const mistake = annotation.mistake_pattern_id ? mistakeIndex[annotation.mistake_pattern_id] : undefined;
                     const SeverityIcon = SEVERITY_META[annotation.severity].Icon;
 
                     return (
@@ -65,10 +65,10 @@ export default function AnnotationList({ placed, mistakeIndex }: AnnotationListP
                                         <SeverityIcon className="size-3" aria-hidden="true" />
                                         {CRITERION_LABEL[annotation.criterion]}
                                     </span>
-                                    {annotation.at !== undefined && (
+                                    {annotation.at_sec !== null && (
                                         <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>
                                             <LuClock className="size-3" aria-hidden="true" />
-                                            {formatTimestamp(annotation.at)}
+                                            {formatTimestamp(annotation.at_sec)}
                                         </span>
                                     )}
                                 </div>

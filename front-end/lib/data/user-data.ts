@@ -1,4 +1,4 @@
-import type { Attempt, AttemptMode, AttemptResponse, Bookmark } from '@/lib/domain/types';
+import type { Annotation, Attempt, AttemptMode, AttemptResponse, Bookmark } from '@/lib/domain/types';
 import { readTable, writeTable } from './local-store';
 
 /**
@@ -11,6 +11,7 @@ export const GUEST_USER_ID = 'guest';
 const ATTEMPTS = 'attempts';
 const RESPONSES = 'responses';
 const BOOKMARKS = 'bookmarks';
+const ANNOTATIONS = 'annotations';
 
 const now = () => new Date().toISOString();
 
@@ -98,6 +99,12 @@ export async function saveResponse(attemptId: string, questionId: string, patch:
     else rows[index] = saved;
     writeTable(RESPONSES, rows);
     return saved;
+}
+
+/** Nhận xét của AI cho các câu trả lời; chỉ khâu chấm bài ghi bảng này. */
+export async function listAnnotations(responseIds: string[]): Promise<Annotation[]> {
+    const ids = new Set(responseIds);
+    return readTable<Annotation>(ANNOTATIONS).filter((annotation) => ids.has(annotation.response_id));
 }
 
 export async function listBookmarkedExamIds(): Promise<string[]> {

@@ -1,4 +1,4 @@
-import { ExamLibraryItem, ExamSkill, LibraryTab, Option, SourceFilter, StatusFilter } from './types';
+import { ExamLibraryItem, LibraryTab, Option, SourceFilter, StatusFilter } from './types';
 
 export const EXAM_LIBRARY_ID = 'exam-library';
 
@@ -20,12 +20,6 @@ export const SOURCE_FILTER_OPTIONS: Option<SourceFilter>[] = [
     { value: 'ets', label: 'ETS chính thức' },
     { value: 'internal', label: 'Biên soạn nội bộ' },
 ];
-
-/** Phòng thi dùng để xem trước theo kỹ năng của đề. */
-export const PREVIEW_HREF: Record<ExamSkill, string> = {
-    speaking: '/speaking/test',
-    writing: '/writing/test',
-};
 
 export function formatCount(value: number): string {
     return value.toLocaleString('vi-VN');

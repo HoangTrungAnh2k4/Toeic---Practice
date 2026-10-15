@@ -1,25 +1,26 @@
 import Image from 'next/image';
 import { LuCheck, LuImage, LuKeyRound, LuListChecks } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
-import { PictureQuestion } from '../types';
-import { PICTURE_QUESTIONS } from '../utils';
+import type { Question } from '@/lib/domain/types';
 
 interface PictureStimulusProps {
-    question: PictureQuestion;
+    question: Question;
+    /** Số câu trong nhóm, để hiển thị vị trí ảnh. */
+    total: number;
     /** Dạng từ khóa thí sinh đã dùng (theo thứ tự `question.keywords`), `null` nếu chưa dùng. */
     keywordUsages: (string | null)[];
 }
 
-export default function PictureStimulus({ question, keywordUsages }: PictureStimulusProps) {
-    const position = String(question.id).padStart(2, '0');
-    const total = String(PICTURE_QUESTIONS.length).padStart(2, '0');
+export default function PictureStimulus({ question, total, keywordUsages }: PictureStimulusProps) {
+    const position = String(question.number).padStart(2, '0');
+    const totalLabel = String(total).padStart(2, '0');
 
     return (
         <figure className="flex flex-col gap-4 bg-white shadow-sm p-4 border border-sub2/30 rounded-xl">
             <div className="relative bg-sub1 rounded-lg w-full aspect-4/3 overflow-hidden">
                 <Image
-                    src={question.imageUrl}
-                    alt={question.imageAlt}
+                    src={question.image_path ?? ''}
+                    alt={question.image_alt ?? `Hình ảnh câu ${question.number}`}
                     fill
                     unoptimized
                     priority
@@ -28,7 +29,7 @@ export default function PictureStimulus({ question, keywordUsages }: PictureStim
                 />
                 <figcaption className="right-3 bottom-3 absolute flex items-center gap-1.5 bg-main/90 backdrop-blur-xs px-2.5 py-1 rounded-md font-medium tabular-nums text-sub1 text-xs">
                     <LuImage className="size-3.5" aria-hidden="true" />
-                    Hình ảnh {position} / {total}
+                    Hình ảnh {position} / {totalLabel}
                 </figcaption>
             </div>
 
@@ -39,7 +40,7 @@ export default function PictureStimulus({ question, keywordUsages }: PictureStim
                     Từ khóa bắt buộc
                 </span>
                 <ul className="flex flex-wrap items-center gap-2" aria-label="Từ khóa bắt buộc">
-                    {question.keywords.map((keyword, index) => {
+                    {(question.keywords ?? []).map((keyword, index) => {
                         const isUsed = Boolean(keywordUsages[index]);
                         return (
                             <li

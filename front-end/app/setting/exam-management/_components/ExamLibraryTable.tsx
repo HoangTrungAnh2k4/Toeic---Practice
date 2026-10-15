@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE, SOURCE_LABEL, STATUS_STYLE } from '../_lib/examStyle';
 import { ExamLibraryItem } from '../types';
-import { PREVIEW_HREF, formatCount } from '../utils';
+import { buildTestHref } from '@/lib/exam-library/search-params';
+import { formatCount } from '../utils';
 
 interface ExamLibraryTableProps {
     exams: ExamLibraryItem[];
@@ -160,7 +161,7 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetF
                                     <TableCell className="py-4 pr-5 pl-3 text-right">
                                         <div className="flex justify-end items-center gap-1.5">
                                             <Link
-                                                href={PREVIEW_HREF[exam.skill]}
+                                                href={buildTestHref(exam.skill, exam.id)}
                                                 aria-label={`Xem trước phòng thi ${exam.title}`}
                                                 title="Xem trước phòng thi"
                                                 className={cn(ICON_ACTION_CLASS, 'hover:bg-sub1')}

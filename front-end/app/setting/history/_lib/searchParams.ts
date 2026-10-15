@@ -18,7 +18,7 @@ export const DEFAULT_HISTORY_QUERY: HistoryQuery = {
     mode: 'all',
     category: 'all',
     status: 'all',
-    dateScope: '7d',
+    dateScope: 'all',
     page: 1,
     pageSize: 10,
 };

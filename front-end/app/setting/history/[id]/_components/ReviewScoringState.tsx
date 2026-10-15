@@ -1,12 +1,12 @@
 import { LuBrain } from 'react-icons/lu';
-import { HistoryAttempt } from '../../types';
+import { HistoryRow } from '../../types';
 
 interface ReviewScoringStateProps {
-    attempt: HistoryAttempt;
+    row: HistoryRow;
 }
 
-export default function ReviewScoringState({ attempt }: ReviewScoringStateProps) {
-    const progress = attempt.scoreInfo.scoringProgress ?? 0;
+export default function ReviewScoringState({ row }: ReviewScoringStateProps) {
+    const { scoring_error: scoringError } = row.attempt;
 
     return (
         <section
@@ -20,23 +20,13 @@ export default function ReviewScoringState({ attempt }: ReviewScoringStateProps)
                 </span>
                 <div className="flex flex-col gap-1">
                     <h2 id="scoring-title" className="font-bold text-main text-lg tracking-tight">
-                        AI đang chấm bài ({progress}%)
+                        Bài đã nộp, đang chờ AI chấm
                     </h2>
                     <p className="font-medium text-subText text-sm">
-                        Dự kiến hoàn tất: {attempt.scoreInfo.estimatedTimeRemaining}. Điểm, nhận xét và lỗi sẽ hiển thị
-                        tại đây khi chấm xong; bài này chưa được tính vào sổ lỗi.
+                        Điểm, nhận xét và lỗi sẽ hiển thị tại đây khi chấm xong; bài này chưa được tính vào sổ lỗi.
                     </p>
+                    {scoringError && <p className="font-semibold text-main text-sm">Lỗi khi chấm: {scoringError}</p>}
                 </div>
-            </div>
-            <div
-                role="progressbar"
-                aria-label="Tiến độ chấm điểm"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={progress}
-                className="bg-sub1 rounded-full w-full h-2 overflow-hidden"
-            >
-                <div className="bg-sub3 rounded-full h-full transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
         </section>
     );

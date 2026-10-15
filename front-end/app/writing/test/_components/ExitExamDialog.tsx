@@ -12,17 +12,24 @@ import {
     AlertDialogMedia,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { EXAM_TITLE } from '../utils';
 
 interface ExitExamDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    title: string;
     answeredCount: number;
     totalQuestions: number;
     onConfirm: () => void;
 }
 
-export default function ExitExamDialog({ open, onOpenChange, answeredCount, totalQuestions, onConfirm }: ExitExamDialogProps) {
+export default function ExitExamDialog({
+    open,
+    onOpenChange,
+    title,
+    answeredCount, 
+    totalQuestions,
+    onConfirm,
+}: ExitExamDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent className="gap-5 data-[size=default]:sm:max-w-md">
@@ -32,12 +39,12 @@ export default function ExitExamDialog({ open, onOpenChange, answeredCount, tota
                     </AlertDialogMedia>
                     <AlertDialogTitle className="font-bold text-main text-lg">Thoát khỏi phòng thi?</AlertDialogTitle>
                     <AlertDialogDescription className="text-subText">
-                        Bản nháp của bạn vẫn được lưu trên máy này. Bạn có thể quay lại làm tiếp trước khi hết giờ.
+                        Bài làm vẫn được lưu trên trình duyệt này. Mở lại đề từ thư viện để làm tiếp; đồng hồ vẫn tiếp tục chạy.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <p className="bg-sub1/60 px-4 py-3 rounded-lg text-subText text-xs">
-                    Bài thi: <strong className="font-semibold text-main">{EXAM_TITLE}</strong> · Đã trả lời{' '}
+                    Bài thi: <strong className="font-semibold text-main">{title}</strong> · Đã trả lời{' '}
                     <strong className="font-semibold tabular-nums text-main">
                         {answeredCount}/{totalQuestions}
                     </strong>{' '}

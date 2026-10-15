@@ -13,10 +13,11 @@ export default function ReviewQuestionNav({ questions }: ReviewQuestionNavProps)
         >
             <span className="font-semibold text-subText text-xs uppercase tracking-wider">Đi tới câu</span>
             <ol className="flex lg:flex-col flex-wrap gap-2">
-                {questions.map(({ number, task, score, annotations }) => {
-                    const isPerfect = score && score.value === score.max;
+                {questions.map(({ question: { id, number }, template, response, annotations }) => {
+                    const score = response?.score ?? null;
+                    const maxScore = response?.max_score ?? null;
                     return (
-                        <li key={number}>
+                        <li key={id}>
                             <a
                                 href={`#q-${number}`}
                                 className="flex items-center gap-2 hover:bg-sub1/50 p-2 border border-sub2/20 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"
@@ -25,19 +26,23 @@ export default function ReviewQuestionNav({ questions }: ReviewQuestionNavProps)
                                     Q{number}
                                 </span>
                                 <span className="hidden lg:flex flex-col flex-1 min-w-0">
-                                    <span className="font-semibold text-main text-xs truncate">{task}</span>
+                                    <span className="font-semibold text-main text-xs truncate">{template.task}</span>
                                     <span className="text-[0.6875rem] text-subText">
-                                        {annotations.length ? `${annotations.length} nhận xét` : 'Không có lỗi'}
+                                        {annotations.length
+                                            ? `${annotations.length} nhận xét`
+                                            : (response?.text_answer ?? response?.transcript)?.trim()
+                                              ? 'Không có lỗi'
+                                              : 'Chưa trả lời'}
                                     </span>
                                 </span>
-                                {score && (
+                                {score !== null && maxScore !== null && (
                                     <span
                                         className={cn(
                                             'px-1.5 py-0.5 rounded-md font-bold text-[0.6875rem] tabular-nums',
-                                            isPerfect ? 'bg-main text-sub1' : 'bg-sub3/25 text-main',
+                                            score === maxScore ? 'bg-main text-sub1' : 'bg-sub3/25 text-main',
                                         )}
                                     >
-                                        {score.value}/{score.max}
+                                        {score}/{maxScore}
                                     </span>
                                 )}
                             </a>

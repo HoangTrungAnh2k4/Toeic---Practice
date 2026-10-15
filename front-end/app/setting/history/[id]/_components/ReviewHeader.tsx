@@ -1,17 +1,26 @@
 import Link from 'next/link';
 import { LuArrowLeft, LuCalendar, LuChevronRight, LuClock, LuEye } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
-import { HistoryAttempt } from '../../types';
-import { SKILL_STYLE } from '../../utils';
+import { HistoryRow } from '../../types';
+import {
+    formatDateTime,
+    formatDuration,
+    getAttemptCode,
+    getPartLabel,
+    MODE_LABEL,
+    SKILL_STYLE,
+} from '../../utils';
 
 interface ReviewHeaderProps {
-    attempt: HistoryAttempt;
+    row: HistoryRow;
 }
 
 const CHIP_CLASS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold text-[0.6875rem] tracking-wider';
 
-export default function ReviewHeader({ attempt }: ReviewHeaderProps) {
-    const skill = SKILL_STYLE[attempt.skill];
+export default function ReviewHeader({ row }: ReviewHeaderProps) {
+    const { attempt, exam, attemptNo } = row;
+    const skill = SKILL_STYLE[exam.skill];
+    const duration = formatDuration(attempt);
 
     return (
         <div className="flex flex-col gap-4">
@@ -45,31 +54,33 @@ export default function ReviewHeader({ attempt }: ReviewHeaderProps) {
                             Lịch sử làm bài
                         </Link>
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
-                        <span className="text-main tabular-nums">{attempt.code}</span>
+                        <span className="text-main tabular-nums">{getAttemptCode(attempt)}</span>
                     </nav>
-                    <h1 className="font-bold text-main text-2xl sm:text-3xl tracking-tight">{attempt.title}</h1>
-                    <p className="font-medium text-subText text-sm">{attempt.topic}</p>
+                    <h1 className="font-bold text-main text-2xl sm:text-3xl tracking-tight">{exam.title}</h1>
+                    <p className="font-medium text-subText text-sm">{exam.code}</p>
 
                     <div className="flex flex-wrap items-center gap-1.5">
                         <span className={cn(CHIP_CLASS, 'bg-main text-sub1')}>{skill.label}</span>
-                        <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>{attempt.part}</span>
-                        <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>{attempt.mode}</span>
-                        <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>{attempt.categoryBadge}</span>
-                        <span className={cn(CHIP_CLASS, attempt.hasSampleViewed ? 'bg-sub3/25 text-main' : 'bg-sub1 text-main')}>
-                            {attempt.hasSampleViewed && <LuEye className="size-3" aria-hidden="true" />}
-                            {attempt.assistBadge}
+                        <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>{getPartLabel(attempt)}</span>
+                        <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>{MODE_LABEL[attempt.mode]}</span>
+                        <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>{attemptNo > 1 ? `Làm lại #${attemptNo}` : 'Làm lần đầu'}</span>
+                        <span className={cn(CHIP_CLASS, attempt.sample_viewed ? 'bg-sub3/25 text-main' : 'bg-sub1 text-main')}>
+                            {attempt.sample_viewed && <LuEye className="size-3" aria-hidden="true" />}
+                            {attempt.sample_viewed ? 'Có xem bài mẫu' : 'Không trợ giúp'}
                         </span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 font-medium text-subText text-xs">
                         <span className="flex items-center gap-1.5">
                             <LuCalendar className="size-3.5" aria-hidden="true" />
-                            {attempt.submittedAt}
+                            {formatDateTime(attempt.submitted_at ?? attempt.started_at)}
                         </span>
-                        <span className="flex items-center gap-1.5">
-                            <LuClock className="size-3.5" aria-hidden="true" />
-                            {attempt.duration}
-                        </span>
+                        {duration && (
+                            <span className="flex items-center gap-1.5">
+                                <LuClock className="size-3.5" aria-hidden="true" />
+                                {duration}
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

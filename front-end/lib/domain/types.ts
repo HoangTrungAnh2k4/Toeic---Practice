@@ -117,7 +117,10 @@ export interface Question {
     id: string;
     exam_part_id: string;
     number: number;
+    /** Yêu cầu của câu: đoạn cần đọc, câu hỏi, đề bài. */
     prompt: string;
+    /** Ngữ liệu riêng của câu (email Writing Q6-7); ngữ liệu dùng chung cả cụm nằm ở `exam_parts.context`. */
+    stimulus: string | null;
     image_path: string | null;
     image_alt: string | null;
     audio_path: string | null;
@@ -246,4 +249,73 @@ export interface PlanTask {
     mistake_pattern_id: string | null;
     /** Bài làm hoàn thành task — có giá trị thì task coi như xong. */
     attempt_id: string | null;
+}
+
+/** Nhận định do AI sinh cho lịch học, cache để không gọi AI mỗi lần tải trang. */
+export interface AiInsight {
+    id: string;
+    user_id: string;
+    /** shortcut: chưa chốt shape; định nghĩa khi làm module lịch học (Bước 4.7). */
+    payload: Record<string, unknown>;
+    generated_at: string;
+}
+
+/** Bảng quy đổi điểm → Level theo ETS: Level là mức cao nhất có `min_score` ≤ điểm. Xem `SCORE_LEVELS`. */
+export interface ScoreLevel {
+    skill: Skill;
+    min_score: number;
+    level: number;
+}
+
+/**
+ * Trạng thái mẫu lỗi, TÍNH TỰ ĐỘNG từ các bài gần nhất:
+ * - active: lặp lại ở bài gần nhất trong phạm vi.
+ * - improving: đã có ít nhất 1 bài độc lập liên tiếp không lặp lại.
+ * - resolved: đủ số bài độc lập liên tiếp không lặp lại.
+ */
+export type MistakeStatus = 'active' | 'improving' | 'resolved';
+
+/** Row của view `user_mistake_stats` — một mẫu lỗi trong sổ lỗi của một người dùng. */
+export interface UserMistakeStats {
+    user_id: string;
+    mistake_pattern_id: string;
+    status: MistakeStatus;
+    /** Số bài lặp lại lỗi trong cửa sổ theo dõi. */
+    hit_count: number;
+    /** Số bài trong cửa sổ theo dõi. */
+    window_count: number;
+    /** Số bài độc lập liên tiếp gần nhất không lặp lại lỗi. */
+    clean_streak: number;
+    occurrence_count: number;
+    last_seen_attempt_id: string | null;
+    last_seen_at: string | null;
+    priority: number;
+}
+
+/** Row của view `user_skill_stats` — tổng hợp theo kỹ năng của một người dùng. */
+export interface UserSkillStats {
+    user_id: string;
+    skill: Skill;
+    attempt_count: number;
+    scored_count: number;
+    latest_score: number | null;
+    latest_scored_at: string | null;
+    total_minutes: number;
+}
+
+/** Row của view `user_part_stats` — số lượt và điểm trung bình theo Part. */
+export interface UserPartStats {
+    user_id: string;
+    part_template_id: number;
+    attempt_count: number;
+    /** Điểm trung bình / điểm tối đa của các câu thuộc Part (0-1); `null` khi chưa có câu nào được chấm. */
+    avg_score_ratio: number | null;
+}
+
+/** Row của view `user_study_stats` — thói quen học của một người dùng. */
+export interface UserStudyStats {
+    user_id: string;
+    streak_days: number;
+    best_streak_days: number;
+    minutes_this_month: number;
 }

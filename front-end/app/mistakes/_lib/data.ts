@@ -1,6 +1,3 @@
-import { MOCK_REVIEWS } from '@/app/setting/history/_lib/reviews';
-import { HistoryAttempt } from '@/app/setting/history/types';
-import { MOCK_ATTEMPTS } from '@/app/setting/history/utils';
 import {
     Criterion,
     MistakeCheck,
@@ -14,6 +11,8 @@ import {
 } from '../types';
 import { RESOLVE_STREAK, SEVERITY_META, WINDOW_SIZE } from '../utils';
 import { MOCK_MISTAKES } from './mock';
+import { HistoryAttempt, MOCK_ATTEMPTS } from './mock-attempts';
+import { MOCK_REVIEWS } from './mock-reviews';
 
 /** Bài đang chấm hoặc bị gián đoạn chưa có nhận xét → không được tính vào thống kê lỗi. */
 function isScored(attempt: HistoryAttempt) {

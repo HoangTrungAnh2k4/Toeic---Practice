@@ -32,7 +32,7 @@ export default function ExamNavigation({
                     <div className="flex flex-col gap-0.5">
                         <span className="font-semibold text-destructive">Đã hết 8 phút của nhóm 1</span>
                         <span className="text-subText text-xs">
-                            Bài làm đã được khóa và lưu lại. Hãy nộp nhóm 1 để chuyển sang phần Email.
+                            Bài làm đã được khóa và lưu lại. Hãy nộp bài để lưu kết quả.
                         </span>
                     </div>
                 </div>
@@ -68,7 +68,7 @@ export default function ExamNavigation({
 
                 <Button type="button" size="md" variant="primary" onClick={onFinish} className="gap-1.5">
                     <LuCircleCheckBig className="size-4" aria-hidden="true" />
-                    <span>Nộp nhóm 1 & sang Email</span>
+                    <span>Nộp bài Câu 1–5</span>
                 </Button>
             </div>
 

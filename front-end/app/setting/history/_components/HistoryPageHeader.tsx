@@ -33,8 +33,8 @@ export default function HistoryPageHeader() {
                         Lịch sử làm bài & Nhật ký nỗ lực
                     </h1>
                     <p className="max-w-3xl font-medium text-subText text-sm leading-relaxed">
-                        Theo dõi toàn bộ các lượt làm bài Speaking, Writing và Thi thử hoàn chỉnh. Phân biệt rõ lượt làm
-                        độc lập, làm lại và các bài đang chờ chấm theo chuẩn khảo thí ETS.
+                        Theo dõi toàn bộ các lượt làm bài Speaking và Writing. Phân biệt rõ lượt làm độc lập, làm lại,
+                        bài đang làm dở và bài đang chờ chấm theo chuẩn khảo thí ETS.
                     </p>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import { ReviewQuestion } from '../types';
+import type { ReviewQuestion } from './mock-attempts';
 
 const PICTURE_PROMPT = 'Describe the picture in as much detail as you can. You will have 45 seconds to prepare and 30 seconds to speak.';
 const COFFEE_SURVEY =

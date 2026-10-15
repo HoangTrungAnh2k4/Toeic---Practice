@@ -3,23 +3,29 @@ import { LuAudioLines, LuChevronRight, LuCircleCheck, LuEye } from 'react-icons/
 import { MistakeStatusBadge } from '@/components/mistakes/mistake-badges';
 import { Criterion, MistakeItem } from '@/app/mistakes/types';
 import { CRITERION_LABEL, getMistakeHref } from '@/app/mistakes/utils';
-import { HistoryAttempt, ReviewQuestion } from '../../types';
+import { getScoreLevel } from '@/lib/domain/score-levels';
+import { HistoryRow, ReviewQuestion } from '../../types';
 
 interface ReviewScoreSummaryProps {
-    attempt: HistoryAttempt;
+    row: HistoryRow;
     questions: ReviewQuestion[];
     mistakeIndex: Record<string, MistakeItem>;
 }
 
 const LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider';
 
-export default function ReviewScoreSummary({ attempt, questions, mistakeIndex }: ReviewScoreSummaryProps) {
-    const { score, maxScore, level, feedbackSummary, retakeComparison } = attempt.scoreInfo;
+export default function ReviewScoreSummary({ row, questions, mistakeIndex }: ReviewScoreSummaryProps) {
+    const { attempt, exam, scoreDelta } = row;
+    const { score, feedback_summary: feedbackSummary } = attempt;
     const annotations = questions.flatMap((q) => q.annotations);
-    const recurringIds = [...new Set(annotations.flatMap((a) => (a.mistakeId ? [a.mistakeId] : [])))];
+    const recurringIds = [
+        ...new Set(annotations.flatMap((a) => (a.mistake_pattern_id ? [a.mistake_pattern_id] : []))),
+    ];
     const recurring = recurringIds.map((id) => mistakeIndex[id]).filter(Boolean);
-    const oneOffCount = annotations.filter((a) => !a.mistakeId).length;
-    const perfectCount = questions.filter((q) => q.score && q.score.value === q.score.max).length;
+    const oneOffCount = annotations.filter((a) => !a.mistake_pattern_id).length;
+    const perfectCount = questions.filter(
+        ({ response }) => response?.score != null && response.score === response.max_score,
+    ).length;
 
     const byCriterion = new Map<Criterion, number>();
     for (const { criterion } of annotations) byCriterion.set(criterion, (byCriterion.get(criterion) ?? 0) + 1);
@@ -38,16 +44,23 @@ export default function ReviewScoreSummary({ attempt, questions, mistakeIndex }:
                 <div className="flex flex-col gap-1">
                     <span className="font-semibold text-sub1 text-xs uppercase tracking-wider">Điểm quy đổi</span>
                     <div className="flex flex-wrap items-baseline gap-2">
-                        <span className="font-bold text-sub1 text-4xl tabular-nums tracking-tight">{score}</span>
-                        <span className="font-semibold text-sub1/80 text-sm">/ {maxScore}</span>
-                        {level && (
-                            <span className="bg-sub3 px-2 py-0.5 rounded-md font-bold text-[0.6875rem] text-main">{level}</span>
+                        <span className="font-bold text-sub1 text-4xl tabular-nums tracking-tight">{score ?? '—'}</span>
+                        <span className="font-semibold text-sub1/80 text-sm">/ 200</span>
+                        {score !== null && (
+                            <span className="bg-sub3 px-2 py-0.5 rounded-md font-bold text-[0.6875rem] text-main">
+                                Level {getScoreLevel(exam.skill, score)}
+                            </span>
                         )}
                     </div>
                 </div>
                 <div className="flex flex-col gap-1 bg-sub1/10 px-3 py-2 rounded-lg text-sub1 text-xs">
                     {feedbackSummary && <span>{feedbackSummary}</span>}
-                    {retakeComparison && <strong className="font-semibold text-sub3">{retakeComparison}</strong>}
+                    {scoreDelta !== null && (
+                        <strong className="font-semibold text-sub3">
+                            {scoreDelta >= 0 ? '+' : ''}
+                            {scoreDelta} điểm so với lượt trước
+                        </strong>
+                    )}
                 </div>
             </div>
 
@@ -101,13 +114,13 @@ export default function ReviewScoreSummary({ attempt, questions, mistakeIndex }:
                 )}
 
                 <div className="flex flex-col gap-1.5 mt-auto pt-3 border-sub2/20 border-t font-medium text-subText text-xs">
-                    {attempt.hasSampleViewed && (
+                    {attempt.sample_viewed && (
                         <p className="flex items-start gap-1.5">
                             <LuEye className="mt-px size-3.5 shrink-0" aria-hidden="true" />
                             Bài có xem bài mẫu: lỗi vẫn được ghi nhận nhưng không tính vào tiến độ khắc phục.
                         </p>
                     )}
-                    {attempt.skill === 'speaking' && (
+                    {exam.skill === 'speaking' && (
                         <p className="flex items-start gap-1.5">
                             <LuAudioLines className="mt-px size-3.5 shrink-0" aria-hidden="true" />
                             Transcript do AI nhận dạng từ bản ghi âm, có thể khác đôi chút so với lời bạn nói.

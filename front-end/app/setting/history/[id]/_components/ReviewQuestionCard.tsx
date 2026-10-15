@@ -7,7 +7,7 @@ import AnnotatedResponse from './AnnotatedResponse';
 import AnnotationList from './AnnotationList';
 
 interface ReviewQuestionCardProps {
-    question: ReviewQuestion;
+    item: ReviewQuestion;
     isSpeaking: boolean;
     mistakeIndex: Record<string, MistakeItem>;
     /** Bài đang chấm: chỉ hiện câu trả lời đã nộp, chưa có nhận xét. */
@@ -16,10 +16,17 @@ interface ReviewQuestionCardProps {
 
 const BLOCK_LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider';
 
-export default function ReviewQuestionCard({ question, isSpeaking, mistakeIndex, isPending }: ReviewQuestionCardProps) {
-    const { number, task, prompt, stimulus, keywords, score, response, responseTime, strengths } = question;
-    const { placed, segments } = placeAnnotations(response, question.annotations);
-    const isPerfect = score && score.value === score.max;
+export default function ReviewQuestionCard({ item, isSpeaking, mistakeIndex, isPending }: ReviewQuestionCardProps) {
+    const { question, template, context, response, annotations } = item;
+    const { number, prompt, keywords } = question;
+    const stimulus = question.stimulus ?? context;
+    const answer = (isSpeaking ? response?.transcript : response?.text_answer) ?? '';
+    const responseTime = isSpeaking ? template.response_sec?.[number - template.q_from] : undefined;
+    const score = response?.score ?? null;
+    const maxScore = response?.max_score ?? null;
+    const strengths = response?.strengths ?? [];
+    const { placed, segments } = placeAnnotations(answer, annotations);
+    const isPerfect = score !== null && score === maxScore;
 
     return (
         <section
@@ -34,17 +41,17 @@ export default function ReviewQuestionCard({ question, isSpeaking, mistakeIndex,
                         Q{number}
                     </span>
                     <h2 id={`q-${number}-title`} className="font-bold text-main text-lg tracking-tight">
-                        {task}
+                        {template.task}
                     </h2>
                 </div>
-                {score && (
+                {score !== null && maxScore !== null && (
                     <span
                         className={cn(
                             'px-2.5 py-1 rounded-lg font-bold text-sm tabular-nums',
                             isPerfect ? 'bg-main text-sub1' : 'bg-sub3/25 text-main',
                         )}
                     >
-                        {score.value}/{score.max} điểm
+                        {score}/{maxScore} điểm
                     </span>
                 )}
             </div>
@@ -52,7 +59,7 @@ export default function ReviewQuestionCard({ question, isSpeaking, mistakeIndex,
             {/* Prompt */}
             <div className="flex flex-col gap-3 bg-sub1/50 p-4 rounded-xl">
                 <span className={BLOCK_LABEL_CLASS}>Đề bài</span>
-                <p className="font-medium text-main text-sm leading-relaxed">{prompt}</p>
+                <p className="font-medium text-main text-sm leading-relaxed whitespace-pre-line">{prompt}</p>
                 {stimulus && (
                     <p className="bg-card p-3 rounded-lg font-medium text-subText text-sm leading-relaxed whitespace-pre-line">
                         {stimulus}
@@ -62,7 +69,7 @@ export default function ReviewQuestionCard({ question, isSpeaking, mistakeIndex,
                     <div className="flex flex-wrap items-center gap-1.5">
                         <LuKeyRound className="size-4 text-subText" aria-hidden="true" />
                         <span className="sr-only">Từ khoá bắt buộc:</span>
-                        {keywords.map((word) => (
+                        {keywords.map(({ word }) => (
                             <span key={word} className="bg-card px-2 py-0.5 rounded-md font-semibold text-main text-xs">
                                 {word}
                             </span>
@@ -82,7 +89,13 @@ export default function ReviewQuestionCard({ question, isSpeaking, mistakeIndex,
                         </span>
                     )}
                 </div>
-                <AnnotatedResponse segments={segments} />
+                {answer.trim() ? (
+                    <AnnotatedResponse segments={segments} />
+                ) : (
+                    <p className="bg-card p-4 border border-sub2/30 border-dashed rounded-xl font-medium text-subText text-sm">
+                        {isSpeaking && response?.audio_path ? 'Chưa có transcript cho bản ghi âm.' : 'Bạn chưa trả lời câu này.'}
+                    </p>
+                )}
             </div>
 
             {/* Feedback */}
@@ -90,20 +103,22 @@ export default function ReviewQuestionCard({ question, isSpeaking, mistakeIndex,
                 (placed.length > 0 ? (
                     <AnnotationList placed={placed} mistakeIndex={mistakeIndex} />
                 ) : (
-                    <p className="flex items-center gap-2 bg-success/15 p-3 border border-success/60 rounded-lg font-medium text-main text-sm">
-                        <LuCircleCheck className="size-4 shrink-0" aria-hidden="true" />
-                        Không phát hiện lỗi đáng kể ở câu này.
-                    </p>
+                    answer.trim() && (
+                        <p className="flex items-center gap-2 bg-success/15 p-3 border border-success/60 rounded-lg font-medium text-main text-sm">
+                            <LuCircleCheck className="size-4 shrink-0" aria-hidden="true" />
+                            Không phát hiện lỗi đáng kể ở câu này.
+                        </p>
+                    )
                 ))}
 
             {!isPending && strengths.length > 0 && (
                 <div className="flex flex-col gap-2 pt-4 border-sub2/20 border-t">
                     <span className={BLOCK_LABEL_CLASS}>Điểm làm tốt</span>
                     <ul className="flex flex-col gap-1.5">
-                        {strengths.map((item) => (
-                            <li key={item} className="flex items-start gap-2 font-medium text-main text-sm">
+                        {strengths.map((strength) => (
+                            <li key={strength} className="flex items-start gap-2 font-medium text-main text-sm">
                                 <LuSparkles className="mt-0.5 size-4 text-sub2 shrink-0" aria-hidden="true" />
-                                {item}
+                                {strength}
                             </li>
                         ))}
                     </ul>

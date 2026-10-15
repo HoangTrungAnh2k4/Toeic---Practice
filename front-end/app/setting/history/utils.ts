@@ -1,247 +1,36 @@
 import type { IconType } from 'react-icons';
-import { LuClipboardList, LuMic, LuPenLine } from 'react-icons/lu';
+import { LuMic, LuPenLine } from 'react-icons/lu';
+import { PART_TEMPLATES } from '@/lib/domain/parts';
+import type { Attempt, AttemptMode, AttemptStatus, Skill } from '@/lib/domain/types';
 import {
     CategoryFilterType,
     DateScopeType,
     ExamModeType,
-    HistoryAttempt,
     Option,
     SkillType,
     StatusFilterType,
 } from './types';
 
-export const MOCK_ATTEMPTS: HistoryAttempt[] = [
-    {
-        id: '1',
-        code: '#ATT-9041',
-        title: 'Test 04 — Describe a Picture (Q3-Q4)',
-        part: 'Part 2',
-        topic: 'Chủ đề: Outdoor Coffee Shop & Busy Commuters',
-        skill: 'speaking',
-        mode: 'Thi thử chuẩn (CBT)',
-        modeType: 'cbt',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            score: 140,
-            maxScore: 200,
-            level: 'Level 6',
-            feedbackSummary: 'Phát âm: Cao | Ngữ pháp: Khá',
-        },
-        submittedAt: 'Hôm nay, 10:45',
-        duration: '18m 42s',
-        actionText: 'Xem lại chi tiết',
-    },
-    {
-        id: '2',
-        code: '#ATT-8992',
-        title: 'Test 02 — Write an Opinion Essay (Task 8)',
-        part: 'Part 3',
-        topic: 'Chủ đề: Remote Work vs. In-office Productivity (342 từ)',
-        skill: 'writing',
-        mode: 'Thi thử chuẩn (CBT)',
-        modeType: 'cbt',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            maxScore: 200,
-            isScoring: true,
-            scoringProgress: 85,
-            estimatedTimeRemaining: '~1 phút nữa',
-        },
-        submittedAt: 'Hôm qua, 21:15',
-        duration: '29m 10s',
-        actionText: 'Kiểm tra tiến độ',
-        isPendingRow: true,
-    },
-    {
-        id: '3',
-        code: '#ATT-8760',
-        title: 'Test 01 — Express an Opinion (Question 11)',
-        part: 'Part 5',
-        topic: 'Chủ đề: Company Training Programs: Online vs In-person',
-        skill: 'speaking',
-        mode: 'Học có hướng dẫn',
-        modeType: 'guided',
-        categoryBadge: 'Làm lại #2',
-        assistBadge: 'Có xem bài mẫu',
-        hasSampleViewed: true,
-        scoreInfo: {
-            score: 130,
-            maxScore: 200,
-            level: 'Level 5+',
-            retakeComparison: '+15 điểm so với lượt #1',
-        },
-        submittedAt: '2 ngày trước, 15:30',
-        duration: '12m 05s',
-        actionText: 'Xem & So sánh #1',
-    },
-    {
-        id: '4',
-        code: '#ATT-8604',
-        title: 'Test 03 — Full Mock Test S&W (80 Phút)',
-        part: 'Full Mock S+W',
-        topic: 'Bị gián đoạn tại Speaking Q06 (Mất tín hiệu mic)',
-        skill: 'full_mock',
-        mode: 'Thi thử chuẩn (CBT)',
-        modeType: 'cbt',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            maxScore: 200,
-            isInterrupted: true,
-            interruptedReason: 'Đã lưu 5/11 Speaking',
-        },
-        submittedAt: '3 ngày trước, 09:15',
-        duration: '14m 20s',
-        actionText: 'Tiếp tục làm tiếp',
-        isWarningRow: true,
-    },
-    {
-        id: '5',
-        code: '#ATT-8419',
-        title: 'Test 02 — Respond to Written Request (Task 6-7)',
-        part: 'Part 2',
-        topic: 'Chủ đề: Customer Inquiry regarding Delivery Delay & Refund',
-        skill: 'writing',
-        mode: 'Luyện có thời gian',
-        modeType: 'timed',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            score: 160,
-            maxScore: 200,
-            level: 'Level 7',
-            feedbackSummary: 'Ngữ điệu tự nhiên | Đủ 3 yêu cầu',
-        },
-        submittedAt: '5 ngày trước, 20:00',
-        duration: '19m 50s',
-        actionText: 'Xem lại chi tiết',
-    },
-    {
-        id: '6',
-        code: '#ATT-8301',
-        title: 'Test 05 — Describe a Picture (Q3-Q4)',
-        part: 'Part 2',
-        topic: 'Chủ đề: Outdoor Market & Airport Lounge',
-        skill: 'speaking',
-        mode: 'Luyện có thời gian',
-        modeType: 'timed',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            score: 130,
-            maxScore: 200,
-            level: 'Level 5+',
-            feedbackSummary: 'Phát âm: Khá | Từ vựng: Trung bình',
-        },
-        submittedAt: '5 ngày trước, 08:15',
-        duration: '6m 10s',
-        actionText: 'Xem lại chi tiết',
-    },
-    {
-        id: '7',
-        code: '#ATT-8188',
-        title: 'Test 01 — Respond to Written Request (Task 6-7)',
-        part: 'Part 2',
-        topic: 'Chủ đề: Office Printer & Workshop Registration',
-        skill: 'writing',
-        mode: 'Thi thử chuẩn (CBT)',
-        modeType: 'cbt',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            score: 150,
-            maxScore: 200,
-            level: 'Level 6',
-            feedbackSummary: 'Ngữ pháp: Khá | Thiếu 1 yêu cầu',
-        },
-        submittedAt: '6 ngày trước, 21:00',
-        duration: '20m 00s',
-        actionText: 'Xem lại chi tiết',
-    },
-    {
-        id: '8',
-        code: '#ATT-8102',
-        title: 'Test 05 — Write a Sentence (Q1-Q5)',
-        part: 'Part 1',
-        topic: 'Chủ đề: Daily Activities & Workplace Scenes',
-        skill: 'writing',
-        mode: 'Luyện có thời gian',
-        modeType: 'timed',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            score: 170,
-            maxScore: 200,
-            level: 'Level 8',
-            feedbackSummary: 'Đủ từ khoá | Ngữ pháp: Khá',
-        },
-        submittedAt: '6 ngày trước, 08:40',
-        duration: '7m 45s',
-        actionText: 'Xem lại chi tiết',
-    },
-    {
-        id: '9',
-        code: '#ATT-8040',
-        title: 'Test 03 — Respond to Questions (Q5-Q7)',
-        part: 'Part 3',
-        topic: 'Chủ đề: Telephone Survey about Coffee Shops',
-        skill: 'speaking',
-        mode: 'Luyện có thời gian',
-        modeType: 'timed',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            score: 140,
-            maxScore: 200,
-            level: 'Level 6',
-            feedbackSummary: 'Trôi chảy: Tốt | Bám câu hỏi: Khá',
-        },
-        submittedAt: '7 ngày trước, 19:30',
-        duration: '4m 20s',
-        actionText: 'Xem lại chi tiết',
-    },
-    {
-        id: '10',
-        code: '#ATT-7985',
-        title: 'Test 02 — Read a Text Aloud (Q1-Q2)',
-        part: 'Part 1',
-        topic: 'Chủ đề: Store Announcement & Summer Sale',
-        skill: 'speaking',
-        mode: 'Luyện có thời gian',
-        modeType: 'timed',
-        categoryBadge: 'Đề chưa gặp',
-        assistBadge: 'Không trợ giúp',
-        scoreInfo: {
-            score: 120,
-            maxScore: 200,
-            level: 'Level 5',
-            feedbackSummary: 'Phát âm: Trung bình | Ngữ điệu: Đều',
-        },
-        submittedAt: '7 ngày trước, 07:30',
-        duration: '3m 50s',
-        actionText: 'Xem lại chi tiết',
-    },
-];
-
 export const SKILL_OPTIONS: Option<SkillType>[] = [
     { value: 'all', label: 'Tất cả kỹ năng' },
     { value: 'speaking', label: 'Speaking' },
     { value: 'writing', label: 'Writing' },
-    { value: 'full_mock', label: 'Full Mock Test' },
 ];
+
+export const MODE_LABEL: Record<AttemptMode, string> = {
+    cbt: 'Thi thử chuẩn (CBT)',
+    timed: 'Luyện có thời gian',
+    guided: 'Học có hướng dẫn',
+};
 
 export const MODE_OPTIONS: Option<ExamModeType>[] = [
     { value: 'all', label: 'Chế độ: Tất cả' },
-    { value: 'cbt', label: 'Thi thử chuẩn (CBT)' },
-    { value: 'timed', label: 'Luyện có thời gian' },
-    { value: 'guided', label: 'Học có hướng dẫn' },
+    ...(Object.keys(MODE_LABEL) as AttemptMode[]).map((value) => ({ value, label: MODE_LABEL[value] })),
 ];
 
 export const CATEGORY_OPTIONS: Option<CategoryFilterType>[] = [
     { value: 'all', label: 'Phân loại: Đề & Trợ giúp' },
-    { value: 'fresh', label: 'Đề mới (Chưa gặp)' },
+    { value: 'fresh', label: 'Làm lần đầu' },
     { value: 'retake', label: 'Làm lại (Retake)' },
     { value: 'sample_viewed', label: 'Đã xem mẫu gợi ý' },
     { value: 'independent', label: 'Độc lập hoàn toàn' },
@@ -249,16 +38,17 @@ export const CATEGORY_OPTIONS: Option<CategoryFilterType>[] = [
 
 export const STATUS_OPTIONS: Option<StatusFilterType>[] = [
     { value: 'all', label: 'Trạng thái: Tất cả' },
-    { value: 'completed', label: 'Đã hoàn thành & Chấm điểm' },
-    { value: 'scoring', label: 'Đang chờ AI chấm' },
+    { value: 'scored', label: 'Đã chấm điểm' },
+    { value: 'pending', label: 'Đang chờ AI chấm' },
+    { value: 'in_progress', label: 'Đang làm dở' },
     { value: 'interrupted', label: 'Bị gián đoạn' },
 ];
 
 export const DATE_SCOPE_OPTIONS: Option<DateScopeType>[] = [
+    { value: 'all', label: 'Tất cả' },
     { value: '7d', label: '7 ngày gần nhất' },
     { value: '30d', label: '30 ngày qua' },
-    { value: 'this_month', label: 'Tháng này (Tháng 5/2025)' },
-    { value: 'custom', label: 'Tuỳ chọn ngày...' },
+    { value: 'this_month', label: 'Tháng này' },
 ];
 
 export const PAGE_SIZE_OPTIONS: Option<number>[] = [
@@ -267,14 +57,41 @@ export const PAGE_SIZE_OPTIONS: Option<number>[] = [
     { value: 50, label: '50 dòng' },
 ];
 
-export const isRetakeAttempt = (attempt: HistoryAttempt) => attempt.categoryBadge.includes('Làm lại');
+/** Nhóm trạng thái hiển thị: `submitted` và `scoring` đều là "đang chờ chấm". */
+export const STATUS_GROUP: Record<AttemptStatus, Exclude<StatusFilterType, 'all'>> = {
+    in_progress: 'in_progress',
+    submitted: 'pending',
+    scoring: 'pending',
+    scored: 'scored',
+    interrupted: 'interrupted',
+};
 
 /** Link tới trang xem lại bài; `annotationId` cuộn thẳng tới đoạn bị nhận xét. */
 export const getAttemptHref = (attemptId: string, annotationId?: string) =>
     `/setting/history/${attemptId}${annotationId ? `#ann-${annotationId}` : ''}`;
 
-export const SKILL_STYLE: Record<HistoryAttempt['skill'], { Icon: IconType; className: string; label: string }> = {
+/** Mã ngắn để người dùng nhận ra lượt làm (attempt không có cột mã riêng). */
+export const getAttemptCode = (attempt: Attempt) => `#${attempt.id.slice(0, 8).toUpperCase()}`;
+
+/** "Part 2 · Q3-4" khi luyện riêng một Part, "Cả đề" khi làm hết. */
+export function getPartLabel(attempt: Attempt) {
+    const template = PART_TEMPLATES.find((part) => part.id === attempt.part_template_id);
+    return template ? `Part ${template.part_no} · Q${template.q_from}-${template.q_to}` : 'Cả đề';
+}
+
+const DATE_TIME = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+
+export const formatDateTime = (iso: string) => DATE_TIME.format(new Date(iso));
+
+/** Thời lượng từ lúc bắt đầu tới lúc nộp; `null` khi chưa nộp. */
+export function formatDuration(attempt: Attempt) {
+    if (!attempt.submitted_at) return null;
+    const totalSec = Math.max(0, Math.round((Date.parse(attempt.submitted_at) - Date.parse(attempt.started_at)) / 1000));
+    const minutes = Math.floor(totalSec / 60);
+    return `${minutes}m ${String(totalSec % 60).padStart(2, '0')}s`;
+}
+
+export const SKILL_STYLE: Record<Skill, { Icon: IconType; className: string; label: string }> = {
     speaking: { Icon: LuMic, className: 'bg-main text-sub3', label: 'Speaking' },
     writing: { Icon: LuPenLine, className: 'bg-sub3 text-main', label: 'Writing' },
-    full_mock: { Icon: LuClipboardList, className: 'bg-sub2 text-white', label: 'Full Mock Test' },
 };
