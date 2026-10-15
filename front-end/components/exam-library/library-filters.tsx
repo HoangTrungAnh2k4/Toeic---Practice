@@ -1,16 +1,19 @@
 import Link from 'next/link';
 import type { IconType } from 'react-icons';
-import { LuBookmark, LuLayers, LuMonitor, LuRotateCcw } from 'react-icons/lu';
+import { LuBookmark, LuRotateCcw } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
-import { buildSpeakingHref, DEFAULT_SPEAKING_QUERY } from '../_lib/searchParams';
-import { SpeakingQuery, SpeakingTabType } from '../types';
-import { STATUS_OPTIONS, TAB_OPTIONS, TARGET_OPTIONS, TOPIC_OPTIONS } from '../utils';
-import SpeakingParamSelect from './SpeakingParamSelect';
-import SpeakingSearchInput from './SpeakingSearchInput';
+import type { Skill } from '@/lib/domain/types';
+import { STATUS_OPTIONS, TAB_OPTIONS, TARGET_OPTIONS, TOPIC_OPTIONS } from '@/lib/exam-library/options';
+import { buildLibraryHref, DEFAULT_LIBRARY_QUERY } from '@/lib/exam-library/search-params';
+import type { LibraryQuery, LibraryTab } from '@/lib/exam-library/types';
+import { LibraryParamSelect } from './library-param-select';
+import { LibrarySearchInput } from './library-search-input';
+import { SKILL_COPY } from './skill-copy';
 
-interface SpeakingFiltersProps {
-    query: SpeakingQuery;
-    tabCounts: Record<SpeakingTabType, number>;
+interface LibraryFiltersProps {
+    skill: Skill;
+    query: LibraryQuery;
+    tabCounts: Record<LibraryTab, number>;
     displayedCount: number;
 }
 
@@ -19,9 +22,7 @@ const SELECT_CLASS =
 
 const FOCUS_RING_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
 
-const TAB_ICONS: Partial<Record<SpeakingTabType, IconType>> = {
-    cbt: LuMonitor,
-    by_part: LuLayers,
+const TAB_ICONS: Partial<Record<LibraryTab, IconType>> = {
     retake: LuRotateCcw,
     bookmark: LuBookmark,
 };
@@ -32,10 +33,10 @@ const SELECT_FILTERS = [
     { name: 'topic', label: 'Lọc theo chủ đề', options: TOPIC_OPTIONS },
 ] as const;
 
-export default function SpeakingFilters({ query, tabCounts, displayedCount }: SpeakingFiltersProps) {
+export function LibraryFilters({ skill, query, tabCounts, displayedCount }: LibraryFiltersProps) {
     return (
         <section
-            aria-label="Bộ lọc thư viện đề Speaking"
+            aria-label={`Bộ lọc thư viện đề ${SKILL_COPY[skill].label}`}
             className="flex flex-col gap-4 bg-white shadow-sm p-4 sm:p-5 border border-sub2/30 rounded-xl"
         >
             {/* Practice tabs & reset */}
@@ -47,7 +48,7 @@ export default function SpeakingFilters({ query, tabCounts, displayedCount }: Sp
                         return (
                             <Link
                                 key={value}
-                                href={buildSpeakingHref(query, { tab: value })}
+                                href={buildLibraryHref(skill, query, { tab: value })}
                                 scroll={false}
                                 aria-current={isActive ? 'true' : undefined}
                                 className={cn(
@@ -77,7 +78,7 @@ export default function SpeakingFilters({ query, tabCounts, displayedCount }: Sp
                         {tabCounts.all} bộ đề
                     </span>
                     <Link
-                        href={buildSpeakingHref(DEFAULT_SPEAKING_QUERY)}
+                        href={buildLibraryHref(skill, DEFAULT_LIBRARY_QUERY)}
                         scroll={false}
                         className={cn(
                             'inline-flex items-center gap-1.5 hover:bg-sub1 px-2.5 py-1.5 rounded-lg font-semibold text-main text-xs transition-colors',
@@ -92,10 +93,11 @@ export default function SpeakingFilters({ query, tabCounts, displayedCount }: Sp
 
             {/* Search & dropdown filters */}
             <div className="gap-3 grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-5">
-                <SpeakingSearchInput query={query} className="sm:col-span-3 xl:col-span-2" />
+                <LibrarySearchInput skill={skill} query={query} className="sm:col-span-3 xl:col-span-2" />
                 {SELECT_FILTERS.map((filter) => (
-                    <SpeakingParamSelect
+                    <LibraryParamSelect
                         key={filter.name}
+                        skill={skill}
                         query={query}
                         name={filter.name}
                         options={filter.options}

@@ -68,6 +68,8 @@ export interface PartTemplate {
 
 export interface Exam {
     id: string;
+    /** Mỗi đề chỉ thuộc một kỹ năng — Speaking và Writing thi riêng, không có đề Full Test. */
+    skill: Skill;
     code: string;
     title: string;
     edition: number;
@@ -140,8 +142,8 @@ export interface Attempt {
     ends_at: string | null;
     submitted_at: string | null;
     scored_at: string | null;
-    speaking_score: number | null;
-    writing_score: number | null;
+    /** Điểm thang ETS 0-200 của kỹ năng của đề. */
+    score: number | null;
     feedback_summary: string | null;
     scoring_error: string | null;
 }

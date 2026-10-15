@@ -1,14 +1,13 @@
-import { Option, WritingQuery } from '../types';
-import { STATUS_OPTIONS, TAB_OPTIONS, TARGET_OPTIONS, TOPIC_OPTIONS } from '../utils';
+import type { AttemptMode, Skill } from '@/lib/domain/types';
+import { STATUS_OPTIONS, TAB_OPTIONS, TARGET_OPTIONS, TOPIC_OPTIONS } from './options';
+import type { LibraryQuery, Option } from './types';
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
 
-export const WRITING_PATH = '/writing';
-
 /** Id của khu vực danh sách đề, dùng làm anchor khi chuyển trang. */
-export const WRITING_LIBRARY_ID = 'writing-library';
+export const LIBRARY_SECTION_ID = 'exam-library';
 
-export const DEFAULT_WRITING_QUERY: WritingQuery = {
+export const DEFAULT_LIBRARY_QUERY: LibraryQuery = {
     tab: 'all',
     searchQuery: '',
     target: 'all',
@@ -25,9 +24,9 @@ const PARAM_KEYS = {
     status: 'status',
     topic: 'topic',
     page: 'page',
-} as const satisfies Record<keyof WritingQuery, string>;
+} as const satisfies Record<keyof LibraryQuery, string>;
 
-const QUERY_KEYS = Object.keys(PARAM_KEYS) as (keyof WritingQuery)[];
+const QUERY_KEYS = Object.keys(PARAM_KEYS) as (keyof LibraryQuery)[];
 
 function pickOption<T extends string | number>(raw: string | undefined, options: Option<T>[], fallback: T): T {
     return options.find((option) => String(option.value) === raw)?.value ?? fallback;
@@ -39,12 +38,12 @@ function toPositiveInt(raw: string | undefined, fallback: number) {
 }
 
 /** Đọc & validate search params; giá trị không hợp lệ sẽ rơi về mặc định. */
-export function parseWritingQuery(raw: RawSearchParams): WritingQuery {
-    const get = (key: keyof WritingQuery) => {
+export function parseLibraryQuery(raw: RawSearchParams): LibraryQuery {
+    const get = (key: keyof LibraryQuery) => {
         const value = raw[PARAM_KEYS[key]];
         return Array.isArray(value) ? value[0] : value;
     };
-    const defaults = DEFAULT_WRITING_QUERY;
+    const defaults = DEFAULT_LIBRARY_QUERY;
 
     return {
         tab: pickOption(get('tab'), TAB_OPTIONS, defaults.tab),
@@ -57,20 +56,27 @@ export function parseWritingQuery(raw: RawSearchParams): WritingQuery {
 }
 
 /**
- * Tạo URL mới từ query hiện tại + phần thay đổi.
+ * Tạo URL thư viện đề từ query hiện tại + phần thay đổi.
  * Mọi thay đổi bộ lọc đều quay về trang 1, trừ khi `patch` chỉ định `page`.
  * Giá trị trùng mặc định được lược khỏi URL cho gọn.
  */
-export function buildWritingHref(query: WritingQuery, patch: Partial<WritingQuery> = {}) {
-    const next: WritingQuery = { ...query, page: 1, ...patch };
+export function buildLibraryHref(skill: Skill, query: LibraryQuery, patch: Partial<LibraryQuery> = {}) {
+    const next: LibraryQuery = { ...query, page: 1, ...patch };
     const params = new URLSearchParams();
 
     for (const key of QUERY_KEYS) {
-        if (next[key] !== DEFAULT_WRITING_QUERY[key]) {
+        if (next[key] !== DEFAULT_LIBRARY_QUERY[key]) {
             params.set(PARAM_KEYS[key], String(next[key]));
         }
     }
 
     const search = params.toString();
-    return search ? `${WRITING_PATH}?${search}` : WRITING_PATH;
+    return search ? `/${skill}?${search}` : `/${skill}`;
+}
+
+/** Link vào phòng thi của đề; bỏ trống `mode` = thi thử chuẩn CBT. */
+export function buildTestHref(skill: Skill, examId: string, mode?: AttemptMode) {
+    const params = new URLSearchParams({ id: examId });
+    if (mode) params.set('mode', mode);
+    return `/${skill}/test?${params}`;
 }

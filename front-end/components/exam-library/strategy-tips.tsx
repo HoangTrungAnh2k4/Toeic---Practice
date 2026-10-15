@@ -1,10 +1,19 @@
 import { LuLightbulb } from 'react-icons/lu';
-import { PART_STRATEGIES } from '../utils';
+import type { Skill } from '@/lib/domain/types';
+import type { PartStrategy } from '@/lib/exam-library/types';
+import { SKILL_COPY } from './skill-copy';
 
-export default function WritingStrategyTips() {
+interface StrategyTipsProps {
+    skill: Skill;
+    strategies: PartStrategy[];
+}
+
+export function StrategyTips({ skill, strategies }: StrategyTipsProps) {
+    const copy = SKILL_COPY[skill];
+
     return (
         <section
-            aria-labelledby="writing-strategy-title"
+            aria-labelledby={`${skill}-strategy-title`}
             className="flex flex-col gap-5 bg-white shadow-sm p-5 sm:p-6 border border-sub2/30 rounded-xl"
         >
             <div className="flex items-start gap-3">
@@ -15,17 +24,17 @@ export default function WritingStrategyTips() {
                     <span className="font-semibold text-sub2 text-xs uppercase tracking-wider">
                         Bí quyết phòng thi CBT · ETS Scoring Secrets
                     </span>
-                    <h2 id="writing-strategy-title" className="font-bold text-main text-xl tracking-tight">
-                        Chiến thuật tối ưu điểm từng phần thi TOEIC Writing
+                    <h2 id={`${skill}-strategy-title`} className="font-bold text-main text-xl tracking-tight">
+                        Chiến thuật tối ưu điểm từng phần thi TOEIC {copy.label}
                     </h2>
                     <p className="font-medium text-subText text-sm">
-                        Đúc kết từ kinh nghiệm luyện thi 200/200 và thuật toán chấm rubric tự động của AI.
+                        {copy.strategySubtitle}
                     </p>
                 </div>
             </div>
 
             <div className="gap-4 grid grid-cols-1 lg:grid-cols-3">
-                {PART_STRATEGIES.map(({ part, timing, tips, formula }) => (
+                {strategies.map(({ part, timing, tips, formula }) => (
                     <div key={part} className="flex flex-col justify-between gap-4 bg-sub1/50 p-4 rounded-xl">
                         <div className="flex flex-col gap-3">
                             <div className="flex flex-wrap justify-between items-center gap-2">

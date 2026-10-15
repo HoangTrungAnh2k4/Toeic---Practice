@@ -1,9 +1,9 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { PAGE_SIZE } from '../utils';
+import { PAGE_SIZE } from '@/lib/exam-library/options';
 
-export default function SpeakingResultsSkeleton() {
+export function LibraryResultsSkeleton() {
     return (
-        <div className="flex flex-col gap-4" aria-busy="true" aria-label="Đang tải thư viện đề Speaking">
+        <div className="flex flex-col gap-4" aria-busy="true" aria-label="Đang tải thư viện đề">
             {/* Filters */}
             <div className="flex flex-col gap-4 bg-white shadow-sm p-4 sm:p-5 border border-sub2/30 rounded-xl">
                 <div className="flex flex-wrap justify-between items-center gap-3 pb-4 border-sub2/20 border-b">

@@ -3,11 +3,13 @@ import { ReactNode } from 'react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { buildSpeakingHref, SPEAKING_LIBRARY_ID } from '../_lib/searchParams';
-import { SpeakingQuery } from '../types';
+import type { Skill } from '@/lib/domain/types';
+import { buildLibraryHref, LIBRARY_SECTION_ID } from '@/lib/exam-library/search-params';
+import type { LibraryQuery } from '@/lib/exam-library/types';
 
-interface SpeakingPaginationProps {
-    query: SpeakingQuery;
+interface LibraryPaginationProps {
+    skill: Skill;
+    query: LibraryQuery;
     page: number;
     totalPages: number;
     displayedCount: number;
@@ -39,16 +41,17 @@ function StepLink({ href, disabled, label, children }: StepLinkProps) {
     );
 }
 
-export default function SpeakingPagination({
+export function LibraryPagination({
+    skill,
     query,
     page,
     totalPages,
     displayedCount,
     totalRecords,
-}: SpeakingPaginationProps) {
+}: LibraryPaginationProps) {
     const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
     // Cuộn về đầu danh sách đề khi đổi trang thay vì đầu trang
-    const hrefFor = (target: number) => `${buildSpeakingHref(query, { page: target })}#${SPEAKING_LIBRARY_ID}`;
+    const hrefFor = (target: number) => `${buildLibraryHref(skill, query, { page: target })}#${LIBRARY_SECTION_ID}`;
 
     return (
         <div className="flex sm:flex-row flex-col justify-between items-center gap-3 bg-white shadow-sm px-4 py-3 border border-sub2/30 rounded-xl">

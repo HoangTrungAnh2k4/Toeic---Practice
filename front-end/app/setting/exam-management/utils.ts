@@ -6,7 +6,6 @@ export const LIBRARY_TABS: Option<LibraryTab>[] = [
     { value: 'all', label: 'Tất cả' },
     { value: 'speaking', label: 'Speaking' },
     { value: 'writing', label: 'Writing' },
-    { value: 'combo', label: 'Full Test' },
 ];
 
 export const STATUS_FILTER_OPTIONS: Option<StatusFilter>[] = [
@@ -26,7 +25,6 @@ export const SOURCE_FILTER_OPTIONS: Option<SourceFilter>[] = [
 export const PREVIEW_HREF: Record<ExamSkill, string> = {
     speaking: '/speaking/test',
     writing: '/writing/test',
-    combo: '/speaking/test',
 };
 
 export function formatCount(value: number): string {
@@ -38,7 +36,6 @@ export function getTabCounts(exams: ExamLibraryItem[]): Record<LibraryTab, numbe
         all: exams.length,
         speaking: exams.filter((exam) => exam.skill === 'speaking').length,
         writing: exams.filter((exam) => exam.skill === 'writing').length,
-        combo: exams.filter((exam) => exam.skill === 'combo').length,
     };
 }
 

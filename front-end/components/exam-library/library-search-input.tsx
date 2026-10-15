@@ -3,16 +3,20 @@
 import { LuSearch } from 'react-icons/lu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { useSpeakingParam } from '../_lib/useSpeakingParam';
-import { SpeakingQuery } from '../types';
+import type { Skill } from '@/lib/domain/types';
+import type { LibraryQuery } from '@/lib/exam-library/types';
+import { useLibraryParam } from '@/lib/exam-library/use-library-param';
+import { SKILL_COPY } from './skill-copy';
 
-interface SpeakingSearchInputProps {
-    query: SpeakingQuery;
+interface LibrarySearchInputProps {
+    skill: Skill;
+    query: LibraryQuery;
     className?: string;
 }
 
-export default function SpeakingSearchInput({ query, className }: SpeakingSearchInputProps) {
-    const { value, setValue, isPending } = useSpeakingParam(query, 'searchQuery');
+export function LibrarySearchInput({ skill, query, className }: LibrarySearchInputProps) {
+    const { value, setValue, isPending } = useLibraryParam(skill, query, 'searchQuery');
+    const copy = SKILL_COPY[skill];
 
     return (
         <div className={cn('relative', className)} data-pending={isPending ? '' : undefined}>
@@ -24,8 +28,8 @@ export default function SpeakingSearchInput({ query, className }: SpeakingSearch
                 type="search"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                aria-label="Tìm kiếm đề Speaking"
-                placeholder="Tìm theo mã đề (ETS SP-09), chủ đề (Office, Travel)..."
+                aria-label={`Tìm kiếm đề ${copy.label}`}
+                placeholder={copy.searchPlaceholder}
                 className="bg-sub1/50 focus-visible:bg-white pl-9 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 h-10 text-main md:text-xs placeholder:text-sub2"
             />
         </div>

@@ -1,9 +1,9 @@
-import type { Exam, ExamSource, ExamStats, ExamStatus } from '@/lib/domain/types';
+import type { ExamSource, ExamStats, ExamStatus, Skill } from '@/lib/domain/types';
+import type { ExamSummary } from '@/lib/exam-library/types';
 
 export type { ExamSource, ExamStatus };
 
-/** Kỹ năng của đề, suy ra từ các Part: có cả Speaking lẫn Writing là `combo` (Full Test). */
-export type ExamSkill = 'speaking' | 'writing' | 'combo';
+export type ExamSkill = Skill;
 
 export type LibraryTab = 'all' | ExamSkill;
 
@@ -16,11 +16,8 @@ export interface Option<T extends string> {
     label: string;
 }
 
-/** Một dòng trong thư viện đề: row `exams` kèm các giá trị tính từ Part và thống kê. */
-export interface ExamLibraryItem extends Exam {
-    skill: ExamSkill;
-    questionCount: number;
-    durationMin: number;
+/** Một dòng trong thư viện đề: đề kèm số câu, thời lượng và thống kê lượt làm. */
+export interface ExamLibraryItem extends ExamSummary {
     /** `null` khi đề chưa có lượt làm nào (chưa phát hành). */
     stats: ExamStats | null;
 }

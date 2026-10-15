@@ -45,8 +45,7 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
         ends_at: duration_sec === null ? null : new Date(startedAt.getTime() + duration_sec * 1000).toISOString(),
         submitted_at: null,
         scored_at: null,
-        speaking_score: null,
-        writing_score: null,
+        score: null,
         feedback_summary: null,
         scoring_error: null,
     };

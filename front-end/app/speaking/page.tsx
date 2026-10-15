@@ -1,29 +1,33 @@
 import { Suspense } from 'react';
-import SpeakingHeroCard from './_components/SpeakingHeroCard';
-import SpeakingKpiCards from './_components/SpeakingKpiCards';
-import SpeakingResults from './_components/SpeakingResults';
-import SpeakingResultsSkeleton from './_components/SpeakingResultsSkeleton';
+import { ExamLibraryResults } from '@/components/exam-library/exam-library-results';
+import { LibraryHero } from '@/components/exam-library/library-hero';
+import { LibraryKpiCards } from '@/components/exam-library/library-kpi-cards';
+import { LibraryResultsSkeleton } from '@/components/exam-library/library-results-skeleton';
+import { StrategyTips } from '@/components/exam-library/strategy-tips';
+import { RawSearchParams } from '@/lib/exam-library/search-params';
+import { getLibraryExams } from '@/lib/exam-library/summaries';
 import SpeakingRubricGuide from './_components/SpeakingRubricGuide';
-import SpeakingStrategyTips from './_components/SpeakingStrategyTips';
-import { RawSearchParams } from './_lib/searchParams';
+import { PART_STRATEGIES } from './utils';
 
 interface SpeakingPageProps {
     searchParams: Promise<RawSearchParams>;
 }
 
-export default function SpeakingPage({ searchParams }: SpeakingPageProps) {
+export default async function SpeakingPage({ searchParams }: SpeakingPageProps) {
+    const exams = await getLibraryExams('speaking');
+
     return (
         <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
-            <SpeakingHeroCard />
-            <SpeakingKpiCards />
+            <LibraryHero skill="speaking" exams={exams} />
+            <LibraryKpiCards skill="speaking" exams={exams} />
 
             {/* Phụ thuộc searchParams → stream riêng, phần tĩnh xung quanh vẫn được prerender */}
-            <Suspense fallback={<SpeakingResultsSkeleton />}>
-                <SpeakingResults searchParams={searchParams} />
+            <Suspense fallback={<LibraryResultsSkeleton />}>
+                <ExamLibraryResults skill="speaking" exams={exams} searchParams={searchParams} />
             </Suspense>
 
             <SpeakingRubricGuide />
-            <SpeakingStrategyTips />
+            <StrategyTips skill="speaking" strategies={PART_STRATEGIES} />
         </main>
     );
 }
