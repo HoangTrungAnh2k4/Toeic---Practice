@@ -1,5 +1,5 @@
 import type { IconType } from 'react-icons';
-import { LuBookCheck, LuGraduationCap, LuMic, LuPenLine } from 'react-icons/lu';
+import { LuBookCheck, LuMic, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';

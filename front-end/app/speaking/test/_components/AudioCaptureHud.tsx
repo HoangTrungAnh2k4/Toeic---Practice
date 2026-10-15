@@ -1,6 +1,6 @@
 'use client';
 
-import { LuClock, LuMic } from 'react-icons/lu';
+import { LuMic } from 'react-icons/lu';
 
 import { cn } from '@/lib/utils';
 

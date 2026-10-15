@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${roboto.variable} ${geistMono.variable} antialiased min-h-screen flex`}>
+            <body className={`${roboto.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col md:flex-row`}>
                 {/* usePathname cần Suspense trên các route có param động (cacheComponents) */}
                 <Suspense fallback={<SidebarFallback />}>
                     <HideOnAuth>

@@ -110,9 +110,9 @@ export const RESPONSE_VERB: Record<MistakeSkill, string> = {
     writing: 'Bạn đã viết',
 };
 
-/** Thư viện đề lọc sẵn chế độ "Luyện theo Part" của kỹ năng tương ứng. */
+/** Thư viện đề của kỹ năng; thư viện chưa có bộ lọc theo Part nên không lọc sẵn. */
 export function getPracticeHref(skill: MistakeSkill) {
-    return `/${skill}?tab=by_part`;
+    return `/${skill}`;
 }
 
 export function getMistakeHref(id: string) {

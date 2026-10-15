@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import packageJson from '@/package.json';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { author, copyrightYear, examSources, linkGroups } from './footer-data';
 
 const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sub3';

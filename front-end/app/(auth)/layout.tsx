@@ -1,4 +1,3 @@
-import { LuGraduationCap } from 'react-icons/lu';
 import AuthShowcase from './_components/AuthShowcase';
 
 export default function AuthLayout({
