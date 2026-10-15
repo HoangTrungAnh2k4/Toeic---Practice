@@ -12,7 +12,7 @@ export default function StudyDayCard({ day }: StudyDayCardProps) {
     const isToday = day.status === 'today';
     const isDone = day.status === 'done';
     const [mainTask, ...extraTasks] = day.tasks;
-    const style = mainTask ? SKILL_STYLE[mainTask.skill] : null;
+    const style = mainTask ? SKILL_STYLE[mainTask.kind] : null;
 
     return (
         <article
@@ -42,6 +42,11 @@ export default function StudyDayCard({ day }: StudyDayCardProps) {
                         Ưu tiên
                     </span>
                 )}
+                {day.status === 'missed' && (
+                    <span className="bg-destructive/10 px-2 py-0.5 rounded-md font-bold text-[10px] text-destructive">
+                        Bỏ lỡ
+                    </span>
+                )}
                 {day.status === 'upcoming' && (
                     <span className="bg-sub2/40 mt-1.5 rounded-full size-2" aria-hidden="true" />
                 )}
@@ -69,11 +74,13 @@ export default function StudyDayCard({ day }: StudyDayCardProps) {
                 <p className="flex-1 font-medium text-sub2 text-xs">Ngày nghỉ – không có bài</p>
             )}
 
-            {/* Footer meta */}
-            {day.meta && (
+            {/* Tiêu chí cần đạt của bài chính */}
+            {mainTask?.goal && (
                 <div className="flex justify-between items-center gap-2 bg-white px-2.5 py-1.5 border border-sub2/20 rounded-lg text-[11px]">
-                    <span className="text-subText">{day.meta.label}</span>
-                    <span className="font-bold text-main truncate">{day.meta.value}</span>
+                    <span className="text-subText shrink-0">Mục tiêu</span>
+                    <span className="font-bold text-main truncate" title={mainTask.goal}>
+                        {mainTask.goal}
+                    </span>
                 </div>
             )}
         </article>

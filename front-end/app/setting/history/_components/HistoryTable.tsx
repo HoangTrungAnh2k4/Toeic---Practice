@@ -15,14 +15,13 @@ import { buttonVariants } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getScoreLevel } from '@/lib/domain/score-levels';
 import type { AttemptMode } from '@/lib/domain/types';
-import { buildTestHref } from '@/lib/exam-library/search-params';
 import { cn } from '@/lib/utils';
 import { HistoryRow } from '../types';
 import {
     formatDateTime,
     formatDuration,
+    getAttemptAction,
     getAttemptCode,
-    getAttemptHref,
     getPartLabel,
     MODE_LABEL,
     SKILL_STYLE,
@@ -50,19 +49,6 @@ const MODE_ICON: Record<AttemptMode, IconType> = {
 };
 
 const BADGE_CLASS = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full w-fit font-semibold text-[11px] text-main';
-
-function getAction({ attempt, exam }: HistoryRow) {
-    switch (STATUS_GROUP[attempt.status]) {
-        case 'in_progress':
-            return { label: 'Tiếp tục làm bài', href: buildTestHref(exam.skill, exam.id, attempt.mode), primary: true };
-        case 'scored':
-            return { label: 'Xem lại chi tiết', href: getAttemptHref(attempt.id), primary: true };
-        case 'pending':
-            return { label: 'Xem bài đã nộp', href: getAttemptHref(attempt.id), primary: false };
-        default:
-            return { label: 'Xem chi tiết', href: getAttemptHref(attempt.id), primary: false };
-    }
-}
 
 function ScoreCell({ row }: { row: HistoryRow }) {
     const { attempt, exam, scoreDelta, answeredCount, questionCount } = row;
@@ -184,7 +170,7 @@ export default function HistoryTable({ rows, hasAnyAttempt }: HistoryTableProps)
                         const ModeIcon = MODE_ICON[attempt.mode];
                         const isRetake = attemptNo > 1;
                         const duration = formatDuration(attempt);
-                        const action = getAction(row);
+                        const action = getAttemptAction(row);
 
                         return (
                             <TableRow

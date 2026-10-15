@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { SESSION_DURATION_OPTIONS } from '../utils';
 
-type SessionDuration = (typeof SESSION_DURATION_OPTIONS)[number];
-
 interface SessionDurationSwitchProps {
-    defaultValue?: SessionDuration;
+    /** `study_plans.minutes_per_day` — mỗi ngày một buổi. */
+    defaultValue: number;
 }
 
-export default function SessionDurationSwitch({ defaultValue = 45 }: SessionDurationSwitchProps) {
-    const [value, setValue] = useState<SessionDuration>(defaultValue);
+/** shortcut: chỉ đổi trên giao diện, chưa ghi `minutes_per_day`; nối khi có API cập nhật lộ trình. */
+export default function SessionDurationSwitch({ defaultValue }: SessionDurationSwitchProps) {
+    const [value, setValue] = useState(defaultValue);
 
     return (
         <div className="flex flex-wrap justify-between items-center gap-3 bg-sub1/50 p-3 rounded-lg">

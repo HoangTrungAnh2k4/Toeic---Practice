@@ -2,7 +2,7 @@ import { formatDateTime, getAttemptCode } from '@/app/setting/history/utils';
 import { listExamParts, listQuestions } from '@/lib/data/content';
 import { listAnnotations, listAttempts, listResponses } from '@/lib/data/user-data';
 import { getPartTemplates, PART_TEMPLATES } from '@/lib/domain/parts';
-import type { Annotation, Attempt, MistakePattern } from '@/lib/domain/types';
+import type { Annotation, Attempt, MistakePattern, Skill } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import {
     Criterion,
@@ -231,6 +231,12 @@ export function getMistakes(book: MistakeBook, query: MistakeQuery): MistakeItem
         .filter((computed) => matchesQuery(computed, query))
         .sort(SORTERS[query.sort])
         .map(({ item }) => item);
+}
+
+/** Lỗi đang mở cần ưu tiên khắc phục nhất của kỹ năng — "Trọng tâm" ở overview và lịch học. */
+export function getTopMistake(book: MistakeBook, skill: Skill): MistakeItem | null {
+    const [top] = getMistakes(book, { skill, status: 'open', criterion: 'all', sort: 'priority', searchQuery: '' });
+    return top ?? null;
 }
 
 export function getMistakeSummary(book: MistakeBook): MistakeSummary {

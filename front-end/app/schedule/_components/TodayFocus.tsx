@@ -1,4 +1,4 @@
-import { LuClock, LuCoffee, LuPlay } from 'react-icons/lu';
+import { LuCircleCheck, LuClock, LuCoffee, LuPlay } from 'react-icons/lu';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -23,8 +23,7 @@ export default function TodayFocus({ day }: TodayFocusProps) {
         );
     }
 
-    const firstTask = day.tasks[0];
-    const startHref = firstTask.skill === 'writing' ? '/writing' : '/speaking';
+    const nextTask = day.tasks.find((task) => task.status !== 'done');
 
     return (
         <section
@@ -41,13 +40,14 @@ export default function TodayFocus({ day }: TodayFocusProps) {
                     </h2>
                 </div>
                 <span className="bg-sub3 px-2 py-0.5 rounded-md font-bold text-[11px] text-main uppercase tracking-wider">
-                    Ưu tiên cao
+                    {nextTask ? 'Ưu tiên cao' : 'Đã xong'}
                 </span>
             </div>
 
             <ol className="flex flex-col gap-2">
                 {day.tasks.map((task, index) => {
-                    const style = SKILL_STYLE[task.skill];
+                    const style = SKILL_STYLE[task.kind];
+                    const isDone = task.status === 'done';
 
                     return (
                         <li key={task.id} className="flex items-start gap-3 bg-white/10 p-3 rounded-lg">
@@ -57,7 +57,11 @@ export default function TodayFocus({ day }: TodayFocusProps) {
                                     index === 0 ? 'bg-sub3 text-main' : 'bg-white/15 text-sub3',
                                 )}
                             >
-                                <style.Icon className="size-4" aria-hidden="true" />
+                                {isDone ? (
+                                    <LuCircleCheck className="size-4" aria-label="Đã hoàn thành" />
+                                ) : (
+                                    <style.Icon className="size-4" aria-hidden="true" />
+                                )}
                             </span>
                             <div className="flex flex-col flex-1 gap-0.5 min-w-0">
                                 <div className="flex justify-between items-center gap-2">
@@ -67,7 +71,9 @@ export default function TodayFocus({ day }: TodayFocusProps) {
                                         {formatMinutes(task.duration)}
                                     </span>
                                 </div>
-                                <span className="font-semibold text-white text-sm">{task.title}</span>
+                                <span className={cn('font-semibold text-white text-sm', isDone && 'line-through')}>
+                                    {task.title}
+                                </span>
                                 {task.description && (
                                     <span className="text-sub1 text-xs leading-relaxed">{task.description}</span>
                                 )}
@@ -82,10 +88,14 @@ export default function TodayFocus({ day }: TodayFocusProps) {
                     Tổng dự kiến:{' '}
                     <strong className="font-semibold text-white">{formatMinutes(getTotalDuration(day.tasks))}</strong>
                 </span>
-                <Link href={startHref} className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
-                    <LuPlay className="size-4" aria-hidden="true" />
-                    <span>Bắt đầu học ngay</span>
-                </Link>
+                {nextTask ? (
+                    <Link href={nextTask.href} className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
+                        <LuPlay className="size-4" aria-hidden="true" />
+                        <span>{nextTask.actionLabel}</span>
+                    </Link>
+                ) : (
+                    <span className="font-semibold text-sub3 text-sm">Đã hoàn thành phiên học hôm nay</span>
+                )}
             </div>
         </section>
     );

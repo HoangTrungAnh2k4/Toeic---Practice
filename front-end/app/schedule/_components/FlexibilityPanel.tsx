@@ -7,7 +7,11 @@ const QUICK_ACTIONS: { id: string; label: string; Icon: IconType }[] = [
     { id: 'library', label: 'Bổ sung đề tự chọn từ thư viện ETS', Icon: LuLibrary },
 ];
 
-export default function FlexibilityPanel() {
+interface FlexibilityPanelProps {
+    minutesPerDay: number;
+}
+
+export default function FlexibilityPanel({ minutesPerDay }: FlexibilityPanelProps) {
     return (
         <section
             aria-labelledby="flexibility-title"
@@ -44,7 +48,7 @@ export default function FlexibilityPanel() {
                         />
                     </button>
                 ))}
-                <SessionDurationSwitch />
+                <SessionDurationSwitch defaultValue={minutesPerDay} />
             </div>
 
             <div className="flex items-start gap-3 bg-sub3/10 mt-auto p-3 border border-sub3/50 rounded-lg">

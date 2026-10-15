@@ -6,10 +6,12 @@ import StudyDayCard from './StudyDayCard';
 
 interface WeekSprintProps {
     week: StudyWeek;
+    weekCount: number;
+    onWeekChange: (weekNo: number) => void;
 }
 
-export default function WeekSprint({ week }: WeekSprintProps) {
-    const percent = getProgressPercent(week.completedSessions, week.totalSessions);
+export default function WeekSprint({ week, weekCount, onWeekChange }: WeekSprintProps) {
+    const percent = getProgressPercent(week.completedTasks, week.totalTasks);
 
     return (
         <section
@@ -25,7 +27,8 @@ export default function WeekSprint({ week }: WeekSprintProps) {
                     <div className="flex flex-col gap-0.5 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                             <h2 id="week-sprint-title" className="font-bold text-main text-lg">
-                                Tuần {week.index}: {week.theme}
+                                Tuần {week.index}
+                                {week.theme && `: ${week.theme}`}
                             </h2>
                             {week.isCurrent && (
                                 <span className="bg-sub3 px-2 py-0.5 rounded-md font-bold text-[11px] text-main">
@@ -42,9 +45,9 @@ export default function WeekSprint({ week }: WeekSprintProps) {
                         <span className="font-semibold text-subText text-xs">
                             Hoàn thành{' '}
                             <strong className="text-main">
-                                {week.completedSessions}/{week.totalSessions}
+                                {week.completedTasks}/{week.totalTasks}
                             </strong>{' '}
-                            phiên
+                            bài
                         </span>
                         <div
                             role="progressbar"
@@ -64,6 +67,8 @@ export default function WeekSprint({ week }: WeekSprintProps) {
                             variant="third"
                             className="bg-white px-0 w-9"
                             aria-label="Tuần trước"
+                            disabled={week.index <= 1}
+                            onClick={() => onWeekChange(week.index - 1)}
                         >
                             <LuChevronLeft className="size-4" aria-hidden="true" />
                         </Button>
@@ -73,6 +78,8 @@ export default function WeekSprint({ week }: WeekSprintProps) {
                             variant="third"
                             className="bg-white px-0 w-9"
                             aria-label="Tuần sau"
+                            disabled={week.index >= weekCount}
+                            onClick={() => onWeekChange(week.index + 1)}
                         >
                             <LuChevronRight className="size-4" aria-hidden="true" />
                         </Button>
@@ -81,7 +88,7 @@ export default function WeekSprint({ week }: WeekSprintProps) {
             </div>
 
             {/* Day strip: cuộn ngang trên màn nhỏ, lưới 7 cột trên màn rộng */}
-            {week.days.length === 0 ? (
+            {week.totalTasks === 0 ? (
                 <p className="bg-sub1/40 p-6 rounded-lg font-medium text-subText text-xs text-center">
                     Tuần này chưa có lịch học. Dùng “Tối ưu lộ trình (AI)” để tạo lịch mới.
                 </p>

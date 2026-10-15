@@ -54,10 +54,11 @@ erDiagram
 
 ### Lịch học
 
-- [x] **study_plans** — `id` PK · `user_id` FK · `minutes_per_day` · `days_per_week` · `session_minutes` · `status` (active | archived) · `ai_rationale?` · `created_at`
-- [x] **study_plan_weeks** — PK (`plan_id`, `week_no`) · `theme`
-- [x] **plan_tasks** — `id` PK · `plan_id` FK · `scheduled_date` · `sort_order` · `kind` (speaking | writing | review | mock | summary) · `title` · `description?` · `goal?` · `duration_min` · `exam_id?` FK · `part_template_id?` FK · `mistake_pattern_id?` FK · `attempt_id?` FK UK (có = task đã xong)
-- [x] **ai_insights** — `id` PK · `user_id` FK · `payload jsonb` (shape chốt ở Bước 4.7) · `generated_at`
+- [x] **study_plans** — `id` PK · `user_id` FK · `minutes_per_day` (mỗi ngày học một buổi) · `days_per_week` · `status` (active | archived) · `ai_rationale?` · `created_at`
+- [x] **study_plan_weeks** — PK (`plan_id`, `week_no`) · `theme` — tuần 1 là tuần (Thứ 2 – Chủ nhật) chứa `study_plans.created_at`
+- [x] **plan_tasks** — `id` PK · `plan_id` FK · `scheduled_date` · `sort_order` · `kind` (speaking | writing | review | mock | summary) · `title` · `description?` · `goal?` · `duration_min` · `exam_id?` FK · `part_template_id?` FK · `mistake_pattern_id?` FK · `attempt_id?` FK UK (phòng thi ghi khi nộp bài mở từ task) · `completed_at?` (task không cần bài làm: review, summary) — task xong khi có `attempt_id` hoặc `completed_at`
+- [x] **ai_insights** — `id` PK · `user_id` FK · `payload jsonb` · `generated_at`
+  - `payload`: `{ based_on_attempts, items: [{ skill, part_template_id?, mistake_pattern_id?, title, metric, tone (critical | warning), body, action_label, href }] }`
 
 ### Tra cứu
 

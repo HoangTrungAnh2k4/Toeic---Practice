@@ -1,24 +1,25 @@
 import Link from 'next/link';
-import { LuCalendarClock, LuCircle, LuCircleCheck, LuCirclePlay, LuInbox } from 'react-icons/lu';
+import { LuCalendarClock, LuCircleAlert, LuCircleCheck, LuCirclePlay, LuInbox } from 'react-icons/lu';
 import type { IconType } from 'react-icons';
 import { buttonVariants } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE } from '../_lib/skillStyle';
-import { TaskStatus, WeeklyTask } from '../types';
+import { TaskStatus, TaskView } from '../types';
 import { formatMinutes } from '../utils';
 
 interface WeeklyTaskTableProps {
-    tasks: WeeklyTask[];
+    /** Task của tuần đang xem. */
+    tasks: TaskView[];
 }
 
-const COLUMNS = ['Kỹ năng', 'Chủ đề bài học', 'Mục tiêu đầu ra (Rubric)', 'Thời lượng', 'Trạng thái'];
+const COLUMNS = ['Kỹ năng', 'Chủ đề bài học', 'Mục tiêu đầu ra', 'Thời lượng', 'Trạng thái'];
 
-const STATUS_STYLE: Record<TaskStatus, { Icon: IconType; label: string; className: string }> = {
-    done: { Icon: LuCircleCheck, label: 'Hoàn thành', className: 'bg-sub1 text-main' },
-    today: { Icon: LuCirclePlay, label: 'Cần học hôm nay', className: 'bg-sub3 text-main' },
-    todo: { Icon: LuCircle, label: 'Chưa làm', className: 'bg-white text-main ring-1 ring-inset ring-sub2' },
-    scheduled: { Icon: LuCalendarClock, label: 'Đã lên lịch', className: 'bg-sub1/50 text-subText' },
+const STATUS_STYLE: Record<TaskStatus, { Icon: IconType; className: string }> = {
+    done: { Icon: LuCircleCheck, className: 'bg-sub1 text-main' },
+    today: { Icon: LuCirclePlay, className: 'bg-sub3 text-main' },
+    overdue: { Icon: LuCircleAlert, className: 'bg-destructive/10 text-destructive' },
+    scheduled: { Icon: LuCalendarClock, className: 'bg-sub1/50 text-subText' },
 };
 
 export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
@@ -33,7 +34,7 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                         Danh mục bài tập trọng điểm trong tuần
                     </h2>
                     <p className="font-medium text-subText text-xs">
-                        {tasks.length} học phần được tổng hợp để đạt mục tiêu S160 / W170.
+                        {tasks.length} bài trong tuần đang xem.
                     </p>
                 </div>
             </div>
@@ -72,7 +73,7 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                         </TableRow>
                     ) : (
                         tasks.map((task) => {
-                            const skill = SKILL_STYLE[task.skill];
+                            const skill = SKILL_STYLE[task.kind];
                             const status = STATUS_STYLE[task.status];
                             const isToday = task.status === 'today';
 
@@ -92,14 +93,14 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                                             )}
                                         >
                                             <skill.Icon className="size-3.5" aria-hidden="true" />
-                                            {task.partLabel}
+                                            {task.label}
                                         </span>
                                     </TableCell>
                                     <TableCell className="px-3 py-4 min-w-56 whitespace-normal">
-                                        <span className="font-semibold text-main text-sm">{task.topic}</span>
+                                        <span className="font-semibold text-main text-sm">{task.title}</span>
                                     </TableCell>
                                     <TableCell className="px-3 py-4 min-w-64 whitespace-normal">
-                                        <span className="text-subText leading-relaxed">{task.rubric}</span>
+                                        <span className="text-subText leading-relaxed">{task.goal ?? '—'}</span>
                                     </TableCell>
                                     <TableCell className="px-3 py-4 font-medium tabular-nums text-main">
                                         {formatMinutes(task.duration)}
@@ -112,7 +113,7 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                                             )}
                                         >
                                             <status.Icon className="size-3.5" aria-hidden="true" />
-                                            {task.statusLabel ?? status.label}
+                                            {task.statusLabel}
                                         </span>
                                     </TableCell>
                                     <TableCell className="px-3 py-4 text-right">

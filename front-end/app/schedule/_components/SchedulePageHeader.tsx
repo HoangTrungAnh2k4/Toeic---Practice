@@ -3,7 +3,14 @@ import Button, { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-export default function SchedulePageHeader() {
+interface SchedulePageHeaderProps {
+    /** `study_plans.ai_rationale`; `null` dùng mô tả chung. */
+    rationale: string | null;
+    /** Khách không có lộ trình nên ẩn các nút chỉnh lộ trình. */
+    showActions: boolean;
+}
+
+export default function SchedulePageHeader({ rationale, showActions }: SchedulePageHeaderProps) {
     return (
         <div className="flex xl:flex-row flex-col justify-between xl:items-end gap-4">
             {/* Title & Breadcrumb */}
@@ -24,14 +31,13 @@ export default function SchedulePageHeader() {
                         Kế hoạch học & Lộ trình bứt phá điểm số
                     </h1>
                     <p className="max-w-3xl font-medium text-subText text-sm leading-relaxed">
-                        Lộ trình cá nhân hóa, tự điều chỉnh theo <strong className="text-main">28 lượt làm bài</strong>{' '}
-                        gần nhất. Tuần này tập trung vào phản xạ <strong className="text-main">Speaking Q5-7</strong> và
-                        cấu trúc đa yêu cầu của <strong className="text-main">Email Writing Q6-7</strong>.
+                        {rationale ?? 'Lộ trình cá nhân hóa theo ngày thi, mục tiêu điểm và các lỗi bạn hay gặp.'}
                     </p>
                 </div>
             </div>
 
             {/* Header Actions */}
+            {showActions && (
             <div className="flex flex-wrap items-center gap-3 self-start xl:self-auto shrink-0">
                 <Link
                     href="/setting/profile"
@@ -45,6 +51,7 @@ export default function SchedulePageHeader() {
                     <span>Tối ưu lộ trình (AI)</span>
                 </Button>
             </div>
+            )}
         </div>
     );
 }

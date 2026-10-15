@@ -1,41 +1,48 @@
-export type TaskSkill = 'speaking' | 'writing' | 'review' | 'mock' | 'summary';
+import type { MistakeItem } from '@/app/mistakes/types';
+import type { PlanTaskKind, Skill } from '@/lib/domain/types';
 
-export type DayStatus = 'done' | 'today' | 'upcoming';
+export type DayStatus = 'done' | 'today' | 'missed' | 'upcoming';
 
-export type TaskStatus = 'done' | 'today' | 'todo' | 'scheduled';
-
-export type InsightTone = 'critical' | 'warning';
+export type TaskStatus = 'done' | 'today' | 'overdue' | 'scheduled';
 
 export interface ExamGoal {
-    daysLeft: number;
-    examDate: string;
+    /** `null` khi chưa đặt ngày thi. */
+    daysLeft: number | null;
+    examDate: string | null;
     minutesPerDay: number;
     daysPerWeek: number;
     streakDays: number;
 }
 
 export interface SkillProgress {
-    skill: 'speaking' | 'writing';
+    skill: Skill;
     label: string;
-    current: number;
-    target: number;
-    targetLevel: string;
-    focus: string;
+    /** Điểm lượt làm cả đề gần nhất. */
+    current: number | null;
+    target: number | null;
+    targetLevel: number | null;
+    focus: MistakeItem | null;
 }
 
 export interface MonthlyProgress {
     completed: number;
     total: number;
-    note: string;
+    overdue: number;
 }
 
-export interface DayTask {
+/** Một `plan_tasks` đã gắn nhãn, trạng thái và link để hiển thị. */
+export interface TaskView {
     id: string;
-    skill: TaskSkill;
+    kind: PlanTaskKind;
     label: string;
     title: string;
-    description?: string;
+    description: string | null;
+    goal: string | null;
     duration: number;
+    status: TaskStatus;
+    statusLabel: string;
+    actionLabel: string;
+    href: string;
 }
 
 export interface StudyDay {
@@ -43,43 +50,15 @@ export interface StudyDay {
     weekday: string;
     date: string;
     status: DayStatus;
-    tasks: DayTask[];
-    meta?: { label: string; value: string };
+    tasks: TaskView[];
 }
 
 export interface StudyWeek {
     index: number;
-    theme: string;
+    theme: string | null;
     range: string;
     isCurrent: boolean;
-    completedSessions: number;
-    totalSessions: number;
+    completedTasks: number;
+    totalTasks: number;
     days: StudyDay[];
-}
-
-export interface AiInsight {
-    id: string;
-    skill: TaskSkill;
-    title: string;
-    metric: string;
-    tone: InsightTone;
-    summary: string;
-    highlight: string;
-    conclusion: string;
-    tag: string;
-    linkLabel: string;
-    href: string;
-}
-
-export interface WeeklyTask {
-    id: string;
-    skill: TaskSkill;
-    partLabel: string;
-    topic: string;
-    rubric: string;
-    duration: number;
-    status: TaskStatus;
-    statusLabel?: string;
-    actionLabel: string;
-    href: string;
 }

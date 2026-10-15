@@ -20,14 +20,13 @@ interface ScoreTrendChartProps {
     data: ScorePoint[];
 }
 
-/** Điểm qua các bài thi thử; Writing nét đứt để không phân biệt chỉ bằng màu. */
+/** Điểm qua các bài làm cả đề; Writing nét đứt để không phân biệt chỉ bằng màu. Mỗi bài chỉ có một kỹ năng nên nối qua điểm trống. */
 export default function ScoreTrendChart({ data }: ScoreTrendChartProps) {
-    const first = data[0];
-    const last = data[data.length - 1];
-    const summary =
-        first && last
-            ? `Speaking từ ${first.speaking} lên ${last.speaking}, Writing từ ${first.writing} lên ${last.writing} qua ${data.length} bài thi thử`
-            : 'Chưa có bài thi thử';
+    const describe = (skill: 'speaking' | 'writing', label: string) => {
+        const scores = data.flatMap((point) => (point[skill] === undefined ? [] : [point[skill]]));
+        return scores.length ? `${label} từ ${scores[0]} tới ${scores[scores.length - 1]}` : `${label} chưa có bài`;
+    };
+    const summary = `${describe('speaking', 'Speaking')}, ${describe('writing', 'Writing')} qua ${data.length} bài làm cả đề`;
 
     return (
         <ChartContainer config={chartConfig} className="w-full h-56" role="img" aria-label={summary}>
@@ -41,6 +40,7 @@ export default function ScoreTrendChart({ data }: ScoreTrendChartProps) {
                     dataKey="speaking"
                     type="monotone"
                     stroke="var(--color-speaking)"
+                    connectNulls
                     strokeWidth={3}
                     dot={{ r: 3 }}
                     activeDot={{ r: 5 }}
@@ -49,6 +49,7 @@ export default function ScoreTrendChart({ data }: ScoreTrendChartProps) {
                     dataKey="writing"
                     type="monotone"
                     stroke="var(--color-writing)"
+                    connectNulls
                     strokeWidth={3}
                     strokeDasharray="6 4"
                     dot={{ r: 3 }}

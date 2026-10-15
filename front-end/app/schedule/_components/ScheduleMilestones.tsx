@@ -1,12 +1,23 @@
+import Link from 'next/link';
 import { LuFlag, LuFlame, LuTrendingUp } from 'react-icons/lu';
+import { getMistakeHref } from '@/app/mistakes/utils';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE } from '../_lib/skillStyle';
-import { EXAM_GOAL, MONTHLY_PROGRESS, SKILL_PROGRESS, getProgressPercent } from '../utils';
+import type { ExamGoal, MonthlyProgress, SkillProgress } from '../types';
+import { getProgressPercent } from '../utils';
+
+const MAX_SCORE = 200;
 
 const CARD_CLASS =
     'flex flex-col justify-between gap-4 bg-white p-5 border border-sub2/30 rounded-xl shadow-sm transition-shadow hover:shadow-md';
 
 const LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider';
+
+interface ScheduleMilestonesProps {
+    goal: ExamGoal;
+    skills: SkillProgress[];
+    monthly: MonthlyProgress;
+}
 
 interface ProgressBarProps {
     value: number;
@@ -32,8 +43,14 @@ function ProgressBar({ value, label, barClassName }: ProgressBarProps) {
     );
 }
 
-export default function ScheduleMilestones() {
-    const monthlyPercent = getProgressPercent(MONTHLY_PROGRESS.completed, MONTHLY_PROGRESS.total);
+function getCountdown(daysLeft: number | null) {
+    if (daysLeft === null) return 'Chưa đặt';
+    if (daysLeft < 0) return 'Đã thi';
+    return daysLeft === 0 ? 'Hôm nay' : `${daysLeft} ngày`;
+}
+
+export default function ScheduleMilestones({ goal, skills, monthly }: ScheduleMilestonesProps) {
+    const monthlyPercent = getProgressPercent(monthly.completed, monthly.total);
 
     return (
         <section aria-label="Cột mốc mục tiêu" className="gap-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
@@ -46,9 +63,11 @@ export default function ScheduleMilestones() {
                         </span>
                         <div className="flex flex-wrap items-baseline gap-x-2">
                             <span className="font-bold text-white text-3xl tracking-tight">
-                                {EXAM_GOAL.daysLeft} ngày
+                                {getCountdown(goal.daysLeft)}
                             </span>
-                            <span className="font-semibold text-sub3 text-xs">đến {EXAM_GOAL.examDate}</span>
+                            <span className="font-semibold text-sub3 text-xs">
+                                {goal.examDate ? `đến ${goal.examDate}` : 'ngày thi'}
+                            </span>
                         </div>
                     </div>
                     <div className="flex justify-center items-center bg-sub3 rounded-lg size-10 text-main shrink-0">
@@ -58,24 +77,26 @@ export default function ScheduleMilestones() {
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-center bg-white/10 px-3 py-2 rounded-lg text-sub1 text-xs">
                         <span>
-                            <strong className="font-semibold text-white">{EXAM_GOAL.minutesPerDay}</strong> phút/ngày
+                            <strong className="font-semibold text-white">{goal.minutesPerDay}</strong> phút/ngày
                         </span>
                         <span className="bg-sub2/50 w-px h-3" aria-hidden="true" />
                         <span>
-                            <strong className="font-semibold text-white">{EXAM_GOAL.daysPerWeek}</strong> ngày/tuần
+                            <strong className="font-semibold text-white">{goal.daysPerWeek}</strong> ngày/tuần
                         </span>
                     </div>
                     <span className="flex items-center gap-1.5 font-medium text-sub1 text-xs">
                         <LuFlame className="size-4 text-sub3" aria-hidden="true" />
-                        Chuỗi học {EXAM_GOAL.streakDays} ngày liên tục
+                        Chuỗi học {goal.streakDays} ngày liên tục
                     </span>
                 </div>
             </div>
 
             {/* Skill target vs current */}
-            {SKILL_PROGRESS.map((item) => {
+            {skills.map((item) => {
                 const style = SKILL_STYLE[item.skill];
-                const percent = getProgressPercent(item.current, item.target);
+                const scale = item.target ?? MAX_SCORE;
+                const percent = item.current === null ? 0 : getProgressPercent(item.current, scale);
+                const gap = item.current !== null && item.target !== null ? item.target - item.current : null;
 
                 return (
                     <div key={item.skill} className={CARD_CLASS}>
@@ -84,12 +105,14 @@ export default function ScheduleMilestones() {
                                 <span className={LABEL_CLASS}>{item.label}</span>
                                 <div className="flex flex-wrap items-baseline gap-x-2">
                                     <span className="font-bold tabular-nums text-main text-3xl tracking-tight">
-                                        {item.current}
-                                        <span className="font-normal text-sub2 text-sm"> / {item.target}</span>
+                                        {item.current ?? '—'}
+                                        <span className="font-normal text-sub2 text-sm"> / {scale}</span>
                                     </span>
-                                    <span className="bg-sub1 px-1.5 py-0.5 rounded font-bold text-[10px] text-main">
-                                        {item.targetLevel}
-                                    </span>
+                                    {item.targetLevel !== null && (
+                                        <span className="bg-sub1 px-1.5 py-0.5 rounded font-bold text-[10px] text-main">
+                                            Level {item.targetLevel}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             <div
@@ -103,18 +126,33 @@ export default function ScheduleMilestones() {
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-between items-center font-semibold text-xs">
-                                <span className="text-subText">{percent}% mục tiêu</span>
-                                <span className="flex items-center gap-1 text-main">
-                                    <LuTrendingUp className="size-3.5 text-sub2" aria-hidden="true" />+
-                                    {item.target - item.current} điểm
+                                <span className="text-subText">
+                                    {item.target === null ? 'Chưa đặt mục tiêu' : `${percent}% mục tiêu`}
                                 </span>
+                                {gap !== null && gap > 0 && (
+                                    <span className="flex items-center gap-1 text-main">
+                                        <LuTrendingUp className="size-3.5 text-sub2" aria-hidden="true" />+{gap} điểm
+                                    </span>
+                                )}
                             </div>
                             <ProgressBar
                                 value={percent}
                                 label={`Tiến độ ${item.label}`}
                                 barClassName="bg-linear-to-r from-sub2 to-main"
                             />
-                            <span className="font-medium text-[11px] text-subText">Trọng tâm: {item.focus}</span>
+                            <span className="font-medium text-[11px] text-subText truncate">
+                                Trọng tâm:{' '}
+                                {item.focus ? (
+                                    <Link
+                                        href={getMistakeHref(item.focus.id)}
+                                        className="font-semibold text-main hover:underline"
+                                    >
+                                        {item.focus.title}
+                                    </Link>
+                                ) : (
+                                    'chưa có lỗi lặp lại'
+                                )}
+                            </span>
                         </div>
                     </div>
                 );
@@ -129,13 +167,15 @@ export default function ScheduleMilestones() {
                             {monthlyPercent}%
                         </span>
                         <span className="font-semibold text-main/70 text-xs">
-                            {MONTHLY_PROGRESS.completed}/{MONTHLY_PROGRESS.total} bài trọng tâm
+                            {monthly.completed}/{monthly.total} bài trong lộ trình
                         </span>
                     </div>
                 </div>
                 <div className="flex flex-col gap-2">
                     <ProgressBar value={monthlyPercent} label="Tiến độ chặng tháng" barClassName="bg-sub3" />
-                    <span className="font-medium text-[11px] text-main">{MONTHLY_PROGRESS.note}</span>
+                    <span className="font-medium text-[11px] text-main">
+                        {monthly.overdue > 0 ? `${monthly.overdue} bài quá hạn chưa làm` : 'Đúng tiến độ'}
+                    </span>
                 </div>
             </div>
         </section>

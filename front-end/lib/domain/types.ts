@@ -219,9 +219,9 @@ export interface Bookmark {
 export interface StudyPlan {
     id: string;
     user_id: string;
+    /** Mỗi ngày học một buổi nên đây cũng là thời lượng một buổi. */
     minutes_per_day: number;
     days_per_week: number;
-    session_minutes: number;
     status: PlanStatus;
     ai_rationale: string | null;
     created_at: string;
@@ -247,16 +247,30 @@ export interface PlanTask {
     exam_id: string | null;
     part_template_id: number | null;
     mistake_pattern_id: string | null;
-    /** Bài làm hoàn thành task — có giá trị thì task coi như xong. */
+    /** Bài làm mở từ task, phòng thi ghi khi nộp. */
     attempt_id: string | null;
+    /** Task không cần bài làm (review, summary) được đánh dấu xong. */
+    completed_at: string | null;
+}
+
+export interface AiInsightItem {
+    skill: Skill;
+    part_template_id: number | null;
+    mistake_pattern_id: string | null;
+    title: string;
+    /** Chỉ số ngắn, vd "Tỷ lệ đạt 66% / mục tiêu 90%". */
+    metric: string;
+    tone: 'critical' | 'warning';
+    body: string;
+    action_label: string;
+    href: string;
 }
 
 /** Nhận định do AI sinh cho lịch học, cache để không gọi AI mỗi lần tải trang. */
 export interface AiInsight {
     id: string;
     user_id: string;
-    /** shortcut: chưa chốt shape; định nghĩa khi làm module lịch học (Bước 4.7). */
-    payload: Record<string, unknown>;
+    payload: { based_on_attempts: number; items: AiInsightItem[] };
     generated_at: string;
 }
 

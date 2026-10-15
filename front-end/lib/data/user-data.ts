@@ -1,4 +1,15 @@
-import type { Annotation, Attempt, AttemptMode, AttemptResponse, Bookmark } from '@/lib/domain/types';
+import type {
+    AiInsight,
+    Annotation,
+    Attempt,
+    AttemptMode,
+    AttemptResponse,
+    Bookmark,
+    PlanTask,
+    Profile,
+    StudyPlan,
+    StudyPlanWeek,
+} from '@/lib/domain/types';
 import { readTable, writeTable } from './local-store';
 
 /**
@@ -14,6 +25,34 @@ const BOOKMARKS = 'bookmarks';
 const ANNOTATIONS = 'annotations';
 
 const now = () => new Date().toISOString();
+
+/**
+ * Hồ sơ của người dùng đã đăng nhập; khách không có hồ sơ nên mục tiêu, ngày thi, giờ học đều ẩn.
+ * shortcut: chưa có auth nên luôn trả `null`; đọc bảng `profiles` khi nối Supabase.
+ */
+export async function getProfile(): Promise<Profile | null> {
+    return null;
+}
+
+export interface ActivePlan {
+    plan: StudyPlan;
+    weeks: StudyPlanWeek[];
+    /** Theo `scheduled_date`, rồi `sort_order`. */
+    tasks: PlanTask[];
+}
+
+/**
+ * Lộ trình `active` của người dùng đã đăng nhập; khách không có lộ trình.
+ * shortcut: chưa có auth nên luôn trả `null`; đọc `study_plans`, `study_plan_weeks`, `plan_tasks` khi nối Supabase.
+ */
+export async function getActivePlan(): Promise<ActivePlan | null> {
+    return null;
+}
+
+/** shortcut: chưa có auth nên luôn trả `null`; đọc bản mới nhất của `ai_insights` khi nối Supabase. */
+export async function getLatestInsight(): Promise<AiInsight | null> {
+    return null;
+}
 
 /** Mới nhất trước. */
 export async function listAttempts(): Promise<Attempt[]> {

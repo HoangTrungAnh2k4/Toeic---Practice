@@ -2,10 +2,12 @@ import type { IconType } from 'react-icons';
 import { LuMic, LuPenLine } from 'react-icons/lu';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
 import type { Attempt, AttemptMode, AttemptStatus, Skill } from '@/lib/domain/types';
+import { buildTestHref } from '@/lib/exam-library/search-params';
 import {
     CategoryFilterType,
     DateScopeType,
     ExamModeType,
+    HistoryRow,
     Option,
     SkillType,
     StatusFilterType,
@@ -69,6 +71,20 @@ export const STATUS_GROUP: Record<AttemptStatus, Exclude<StatusFilterType, 'all'
 /** Link tới trang xem lại bài; `annotationId` cuộn thẳng tới đoạn bị nhận xét. */
 export const getAttemptHref = (attemptId: string, annotationId?: string) =>
     `/setting/history/${attemptId}${annotationId ? `#ann-${annotationId}` : ''}`;
+
+/** Nút chính của một lượt làm: lượt dở dang quay lại phòng thi, còn lại mở trang xem bài. */
+export function getAttemptAction({ attempt, exam }: HistoryRow) {
+    switch (STATUS_GROUP[attempt.status]) {
+        case 'in_progress':
+            return { label: 'Tiếp tục làm bài', href: buildTestHref(exam.skill, exam.id, attempt.mode), primary: true };
+        case 'scored':
+            return { label: 'Xem lại chi tiết', href: getAttemptHref(attempt.id), primary: true };
+        case 'pending':
+            return { label: 'Xem bài đã nộp', href: getAttemptHref(attempt.id), primary: false };
+        default:
+            return { label: 'Xem chi tiết', href: getAttemptHref(attempt.id), primary: false };
+    }
+}
 
 /** Mã ngắn để người dùng nhận ra lượt làm (attempt không có cột mã riêng). */
 export const getAttemptCode = (attempt: Attempt) => `#${attempt.id.slice(0, 8).toUpperCase()}`;
