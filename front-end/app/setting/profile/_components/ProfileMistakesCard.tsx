@@ -1,21 +1,30 @@
+'use client';
+
 import Link from 'next/link';
 import { LuArrowRight } from 'react-icons/lu';
 import { getMistakes } from '@/app/mistakes/_lib/data';
+import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
 import { getMistakeHref, MISTAKES_PATH, SKILL_META, STATUS_META } from '@/app/mistakes/utils';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
+import type { MistakePattern } from '@/lib/domain/types';
+import type { ExamSummary } from '@/lib/exam-library/types';
 import { cn } from '@/lib/utils';
 import { PROFILE_CARD_CLASS } from '../utils';
 
 interface ProfileMistakesCardProps {
+    patterns: MistakePattern[];
+    exams: ExamSummary[];
     limit?: number;
     className?: string;
 }
 
 /** Các mẫu lỗi lặp lại nhiều nhất, lấy từ sổ lỗi. */
-export default async function ProfileMistakesCard({ limit = 3, className }: ProfileMistakesCardProps) {
-    const mistakes = (
-        await getMistakes({ skill: 'all', status: 'all', criterion: 'all', sort: 'frequency', searchQuery: '' })
-    ).slice(0, limit);
+export default function ProfileMistakesCard({ patterns, exams, limit = 3, className }: ProfileMistakesCardProps) {
+    const book = useMistakeBook(patterns, exams);
+    // Đang tải coi như danh sách rỗng: thẻ nhỏ, không đáng một skeleton riêng
+    const mistakes = book
+        ? getMistakes(book, { skill: 'all', status: 'all', criterion: 'all', sort: 'frequency', searchQuery: '' }).slice(0, limit)
+        : [];
 
     return (
         <Card role="region" aria-labelledby="profile-mistakes-title" className={cn(PROFILE_CARD_CLASS, className)}>

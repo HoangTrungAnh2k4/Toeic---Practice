@@ -1,5 +1,13 @@
 import type { IconType } from 'react-icons';
-import type { Criterion, MistakeRemedy, MistakeStatus, Severity, Skill } from '@/lib/domain/types';
+import type {
+    Annotation,
+    Criterion,
+    MistakePattern,
+    MistakeRemedy,
+    MistakeStatus,
+    Severity,
+    Skill,
+} from '@/lib/domain/types';
 
 export type { Criterion, MistakeRemedy, MistakeStatus, Severity };
 
@@ -10,22 +18,11 @@ export interface Option<T extends string | number> {
     label: string;
 }
 
-/** Định nghĩa một mẫu lỗi lặp lại (thứ xuất hiện trong sổ lỗi). */
-export interface MistakeDefinition {
-    id: string;
-    skill: MistakeSkill;
-    /** Phạm vi câu hỏi áp dụng — dùng để xác định bài nào được tính vào thống kê. */
-    questions: number[];
+/** Mẫu lỗi (row `mistake_patterns`) kèm nhãn phạm vi suy ra từ `part_template_id`. */
+export interface MistakeDefinition extends MistakePattern {
+    /** "Q3-4"; mẫu lỗi áp dụng mọi Part thì là cả dải câu của kỹ năng. */
     partLabel: string;
     task: string;
-    title: string;
-    summary: string;
-    /** Vì sao bị trừ điểm, giải thích theo rubric. */
-    why: string;
-    criteria: Criterion[];
-    severity: Severity;
-    impact: string;
-    remedy: MistakeRemedy;
 }
 
 /** Một bài nằm trong cửa sổ theo dõi của mẫu lỗi. */
@@ -50,20 +47,6 @@ export interface MistakeItem extends MistakeDefinition {
 }
 
 /** Một lần mắc lỗi cụ thể, trích từ bài làm. */
-export interface ResponseAnnotation {
-    id: string;
-    /** Thuộc mẫu lỗi trong sổ lỗi; bỏ trống = lỗi đơn lẻ, chưa đủ lặp lại để theo dõi. */
-    mistakeId?: string;
-    /** Trích nguyên văn trong câu trả lời — phải khớp chính xác để tô sáng. */
-    quote: string;
-    correction: string;
-    explanation: string;
-    criterion: Criterion;
-    severity: Severity;
-    /** Mốc giây trong bản ghi âm (chỉ Speaking). */
-    at?: number;
-}
-
 export interface MistakeEvidence {
     attemptId: string;
     code: string;
@@ -71,7 +54,7 @@ export interface MistakeEvidence {
     submittedAt: string;
     assisted: boolean;
     question: number;
-    annotation: ResponseAnnotation;
+    annotation: Annotation;
 }
 
 export interface MistakeDetail extends MistakeItem {

@@ -1,16 +1,14 @@
-import { MistakeDefinition } from '../types';
+import type { MistakePattern } from '@/lib/domain/types';
 
-const ALL_SPEAKING = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-const ALL_WRITING = [1, 2, 3, 4, 5, 6, 7, 8];
-
-// TODO: thay bằng API. Trạng thái, tần suất và bằng chứng KHÔNG lưu ở đây mà được tính từ các bài đã chấm.
-export const MOCK_MISTAKES: MistakeDefinition[] = [
+/**
+ * Mẫu lỗi lặp lại (bảng `mistake_patterns`) — nội dung dùng chung, không phụ thuộc người dùng.
+ * Trạng thái, tần suất và bằng chứng KHÔNG lưu ở đây mà tính từ các bài đã chấm của từng người.
+ */
+const MISTAKE_PATTERNS: MistakePattern[] = [
     {
         id: 'spk-picture-location',
         skill: 'speaking',
-        questions: [3, 4],
-        partLabel: 'Q3-4',
-        task: 'Describe a picture',
+        part_template_id: 2,
         title: 'Thiếu cụm từ chỉ vị trí khi mô tả hậu cảnh',
         summary:
             'Mô tả nhân vật chính khá tốt nhưng chuyển sang hậu cảnh mà không định vị không gian, khiến bài nói rời rạc như đang liệt kê.',
@@ -47,9 +45,7 @@ export const MOCK_MISTAKES: MistakeDefinition[] = [
     {
         id: 'wri-email-missing-task',
         skill: 'writing',
-        questions: [6, 7],
-        partLabel: 'Q6-7',
-        task: 'Respond to a written request',
+        part_template_id: 7,
         title: 'Bỏ sót một nhiệm vụ bắt buộc trong email',
         summary:
             'Trả lời kỹ nhiệm vụ đầu tiên nhưng thiếu nhiệm vụ còn lại mà phần Directions chỉ định (thường là yêu cầu hoặc câu hỏi thứ hai).',
@@ -85,9 +81,7 @@ export const MOCK_MISTAKES: MistakeDefinition[] = [
     {
         id: 'spk-final-sounds',
         skill: 'speaking',
-        questions: ALL_SPEAKING,
-        partLabel: 'Q1-11',
-        task: 'Toàn bài Speaking',
+        part_template_id: null,
         title: 'Nuốt âm cuối của đuôi -s và -ed',
         summary:
             'Âm cuối của danh từ số nhiều và động từ quá khứ thường bị bỏ, khiến "results" nghe như "result", "returned" nghe như "return".',
@@ -118,9 +112,7 @@ export const MOCK_MISTAKES: MistakeDefinition[] = [
     {
         id: 'spk-opinion-example',
         skill: 'speaking',
-        questions: [11],
-        partLabel: 'Q11',
-        task: 'Express an opinion',
+        part_template_id: 5,
         title: 'Nêu quan điểm nhưng thiếu ví dụ cụ thể',
         summary:
             'Lý do được nêu đúng nhưng chỉ nhắc lại ý chung chung, không có trải nghiệm hay tình huống cụ thể nào để chứng minh.',
@@ -154,9 +146,7 @@ export const MOCK_MISTAKES: MistakeDefinition[] = [
     {
         id: 'wri-articles',
         skill: 'writing',
-        questions: ALL_WRITING,
-        partLabel: 'Q1-8',
-        task: 'Toàn bài Writing',
+        part_template_id: null,
         title: 'Thiếu hoặc dùng sai mạo từ a/an/the',
         summary: 'Danh từ đếm được số ít thường bị thiếu mạo từ, hoặc dùng "the" cho đối tượng mới nhắc tới lần đầu.',
         why: 'Lỗi mạo từ hiếm khi làm sai nghĩa nhưng lặp lại nhiều lần sẽ kéo tiêu chí Ngữ pháp xuống, đặc biệt ở Q1-5 nơi mỗi câu chỉ có một câu văn để đánh giá.',
@@ -188,9 +178,7 @@ export const MOCK_MISTAKES: MistakeDefinition[] = [
     {
         id: 'spk-hesitation',
         skill: 'speaking',
-        questions: ALL_SPEAKING,
-        partLabel: 'Q1-11',
-        task: 'Toàn bài Speaking',
+        part_template_id: null,
         title: 'Ngập ngừng và dùng từ đệm "uhm, ah" giữa câu',
         summary: 'Khoảng lặng dài và từ đệm xuất hiện giữa câu khi đang tìm từ, làm bài nói thiếu tự nhiên.',
         why: 'Ngập ngừng làm giảm độ trôi chảy và dễ khiến bạn hết giờ trước khi nói đủ ý, ảnh hưởng tiêu chí Mạch lạc và Ngữ điệu.',
@@ -217,3 +205,7 @@ export const MOCK_MISTAKES: MistakeDefinition[] = [
         },
     },
 ];
+
+export async function listMistakePatterns(): Promise<MistakePattern[]> {
+    return MISTAKE_PATTERNS;
+}

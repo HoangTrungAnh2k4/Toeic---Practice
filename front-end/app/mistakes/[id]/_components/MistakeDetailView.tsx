@@ -1,6 +1,12 @@
-import { notFound } from 'next/navigation';
+'use client';
+
+import type { MistakePattern } from '@/lib/domain/types';
+import type { ExamSummary } from '@/lib/exam-library/types';
 import { getMistakeDetail } from '../../_lib/data';
+import { useMistakeBook } from '../../_lib/useMistakeBook';
+import MistakeNotFound from '../not-found';
 import MistakeDetailHeader from './MistakeDetailHeader';
+import MistakeDetailSkeleton from './MistakeDetailSkeleton';
 import MistakeEvidenceList from './MistakeEvidenceList';
 import MistakePracticeCard from './MistakePracticeCard';
 import MistakeProgress from './MistakeProgress';
@@ -9,13 +15,19 @@ import MistakeRemedy from './MistakeRemedy';
 import MistakeWhy from './MistakeWhy';
 
 interface MistakeDetailViewProps {
-    params: Promise<{ id: string }>;
+    id: string;
+    patterns: MistakePattern[];
+    exams: ExamSummary[];
 }
 
-export default async function MistakeDetailView({ params }: MistakeDetailViewProps) {
-    const { id } = await params;
-    const mistake = await getMistakeDetail(id);
-    if (!mistake) notFound();
+/** Tiến độ và bằng chứng tính từ bài làm trong localStorage → render sau khi mount. */
+export default function MistakeDetailView({ id, patterns, exams }: MistakeDetailViewProps) {
+    const book = useMistakeBook(patterns, exams);
+    if (!book) return <MistakeDetailSkeleton />;
+
+    // Server đã chặn id không tồn tại; nhánh này chỉ phòng dữ liệu đổi giữa chừng
+    const mistake = getMistakeDetail(book, id);
+    if (!mistake) return <MistakeNotFound />;
 
     return (
         <>

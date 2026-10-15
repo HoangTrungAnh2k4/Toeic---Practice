@@ -42,10 +42,10 @@ export default function MistakeEvidenceList({ mistake }: MistakeEvidenceListProp
                                 </div>
                                 <div className="flex flex-wrap gap-1.5">
                                     <span className={CHIP_CLASS}>Q{question}</span>
-                                    {annotation.at !== undefined && (
+                                    {annotation.at_sec !== null && (
                                         <span className={CHIP_CLASS}>
                                             <LuClock className="size-3" aria-hidden="true" />
-                                            {formatTimestamp(annotation.at)}
+                                            {formatTimestamp(annotation.at_sec)}
                                         </span>
                                     )}
                                     {assisted && (

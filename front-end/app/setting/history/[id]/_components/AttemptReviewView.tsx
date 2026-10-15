@@ -2,7 +2,9 @@
 
 import { use, useEffect, useState } from 'react';
 import { LuFileQuestion } from 'react-icons/lu';
-import { MistakeItem } from '@/app/mistakes/types';
+import { getMistakeIndex } from '@/app/mistakes/_lib/data';
+import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
+import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { AttemptReview, loadAttemptReview } from '../../_lib/review';
 import { STATUS_GROUP } from '../../utils';
@@ -18,13 +20,15 @@ import ReviewScoringState from './ReviewScoringState';
 interface AttemptReviewViewProps {
     params: Promise<{ id: string }>;
     exams: ExamSummary[];
-    mistakeIndex: Record<string, MistakeItem>;
+    patterns: MistakePattern[];
 }
 
 /** Lượt làm của khách nằm trong localStorage → nạp sau khi mount; `undefined` = đang tải, `null` = không có. */
-export default function AttemptReviewView({ params, exams, mistakeIndex }: AttemptReviewViewProps) {
+export default function AttemptReviewView({ params, exams, patterns }: AttemptReviewViewProps) {
     const { id } = use(params);
     const [review, setReview] = useState<AttemptReview | null | undefined>(undefined);
+    // Trạng thái của mẫu lỗi (nhãn "Lỗi lặp lại") tính từ toàn bộ bài làm, không chỉ bài này
+    const book = useMistakeBook(patterns, exams);
 
     useEffect(() => {
         let cancelled = false;
@@ -34,8 +38,10 @@ export default function AttemptReviewView({ params, exams, mistakeIndex }: Attem
         };
     }, [id, exams]);
 
-    if (review === undefined) return <AttemptReviewSkeleton />;
+    if (review === undefined || !book) return <AttemptReviewSkeleton />;
     if (review === null) return <AttemptNotFound />;
+
+    const mistakeIndex = getMistakeIndex(book);
 
     const { row, questions } = review;
     const isSpeaking = row.exam.skill === 'speaking';

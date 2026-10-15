@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LuAlarmClock, LuBookOpenCheck, LuClock, LuFlame, LuListChecks, LuSunMoon } from 'react-icons/lu';
-import { getMistakeSummary } from '@/app/mistakes/_lib/data';
+import { listMistakePatterns } from '@/lib/data/mistake-patterns';
+import { getExamSummaries } from '@/lib/exam-library/summaries';
 import { CURRENT_WEEK, EXAM_GOAL, MONTHLY_PROGRESS, SKILL_PROGRESS } from '@/app/schedule/utils';
 import PartScoreCard from './_components/PartScoreCard';
 import ProfileGoalCard from './_components/ProfileGoalCard';
@@ -25,11 +26,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-    const mistakeSummary = await getMistakeSummary();
+    const [patterns, exams] = await Promise.all([listMistakePatterns(), getExamSummaries()]);
     const studyTime = formatDuration(MONTHLY_STUDY_MINUTES);
     const sessionCount = MONTHLY_PROGRESS.completed;
     const { speaking, writing } = COMPLETED_EXERCISES;
-    const { resolved, active, improving } = mistakeSummary.byStatus;
 
     const habitFields: ProfileField[] = [
         {
@@ -59,7 +59,7 @@ export default async function ProfilePage() {
 
             <div className="items-stretch gap-6 grid grid-cols-1 xl:grid-cols-3">
                 <PartScoreCard scores={PART_SCORES} className="xl:col-span-2" />
-                <ProfileMistakesCard />
+                <ProfileMistakesCard patterns={patterns} exams={exams} />
             </div>
         </main>
     );

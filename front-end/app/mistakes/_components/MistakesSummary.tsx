@@ -1,13 +1,16 @@
 import { LuCircleCheck, LuHourglass, LuNotebookPen, LuTarget } from 'react-icons/lu';
-import { getMistakeSummary } from '../_lib/data';
+import { MistakeSummary } from '../types';
 import { CRITERION_LABEL } from '../utils';
 
 const CARD_CLASS = 'flex flex-col justify-between gap-4 bg-card p-5 border border-sub2/30 rounded-xl shadow-sm';
 
 const LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider';
 
-export default async function MistakesSummary() {
-    const summary = await getMistakeSummary();
+interface MistakesSummaryProps {
+    summary: MistakeSummary;
+}
+
+export default function MistakesSummary({ summary }: MistakesSummaryProps) {
     const { active, improving, resolved } = summary.byStatus;
     const open = active + improving;
     const resolvedRate = summary.total ? Math.round((resolved / summary.total) * 100) : 0;
