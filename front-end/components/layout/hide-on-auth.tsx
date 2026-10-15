@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
 
 const AUTH_ROUTES = ['/login', '/register'];
 
@@ -17,9 +16,3 @@ export function HideOnAuth({ children }: { children: React.ReactNode }) {
     return children;
 }
 
-/** Vùng nội dung chính: trang auth tự quản lý khoảng cách để phủ kín màn hình nên bỏ padding. */
-export function MainContent({ children }: { children: React.ReactNode }) {
-    const isAuth = useIsAuthRoute();
-
-    return <div className={cn('flex-1', !isAuth && 'px-4 sm:px-8 pt-4 pb-10')}>{children}</div>;
-}

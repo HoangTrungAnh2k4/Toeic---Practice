@@ -1,0 +1,26 @@
+{
+  "name": "toeic-practice-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff -f",
+    "db:push": "supabase db push",
+    "migration:new": "supabase migration new",
+    "gen:types": "supabase gen types typescript --local > ../front-end/lib/database.types.ts"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.11.2",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.11.2",
+  "devDependencies": {
+    "supabase": "^2.120.0"
+  },
+  "private": true
+}
