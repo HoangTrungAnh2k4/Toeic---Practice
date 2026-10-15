@@ -11,7 +11,7 @@ export default function AttemptNotFound() {
             </span>
             <h1 className="font-semibold text-main text-base">Không tìm thấy lượt làm bài</h1>
             <p className="max-w-md text-subText text-xs">
-                Lượt làm bài có thể đã bị xoá, chưa được đồng bộ lên thiết bị này, hoặc đường dẫn không đúng.
+                Lượt làm bài có thể đã bị xoá hoặc đường dẫn không đúng.
             </p>
             <Link
                 href="/setting/history"

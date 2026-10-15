@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { LuArrowLeft, LuCalendar, LuChevronRight, LuClock, LuEye } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import { HistoryAttempt } from '../../types';
-import { SKILL_STYLE, STORAGE_STYLE } from '../../utils';
+import { SKILL_STYLE } from '../../utils';
 
 interface ReviewHeaderProps {
     attempt: HistoryAttempt;
@@ -12,7 +12,6 @@ const CHIP_CLASS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-s
 
 export default function ReviewHeader({ attempt }: ReviewHeaderProps) {
     const skill = SKILL_STYLE[attempt.skill];
-    const storage = STORAGE_STYLE[attempt.storage];
 
     return (
         <div className="flex flex-col gap-4">
@@ -70,10 +69,6 @@ export default function ReviewHeader({ attempt }: ReviewHeaderProps) {
                         <span className="flex items-center gap-1.5">
                             <LuClock className="size-3.5" aria-hidden="true" />
                             {attempt.duration}
-                        </span>
-                        <span className={cn(CHIP_CLASS, 'rounded-full', storage.className)}>
-                            <storage.Icon className="size-3" aria-hidden="true" />
-                            {storage.label}
                         </span>
                     </div>
                 </div>

@@ -1,20 +1,9 @@
 import type { IconType } from 'react-icons';
+import type { Criterion, MistakeRemedy, Severity, Skill } from '@/lib/domain/types';
 
-export type MistakeSkill = 'speaking' | 'writing';
+export type { Criterion, MistakeRemedy, Severity };
 
-/** Tiêu chí chấm theo rubric ETS mà lỗi làm ảnh hưởng. */
-export type Criterion =
-    | 'pronunciation'
-    | 'intonation'
-    | 'grammar'
-    | 'vocabulary'
-    | 'cohesion'
-    | 'relevance'
-    | 'completeness'
-    | 'organization'
-    | 'support';
-
-export type Severity = 'high' | 'medium' | 'low';
+export type MistakeSkill = Skill;
 
 /**
  * Trạng thái được TÍNH TỰ ĐỘNG từ các bài gần nhất, người học không tự đánh dấu:
@@ -27,16 +16,6 @@ export type MistakeStatus = 'active' | 'improving' | 'resolved';
 export interface Option<T extends string | number> {
     value: T;
     label: string;
-}
-
-export interface MistakeRemedy {
-    /** Nguyên tắc cốt lõi, một câu. */
-    rule: string;
-    steps: string[];
-    phrases: { phrase: string; usage: string }[];
-    model: { before: string; after: string };
-    /** Tự kiểm tra trước khi nộp bài. */
-    checklist: string[];
 }
 
 /** Định nghĩa một mẫu lỗi lặp lại (thứ xuất hiện trong sổ lỗi). */

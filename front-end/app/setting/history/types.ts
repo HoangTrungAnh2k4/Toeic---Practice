@@ -6,11 +6,9 @@ export type ExamModeType = 'all' | 'cbt' | 'timed' | 'guided';
 
 export type CategoryFilterType = 'all' | 'fresh' | 'retake' | 'sample_viewed' | 'independent';
 
-export type StatusFilterType = 'all' | 'completed' | 'scoring' | 'sync_pending' | 'interrupted';
+export type StatusFilterType = 'all' | 'completed' | 'scoring' | 'interrupted';
 
 export type DateScopeType = '7d' | '30d' | 'this_month' | 'custom';
-
-export type StorageType = 'cloud' | 'sync_pending' | 'local_cache';
 
 export interface Option<T extends string | number> {
     value: T;
@@ -56,7 +54,6 @@ export interface HistoryAttempt {
     scoreInfo: AttemptScore;
     submittedAt: string;
     duration: string;
-    storage: StorageType;
     actionText: string;
     isWarningRow?: boolean;
     isPendingRow?: boolean;

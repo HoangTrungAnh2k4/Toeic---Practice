@@ -1,9 +1,6 @@
-export interface RequiredKeyword {
-    /** Dạng gốc hiển thị cho thí sinh. */
-    word: string;
-    /** Các biến thể được chấp nhận (chia thì, số nhiều...). */
-    forms: string[];
-}
+import type { RequiredKeyword } from '@/lib/domain/types';
+
+export type { RequiredKeyword };
 
 export interface PictureQuestion {
     id: number;

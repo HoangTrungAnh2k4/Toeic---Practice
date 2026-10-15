@@ -1,4 +1,4 @@
-import { LuBrain, LuRefreshCw } from 'react-icons/lu';
+import { LuBrain } from 'react-icons/lu';
 import { HistoryAttempt } from '../../types';
 
 interface ReviewScoringStateProps {
@@ -38,12 +38,6 @@ export default function ReviewScoringState({ attempt }: ReviewScoringStateProps)
             >
                 <div className="bg-sub3 rounded-full h-full transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
-            {attempt.storage === 'sync_pending' && (
-                <p className="flex items-center gap-2 font-medium text-main text-xs">
-                    <LuRefreshCw className="size-3.5 shrink-0" aria-hidden="true" />
-                    Bài đang chờ đồng bộ lên máy chủ. Giữ kết nối mạng để quá trình chấm không bị gián đoạn.
-                </p>
-            )}
         </section>
     );
 }

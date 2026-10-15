@@ -6,7 +6,6 @@ type AttemptMatcher = (attempt: HistoryAttempt) => boolean;
 const STATUS_MATCHERS: Record<Exclude<StatusFilterType, 'all'>, AttemptMatcher> = {
     completed: (attempt) => !attempt.isPendingRow && !attempt.isWarningRow,
     scoring: (attempt) => Boolean(attempt.scoreInfo.isScoring),
-    sync_pending: (attempt) => attempt.storage === 'sync_pending',
     interrupted: (attempt) => Boolean(attempt.scoreInfo.isInterrupted),
 };
 

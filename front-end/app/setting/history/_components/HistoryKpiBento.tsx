@@ -88,11 +88,11 @@ export default function HistoryKpiBento() {
                 </div>
             </div>
 
-            {/* Metric 4: Pending Processing & Local Sync */}
+            {/* Metric 4: Pending scoring & interrupted */}
             <div className="flex flex-col justify-between gap-4 bg-sub3/10 shadow-sm p-5 border border-sub3/50 rounded-xl">
                 <div className="flex justify-between items-start gap-3">
                     <div className="space-y-1 min-w-0">
-                        <span className={LABEL_CLASS}>Chờ chấm / Chờ đồng bộ</span>
+                        <span className={LABEL_CLASS}>Chờ chấm / Gián đoạn</span>
                         <div className="flex items-baseline gap-2">
                             <span className="font-bold text-main text-3xl tracking-tight">2</span>
                             <span className="font-semibold text-main/70 text-xs">Cần xử lý</span>
@@ -104,8 +104,8 @@ export default function HistoryKpiBento() {
                 </div>
                 <div className="flex justify-between items-center bg-white px-3 py-2 border border-sub3/40 rounded-lg font-medium text-main text-xs">
                     <span className="flex items-center gap-1.5">
-                        <span className="bg-sub3 rounded-full size-1.5 animate-pulse" aria-hidden="true" />1 Local
-                        cache
+                        <span className="bg-sub3 rounded-full size-1.5 animate-pulse" aria-hidden="true" />1 bị gián
+                        đoạn
                     </span>
                     <span className="bg-sub3/50 w-px h-3" aria-hidden="true" />
                     <span>1 AI đang chấm</span>

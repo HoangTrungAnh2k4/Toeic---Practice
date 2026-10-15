@@ -4,10 +4,9 @@ import { useMemo, useState } from 'react';
 import { LuDownload } from 'react-icons/lu';
 import Button from '@/components/ui/button';
 import { downloadJson } from '../_lib/downloadJson';
-import { ExamRecord } from '../types';
+import { ExamLibraryItem } from '../types';
 import {
     DEFAULT_EXAM_FILTERS,
-    EXAM_LIBRARY,
     EXAM_LIBRARY_ID,
     ExamFilters,
     filterExams,
@@ -17,11 +16,16 @@ import DeleteExamDialog from './DeleteExamDialog';
 import ExamLibraryFilters from './ExamLibraryFilters';
 import ExamLibraryTable from './ExamLibraryTable';
 
-export default function ExamLibrary() {
-    const [exams, setExams] = useState<ExamRecord[]>(EXAM_LIBRARY);
+interface ExamLibraryProps {
+    initialExams: ExamLibraryItem[];
+}
+
+export default function ExamLibrary({ initialExams }: ExamLibraryProps) {
+    // shortcut: xoá chỉ gỡ khỏi state phía client; gọi API xoá đề khi có backend.
+    const [exams, setExams] = useState(initialExams);
     const [filters, setFilters] = useState<ExamFilters>(DEFAULT_EXAM_FILTERS);
     // Giữ đề đang chọn khi đóng dialog để nội dung không biến mất trong lúc chạy animation
-    const [deleteTarget, setDeleteTarget] = useState<ExamRecord | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<ExamLibraryItem | null>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [notice, setNotice] = useState('');
 
@@ -37,7 +41,7 @@ export default function ExamLibrary() {
 
     const handleResetFilters = () => setFilters(DEFAULT_EXAM_FILTERS);
 
-    const handleRequestDelete = (exam: ExamRecord) => {
+    const handleRequestDelete = (exam: ExamLibraryItem) => {
         setDeleteTarget(exam);
         setIsDeleteOpen(true);
     };
@@ -46,7 +50,7 @@ export default function ExamLibrary() {
         if (!deleteTarget) return;
         setExams((prev) => prev.filter((exam) => exam.id !== deleteTarget.id));
         setIsDeleteOpen(false);
-        setNotice(`Đã xóa đề ${deleteTarget.id} khỏi kho.`);
+        setNotice(`Đã xóa đề ${deleteTarget.code} khỏi kho.`);
     };
 
     const handleExport = () => {

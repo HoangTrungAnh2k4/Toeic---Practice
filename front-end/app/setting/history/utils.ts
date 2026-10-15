@@ -1,5 +1,5 @@
 import type { IconType } from 'react-icons';
-import { LuClipboardList, LuCloud, LuMic, LuPenLine, LuRefreshCw, LuSave } from 'react-icons/lu';
+import { LuClipboardList, LuMic, LuPenLine } from 'react-icons/lu';
 import {
     CategoryFilterType,
     DateScopeType,
@@ -30,7 +30,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: 'Hôm nay, 10:45',
         duration: '18m 42s',
-        storage: 'cloud',
         actionText: 'Xem lại chi tiết',
     },
     {
@@ -52,7 +51,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: 'Hôm qua, 21:15',
         duration: '29m 10s',
-        storage: 'sync_pending',
         actionText: 'Kiểm tra tiến độ',
         isPendingRow: true,
     },
@@ -76,7 +74,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '2 ngày trước, 15:30',
         duration: '12m 05s',
-        storage: 'cloud',
         actionText: 'Xem & So sánh #1',
     },
     {
@@ -97,7 +94,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '3 ngày trước, 09:15',
         duration: '14m 20s',
-        storage: 'local_cache',
         actionText: 'Tiếp tục làm tiếp',
         isWarningRow: true,
     },
@@ -120,7 +116,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '5 ngày trước, 20:00',
         duration: '19m 50s',
-        storage: 'cloud',
         actionText: 'Xem lại chi tiết',
     },
     {
@@ -142,7 +137,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '5 ngày trước, 08:15',
         duration: '6m 10s',
-        storage: 'cloud',
         actionText: 'Xem lại chi tiết',
     },
     {
@@ -164,7 +158,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '6 ngày trước, 21:00',
         duration: '20m 00s',
-        storage: 'cloud',
         actionText: 'Xem lại chi tiết',
     },
     {
@@ -186,7 +179,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '6 ngày trước, 08:40',
         duration: '7m 45s',
-        storage: 'cloud',
         actionText: 'Xem lại chi tiết',
     },
     {
@@ -208,7 +200,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '7 ngày trước, 19:30',
         duration: '4m 20s',
-        storage: 'cloud',
         actionText: 'Xem lại chi tiết',
     },
     {
@@ -230,7 +221,6 @@ export const MOCK_ATTEMPTS: HistoryAttempt[] = [
         },
         submittedAt: '7 ngày trước, 07:30',
         duration: '3m 50s',
-        storage: 'cloud',
         actionText: 'Xem lại chi tiết',
     },
 ];
@@ -261,7 +251,6 @@ export const STATUS_OPTIONS: Option<StatusFilterType>[] = [
     { value: 'all', label: 'Trạng thái: Tất cả' },
     { value: 'completed', label: 'Đã hoàn thành & Chấm điểm' },
     { value: 'scoring', label: 'Đang chờ AI chấm' },
-    { value: 'sync_pending', label: 'Chờ đồng bộ cục bộ' },
     { value: 'interrupted', label: 'Bị gián đoạn' },
 ];
 
@@ -288,10 +277,4 @@ export const SKILL_STYLE: Record<HistoryAttempt['skill'], { Icon: IconType; clas
     speaking: { Icon: LuMic, className: 'bg-main text-sub3', label: 'Speaking' },
     writing: { Icon: LuPenLine, className: 'bg-sub3 text-main', label: 'Writing' },
     full_mock: { Icon: LuClipboardList, className: 'bg-sub2 text-white', label: 'Full Mock Test' },
-};
-
-export const STORAGE_STYLE: Record<HistoryAttempt['storage'], { Icon: IconType; label: string; className: string }> = {
-    cloud: { Icon: LuCloud, label: 'Đã lưu cloud', className: 'bg-sub1 text-main' },
-    sync_pending: { Icon: LuRefreshCw, label: 'Chờ đồng bộ', className: 'bg-sub3/25 text-main' },
-    local_cache: { Icon: LuSave, label: 'Cache cục bộ', className: 'bg-white text-main ring-1 ring-inset ring-sub2' },
 };

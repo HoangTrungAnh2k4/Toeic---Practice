@@ -1,4 +1,5 @@
-import { QuestionInfo } from './types';
+import { getPartTemplates } from '@/lib/domain/parts';
+import { QuestionInfo, QuestionStatus } from './types';
 
 export function formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);
@@ -6,16 +7,20 @@ export function formatTime(seconds: number): string {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-export const SPEAKING_QUESTIONS: QuestionInfo[] = [
-    { id: 1, title: 'Read a text aloud', description: 'Đã hoàn thành', status: 'completed' },
-    { id: 2, title: 'Read a text aloud', description: 'Đã hoàn thành', status: 'completed' },
-    { id: 3, title: 'Describe a picture', description: 'Đang làm', status: 'active' },
-    { id: 4, title: 'Respond to questions', description: 'Chưa tới', status: 'locked' },
-    { id: 5, title: 'Respond to questions', description: 'Chưa tới', status: 'locked' },
-    { id: 6, title: 'Respond to questions', description: 'Chưa tới', status: 'locked' },
-    { id: 7, title: 'Respond to questions using information provided', description: 'Chưa tới', status: 'locked' },
-    { id: 8, title: 'Respond to questions using information provided', description: 'Chưa tới', status: 'locked' },
-    { id: 9, title: 'Respond to questions using information provided', description: 'Chưa tới', status: 'locked' },
-    { id: 10, title: 'Propose a solution', description: 'Chưa tới', status: 'locked' },
-    { id: 11, title: 'Express an opinion', description: 'Chưa tới', status: 'locked' },
-];
+const STATUS_DESCRIPTION: Record<QuestionStatus, string> = {
+    completed: 'Đã hoàn thành',
+    active: 'Đang làm',
+    locked: 'Chưa tới',
+};
+
+// TODO: câu đang làm lấy từ attempt thật; tạm cố định ở Q3 để demo.
+const MOCK_ACTIVE_QUESTION = 3;
+
+export const SPEAKING_QUESTIONS: QuestionInfo[] = getPartTemplates('speaking').flatMap((part) =>
+    Array.from({ length: part.q_to - part.q_from + 1 }, (_, offset) => {
+        const id = part.q_from + offset;
+        const status: QuestionStatus =
+            id < MOCK_ACTIVE_QUESTION ? 'completed' : id === MOCK_ACTIVE_QUESTION ? 'active' : 'locked';
+        return { id, title: part.task, description: STATUS_DESCRIPTION[status], status };
+    }),
+);

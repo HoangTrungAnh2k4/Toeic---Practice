@@ -49,7 +49,7 @@ export default function ExamHeader({ secondsRemaining, onOpenExitModal }: ExamHe
                 <div className="flex items-center gap-3 sm:gap-4">
                     <div className="hidden sm:flex items-center gap-1.5 font-medium text-[#E8E5F5]/80 text-xs">
                         <LuShieldCheck className="size-4 text-[#F5B841]" aria-hidden="true" />
-                        <span>Đã lưu cục bộ • Sẵn sàng đồng bộ</span>
+                        <span>Đã lưu trên trình duyệt này</span>
                     </div>
 
                     <button

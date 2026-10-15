@@ -24,7 +24,7 @@ export const SETTING_SECTIONS: SettingSection[] = [
     {
         id: 'exam-management',
         title: 'Quản trị đề thi',
-        description: 'Bóc tách đề từ Study4 bằng AI, biên tập từng Part và quản lý kho đề Speaking & Writing.',
+        description: 'Quản lý kho đề Speaking & Writing, trạng thái thẩm định và xem trước phòng thi.',
         href: `${SETTING_BASE_PATH}/exam-management`,
         actionLabel: 'Mở trình quản trị',
         Icon: LuFileCog,

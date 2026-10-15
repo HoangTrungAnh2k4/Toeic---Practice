@@ -9,7 +9,6 @@ import {
     LuPlay,
     LuRotateCcw,
     LuSave,
-    LuStar,
     LuStepForward,
 } from 'react-icons/lu';
 import Link from 'next/link';
@@ -49,7 +48,6 @@ const BADGE_TONE_CLASS: Record<BadgeTone, string> = {
 
 const HIGHLIGHT_STYLE: Record<FreshWritingTest['highlightType'], { Icon: IconType; className: string }> = {
     cbt: { Icon: LuMonitor, className: 'text-sub2' },
-    rating: { Icon: LuStar, className: 'text-sub3' },
     difficulty: { Icon: LuGauge, className: 'text-destructive' },
 };
 

@@ -15,6 +15,6 @@ export const STATUS_STYLE: Record<ExamStatus, { label: string; className: string
 };
 
 export const SOURCE_LABEL: Record<ExamSource, string> = {
-    study4: 'Study4 AI Parsed',
-    ets: 'ETS Official Import',
+    ets: 'ETS chính thức',
+    internal: 'Biên soạn nội bộ',
 };

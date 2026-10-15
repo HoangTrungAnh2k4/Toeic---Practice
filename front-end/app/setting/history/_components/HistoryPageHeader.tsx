@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LuChevronRight, LuDownload, LuHistory, LuRefreshCw } from 'react-icons/lu';
+import { LuChevronRight, LuDownload, LuHistory } from 'react-icons/lu';
 import Button from '@/components/ui/button';
 import { SETTING_BASE_PATH } from '@/app/setting/utils';
 
@@ -34,7 +34,7 @@ export default function HistoryPageHeader() {
                     </h1>
                     <p className="max-w-3xl font-medium text-subText text-sm leading-relaxed">
                         Theo dõi toàn bộ các lượt làm bài Speaking, Writing và Thi thử hoàn chỉnh. Phân biệt rõ lượt làm
-                        độc lập, làm lại và các bài chờ đồng bộ cục bộ theo chuẩn khảo thí ETS.
+                        độc lập, làm lại và các bài đang chờ chấm theo chuẩn khảo thí ETS.
                     </p>
                 </div>
             </div>
@@ -44,10 +44,6 @@ export default function HistoryPageHeader() {
                 <Button type="button" size="md" variant="third" className="gap-2 bg-white">
                     <LuDownload className="size-4" aria-hidden="true" />
                     <span>Báo cáo (PDF)</span>
-                </Button>
-                <Button type="button" size="md" variant="primary" className="gap-2">
-                    <LuRefreshCw className="size-4" aria-hidden="true" />
-                    <span>Đồng bộ máy chủ</span>
                 </Button>
             </div>
         </div>

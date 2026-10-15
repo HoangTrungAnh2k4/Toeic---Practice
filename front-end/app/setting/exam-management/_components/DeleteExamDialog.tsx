@@ -12,12 +12,12 @@ import {
     AlertDialogMedia,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ExamRecord } from '../types';
+import { ExamLibraryItem } from '../types';
 import { formatCount } from '../utils';
 
 interface DeleteExamDialogProps {
     open: boolean;
-    exam: ExamRecord | null;
+    exam: ExamLibraryItem | null;
     onOpenChange: (open: boolean) => void;
     onConfirm: () => void;
 }
@@ -41,7 +41,7 @@ export default function DeleteExamDialog({ open, exam, onOpenChange, onConfirm }
                     <p className="bg-sub1/60 px-4 py-3 rounded-lg text-subText text-xs">
                         <strong className="font-semibold text-main">{exam.title}</strong>
                         <br />
-                        <span className="font-mono">{exam.id}</span> · {formatCount(exam.attempts)} lượt thi
+                        <span className="font-mono">{exam.code}</span> · {formatCount(exam.stats?.attempt_count ?? 0)} lượt thi
                     </p>
                 )}
 

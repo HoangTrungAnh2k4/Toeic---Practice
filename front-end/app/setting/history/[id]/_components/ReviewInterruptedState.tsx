@@ -1,4 +1,4 @@
-import { LuCirclePause, LuPlay, LuSave } from 'react-icons/lu';
+import { LuCirclePause, LuPlay } from 'react-icons/lu';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -16,8 +16,6 @@ const RESUME_HREF: Record<HistoryAttempt['skill'], string> = {
 };
 
 export default function ReviewInterruptedState({ attempt }: ReviewInterruptedStateProps) {
-    const isLocal = attempt.storage === 'local_cache';
-
     return (
         <section
             aria-labelledby="interrupted-title"
@@ -37,13 +35,6 @@ export default function ReviewInterruptedState({ attempt }: ReviewInterruptedSta
                     </p>
                 </div>
             </div>
-
-            {isLocal && (
-                <p className="flex items-start gap-2 bg-sub3/10 p-3 border border-sub3/50 rounded-lg font-medium text-main text-xs">
-                    <LuSave className="mt-px size-4 shrink-0" aria-hidden="true" />
-                    Phần đã làm đang lưu trên thiết bị này. Hãy tiếp tục trên cùng trình duyệt để không mất dữ liệu.
-                </p>
-            )}
 
             <div className="flex flex-wrap gap-3">
                 <Link

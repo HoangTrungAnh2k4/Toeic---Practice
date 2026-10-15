@@ -32,7 +32,7 @@ export interface FreshSpeakingTest extends SpeakingTestBase {
     badge: string;
     badgeTone: BadgeTone;
     highlight: string;
-    highlightType: 'cbt' | 'rating' | 'difficulty';
+    highlightType: 'cbt' | 'difficulty';
     tags: string[];
     description: string;
     summary: string;

@@ -15,7 +15,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { HistoryAttempt } from '../types';
-import { getAttemptHref, isRetakeAttempt, SKILL_STYLE, STORAGE_STYLE } from '../utils';
+import { getAttemptHref, isRetakeAttempt, SKILL_STYLE } from '../utils';
 
 interface HistoryTableProps {
     attempts: HistoryAttempt[];
@@ -75,7 +75,6 @@ export default function HistoryTable({ attempts }: HistoryTableProps) {
                         const isPending = item.isPendingRow;
                         const skill = SKILL_STYLE[item.skill];
                         const ModeIcon = MODE_ICON[item.modeType];
-                        const storage = STORAGE_STYLE[item.storage];
                         const isRetake = isRetakeAttempt(item);
 
                         return (
@@ -236,15 +235,6 @@ export default function HistoryTable({ attempts }: HistoryTableProps) {
                                     <div className="flex flex-col items-start gap-1">
                                         <span className="font-semibold text-main">{item.submittedAt}</span>
                                         <span className="text-subText">Thời lượng: {item.duration}</span>
-                                        <span
-                                            className={cn(
-                                                'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-semibold text-[11px]',
-                                                storage.className,
-                                            )}
-                                        >
-                                            <storage.Icon className="size-3" aria-hidden="true" />
-                                            {storage.label}
-                                        </span>
                                     </div>
                                 </TableCell>
 

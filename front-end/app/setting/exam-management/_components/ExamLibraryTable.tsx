@@ -1,16 +1,16 @@
 import Link from 'next/link';
-import { LuBadgeCheck, LuClock3, LuEye, LuFilePen, LuInbox, LuSearchX, LuTrash2 } from 'react-icons/lu';
+import { LuBadgeCheck, LuClock3, LuEye, LuInbox, LuSearchX, LuTrash2 } from 'react-icons/lu';
 import Button from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE, SOURCE_LABEL, STATUS_STYLE } from '../_lib/examStyle';
-import { ExamRecord } from '../types';
-import { IMPORT_STUDIO_ID, PREVIEW_HREF, formatCount } from '../utils';
+import { ExamLibraryItem } from '../types';
+import { PREVIEW_HREF, formatCount } from '../utils';
 
 interface ExamLibraryTableProps {
-    exams: ExamRecord[];
+    exams: ExamLibraryItem[];
     totalCount: number;
-    onDelete: (exam: ExamRecord) => void;
+    onDelete: (exam: ExamLibraryItem) => void;
     onResetFilters: () => void;
 }
 
@@ -34,7 +34,7 @@ function EmptyRow({ isLibraryEmpty, onResetFilters }: { isLibraryEmpty: boolean;
                     </p>
                     <p className="text-subText text-xs whitespace-normal">
                         {isLibraryEmpty
-                            ? 'Dùng Study4 AI Import ở phía trên để thêm đề đầu tiên.'
+                            ? 'Chưa có đề nào được thêm vào kho.'
                             : 'Thử từ khóa khác hoặc bỏ bớt bộ lọc trạng thái, nguồn dữ liệu.'}
                     </p>
                     {!isLibraryEmpty && (
@@ -97,9 +97,9 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetF
                                             <div className="flex flex-col gap-0.5 min-w-0">
                                                 <span className="font-semibold text-main text-sm">{exam.title}</span>
                                                 <span className="text-subText">
-                                                    <span className="font-mono font-semibold text-sub2">{exam.id}</span>
+                                                    <span className="font-mono font-semibold text-sub2">{exam.code}</span>
                                                     {' · '}
-                                                    {exam.edition}
+                                                    Ấn bản {exam.edition}
                                                 </span>
                                             </div>
                                         </div>
@@ -115,32 +115,34 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetF
                                                 {skill.label}
                                             </span>
                                             <span className="text-subText tabular-nums">
-                                                {exam.questionCount} câu · {exam.durationMinutes} phút
+                                                {exam.questionCount} câu · {exam.durationMin} phút
                                             </span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-3 py-4 min-w-48 whitespace-normal">
                                         <div className="flex items-start gap-2">
-                                            {exam.isVerified ? (
+                                            {exam.is_verified ? (
                                                 <LuBadgeCheck className="mt-0.5 size-4 text-success shrink-0" aria-hidden="true" />
                                             ) : (
                                                 <LuClock3 className="mt-0.5 size-4 text-sub3 shrink-0" aria-hidden="true" />
                                             )}
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="font-semibold text-main">{SOURCE_LABEL[exam.source]}</span>
-                                                <span className="text-subText">{exam.sourceNote}</span>
+                                                <span className="text-subText">
+                                                    {exam.review_note ?? (exam.is_verified ? 'Đã thẩm định' : 'Chưa thẩm định')}
+                                                </span>
                                             </div>
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-3 py-4">
                                         <div className="flex flex-col gap-0.5">
                                             <span className="font-semibold tabular-nums text-main">
-                                                {formatCount(exam.attempts)} lượt
+                                                {formatCount(exam.stats?.attempt_count ?? 0)} lượt
                                             </span>
                                             <span className="text-subText tabular-nums">
-                                                {exam.completionRate === null
-                                                    ? 'Chưa mở công khai'
-                                                    : `${formatCount(exam.completionRate)}% hoàn thành`}
+                                                {exam.stats
+                                                    ? `${formatCount(exam.stats.completion_rate)}% hoàn thành`
+                                                    : 'Chưa mở công khai'}
                                             </span>
                                         </div>
                                     </TableCell>
@@ -157,14 +159,6 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetF
                                     </TableCell>
                                     <TableCell className="py-4 pr-5 pl-3 text-right">
                                         <div className="flex justify-end items-center gap-1.5">
-                                            <a
-                                                href={`#${IMPORT_STUDIO_ID}`}
-                                                aria-label={`Biên tập ${exam.title}`}
-                                                title="Biên tập trong Studio"
-                                                className={cn(ICON_ACTION_CLASS, 'hover:bg-main hover:text-white')}
-                                            >
-                                                <LuFilePen className="size-4" aria-hidden="true" />
-                                            </a>
                                             <Link
                                                 href={PREVIEW_HREF[exam.skill]}
                                                 aria-label={`Xem trước phòng thi ${exam.title}`}

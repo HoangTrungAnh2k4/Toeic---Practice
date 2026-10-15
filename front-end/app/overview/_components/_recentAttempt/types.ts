@@ -2,7 +2,7 @@ import { MdEditNote, MdMic } from "react-icons/md";
 
 export type Skill = 'S' | 'W';
 export type SkillFilter = 'all' | 'speaking' | 'writing';
-export type AttemptStatus = 'done' | 'pending-sync' | 'interrupted';
+export type AttemptStatus = 'done' | 'scoring' | 'interrupted';
 
 export interface Attempt {
     id: string;
@@ -34,7 +34,7 @@ export const ATTEMPTS: Attempt[] = [
         skills: ['W'],
         mode: 'Thi thử',
         examType: 'Đề chưa gặp',
-        status: 'pending-sync',
+        status: 'scoring',
         date: 'Hôm qua, 21:15',
     },
     {
@@ -66,8 +66,8 @@ export const STATUS_STYLE: Record<AttemptStatus, { label: string; badge: string;
         badge: 'bg-[#E8E5F5] text-[#3C3454]',
         dot: 'bg-[#3C3454]',
     },
-    'pending-sync': {
-        label: 'Chờ đồng bộ',
+    scoring: {
+        label: 'Đang chấm',
         badge: 'bg-[#F5B841]/25 text-[#3C3454]',
         dot: 'bg-[#F5B841]',
     },
