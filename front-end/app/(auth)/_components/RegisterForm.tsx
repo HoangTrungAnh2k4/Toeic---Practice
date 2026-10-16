@@ -18,7 +18,7 @@ export default function RegisterForm() {
     const router = useRouter();
     const form = useForm({
         resolver: zodResolver(registerSchema),
-        defaultValues: { fullName: '', email: '', password: '', confirmPassword: '', acceptTerms: false },
+        defaultValues: { fullName: '', email: '', password: '', acceptTerms: false },
     });
 
     const onSubmit = form.handleSubmit(async ({ fullName, email, password }) => {
@@ -75,8 +75,6 @@ export default function RegisterForm() {
                     <Controller
                         name="password"
                         control={form.control}
-                        // Đổi mật khẩu thì kiểm tra lại ô nhập lại
-                        rules={{ deps: 'confirmPassword' }}
                         render={({ field, fieldState }) => (
                             <AuthTextField
                                 {...field}
@@ -86,21 +84,6 @@ export default function RegisterForm() {
                                 autoComplete="new-password"
                                 placeholder="Tạo mật khẩu"
                                 description="Tối thiểu 8 ký tự, gồm cả chữ và số."
-                                error={fieldState.error?.message}
-                            />
-                        )}
-                    />
-                    <Controller
-                        name="confirmPassword"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                            <AuthTextField
-                                {...field}
-                                label="Nhập lại mật khẩu"
-                                type="password"
-                                icon={LuLockKeyhole}
-                                autoComplete="new-password"
-                                placeholder="Nhập lại mật khẩu"
                                 error={fieldState.error?.message}
                             />
                         )}

@@ -17,7 +17,7 @@ export default function AuthTextField({ label, icon, description, error, ...inpu
     const descriptionId = `${id}-description`;
     const errorId = `${id}-error`;
     const invalid = Boolean(error);
-    const describedBy = [description && descriptionId, invalid && errorId].filter(Boolean).join(' ');
+    const describedBy = [description && !invalid && descriptionId, invalid && errorId].filter(Boolean).join(' ');
 
     return (
         <Field data-invalid={invalid}>
@@ -31,7 +31,12 @@ export default function AuthTextField({ label, icon, description, error, ...inpu
                 aria-describedby={describedBy || undefined}
                 {...inputProps}
             />
-            {description && <FieldDescription id={descriptionId}>{description}</FieldDescription>}
+            {/* Gợi ý chỉ hiện khi đang nhập và chưa có lỗi; lỗi đã nói rõ hơn */}
+            {description && !invalid && (
+                <FieldDescription id={descriptionId} className="hidden group-focus-within/field:block">
+                    {description}
+                </FieldDescription>
+            )}
             {invalid && <FieldError id={errorId}>{error}</FieldError>}
         </Field>
     );
