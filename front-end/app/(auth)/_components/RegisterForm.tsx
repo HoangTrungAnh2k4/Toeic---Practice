@@ -1,28 +1,43 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LuLockKeyhole, LuMail, LuUserRound } from 'react-icons/lu';
 import Button from '@/components/ui/button';
 import { FieldGroup, FieldSeparator } from '@/components/ui/field';
 import { registerSchema } from '../_lib/schemas';
+import { supabase } from '@/lib/supabase';
+import { authErrorMessage } from '../_lib/authError';
 import AuthCheckboxField from './AuthCheckboxField';
+import AuthFormError from './AuthFormError';
 import AuthTextField from './AuthTextField';
 import GoogleAuthButton from './GoogleAuthButton';
 
 export default function RegisterForm() {
+    const router = useRouter();
     const form = useForm({
         resolver: zodResolver(registerSchema),
         defaultValues: { fullName: '', email: '', password: '', confirmPassword: '', acceptTerms: false },
     });
 
-    const onSubmit = form.handleSubmit(() => {});
+    const onSubmit = form.handleSubmit(async ({ fullName, email, password }) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: fullName } },
+        });
+        if (error) return form.setError('root', { message: authErrorMessage(error) });
+        // Email đã xác thực trước đó: Supabase trả user giả không có identity thay vì báo lỗi
+        if (data.user?.identities?.length === 0) {
+            return form.setError('root', { message: 'Email này đã được đăng ký, hãy đăng nhập' });
+        }
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    });
 
     return (
         <div className="flex flex-col gap-6">
-            <GoogleAuthButton
-                label="Đăng ký bằng Google"
-            />
+            <GoogleAuthButton label="Đăng ký bằng Google" />
 
             <FieldSeparator>hoặc đăng ký bằng email</FieldSeparator>
 
@@ -101,8 +116,9 @@ export default function RegisterForm() {
                                 onCheckedChange={field.onChange}
                                 label={
                                     <span>
-                                        Tôi đồng ý với <strong className="font-medium text-main">Điều khoản sử dụng</strong>{' '}
-                                        và <strong className="font-medium text-main">Chính sách bảo mật</strong> của Toeco.
+                                        Tôi đồng ý với{' '}
+                                        <strong className="font-medium text-main">Điều khoản sử dụng</strong> và{' '}
+                                        <strong className="font-medium text-main">Chính sách bảo mật</strong> của Toeco.
                                     </span>
                                 }
                                 error={fieldState.error?.message}
@@ -110,8 +126,14 @@ export default function RegisterForm() {
                         )}
                     />
 
-                    <Button type="submit" variant="primary" className="gap-2 w-full h-13">
-                        Tạo tài khoản
+                    <AuthFormError message={form.formState.errors.root?.message} />
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        className="gap-2 w-full h-13"
+                        disabled={form.formState.isSubmitting}
+                    >
+                        {form.formState.isSubmitting ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
                     </Button>
                 </FieldGroup>
             </form>

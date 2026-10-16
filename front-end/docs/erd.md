@@ -31,8 +31,8 @@ erDiagram
 
 ### Người dùng
 
-- [x] **profiles** — `id` PK/FK auth.users · `full_name?` · `avatar_url?` · `role` (student | admin) · `target_speaking?` · `target_writing?` · `exam_date?` · `preferred_time?` · `reminder_enabled` · `created_at` · `updated_at`
-  - Migration hiện có mới gồm `id, full_name, avatar_url, created_at, updated_at`.
+- [x] **profiles** — `id` PK/FK auth.users · `role` (student | admin) · `target_speaking?` · `target_writing?` · `exam_date?` · `preferred_time?` · `reminder_enabled` · `created_at` · `updated_at`
+  - Tên và avatar không lưu ở đây: đọc từ `auth.users.user_metadata` (`full_name`, `avatar_url`), Supabase tự cập nhật khi liên kết Google.
 
 ### Ngân hàng đề
 
@@ -77,4 +77,4 @@ erDiagram
 - Không có đề Full Test: Speaking và Writing là hai đề, hai lượt làm riêng.
 - Khách làm bài: dữ liệu chỉ ở localStorage (`lib/data/user-data.ts`), không lên DB, không chuyển sang khi đăng ký → `attempts.user_id` vẫn NOT NULL.
 - RLS: học viên chỉ đọc đề `published`; chỉ `admin` ghi bảng nội dung; dữ liệu bài làm, đánh dấu, lịch học chỉ chủ sở hữu thấy; `annotations` chỉ service role ghi.
-- Storage: bucket `exam-media` (công khai), `recordings` (riêng theo user).
+- Storage: ảnh, audio đề và bản ghi âm đều ở Cloudflare (không dùng Supabase Storage); các cột `*_path` lưu key của file trên Cloudflare.

@@ -10,6 +10,7 @@ import type {
     StudyPlan,
     StudyPlanWeek,
 } from '@/lib/domain/types';
+import { supabase } from '@/lib/supabase';
 import { readTable, writeTable } from './local-store';
 
 /**
@@ -28,10 +29,16 @@ const now = () => new Date().toISOString();
 
 /**
  * Hồ sơ của người dùng đã đăng nhập; khách không có hồ sơ nên mục tiêu, ngày thi, giờ học đều ẩn.
- * shortcut: chưa có auth nên luôn trả `null`; đọc bảng `profiles` khi nối Supabase.
+ * Dòng `profiles` do trigger tạo lúc đăng ký, RLS chỉ cho đọc của chính mình.
  */
 export async function getProfile(): Promise<Profile | null> {
-    return null;
+    // getSession đọc phiên đã lưu (và chờ xử lý session trong URL sau OAuth), không gọi mạng
+    const { data: auth } = await supabase.auth.getSession();
+    if (!auth.session) return null;
+
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', auth.session.user.id).maybeSingle();
+    if (error) throw error;
+    return data;
 }
 
 export interface ActivePlan {

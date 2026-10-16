@@ -36,8 +36,6 @@ export type PlanTaskKind = 'speaking' | 'writing' | 'review' | 'mock' | 'summary
 
 export interface Profile {
     id: string;
-    full_name: string | null;
-    avatar_url: string | null;
     role: UserRole;
     target_speaking: number | null;
     target_writing: number | null;

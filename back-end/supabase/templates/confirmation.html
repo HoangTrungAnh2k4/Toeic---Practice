@@ -1,0 +1,70 @@
+<!doctype html>
+<!-- Email clients ignore <style>/CSS vars: table layout + inline styles only. Colors mirror front-end tokens (--main, --sub3, --canvas, --subText). -->
+<!-- Gmail strips box-shadow: the offset shadow is faked with a black right column + bottom row, each with a canvas-colored spacer at its start. Corners are square because a rounded card would leave a notch in the square shadow. -->
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mã xác thực Toeco</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#eef0fc;font-family:Roboto,Arial,Helvetica,sans-serif;color:#3C3454">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef0fc">
+      <tr>
+        <td align="center" style="padding:40px 16px">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px">
+            <tr>
+              <td style="padding:0 0 20px 0">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="background-color:#3C3454;color:#ffffff;font-size:18px;font-weight:700;padding:8px 14px;border:2px solid #000000">Toeco</td>
+                    <td width="3" valign="top" style="background-color:#000000"><div style="height:3px;background-color:#eef0fc;font-size:0;line-height:0">&nbsp;</div></td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="font-size:0;line-height:0">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="3" height="3" style="background-color:#eef0fc"></td><td height="3" style="background-color:#000000"></td></tr></table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="background-color:#ffffff;border:2px solid #000000;padding:28px 32px">
+                      <h1 style="margin:0 0 8px 0;font-size:22px;font-weight:700;color:#3C3454">Xác thực email của bạn</h1>
+                      <p style="margin:0 0 24px 0;font-size:14px;line-height:22px;color:#5c596a">Nhập mã dưới đây vào trang xác thực để hoàn tất đăng ký.</p>
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td align="center" style="background-color:#F5B841;border:2px solid #000000;padding:16px 8px">
+                            <span style="font-family:'Courier New',Courier,monospace;font-size:32px;font-weight:700;letter-spacing:8px;color:#000000">{{ .Token }}</span>
+                          </td>
+                          <td width="4" valign="top" style="background-color:#000000"><div style="height:4px;background-color:#ffffff;font-size:0;line-height:0">&nbsp;</div></td>
+                        </tr>
+                        <tr>
+                          <td colspan="2" style="font-size:0;line-height:0">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="4" height="4" style="background-color:#ffffff"></td><td height="4" style="background-color:#000000"></td></tr></table>
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="margin:24px 0 0 0;font-size:14px;line-height:22px;color:#5c596a">Mã có hiệu lực trong <strong style="color:#3C3454">10 phút</strong>.</p>
+                    </td>
+                    <td width="8" valign="top" style="background-color:#000000"><div style="height:8px;background-color:#eef0fc;font-size:0;line-height:0">&nbsp;</div></td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="font-size:0;line-height:0">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="8" height="8" style="background-color:#eef0fc"></td><td height="8" style="background-color:#000000"></td></tr></table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 4px 0 4px;font-size:12px;line-height:18px;color:#5c596a">Nếu bạn không đăng ký Toeco, hãy bỏ qua email này.</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

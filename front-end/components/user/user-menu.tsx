@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { CurrentUser } from '@/app/setting/profile/types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { UserAvatar } from './user-avatar';
 
@@ -33,8 +34,11 @@ export function UserMenu({ collapsed, user }: UserMenuProps) {
     const router = useRouter();
     const isMobile = useIsMobile();
 
-    // TODO: gọi API đăng xuất & xoá phiên khi có hệ thống đăng nhập; hiện chỉ đưa về trang chủ.
-    const handleLogout = () => router.replace('/');
+    const handleLogout = async () => {
+        // signOut vẫn xoá phiên cục bộ kể cả khi gọi server lỗi, nên luôn đưa về trang chủ
+        await supabase.auth.signOut();
+        router.replace('/');
+    };
 
     return (
         <DropdownMenu>

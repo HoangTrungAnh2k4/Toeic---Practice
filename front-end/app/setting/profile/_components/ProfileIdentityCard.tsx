@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { LuCalendarDays, LuHardDrive, LuHourglass, LuSparkles, LuTarget, LuUserPlus } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user/user-avatar';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import type { Profile } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
 import { getDaysUntil, toPercent } from '../utils';
@@ -64,7 +65,7 @@ function ExamCountdown({ examDate, month }: { examDate: string; month: PlanSumma
                     <LuHourglass className={cn('size-6', isUrgent && 'animate-pulse')} aria-hidden="true" />
                 </span>
                 <p className="flex flex-wrap items-baseline gap-x-2 text-main">
-                    <span className="font-bold text-5xl tabular-nums tracking-tight">{countdown.value}</span>
+                    <span className="font-bold tabular-nums text-5xl tracking-tight">{countdown.value}</span>
                     <span className="font-semibold text-subText">{countdown.unit}</span>
                 </p>
             </div>
@@ -72,7 +73,7 @@ function ExamCountdown({ examDate, month }: { examDate: string; month: PlanSumma
                 <div className="flex flex-col gap-1.5 px-5 pb-5">
                     <div className="flex justify-between items-center font-medium text-subText text-xs">
                         <span>Bài lộ trình tháng này</span>
-                        <span className="font-bold text-main tabular-nums">
+                        <span className="font-bold tabular-nums text-main">
                             {month.completed}/{month.total}
                         </span>
                     </div>
@@ -125,7 +126,9 @@ function ExamDatePrompt({ isGuest }: { isGuest: boolean }) {
 
 /** Banner đầu trang: danh tính người học và đếm ngược tới ngày thi. */
 export default function ProfileIdentityCard({ profile, plan, className }: ProfileIdentityCardProps) {
-    const name = profile ? (profile.full_name ?? 'Học viên') : 'Khách';
+    // Tên và avatar nằm ở auth metadata, `profiles` chỉ giữ dữ liệu của app
+    const user = useCurrentUser();
+    const name = profile ? (user?.name ?? 'Học viên') : 'Khách';
     const initials = name
         .split(/\s+/)
         .slice(-2)
@@ -143,20 +146,20 @@ export default function ProfileIdentityCard({ profile, plan, className }: Profil
         >
             {/* Hoạ tiết trang trí: quầng sáng + vòng tròn */}
             <div aria-hidden="true" className="-z-10 absolute inset-0">
-                <div className="-top-20 -left-16 absolute bg-sub2/40 blur-3xl rounded-full size-72" />
                 <div className="-right-10 -bottom-24 absolute bg-sub3/25 blur-3xl rounded-full size-80" />
                 <div className="-top-24 -right-16 absolute border-2 border-sub1/10 rounded-full size-80" />
                 <div className="-top-8 right-0 absolute border-2 border-sub1/10 rounded-full size-48" />
                 <div className="right-1/3 bottom-6 absolute bg-sub3 rounded-full size-2" />
-                <div className="top-8 left-1/2 absolute bg-sub1/40 rounded-full size-1.5" />
+                <div className="top-8 left-2/3 absolute bg-sub1/40 rounded-full size-1.5" />
+                <div className="top-12 left-1/2 absolute bg-sub1/40 rounded-full size-1.5" />
             </div>
 
             <div className="flex sm:flex-row flex-col sm:items-center gap-6">
                 <div className="relative self-start sm:self-auto shrink-0">
-                    <div className="bg-linear-to-br from-sub3 via-sub1 to-sub2 p-1 rounded-full">
+                    <div className="rounded-full">
                         <UserAvatar
-                            user={{ initials, avatarUrl: profile?.avatar_url ?? undefined }}
-                            className="ring-4 ring-main size-24 sm:size-28"
+                            user={{ initials, avatarUrl: profile ? user?.avatarUrl : undefined }}
+                            className="size-24 sm:size-28"
                             fallbackClassName="text-3xl"
                         />
                     </div>

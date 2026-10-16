@@ -33,3 +33,7 @@ export const registerSchema = z
 
 export type LoginValues = z.infer<typeof loginSchema>;
 export type RegisterValues = z.infer<typeof registerSchema>;
+
+export const otpSchema = z.object({
+    token: z.string().trim().regex(/^\d{6}$/, 'Mã xác thực gồm 6 chữ số'),
+});

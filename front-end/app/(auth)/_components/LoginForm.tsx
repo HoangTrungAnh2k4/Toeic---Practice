@@ -1,28 +1,44 @@
 'use client';
 
-import { Controller, useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LuLockKeyhole, LuMail } from 'react-icons/lu';
 import Button from '@/components/ui/button';
 import { FieldGroup, FieldSeparator } from '@/components/ui/field';
 import { loginSchema } from '../_lib/schemas';
+import { supabase, setRememberSession } from '@/lib/supabase';
+import { authErrorMessage } from '../_lib/authError';
 import AuthCheckboxField from './AuthCheckboxField';
+import AuthFormError from './AuthFormError';
 import AuthTextField from './AuthTextField';
 import GoogleAuthButton from './GoogleAuthButton';
 
 export default function LoginForm() {
+    const router = useRouter();
     const form = useForm({
         resolver: zodResolver(loginSchema),
         defaultValues: { email: '', password: '', remember: true },
     });
+    const remember = useWatch({ control: form.control, name: 'remember' });
 
-    const onSubmit = form.handleSubmit(() => {});
+    const onSubmit = form.handleSubmit(async ({ email, password, remember }) => {
+        setRememberSession(remember);
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (!error) return router.replace('/overview');
+
+        // Đăng ký rồi nhưng chưa nhập mã: gửi lại mã và chuyển sang bước xác thực
+        if (error.code === 'email_not_confirmed') {
+            const { error: resendError } = await supabase.auth.resend({ type: 'signup', email });
+            if (resendError) return form.setError('root', { message: authErrorMessage(resendError) });
+            return router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        }
+        form.setError('root', { message: authErrorMessage(error) });
+    });
 
     return (
         <div className="flex flex-col gap-6">
-            <GoogleAuthButton
-                label="Tiếp tục với Google"
-            />
+            <GoogleAuthButton label="Tiếp tục với Google" remember={remember} />
 
             <FieldSeparator>hoặc đăng nhập bằng email</FieldSeparator>
 
@@ -72,8 +88,15 @@ export default function LoginForm() {
                         )}
                     />
 
-                    <Button type="submit" variant="primary" className="gap-2 mt-2" size={'lg'}>
-                        Đăng nhập
+                    <AuthFormError message={form.formState.errors.root?.message} />
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        className="gap-2 mt-2"
+                        size={'lg'}
+                        disabled={form.formState.isSubmitting}
+                    >
+                        {form.formState.isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </Button>
                 </FieldGroup>
             </form>
