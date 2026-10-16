@@ -12,7 +12,8 @@ export function GuestDataNotice() {
     const user = useCurrentUser();
     const [dismissed, setDismissed] = useState(false);
 
-    if (user || dismissed) return null;
+    // chờ đọc xong phiên để người đã đăng nhập không thấy banner nháy lên
+    if (user !== null || dismissed) return null;
 
     return (
         <aside

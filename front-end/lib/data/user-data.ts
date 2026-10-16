@@ -16,7 +16,7 @@ import { readTable, writeTable } from './local-store';
 /**
  * Dữ liệu cá nhân (bài làm, câu trả lời, đề đã lưu). Người đã đăng nhập đọc/ghi attempts, responses, annotations,
  * bookmarks trên Supabase; khách vẫn nằm trong localStorage.
- * Đăng ký tài khoản không chuyển dữ liệu khách sang. Hàm đều async để giữ nguyên signature khi đổi nguồn.
+ * Đăng nhập/đăng ký không chuyển dữ liệu khách sang tài khoản (chốt ở E1-5). Hàm đều async để giữ nguyên signature khi đổi nguồn.
  */
 export const GUEST_USER_ID = 'guest';
 

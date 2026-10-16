@@ -21,7 +21,7 @@
 
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ |
 | --- | --- | --- | --- | --- |
-| E1 | Lưu dữ liệu người dùng trên Supabase | P0 | In progress | 5/6 |
+| E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 |
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | Todo | 0/5 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 |
 | E4 | Pipeline chấm điểm (AI) | P0 | Todo | 0/6 |
@@ -36,13 +36,15 @@
 
 ## E1 — Lưu dữ liệu người dùng trên Supabase (P0)
 
-Người đã đăng nhập đọc/ghi attempts, responses, annotations, bookmarks trên Supabase (`lib/data/user-data.ts`); khách vẫn dùng localStorage (`lib/data/local-store.ts`) tới khi chốt E1-5.
+Người đã đăng nhập đọc/ghi attempts, responses, annotations, bookmarks trên Supabase (`lib/data/user-data.ts`); khách vẫn dùng localStorage (`lib/data/local-store.ts`) và không được chuyển sang tài khoản (E1-5).
 
 - [x] **E1-1** Migration + RLS cho `attempts`, `responses`, `annotations`, `bookmarks` (user chỉ đọc/ghi của mình). Bảng + RLS có sẵn trong `erd_tables`; thêm trigger tính `ends_at` phía server (`20261016130000_attempt_ends_at.sql`) + pgTAP `user_data_rls.test.sql`
-- [x] **E1-2** Chuyển `startAttempt`, `updateAttempt`, `getAttempt`, `listAttempts` sang Supabase khi đã đăng nhập (`lib/data/user-data.ts`); khách vẫn dùng localStorage tới khi chốt E1-5. Insert chỉ gửi `exam_id`/`part_template_id`/`mode`; `AttemptPatch` thu hẹp về cột được grant (`status`, `sample_viewed`, `submitted_at`)
+- [x] **E1-2** Chuyển `startAttempt`, `updateAttempt`, `getAttempt`, `listAttempts` sang Supabase khi đã đăng nhập (`lib/data/user-data.ts`); khách vẫn dùng localStorage. Insert chỉ gửi `exam_id`/`part_template_id`/`mode`; `AttemptPatch` thu hẹp về cột được grant (`status`, `sample_viewed`, `submitted_at`)
 - [x] **E1-3** Chuyển `saveResponse`, `listResponses`, `listAnnotations` sang Supabase khi đã đăng nhập. `saveResponse` sửa-trước-thêm-sau thay vì `.upsert()` (client không có quyền update `attempt_id`/`question_id`); phòng thi Writing chờ lưu xong mới nộp, lỗi thì ở lại phòng. Còn nợ: lưu lúc đóng tab có thể bị huỷ (`shortcut:` trong `useWritingAttempt.ts`)
 - [x] **E1-4** Chuyển `listBookmarkedExamIds`, `toggleBookmark` sang Supabase khi đã đăng nhập. Toggle xoá-trước-thêm-sau (`user_id` do DB lấy từ `auth.uid()`), trùng khoá `23505` khi bấm song song coi như đã lưu; RLS/pgTAP có sẵn từ E1-1
-- [ ] **E1-5** (P1, M) Quyết định số phận dữ liệu guest: migrate localStorage → tài khoản khi đăng nhập, hay bỏ chế độ guest
+- [x] **E1-5** Chốt: giữ chế độ khách, **không** chuyển dữ liệu khách (localStorage) sang tài khoản khi đăng nhập/đăng ký. Dữ liệu khách ở lại trình duyệt, hiện lại khi đăng xuất; banner `GuestDataNotice` báo trước cho khách. Đã thử trên app: bài dở + đề đã lưu của khách không xuất hiện trong tài khoản, không có dòng nào được ghi lên DB
+    - Sửa kèm: `useCurrentUser` trả `undefined` khi chưa đọc xong phiên → banner khách và khối "Bạn chưa đăng nhập" không còn nháy lên (kể cả trong HTML server) với người đã đăng nhập; `npm run lint` bỏ qua `.claude/**` (worktree của session khác làm lint báo 749 lỗi)
+    - Còn nợ: khách đang trong phòng thi mà đăng nhập ở tab khác thì lượt lưu tiếp theo gửi attempt id cục bộ lên Supabase và báo lỗi lưu
 - [x] **E1-6** Trạng thái loading/error cho mọi chỗ đọc dữ liệu sau khi chuyển sang mạng. Hook chung `hooks/use-async.ts` (`useAsync` trả `data`/`failed`/`retry`, `combineAsync` gộp nhiều nguồn) + khối báo lỗi `components/load-error.tsx` có nút Thử lại; áp cho `/overview`, `/schedule`, `/setting/profile`, `/mistakes`, `/mistakes/[id]`, `/setting/history`, `/setting/history/[id]`
     - Thư viện đề: `UserExamStatesProvider` cho hero, KPI, danh sách dùng chung một lượt tải, Thử lại làm mới cả trang; đánh dấu đề cập nhật lạc quan, lỗi thì hoàn tác + báo, bấm trùng khi đang lưu bị bỏ qua
     - Phòng thi Writing: lỗi mở phòng có nút Thử lại, câu báo lỗi không còn chỉ nói localStorage
@@ -124,7 +126,7 @@ Phụ thuộc E1 + E4.
 - [ ] **E9-1** (P2, M) Test cho logic quan trọng: quyền admin, chấm điểm, `user-stats`
 - [ ] **E9-2** (P2, S) Thay dữ liệu mock ở footer (`components/layout/footer/footer-data.ts`)
 - [ ] **E9-3** (P3, S) Quyết định `lucide-react` trong `components/ui/*` (shadcn sinh) vs quy định chỉ dùng `react-icons/lu`
-- [ ] **E9-4** (P3, S) Validate row localStorage bằng zod hoặc xoá hẳn khi E1 xong (`lib/data/local-store.ts`)
+- [ ] **E9-4** (P3, S) Validate row localStorage bằng zod (`lib/data/local-store.ts`; giữ lại vì chế độ khách ở lại sau E1-5)
 - [ ] **E9-5** (P2, M) Audit accessibility (keyboard, contrast) các trang chính
 - [ ] **E9-6** (P2, S) Responsive check ở 375px cho phòng thi
 - [ ] **E9-7** (P3, S) Chạy `/ponytail-debt` định kỳ, đóng các `shortcut:` đã xử lý

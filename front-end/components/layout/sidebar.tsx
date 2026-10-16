@@ -127,7 +127,11 @@ export function Sidebar() {
                         animation: `sidebar-in 600ms ${150 + items.length * 90}ms cubic-bezier(0.22,1,0.36,1) both`,
                     }}
                 >
-                    {user ? <UserMenu collapsed={collapsed} user={user} /> : <GuestMenu collapsed={collapsed} />}
+                    {user === undefined ? null : user ? (
+                        <UserMenu collapsed={collapsed} user={user} />
+                    ) : (
+                        <GuestMenu collapsed={collapsed} />
+                    )}
                 </div>
             </aside>
         </>
@@ -241,7 +245,11 @@ function MobileTopBar({ activeIndex, user }: MobileTopBarProps) {
                     </div>
                     <SidebarNav activeIndex={activeIndex} collapsed={false} onNavigate={close} />
                     <div className="mt-auto p-3">
-                        {user ? <UserMenu collapsed={false} user={user} /> : <GuestMenu collapsed={false} />}
+                        {user === undefined ? null : user ? (
+                            <UserMenu collapsed={false} user={user} />
+                        ) : (
+                            <GuestMenu collapsed={false} />
+                        )}
                     </div>
                 </SheetContent>
             </Sheet>

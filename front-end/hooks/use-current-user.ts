@@ -24,8 +24,9 @@ function toCurrentUser(user: User): CurrentUser {
     };
 }
 
-export function useCurrentUser(): CurrentUser | null {
-    const [user, setUser] = useState<CurrentUser | null>(null);
+/** `undefined` = chưa đọc xong phiên (cả lúc render phía server), `null` = khách. */
+export function useCurrentUser(): CurrentUser | null | undefined {
+    const [user, setUser] = useState<CurrentUser | null>();
 
     useEffect(() => {
         // onAuthStateChange phát INITIAL_SESSION ngay khi đăng ký nên không cần getSession riêng
