@@ -14,8 +14,8 @@ import { supabase } from '@/lib/supabase';
 import { readTable, writeTable } from './local-store';
 
 /**
- * Dữ liệu cá nhân (bài làm, câu trả lời, đề đã lưu). Người đã đăng nhập đọc/ghi attempts, responses, annotations
- * trên Supabase; khách và bookmarks (chưa chuyển) vẫn nằm trong localStorage.
+ * Dữ liệu cá nhân (bài làm, câu trả lời, đề đã lưu). Người đã đăng nhập đọc/ghi attempts, responses, annotations,
+ * bookmarks trên Supabase; khách vẫn nằm trong localStorage.
  * Đăng ký tài khoản không chuyển dữ liệu khách sang. Hàm đều async để giữ nguyên signature khi đổi nguồn.
  */
 export const GUEST_USER_ID = 'guest';
@@ -230,11 +230,17 @@ export async function listAnnotations(responseIds: string[]): Promise<Annotation
 }
 
 export async function listBookmarkedExamIds(): Promise<string[]> {
-    return readTable<Bookmark>(BOOKMARKS).map((bookmark) => bookmark.exam_id);
+    if (!(await sessionUserId())) return readTable<Bookmark>(BOOKMARKS).map((bookmark) => bookmark.exam_id);
+
+    const { data, error } = await supabase.from('bookmarks').select('exam_id');
+    if (error) throw error;
+    return data.map((bookmark) => bookmark.exam_id);
 }
 
 /** Trả về trạng thái mới: `true` = đã lưu đề. */
 export async function toggleBookmark(examId: string): Promise<boolean> {
+    if (await sessionUserId()) return toggleRemoteBookmark(examId);
+
     const rows = readTable<Bookmark>(BOOKMARKS);
     const exists = rows.some((bookmark) => bookmark.exam_id === examId);
     writeTable(
@@ -244,4 +250,16 @@ export async function toggleBookmark(examId: string): Promise<boolean> {
             : [...rows, { user_id: GUEST_USER_ID, exam_id: examId, created_at: now() }],
     );
     return !exists;
+}
+
+/** Xoá trước: có dòng bị xoá = vừa bỏ lưu, không thì thêm. `user_id` do DB lấy từ `auth.uid()`. */
+async function toggleRemoteBookmark(examId: string): Promise<boolean> {
+    const deleted = await supabase.from('bookmarks').delete().eq('exam_id', examId).select('exam_id');
+    if (deleted.error) throw deleted.error;
+    if (deleted.data.length > 0) return false;
+
+    const { error } = await supabase.from('bookmarks').insert({ exam_id: examId });
+    // 23505: lượt bấm song song vừa lưu đề này → kết quả vẫn là đã lưu
+    if (error && error.code !== '23505') throw error;
+    return true;
 }

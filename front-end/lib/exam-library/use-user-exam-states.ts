@@ -43,7 +43,7 @@ export function useUserExamStates(examIds: string[]) {
             try {
                 await toggleBookmark(examId);
             } catch {
-                // Bộ nhớ trình duyệt bị chặn: bỏ qua, lần nạp lại bên dưới đưa nút về trạng thái thật
+                // Lỗi mạng hoặc bộ nhớ trình duyệt bị chặn: bỏ qua, lần nạp lại bên dưới đưa nút về trạng thái thật
             }
             reload();
         },
