@@ -371,7 +371,9 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "create_exam":
+{ Args: { "payload": Json }; Returns: string
+                           }
           }
           Enums: {
             "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published","plan_status": "active"|"archived","plan_task_kind": "speaking"|"writing"|"review"|"mock"|"summary","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"

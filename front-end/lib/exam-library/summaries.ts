@@ -1,27 +1,20 @@
+import { cacheLife, cacheTag } from 'next/cache';
 import { listExamParts, listExams } from '@/lib/data/content';
-import { PART_TEMPLATES, TEST_DURATION_MIN } from '@/lib/domain/parts';
 import type { Skill } from '@/lib/domain/types';
+import { summarizeExams } from './summarize';
 import type { ExamSummary } from './types';
 
-const TEMPLATE_BY_ID = new Map(PART_TEMPLATES.map((part) => [part.id, part]));
+/** Tag để làm mới kho đề phía server sau khi admin tạo/phát hành đề. */
+export const EXAMS_CACHE_TAG = 'exams';
 
-/** Mọi đề kèm số câu, số Part và thời lượng tính từ cấu trúc Part. */
+/** Đề đã phát hành (server không có phiên nên RLS chỉ trả `published`), cache dùng chung mọi người dùng. */
 export async function getExamSummaries(): Promise<ExamSummary[]> {
+    'use cache';
+    cacheLife('minutes');
+    cacheTag(EXAMS_CACHE_TAG);
+
     const [exams, parts] = await Promise.all([listExams(), listExamParts()]);
-
-    return exams.map((exam) => {
-        const templates = parts
-            .filter((part) => part.exam_id === exam.id)
-            .flatMap((part) => TEMPLATE_BY_ID.get(part.part_template_id) ?? []);
-
-        return {
-            ...exam,
-            questionCount: templates.reduce((sum, part) => sum + part.q_to - part.q_from + 1, 0),
-            partCount: templates.length,
-            // shortcut: thời lượng bài đầy đủ của kỹ năng; cộng theo Part khi có đề luyện riêng Part.
-            durationMin: TEST_DURATION_MIN[exam.skill],
-        };
-    });
+    return summarizeExams(exams, parts);
 }
 
 /** Đề đã phát hành của một kỹ năng cho thư viện đề học viên, mã đề mới nhất trước. */
