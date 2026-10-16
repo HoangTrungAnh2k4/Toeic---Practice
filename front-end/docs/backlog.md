@@ -30,10 +30,10 @@
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | Todo | 0/6 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | Todo | 0/6 | S2 – S4 |
-| E5 | Quản trị đề (admin) | P1 | In progress | 5/10 | S1, S5 |
+| E5 | Quản trị đề (admin) | P1 | In progress | 7/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | Todo | 0/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | Todo | 0/4 | S4, S6 |
-| E8 | Auth & bảo mật | P1 | In progress | 5/7 | S1, S5, S6 |
+| E8 | Auth & bảo mật | P1 | In progress | 5/8 | S1, S5, S6 |
 | E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | Todo | 0/12 | rải rác |
 | E10 | Phát hành | P1 | Todo | 0/5 | S1, S6 |
 
@@ -58,7 +58,7 @@
 Mục tiêu: không còn trang nào chỉ chặn phía client; phòng thi Speaking ghi âm, upload và lưu attempt thật.
 
 - [x] **E8-5** (P1, M) Chặn route phía server: chuyển phiên từ `sessionStore` (`lib/supabase.ts`) sang cookie (`@supabase/ssr`) + `proxy.ts` (Next 16 đổi tên `middleware` → `proxy`, xem `node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md`)
-- [ ] **E5-10** (P1, S) Phòng thi chặn đề chưa phát hành theo role (`lib/exam-library/room.ts:35`) — *cần E8-5*
+- [x] **E5-10** (P1, S) Phòng thi chặn đề chưa phát hành theo role (`lib/exam-library/room.ts:35`) — *cần E8-5*
 - [ ] **E5-6** (P1, S) Xoá đề gọi API thật (hiện chỉ gỡ khỏi state — `app/setting/exam-management/_components/ExamLibrary.tsx:25`)
 - [ ] **E10-3** (P1, S) CI: `lint`, `tsc --noEmit`, `test` trên mỗi PR (chưa có `.github/workflows`)
 - [ ] **E2-1** (P0, M) Ghi âm từng câu bằng `MediaRecorder` (tái dùng `useMicrophone`, `useTestRecorder` trong `app/setting/device-check/_lib`)
@@ -130,7 +130,9 @@ Mục tiêu: người dùng mới vào là có lộ trình; deploy production.
 Sau ra mắt, hoặc kéo vào sprint nào còn dư chỗ.
 
 - [ ] **E2-5** (P2, S) Nghe lại bản ghi trước khi nộp (chế độ `guided`)
-- [ ] **E5-9** (P2, M) Xem trước đề nháp (phòng thi tải đề phía client bằng phiên admin)
+- [x] **E5-9** (P2, M) Xem trước đề nháp — xong cùng E5-10: phòng thi đọc đề bằng phiên của người dùng phía server, admin bấm nút xem trước ở kho đề là vào được đề `draft`/`review`
+- [ ] **E5-11** (P2, S) Chế độ xem trước không lưu attempt: admin mở đề `draft`/`review` từ kho đề thì phòng thi Writing vẫn gọi `startAttempt` (`app/writing/test/_lib/useWritingAttempt.ts:33`), tạo attempt thật hiện trong lịch sử. Speaking sẽ dính khi làm E2-3 — *gộp khi làm E2-3*
+- [ ] **E8-8** (P1, S) `proxy.ts` gọi `supabase.auth.getClaims()` ở mọi request trang: chỉ xác thực JWT tại chỗ (JWKS cache) khi project ký bằng khoá bất đối xứng (local đang ES256). Project production còn dùng JWT secret cũ (HS256) thì mỗi request gọi Supabase Auth → bật JWT Signing Keys (ES256/RS256) trước khi ra mắt, hoặc thu hẹp `matcher`
 - [ ] **E6-4** (P2, M) `getLatestInsight` đọc `ai_insights` (`lib/data/user-data.ts:58`); sinh insight sau mỗi lượt chấm — *cần E4*
 - [ ] **E9-1** (P2, M) Test cho logic quan trọng: quyền admin, `user-stats` (hiện mới có 3 file test)
 - [ ] **E9-3** (P3, S) Quyết định `lucide-react` trong `components/ui/*` (shadcn sinh) vs quy định chỉ dùng `react-icons/lu`

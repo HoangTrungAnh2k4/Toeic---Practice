@@ -1,4 +1,6 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getExam, listExamParts, listQuestions } from '@/lib/data/content';
+import type { Database } from '@/lib/database.types';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
 import type { AttemptMode, Exam, ExamPart, PartTemplate, Question, Skill } from '@/lib/domain/types';
 import type { RawSearchParams } from './search-params';
@@ -31,14 +33,18 @@ export function parseRoomParams(raw: RawSearchParams): { examId: string | null; 
 
 /**
  * Nội dung phòng thi của một đề: các Part theo thứ tự kèm câu hỏi.
- * `null` khi không có đề hoặc đề không thuộc kỹ năng của phòng thi.
- * shortcut: chưa chặn đề chưa phát hành vì admin xem trước bằng chính phòng thi; chặn theo role khi có đăng nhập.
+ * `null` khi không có đề, đề không thuộc kỹ năng của phòng thi, hoặc đề chưa phát hành mà `db` không mang phiên admin
+ * (RLS chỉ cho admin đọc đề `draft`/`review`, nhờ vậy admin xem trước được bằng chính phòng thi).
  */
-export async function getExamRoom(skill: Skill, examId: string): Promise<ExamRoom | null> {
-    const exam = await getExam(examId);
+export async function getExamRoom(
+    skill: Skill,
+    examId: string,
+    db?: SupabaseClient<Database>,
+): Promise<ExamRoom | null> {
+    const exam = await getExam(examId, db);
     if (!exam || exam.skill !== skill) return null;
 
-    const [parts, questions] = await Promise.all([listExamParts(examId), listQuestions(examId)]);
+    const [parts, questions] = await Promise.all([listExamParts(examId, db), listQuestions(examId, db)]);
     return {
         exam,
         parts: parts

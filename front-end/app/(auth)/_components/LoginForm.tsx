@@ -42,7 +42,8 @@ export default function LoginForm() {
 
             <FieldSeparator>hoặc đăng nhập bằng email</FieldSeparator>
 
-            <form noValidate onSubmit={onSubmit}>
+            {/* method="post": bấm trước khi hydrate thì trình duyệt submit gốc, không để mật khẩu/mã lên URL */}
+            <form method="post" noValidate onSubmit={onSubmit}>
                 <FieldGroup className="gap-4">
                     <Controller
                         name="email"

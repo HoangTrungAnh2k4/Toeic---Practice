@@ -6,6 +6,7 @@ import type { MistakeItem } from '@/app/mistakes/types';
 import type { UserStats } from '@/lib/data/user-stats';
 import type { Skill } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
+import { FaMicrophoneLines, FaPenNib } from 'react-icons/fa6';
 
 const MAX_SCORE = 200;
 
@@ -18,10 +19,11 @@ interface SkillGoalsProps {
     focus: Record<Skill, MistakeItem | null>;
 }
 
-const SKILL_STYLE: Record<Skill, { label: string; Icon: IconType; tile: string; track: string; bar: string; tip: string }> = {
+const SKILL_STYLE: Record<Skill, { label: string; Icon: IconType;iconColor:string ; tile: string; track: string; bar: string; tip: string }> = {
     writing: {
         label: 'Writing',
-        Icon: LuPenLine,
+        Icon: FaPenNib,
+        iconColor: 'text-sub3',
         tile: 'bg-sub3/15 text-main',
         track: 'bg-sub3/15',
         bar: 'bg-sub3',
@@ -29,7 +31,8 @@ const SKILL_STYLE: Record<Skill, { label: string; Icon: IconType; tile: string; 
     },
     speaking: {
         label: 'Speaking',
-        Icon: LuMic,
+        Icon: FaMicrophoneLines,
+        iconColor: 'text-main',
         tile: 'bg-sub1 text-main',
         track: 'bg-sub1',
         bar: 'bg-main',
@@ -59,7 +62,7 @@ function SkillGoalCard({ skill, stats, target, isGuest, focus }: SkillGoalCardPr
             <div className="flex justify-between items-start gap-4">
                 <div className="flex items-center gap-2">
                     <div className={cn('flex justify-center items-center rounded-lg size-10', style.tile)}>
-                        <style.Icon className="size-5" aria-hidden="true" />
+                        <style.Icon className={cn('size-5', style.iconColor)} aria-hidden="true" />
                     </div>
                     <div>
                         <h4 className="font-semibold text-main text-xl tracking-tight">TOEIC {style.label}</h4>

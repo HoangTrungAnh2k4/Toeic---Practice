@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getExamRoom, parseRoomParams } from '@/lib/exam-library/room';
 import { RawSearchParams } from '@/lib/exam-library/search-params';
+import { createServerSupabase } from '@/lib/supabase-server';
 import SpeakingExamRoom from './_components/SpeakingExamRoom';
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ async function SpeakingExamRoomContent({ searchParams }: SpeakingTestPageProps) 
     const { examId, mode } = parseRoomParams(await searchParams);
     if (!examId) redirect('/speaking');
 
-    const room = await getExamRoom('speaking', examId);
+    const room = await getExamRoom('speaking', examId, await createServerSupabase());
     if (!room || room.parts.every((part) => part.questions.length === 0)) notFound();
 
     return <SpeakingExamRoom exam={room.exam} parts={room.parts} mode={mode} />;

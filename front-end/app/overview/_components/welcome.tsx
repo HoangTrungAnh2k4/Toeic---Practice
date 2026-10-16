@@ -4,6 +4,7 @@ import Image from 'next/image';
 import type { IconType } from 'react-icons';
 import { LuMic, LuPenLine, LuRoute } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
+import { FaMicrophoneLines, FaPenNib } from 'react-icons/fa6';
 
 type ExamFormat = {
     icon: IconType;
@@ -12,8 +13,8 @@ type ExamFormat = {
 };
 
 const EXAM_FORMATS: ExamFormat[] = [
-    { icon: LuMic, skill: 'Speaking', detail: '11 câu trong 20 phút' },
-    { icon: LuPenLine, skill: 'Writing', detail: '8 câu trong 60 phút' },
+    { icon: FaPenNib, skill: 'Speaking', detail: '11 câu trong 20 phút' },
+    { icon: FaMicrophoneLines, skill: 'Writing', detail: '8 câu trong 60 phút' },
 ];
 
 const ENTER = 'motion-safe:animate-rise';

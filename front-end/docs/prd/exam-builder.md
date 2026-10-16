@@ -82,7 +82,7 @@ Kho đề hiện chỉ có dữ liệu mock trong `lib/data/content.ts`, và m�
 ## Giả định & câu hỏi mở
 
 - **Giả định**: chỉ admin dùng tính năng này. Ảnh Part 2 đã có sẵn trên Cloudflare và admin dán key/URL vào.
-- **Ghi chú khi triển khai**: phòng thi render phía server bằng client anon, nên RLS chỉ trả đề `published`. Vì vậy chưa xem trước được đề nháp: sau khi lưu chỉ quay về kho đề kèm thông báo. Muốn xem trước đề nháp thì phòng thi phải tải đề phía client bằng phiên admin.
+- **Ghi chú khi triển khai**: sau khi lưu, form quay về kho đề kèm thông báo; dòng đề nháp có nút xem trước. Từ E5-10, phòng thi đọc đề bằng phiên của người dùng phía server nên RLS cho admin xem đề `draft`/`review`, người khác nhận 404.
 - **Câu hỏi mở**:
     - RPC `create_exam` và RLS do ai viết: repo backend hay trực tiếp trên Supabase?
     - Các đề mock hiện có (`sp-01`...) sẽ seed vào DB, hay giữ mock song song với đề từ DB một thời gian?

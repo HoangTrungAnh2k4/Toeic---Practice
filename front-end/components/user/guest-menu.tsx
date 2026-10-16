@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { LuLogIn, LuUserRound } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { FaUser } from 'react-icons/fa';
 
 interface GuestMenuProps {
     /** Sidebar đang thu gọn: chỉ còn nút đăng nhập dạng icon. */
@@ -18,16 +19,16 @@ export function GuestMenu({ collapsed }: GuestMenuProps) {
                 title="Đăng nhập"
                 className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'mx-auto size-10 px-0')}
             >
-                <LuLogIn aria-hidden="true" className="size-5" />
+                <FaUser aria-hidden="true" className="size-5" />
             </Link>
         );
     }
 
     return (
-        <div className="flex flex-col gap-3 bg-white/10 p-3 border border-sub1/20 rounded-xl overflow-hidden animate-in duration-300 fade-in">
+        <div className="flex flex-col gap-3 bg-white/10 p-3 border border-sub1/20 rounded-xl overflow-hidden animate-in duration-500 ease-out">
             <div className="flex items-center gap-3 min-w-0">
                 <span className="flex justify-center items-center bg-sub1/15 rounded-full size-10 shrink-0">
-                    <LuUserRound aria-hidden="true" className="size-5 text-sub1" />
+                    <FaUser aria-hidden="true" className="size-5 text-sub1" />
                 </span>
                 <span className="grid min-w-0 leading-tight">
                     <span className="font-semibold text-white text-sm truncate">Bạn chưa đăng nhập</span>

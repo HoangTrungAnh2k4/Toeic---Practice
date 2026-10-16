@@ -157,7 +157,6 @@ export default function RecentAttempt({ exams }: RecentAttemptProps) {
                         className="inline-flex items-center gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-semibold text-main text-sm hover:underline"
                     >
                         Xem toàn bộ lịch sử
-                        <LuArrowRight className="size-4" aria-hidden="true" />
                     </Link>
                 </div>
             </div>

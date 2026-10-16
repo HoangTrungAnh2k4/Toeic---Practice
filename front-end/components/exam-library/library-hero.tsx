@@ -10,6 +10,7 @@ import type { ExamSummary } from '@/lib/exam-library/types';
 import { useUserExamStates } from '@/lib/exam-library/use-user-exam-states';
 import { cn } from '@/lib/utils';
 import { SKILL_COPY } from './skill-copy';
+import { GoDotFill } from 'react-icons/go';
 
 interface LibraryHeroProps {
     skill: Skill;
@@ -61,15 +62,15 @@ export function LibraryHero({ skill, exams }: LibraryHeroProps) {
 
                             <ul className="flex flex-wrap gap-x-4 gap-y-2 font-medium text-sub1 text-xs">
                                 <li className="flex items-center gap-1.5">
-                                    <LuListOrdered className="size-4 text-sub3" aria-hidden="true" />
+                                    <GoDotFill className="size-4 text-sub3" aria-hidden="true" />
                                     {recommended.questionCount} câu hỏi thi {copy.verb}
                                 </li>
                                 <li className="flex items-center gap-1.5">
-                                    <LuClock className="size-4 text-sub3" aria-hidden="true" />~
+                                    <GoDotFill className="size-4 text-sub3" aria-hidden="true" />
                                     {recommended.durationMin} phút làm bài
                                 </li>
                                 <li className="flex items-center gap-1.5">
-                                    <LuBadgeCheck className="size-4 text-sub3" aria-hidden="true" />
+                                    <GoDotFill className="size-4 text-sub3" aria-hidden="true" />
                                     Đủ {recommended.partCount} phần chuẩn ETS
                                 </li>
                             </ul>
@@ -80,7 +81,6 @@ export function LibraryHero({ skill, exams }: LibraryHeroProps) {
                                 href={buildTestHref(skill, recommended.id)}
                                 className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}
                             >
-                                <LuCirclePlay className="size-4" aria-hidden="true" />
                                 <span>Bắt đầu làm bài thi</span>
                             </Link>
                             <Link
@@ -90,7 +90,6 @@ export function LibraryHero({ skill, exams }: LibraryHeroProps) {
                                     'gap-2 bg-white text-main',
                                 )}
                             >
-                                <LuGraduationCap className="size-4" aria-hidden="true" />
                                 <span>Luyện có hướng dẫn</span>
                             </Link>
                             <a href="#rubric-guide" className={cn(LINK_FOCUS_CLASS, 'text-sub3')}>

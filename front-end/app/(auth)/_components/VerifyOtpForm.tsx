@@ -48,8 +48,9 @@ export default function VerifyOtpForm() {
         );
     }
 
+    // method="post": bấm trước khi hydrate thì trình duyệt submit gốc, không để mật khẩu/mã lên URL
     return (
-        <form noValidate onSubmit={onSubmit}>
+        <form method="post" noValidate onSubmit={onSubmit}>
             <FieldGroup className="gap-4">
                 <p className="text-subText text-sm">
                     Đã gửi tới <strong className="font-semibold text-main break-all">{email}</strong>

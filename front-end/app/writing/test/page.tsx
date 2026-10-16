@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getExamRoom, parseRoomParams } from '@/lib/exam-library/room';
 import { RawSearchParams } from '@/lib/exam-library/search-params';
+import { createServerSupabase } from '@/lib/supabase-server';
 import WritingExamRoomLoader from './_components/WritingExamRoomLoader';
 import WritingExamRoomSkeleton from './_components/WritingExamRoomSkeleton';
 
@@ -18,7 +19,7 @@ async function WritingExamRoomContent({ searchParams }: WritingTestPageProps) {
     const { examId, mode } = parseRoomParams(await searchParams);
     if (!examId) redirect('/writing');
 
-    const room = await getExamRoom('writing', examId);
+    const room = await getExamRoom('writing', examId, await createServerSupabase());
     // Phòng thi hiện mới có nhóm Q1-5 (Part 1); Q6-8 làm sau
     const part = room?.parts.find((item) => item.template.part_no === 1);
     if (!room || !part) notFound();

@@ -7,6 +7,7 @@ Mandatory rules for every AI agent working in this frontend project.
 ## 1. Core rules
 
 - Reply in Vietnamese; English only for technical terms and code. No filler, no echoing the question. Fix/cause in one or two lines.
+- Every task that changes code ends with a written "Lưu ý" list in the reply text: what was skipped or not tested, and risks the user must know (e.g. breaking changes on deploy). It must be the LAST visible message of the turn: call the closing/next-step summary tool (wrap_up) WITHOUT a question/buttons, then write the final message with the "Lưu ý" list, and put any question (commit?...) as its last line. Never write the list before that tool call (it gets collapsed with the work log) and never leave it only inside the summary box.
 - Before finishing a code task: run `npm run lint` and `npx tsc --noEmit`, fix errors you introduced.
 - UI stack: ONLY Tailwind, shadcn/ui, react-icons (`react-icons/lu` by default). No other UI/CSS/icon library, no emoji or raw SVG icons, no inline style or CSS modules. Add shadcn via `npx shadcn@latest add`, never hand-write it.
 - Use brand tokens (`bg-main`, `text-subText`...) instead of hex or arbitrary values.
