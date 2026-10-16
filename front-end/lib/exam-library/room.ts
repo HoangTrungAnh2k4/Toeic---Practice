@@ -32,7 +32,8 @@ export function parseRoomParams(raw: RawSearchParams): { examId: string | null; 
 /**
  * Nội dung phòng thi của một đề: các Part theo thứ tự kèm câu hỏi.
  * `null` khi không có đề hoặc đề không thuộc kỹ năng của phòng thi.
- * shortcut: chưa chặn đề chưa phát hành vì admin xem trước bằng chính phòng thi; chặn theo role khi có đăng nhập.
+ * Chạy cả server lẫn client; RLS quyết định đề nào thấy được (server không phiên: chỉ `published`).
+ * shortcut: admin xem trước đề nháp nhờ tải lại phía client (`useExamRoom`) khi server trả `null`; đọc phiên ở server (@supabase/ssr) khi cần SSR cho đề nháp.
  */
 export async function getExamRoom(skill: Skill, examId: string): Promise<ExamRoom | null> {
     const exam = await getExam(examId);
