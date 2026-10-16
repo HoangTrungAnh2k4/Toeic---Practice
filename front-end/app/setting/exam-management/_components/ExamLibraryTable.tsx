@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { LuBadgeCheck, LuClock3, LuEye, LuInbox, LuSearchX, LuTrash2 } from 'react-icons/lu';
-import Button from '@/components/ui/button';
+import { LuBadgeCheck, LuClock3, LuEye, LuInbox, LuPlus, LuSearchX, LuTrash2 } from 'react-icons/lu';
+import Button, { buttonVariants } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE, SOURCE_LABEL, STATUS_STYLE } from '../_lib/examStyle';
@@ -38,7 +38,15 @@ function EmptyRow({ isLibraryEmpty, onResetFilters }: { isLibraryEmpty: boolean;
                             ? 'Chưa có đề nào được thêm vào kho.'
                             : 'Thử từ khóa khác hoặc bỏ bớt bộ lọc trạng thái, nguồn dữ liệu.'}
                     </p>
-                    {!isLibraryEmpty && (
+                    {isLibraryEmpty ? (
+                        <Link
+                            href="/setting/exam-management/new"
+                            className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 mt-2 text-xs')}
+                        >
+                            <LuPlus className="size-4" aria-hidden="true" />
+                            Tạo đề
+                        </Link>
+                    ) : (
                         <Button
                             type="button"
                             variant="third"

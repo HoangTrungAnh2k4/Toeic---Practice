@@ -1,5 +1,7 @@
 import Link from 'next/link';
-import { LuBadgeCheck, LuChevronRight, LuFileCog } from 'react-icons/lu';
+import { LuBadgeCheck, LuChevronRight, LuFileCog, LuPlus } from 'react-icons/lu';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export default function ExamManagementHeader() {
     return (
@@ -43,6 +45,13 @@ export default function ExamManagementHeader() {
                 </div>
             </div>
 
+            <Link
+                href="/setting/exam-management/new"
+                className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2 self-start xl:self-auto shrink-0')}
+            >
+                <LuPlus className="size-4" aria-hidden="true" />
+                Tạo đề Speaking
+            </Link>
         </div>
     );
 }
