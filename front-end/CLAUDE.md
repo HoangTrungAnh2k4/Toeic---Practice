@@ -15,7 +15,17 @@ Mandatory rules for every AI agent working in this frontend project.
 
 ---
 
-## 5. Design tokens & identity (Toeco)
+## 2. Server vs Client Components
+
+- Default to Server Components. `page.tsx`/`layout.tsx` stay server and fetch shared content (`lib/data/content.ts`) there.
+- Add `'use client'` only for state, effects, event handlers or browser APIs, and push it down to the smallest leaf (button, input, results list), not the whole page.
+- Need server-rendered content inside a client wrapper (Dialog, Tabs, Collapsible)? Pass it as `children`/props from the server file; never import it inside the client file (that turns it client too).
+- Session lives in cookies (`@supabase/ssr`); `proxy.ts` refreshes it and redirects guests away from protected routes. Per-user data (`lib/data/user-data.ts`) stays client-side (guest mode uses `localStorage`). Server-side auth/role checks use `createServerSupabase()` (`lib/supabase-server.ts`) inside `<Suspense>`; the shared `supabase` client is anon on the server.
+- Interaction-heavy screens (exam rooms: timer, recording, editor) may be one client tree; don't split them just to shrink the client.
+
+---
+
+## 3. Design tokens & identity (Toeco)
 
 Design system reference (local): `docs/design-system/README.md` and `docs/design-system/tokens.json`. Read them only when the table below is not enough. Tokens live in `app/globals.css`.
 
@@ -46,7 +56,7 @@ Design system reference (local): `docs/design-system/README.md` and `docs/design
 
 ---
 
-## 6. Feature planning (PRD)
+## 4. Feature planning (PRD)
 
 Trigger: the user asks to plan/spec a NEW feature, or says "PRD", "lên kế hoạch", "viết spec" before coding.
 Do NOT trigger for bug fixes or small tweaks (≤ 3 files). Just do them.
