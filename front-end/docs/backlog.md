@@ -21,7 +21,7 @@
 
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ |
 | --- | --- | --- | --- | --- |
-| E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Todo | 0/6 |
+| E1 | Lưu dữ liệu người dùng trên Supabase | P0 | In progress | 3/6 |
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | Todo | 0/5 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 |
 | E4 | Pipeline chấm điểm (AI) | P0 | Todo | 0/6 |
@@ -38,9 +38,9 @@
 
 Hiện `listAttempts`, `saveResponse`, bookmark… đọc/ghi qua `lib/data/local-store.ts` (localStorage). Đăng nhập có nhưng dữ liệu không gắn tài khoản.
 
-- [ ] **E1-1** (P0, M) Migration + RLS cho `attempts`, `attempt_responses`, `annotations`, `bookmarks` (user chỉ đọc/ghi của mình)
-- [ ] **E1-2** (P0, M) Chuyển `startAttempt`, `updateAttempt`, `getAttempt`, `listAttempts` sang Supabase
-- [ ] **E1-3** (P0, S) Chuyển `saveResponse`, `listResponses`, `listAnnotations` sang Supabase
+- [x] **E1-1** Migration + RLS cho `attempts`, `responses`, `annotations`, `bookmarks` (user chỉ đọc/ghi của mình). Bảng + RLS có sẵn trong `erd_tables`; thêm trigger tính `ends_at` phía server (`20261016130000_attempt_ends_at.sql`) + pgTAP `user_data_rls.test.sql`
+- [x] **E1-2** Chuyển `startAttempt`, `updateAttempt`, `getAttempt`, `listAttempts` sang Supabase khi đã đăng nhập (`lib/data/user-data.ts`); khách vẫn dùng localStorage tới khi chốt E1-5. Insert chỉ gửi `exam_id`/`part_template_id`/`mode`; `AttemptPatch` thu hẹp về cột được grant (`status`, `sample_viewed`, `submitted_at`)
+- [x] **E1-3** Chuyển `saveResponse`, `listResponses`, `listAnnotations` sang Supabase khi đã đăng nhập. `saveResponse` sửa-trước-thêm-sau thay vì `.upsert()` (client không có quyền update `attempt_id`/`question_id`); phòng thi Writing chờ lưu xong mới nộp, lỗi thì ở lại phòng. Còn nợ: lưu lúc đóng tab có thể bị huỷ (`shortcut:` trong `useWritingAttempt.ts`)
 - [ ] **E1-4** (P1, S) Chuyển `listBookmarkedExamIds`, `toggleBookmark` sang Supabase
 - [ ] **E1-5** (P1, M) Quyết định số phận dữ liệu guest: migrate localStorage → tài khoản khi đăng nhập, hay bỏ chế độ guest
 - [ ] **E1-6** (P1, S) Trạng thái loading/error cho mọi chỗ đọc dữ liệu sau khi chuyển sang mạng

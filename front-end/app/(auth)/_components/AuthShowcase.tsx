@@ -47,7 +47,7 @@ export default function AuthShowcase() {
             <header className="flex items-center gap-2.5 mx-auto w-full max-w-6xl">
                 <Link
                     href="/overview"
-                    className="place-items-center grid bg-main shadow-[3px_3px_0_0_#000] border-2 border-black rounded-lg size-12 text-white"
+                    className="place-items-center grid bg-main rounded-lg size-12 text-white"
                 >
                     {/* <LuGraduationCap aria-hidden="true" className="size-5" /> */}
                     <Image
@@ -71,7 +71,7 @@ export default function AuthShowcase() {
                 Đề sát format ETS, chấm đúng tiêu chí và chỉ rõ lỗi cần sửa sau mỗi bài.
             </p>
 
-            <ul className="hidden sm:flex flex-wrap gap-4.5 pt-2">
+            <ul className="hidden sm:flex flex-wrap gap-8 xl:gap-4.5 pt-2">
                 {HIGHLIGHTS.map(({ icon: Icon, title, detail, tone, tilt }) => (
                     <li
                         key={title}

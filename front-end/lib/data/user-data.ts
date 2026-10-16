@@ -14,8 +14,8 @@ import { supabase } from '@/lib/supabase';
 import { readTable, writeTable } from './local-store';
 
 /**
- * Dữ liệu cá nhân (bài làm, câu trả lời, đề đã lưu). Hiện mọi người dùng đều là khách và dữ liệu nằm trong
- * localStorage; khi có backend, người đã đăng nhập đọc từ Supabase còn khách giữ nguyên nhánh này.
+ * Dữ liệu cá nhân (bài làm, câu trả lời, đề đã lưu). Người đã đăng nhập đọc/ghi attempts, responses, annotations
+ * trên Supabase; khách và bookmarks (chưa chuyển) vẫn nằm trong localStorage.
  * Đăng ký tài khoản không chuyển dữ liệu khách sang. Hàm đều async để giữ nguyên signature khi đổi nguồn.
  */
 export const GUEST_USER_ID = 'guest';
@@ -32,11 +32,10 @@ const now = () => new Date().toISOString();
  * Dòng `profiles` do trigger tạo lúc đăng ký, RLS chỉ cho đọc của chính mình.
  */
 export async function getProfile(): Promise<Profile | null> {
-    // getSession đọc phiên đã lưu (và chờ xử lý session trong URL sau OAuth), không gọi mạng
-    const { data: auth } = await supabase.auth.getSession();
-    if (!auth.session) return null;
+    const userId = await sessionUserId();
+    if (!userId) return null;
 
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', auth.session.user.id).maybeSingle();
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
     if (error) throw error;
     return data;
 }
@@ -61,24 +60,51 @@ export async function getLatestInsight(): Promise<AiInsight | null> {
     return null;
 }
 
+/** Id người đã đăng nhập, `null` = khách. getSession đọc phiên đã lưu, không gọi mạng. */
+async function sessionUserId(): Promise<string | null> {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.user.id ?? null;
+}
+
 /** Mới nhất trước. */
 export async function listAttempts(): Promise<Attempt[]> {
-    return readTable<Attempt>(ATTEMPTS).sort((a, b) => b.started_at.localeCompare(a.started_at));
+    if (!(await sessionUserId())) {
+        return readTable<Attempt>(ATTEMPTS).sort((a, b) => b.started_at.localeCompare(a.started_at));
+    }
+    // RLS chỉ trả attempt của chính mình
+    const { data, error } = await supabase.from('attempts').select('*').order('started_at', { ascending: false });
+    if (error) throw error;
+    return data;
 }
 
 export async function getAttempt(id: string): Promise<Attempt | null> {
-    return readTable<Attempt>(ATTEMPTS).find((attempt) => attempt.id === id) ?? null;
+    if (!(await sessionUserId())) return readTable<Attempt>(ATTEMPTS).find((attempt) => attempt.id === id) ?? null;
+
+    const { data, error } = await supabase.from('attempts').select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return data;
 }
 
 export interface StartAttemptInput {
     exam_id: string;
     part_template_id: number | null;
     mode: AttemptMode;
-    /** Thời lượng làm bài; bỏ trống khi không giới hạn giờ (chế độ có hướng dẫn). */
+    /** Thời lượng làm bài; bỏ trống khi không giới hạn giờ (chế độ có hướng dẫn). Chỉ dùng cho khách: DB tự tính `ends_at`. */
     duration_sec: number | null;
 }
 
 export async function startAttempt({ exam_id, part_template_id, mode, duration_sec }: StartAttemptInput) {
+    if (await sessionUserId()) {
+        // id, user_id, ends_at do DB sinh (client không có quyền ghi các cột này)
+        const { data, error } = await supabase
+            .from('attempts')
+            .insert({ exam_id, part_template_id, mode })
+            .select()
+            .single();
+        if (error) throw error;
+        return data;
+    }
+
     const startedAt = new Date();
     const attempt: Attempt = {
         id: crypto.randomUUID(),
@@ -100,9 +126,17 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
     return attempt;
 }
 
-export type AttemptPatch = Partial<Omit<Attempt, 'id' | 'user_id' | 'exam_id' | 'started_at'>>;
+/** Chỉ các cột client được phép sửa (grant trên `attempts`); điểm do khâu chấm ghi. */
+export type AttemptPatch = Partial<Pick<Attempt, 'status' | 'sample_viewed' | 'submitted_at'>>;
 
 export async function updateAttempt(id: string, patch: AttemptPatch): Promise<Attempt> {
+    if (await sessionUserId()) {
+        // RLS chỉ cho sửa attempt `in_progress` của chính mình → không khớp dòng nào thì single() báo lỗi
+        const { data, error } = await supabase.from('attempts').update(patch).eq('id', id).select().single();
+        if (error) throw error;
+        return data;
+    }
+
     const rows = readTable<Attempt>(ATTEMPTS);
     const index = rows.findIndex((attempt) => attempt.id === id);
     if (index === -1) throw new Error(`Không tìm thấy bài làm ${id}.`);
@@ -114,13 +148,22 @@ export async function updateAttempt(id: string, patch: AttemptPatch): Promise<At
 }
 
 export async function listResponses(attemptId: string): Promise<AttemptResponse[]> {
-    return readTable<AttemptResponse>(RESPONSES).filter((response) => response.attempt_id === attemptId);
+    if (!(await sessionUserId())) {
+        return readTable<AttemptResponse>(RESPONSES).filter((response) => response.attempt_id === attemptId);
+    }
+    const { data, error } = await supabase.from('responses').select('*').eq('attempt_id', attemptId);
+    if (error) throw error;
+    // metrics, strengths là jsonb do khâu chấm ghi theo dạng của AttemptResponse
+    return data as AttemptResponse[];
 }
 
-export type ResponsePatch = Partial<Omit<AttemptResponse, 'id' | 'attempt_id' | 'question_id' | 'updated_at'>>;
+/** Chỉ các cột client được phép ghi (grant trên `responses`); điểm, transcript do khâu chấm ghi. */
+export type ResponsePatch = Partial<Pick<AttemptResponse, 'text_answer' | 'audio_path'>>;
 
 /** Upsert theo cặp (attempt_id, question_id) — dùng cho autosave. */
 export async function saveResponse(attemptId: string, questionId: string, patch: ResponsePatch) {
+    if (await sessionUserId()) return saveRemoteResponse(attemptId, questionId, patch);
+
     const rows = readTable<AttemptResponse>(RESPONSES);
     const index = rows.findIndex((row) => row.attempt_id === attemptId && row.question_id === questionId);
     const base: AttemptResponse =
@@ -147,10 +190,43 @@ export async function saveResponse(attemptId: string, questionId: string, patch:
     return saved;
 }
 
+/**
+ * Không dùng `.upsert()`: PostgREST SET lại cả attempt_id/question_id khi trùng, mà client chỉ có quyền
+ * update text_answer/audio_path → sửa trước, chưa có dòng thì thêm. RLS chặn khi attempt không còn `in_progress`.
+ */
+async function saveRemoteResponse(attemptId: string, questionId: string, patch: ResponsePatch) {
+    const update = () =>
+        supabase.from('responses').update(patch).eq('attempt_id', attemptId).eq('question_id', questionId).select().maybeSingle();
+
+    const updated = await update();
+    if (updated.error) throw updated.error;
+    if (updated.data) return updated.data as AttemptResponse;
+
+    const inserted = await supabase
+        .from('responses')
+        .insert({ attempt_id: attemptId, question_id: questionId, ...patch })
+        .select()
+        .single();
+    // 23505: lượt lưu song song vừa thêm dòng này trước → sửa lại dòng đó
+    if (inserted.error?.code === '23505') {
+        const retried = await update();
+        if (retried.error) throw retried.error;
+        if (retried.data) return retried.data as AttemptResponse;
+    }
+    if (inserted.error) throw inserted.error;
+    return inserted.data as AttemptResponse;
+}
+
 /** Nhận xét của AI cho các câu trả lời; chỉ khâu chấm bài ghi bảng này. */
 export async function listAnnotations(responseIds: string[]): Promise<Annotation[]> {
-    const ids = new Set(responseIds);
-    return readTable<Annotation>(ANNOTATIONS).filter((annotation) => ids.has(annotation.response_id));
+    if (!(await sessionUserId())) {
+        const ids = new Set(responseIds);
+        return readTable<Annotation>(ANNOTATIONS).filter((annotation) => ids.has(annotation.response_id));
+    }
+    if (responseIds.length === 0) return [];
+    const { data, error } = await supabase.from('annotations').select('*').in('response_id', responseIds);
+    if (error) throw error;
+    return data;
 }
 
 export async function listBookmarkedExamIds(): Promise<string[]> {

@@ -72,8 +72,8 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
         setOpenDialog(open ? dialog : null);
 
     const handleSubmit = async () => {
-        await submit();
-        router.push('/writing');
+        // Lỗi hiện ở trạng thái lưu trên header, ở lại phòng để thử nộp lại
+        if (await submit()) router.push('/writing');
     };
 
     return (

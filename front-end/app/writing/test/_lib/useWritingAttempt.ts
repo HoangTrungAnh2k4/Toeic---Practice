@@ -53,7 +53,7 @@ function resumeOrStartOnce(options: UseWritingAttemptOptions) {
 }
 
 /**
- * Lượt làm Writing của khách: tạo hoặc tiếp tục attempt, tự lưu từng câu vào `responses`.
+ * Lượt làm Writing: tạo hoặc tiếp tục attempt, tự lưu từng câu vào `responses`.
  * Đồng hồ chạy theo `attempt.ends_at` nên tải lại trang không reset thời gian.
  */
 export function useWritingAttempt(options: UseWritingAttemptOptions) {
@@ -68,6 +68,8 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
     /** Câu chưa kịp lưu (đang chờ debounce), theo index câu. */
     const pendingRef = useRef(new Map<number, string>());
     const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    /** Các lượt lưu đang chạy; nộp bài phải chờ hết, không thì RLS chặn câu tới sau khi attempt đã `submitted`. */
+    const savingRef = useRef(Promise.resolve(true));
 
     useEffect(() => {
         let cancelled = false;
@@ -84,23 +86,37 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         };
     }, []);
 
-    /** Ghi ngay mọi câu đang chờ. Lỗi ghi (bộ nhớ trình duyệt bị chặn/đầy) chuyển trạng thái sang `error`. */
+    /**
+     * Ghi ngay mọi câu đang chờ; trả `true` khi mọi lượt lưu (cả lượt trước còn đang chạy) đều thành công.
+     * Câu lưu lỗi quay lại hàng chờ (nếu chưa có bản mới hơn) để lần flush sau thử lại.
+     */
     const flush = useCallback(() => {
         clearTimeout(timeoutRef.current);
-        if (!attempt) return;
+        if (!attempt) return savingRef.current;
 
-        // saveResponse ghi localStorage đồng bộ trước khi trả promise → an toàn khi gọi lúc rời trang
-        for (const [index, text] of pendingRef.current) {
-            saveResponse(attempt.id, questions[index].id, { text_answer: text }).catch(() => setSaveStatus('error'));
-        }
+        // shortcut: lưu lên Supabase lúc đóng tab có thể bị huỷ giữa chừng (mất phần gõ trong ~600ms cuối);
+        // thêm fetch keepalive hoặc bản nháp localStorage nếu người dùng báo mất chữ.
+        const batch = [...pendingRef.current].map(([index, text]) =>
+            saveResponse(attempt.id, questions[index].id, { text_answer: text }).then(
+                () => true,
+                () => {
+                    if (!pendingRef.current.has(index)) pendingRef.current.set(index, text);
+                    setSaveStatus('error');
+                    return false;
+                },
+            ),
+        );
         pendingRef.current.clear();
+        savingRef.current = Promise.all([savingRef.current, ...batch]).then((results) => results.every(Boolean));
+        return savingRef.current;
     }, [attempt, questions]);
 
     useEffect(() => {
-        window.addEventListener('pagehide', flush);
+        const onPageHide = () => void flush();
+        window.addEventListener('pagehide', onPageHide);
         return () => {
-            window.removeEventListener('pagehide', flush);
-            flush();
+            window.removeEventListener('pagehide', onPageHide);
+            void flush();
         };
     }, [flush]);
 
@@ -111,18 +127,27 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
 
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
-            // Lỗi ghi (nếu có) báo về sau qua catch trong flush và ghi đè trạng thái này
-            setSaveStatus('saved');
-            setSavedAt(Date.now());
-            flush();
+            void flush().then((ok) => {
+                // Đã gõ tiếp trong lúc lưu → vẫn là `saving`
+                if (!ok || pendingRef.current.size > 0) return;
+                setSaveStatus('saved');
+                setSavedAt(Date.now());
+            });
         }, AUTOSAVE_DELAY_MS);
     };
 
-    /** Nộp bài: lưu nốt phần đang chờ rồi đóng lượt làm. */
+    /** Nộp bài: lưu nốt phần đang chờ rồi đóng lượt làm. Trả `false` (trạng thái `error`) khi chưa lưu/nộp được. */
     const submit = async () => {
-        if (!attempt) return;
-        flush();
-        await updateAttempt(attempt.id, { status: 'submitted', submitted_at: new Date().toISOString() });
+        if (!attempt) return false;
+        // Câu lưu lỗi đã quay lại hàng chờ → còn câu chờ nghĩa là chưa lưu đủ
+        if (!(await flush()) || pendingRef.current.size > 0) return false;
+        try {
+            await updateAttempt(attempt.id, { status: 'submitted', submitted_at: new Date().toISOString() });
+            return true;
+        } catch {
+            setSaveStatus('error');
+            return false;
+        }
     };
 
     return { attempt, answers, isRestored, loadError, saveStatus, savedAt, updateAnswer, submit };
