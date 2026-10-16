@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { LuDownload } from 'react-icons/lu';
 import Button from '@/components/ui/button';
+import { deleteExam } from '../_lib/data';
 import { downloadJson } from '../_lib/downloadJson';
 import { ExamLibraryItem } from '../types';
 import {
@@ -22,7 +23,6 @@ interface ExamLibraryProps {
 }
 
 export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLibraryProps) {
-    // shortcut: xoá chỉ gỡ khỏi state phía client; gọi API xoá đề khi có backend.
     const [exams, setExams] = useState(initialExams);
     const [filters, setFilters] = useState<ExamFilters>(DEFAULT_EXAM_FILTERS);
     // Giữ đề đang chọn khi đóng dialog để nội dung không biến mất trong lúc chạy animation
@@ -47,11 +47,15 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
         setIsDeleteOpen(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (!deleteTarget) return;
-        setExams((prev) => prev.filter((exam) => exam.id !== deleteTarget.id));
+        const { id, code } = deleteTarget;
         setIsDeleteOpen(false);
-        setNotice(`Đã xóa đề ${deleteTarget.code} khỏi kho.`);
+        setNotice(`Đang xóa đề ${code}…`);
+        const error = await deleteExam(id).catch(() => 'Không xóa được đề. Vui lòng thử lại.');
+        if (error) return setNotice(error);
+        setExams((prev) => prev.filter((exam) => exam.id !== id));
+        setNotice(`Đã xóa đề ${code} khỏi kho.`);
     };
 
     const handleExport = () => {
