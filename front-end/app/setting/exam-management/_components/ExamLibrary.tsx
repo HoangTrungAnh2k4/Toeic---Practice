@@ -18,16 +18,17 @@ import ExamLibraryTable from './ExamLibraryTable';
 
 interface ExamLibraryProps {
     initialExams: ExamLibraryItem[];
+    initialNotice?: string;
 }
 
-export default function ExamLibrary({ initialExams }: ExamLibraryProps) {
+export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLibraryProps) {
     // shortcut: xoá chỉ gỡ khỏi state phía client; gọi API xoá đề khi có backend.
     const [exams, setExams] = useState(initialExams);
     const [filters, setFilters] = useState<ExamFilters>(DEFAULT_EXAM_FILTERS);
     // Giữ đề đang chọn khi đóng dialog để nội dung không biến mất trong lúc chạy animation
     const [deleteTarget, setDeleteTarget] = useState<ExamLibraryItem | null>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-    const [notice, setNotice] = useState('');
+    const [notice, setNotice] = useState(initialNotice);
 
     const tabCounts = useMemo(() => getTabCounts(exams), [exams]);
     const filteredExams = useMemo(() => filterExams(exams, filters), [exams, filters]);

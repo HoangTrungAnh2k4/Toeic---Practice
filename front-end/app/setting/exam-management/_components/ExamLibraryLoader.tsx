@@ -8,20 +8,33 @@ import { getExamLibrary } from '../_lib/data';
 import { ExamLibraryItem } from '../types';
 import ExamLibrary from './ExamLibrary';
 
-type LoadState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; exams: ExamLibraryItem[] };
+type LoadState =
+    | { status: 'loading' }
+    | { status: 'error' }
+    | { status: 'ready'; exams: ExamLibraryItem[]; notice: string };
+
+/** Form tạo đề chuyển về đây kèm `?created=<mã đề>`; đọc một lần rồi xoá khỏi URL để tải lại không báo lại. */
+function takeCreatedNotice(): string {
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('created');
+    if (!code) return '';
+    url.searchParams.delete('created');
+    window.history.replaceState(null, '', url);
+    return `Đã tạo đề ${code} ở trạng thái nháp.`;
+}
 
 export default function ExamLibraryLoader() {
     const [state, setState] = useState<LoadState>({ status: 'loading' });
 
     const load = useCallback(() => {
         getExamLibrary()
-            .then((exams) => setState({ status: 'ready', exams }))
+            .then((exams) => setState({ status: 'ready', exams, notice: takeCreatedNotice() }))
             .catch(() => setState({ status: 'error' }));
     }, []);
 
     useEffect(load, [load]);
 
-    if (state.status === 'ready') return <ExamLibrary initialExams={state.exams} />;
+    if (state.status === 'ready') return <ExamLibrary initialExams={state.exams} initialNotice={state.notice} />;
 
     if (state.status === 'loading') {
         return (

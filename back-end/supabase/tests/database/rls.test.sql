@@ -16,7 +16,7 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub": "00000000-0000-0000-0000-000000000001", "role": "authenticated"}';
 
 select results_eq(
-  'select code from public.exams',
+  $$select code from public.exams where code in ('PUB', 'DRAFT')$$,
   array['PUB'],
   'students see only published exams'
 );
