@@ -21,7 +21,7 @@
 
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ |
 | --- | --- | --- | --- | --- |
-| E1 | Lưu dữ liệu người dùng trên Supabase | P0 | In progress | 3/6 |
+| E1 | Lưu dữ liệu người dùng trên Supabase | P0 | In progress | 5/6 |
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | Todo | 0/5 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 |
 | E4 | Pipeline chấm điểm (AI) | P0 | Todo | 0/6 |
@@ -43,7 +43,10 @@ Người đã đăng nhập đọc/ghi attempts, responses, annotations, bookmar
 - [x] **E1-3** Chuyển `saveResponse`, `listResponses`, `listAnnotations` sang Supabase khi đã đăng nhập. `saveResponse` sửa-trước-thêm-sau thay vì `.upsert()` (client không có quyền update `attempt_id`/`question_id`); phòng thi Writing chờ lưu xong mới nộp, lỗi thì ở lại phòng. Còn nợ: lưu lúc đóng tab có thể bị huỷ (`shortcut:` trong `useWritingAttempt.ts`)
 - [x] **E1-4** Chuyển `listBookmarkedExamIds`, `toggleBookmark` sang Supabase khi đã đăng nhập. Toggle xoá-trước-thêm-sau (`user_id` do DB lấy từ `auth.uid()`), trùng khoá `23505` khi bấm song song coi như đã lưu; RLS/pgTAP có sẵn từ E1-1
 - [ ] **E1-5** (P1, M) Quyết định số phận dữ liệu guest: migrate localStorage → tài khoản khi đăng nhập, hay bỏ chế độ guest
-- [ ] **E1-6** (P1, S) Trạng thái loading/error cho mọi chỗ đọc dữ liệu sau khi chuyển sang mạng
+- [x] **E1-6** Trạng thái loading/error cho mọi chỗ đọc dữ liệu sau khi chuyển sang mạng. Hook chung `hooks/use-async.ts` (`useAsync` trả `data`/`failed`/`retry`, `combineAsync` gộp nhiều nguồn) + khối báo lỗi `components/load-error.tsx` có nút Thử lại; áp cho `/overview`, `/schedule`, `/setting/profile`, `/mistakes`, `/mistakes/[id]`, `/setting/history`, `/setting/history/[id]`
+    - Thư viện đề: `UserExamStatesProvider` cho hero, KPI, danh sách dùng chung một lượt tải, Thử lại làm mới cả trang; đánh dấu đề cập nhật lạc quan, lỗi thì hoàn tác + báo, bấm trùng khi đang lưu bị bỏ qua
+    - Phòng thi Writing: lỗi mở phòng có nút Thử lại, câu báo lỗi không còn chỉ nói localStorage
+    - Còn nợ: supabase-js tự retry GET 3 lần nên báo lỗi hiện sau ~15 giây; `/mistakes/[id]`, `/setting/history/[id]` và nhánh lỗi của phòng thi chưa thử trên app (khi API sập, server không lấy được đề nên trang rơi vào `app/error.tsx`)
 
 ## E2 — Phòng thi Speaking thật (P0)
 

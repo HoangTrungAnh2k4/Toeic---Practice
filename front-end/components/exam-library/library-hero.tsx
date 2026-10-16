@@ -20,7 +20,7 @@ const LINK_FOCUS_CLASS =
     'inline-flex items-center gap-1 px-1 rounded-md font-semibold text-xs hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
 
 export function LibraryHero({ skill, exams }: LibraryHeroProps) {
-    const { states } = useUserExamStates(exams.map((exam) => exam.id));
+    const { states } = useUserExamStates();
     const copy = SKILL_COPY[skill];
     // Trước khi đọc xong tiến độ, coi mọi đề là chưa làm để khối gợi ý không bị trống
     const recommended = states ? pickRecommended(toEntries(exams, states))?.exam : exams[0];

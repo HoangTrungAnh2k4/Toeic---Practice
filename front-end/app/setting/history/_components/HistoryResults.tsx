@@ -1,6 +1,7 @@
 'use client';
 
 import { use } from 'react';
+import { LoadError } from '@/components/load-error';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { countSkills, filterHistoryRows, getHistoryKpis } from '../_lib/data';
 import { parseHistoryQuery, RawSearchParams } from '../_lib/searchParams';
@@ -22,8 +23,9 @@ interface HistoryResultsProps {
  */
 export default function HistoryResults({ exams, searchParams }: HistoryResultsProps) {
     const query = parseHistoryQuery(use(searchParams));
-    const rows = useHistoryRows(exams);
+    const { data: rows, failed, retry } = useHistoryRows(exams);
 
+    if (failed) return <LoadError message="Không tải được lịch sử làm bài." onRetry={retry} />;
     if (!rows) return <HistoryResultsSkeleton />;
 
     const result = filterHistoryRows(rows, query);

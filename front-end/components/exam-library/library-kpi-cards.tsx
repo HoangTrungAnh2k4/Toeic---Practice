@@ -22,7 +22,7 @@ const LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider
 const ICON_BOX_CLASS = 'flex justify-center items-center bg-sub1 rounded-lg size-10 text-main shrink-0';
 
 export function LibraryKpiCards({ skill, exams }: LibraryKpiCardsProps) {
-    const { states } = useUserExamStates(exams.map((exam) => exam.id));
+    const { states, loadFailed } = useUserExamStates();
     const copy = SKILL_COPY[skill];
 
     const entries = states ? toEntries(exams, states) : [];
@@ -34,7 +34,7 @@ export function LibraryKpiCards({ skill, exams }: LibraryKpiCardsProps) {
     const latest = scored[0];
 
     return (
-        <div className="gap-4 grid grid-cols-1 md:grid-cols-3" aria-busy={!states}>
+        <div className="gap-4 grid grid-cols-1 md:grid-cols-3" aria-busy={!states && !loadFailed}>
             {/* Library progress */}
             <div className={CARD_CLASS}>
                 <div className="flex justify-between items-start gap-3">
@@ -77,7 +77,7 @@ export function LibraryKpiCards({ skill, exams }: LibraryKpiCardsProps) {
                 <div className="flex justify-between items-start gap-3">
                     <div className="space-y-1 min-w-0">
                         <span className={LABEL_CLASS}>Điểm {copy.label} gần nhất</span>
-                        {!states ? (
+                        {!states && !loadFailed ? (
                             <Skeleton className="bg-sub1 w-24 h-9" />
                         ) : (
                             <div className="flex items-baseline gap-2">
@@ -93,7 +93,9 @@ export function LibraryKpiCards({ skill, exams }: LibraryKpiCardsProps) {
                     </div>
                 </div>
                 <p className="bg-sub1/60 px-3 py-2 rounded-lg font-medium text-main text-xs">
-                    {latest
+                    {loadFailed
+                        ? 'Chưa tải được điểm, xem danh sách đề bên dưới để thử lại.'
+                        : latest
                         ? `Tính từ ${scored.length} đề đã có điểm.`
                         : `Chưa có bài ${copy.label} nào được chấm điểm.`}
                 </p>

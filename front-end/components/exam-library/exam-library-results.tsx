@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { use } from 'react';
-import { LuSearchX } from 'react-icons/lu';
+import { use, useSyncExternalStore } from 'react';
+import { LuSearchX, LuTriangleAlert } from 'react-icons/lu';
+import { LoadError } from '@/components/load-error';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { buttonVariants } from '@/components/ui/button';
 import type { Skill } from '@/lib/domain/types';
 import { countTabs, filterEntries, paginate, pickRecommended, toEntries } from '@/lib/exam-library/entries';
@@ -22,6 +24,8 @@ import { LibraryPagination } from './library-pagination';
 import { LibraryResultsSkeleton } from './library-results-skeleton';
 import { SKILL_COPY } from './skill-copy';
 
+const subscribeNothing = () => () => {};
+
 interface ExamLibraryResultsProps {
     skill: Skill;
     exams: ExamSummary[];
@@ -34,8 +38,12 @@ interface ExamLibraryResultsProps {
  */
 export function ExamLibraryResults({ skill, exams, searchParams }: ExamLibraryResultsProps) {
     const query = parseLibraryQuery(use(searchParams));
-    const { states, toggleBookmark } = useUserExamStates(exams.map((exam) => exam.id));
+    const { states, loadFailed, retry, bookmarkFailed, toggleBookmark } = useUserExamStates();
+    // Provider ở ngoài Suspense có thể tải xong trước khi khối này hydrate → lần hydrate phải khớp skeleton của server
+    const hydrated = useSyncExternalStore(subscribeNothing, () => true, () => false);
 
+    if (!hydrated) return <LibraryResultsSkeleton />;
+    if (loadFailed) return <LoadError message="Không tải được tiến độ làm bài." onRetry={retry} />;
     if (!states) return <LibraryResultsSkeleton />;
 
     const entries = toEntries(exams, states);
@@ -46,6 +54,13 @@ export function ExamLibraryResults({ skill, exams, searchParams }: ExamLibraryRe
         // `group` + `data-pending` từ các ô lọc → làm mờ lưới đề khi URL đang đổi
         <div id={LIBRARY_SECTION_ID} className="group flex flex-col gap-4 scroll-mt-4">
             <LibraryFilters skill={skill} query={query} tabCounts={countTabs(entries)} displayedCount={result.total} />
+
+            {bookmarkFailed && (
+                <Alert variant="destructive">
+                    <LuTriangleAlert aria-hidden="true" />
+                    <AlertDescription>Chưa lưu được đánh dấu đề. Kiểm tra kết nối rồi bấm lại.</AlertDescription>
+                </Alert>
+            )}
 
             <section
                 aria-label={`Danh sách bộ đề ${SKILL_COPY[skill].label}`}

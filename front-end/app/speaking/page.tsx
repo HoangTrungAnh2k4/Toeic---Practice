@@ -6,6 +6,7 @@ import { LibraryResultsSkeleton } from '@/components/exam-library/library-result
 import { StrategyTips } from '@/components/exam-library/strategy-tips';
 import { RawSearchParams } from '@/lib/exam-library/search-params';
 import { getLibraryExams } from '@/lib/exam-library/summaries';
+import { UserExamStatesProvider } from '@/lib/exam-library/use-user-exam-states';
 import SpeakingRubricGuide from './_components/SpeakingRubricGuide';
 import { PART_STRATEGIES } from './utils';
 
@@ -18,13 +19,15 @@ export default async function SpeakingPage({ searchParams }: SpeakingPageProps) 
 
     return (
         <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
-            <LibraryHero skill="speaking" exams={exams} />
-            <LibraryKpiCards skill="speaking" exams={exams} />
+            <UserExamStatesProvider examIds={exams.map((exam) => exam.id)}>
+                <LibraryHero skill="speaking" exams={exams} />
+                <LibraryKpiCards skill="speaking" exams={exams} />
 
-            {/* Phụ thuộc searchParams → stream riêng, phần tĩnh xung quanh vẫn được prerender */}
-            <Suspense fallback={<LibraryResultsSkeleton />}>
-                <ExamLibraryResults skill="speaking" exams={exams} searchParams={searchParams} />
-            </Suspense>
+                {/* Phụ thuộc searchParams → stream riêng, phần tĩnh xung quanh vẫn được prerender */}
+                <Suspense fallback={<LibraryResultsSkeleton />}>
+                    <ExamLibraryResults skill="speaking" exams={exams} searchParams={searchParams} />
+                </Suspense>
+            </UserExamStatesProvider>
 
             <SpeakingRubricGuide />
             <StrategyTips skill="speaking" strategies={PART_STRATEGIES} />

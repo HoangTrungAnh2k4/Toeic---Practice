@@ -106,3 +106,10 @@ export function paginate<T>(items: T[], page: number) {
 export function pickRecommended(entries: LibraryEntry[]): LibraryEntry | undefined {
     return entries.find((entry) => entry.user.progress === 'not_started');
 }
+
+/** Bản sao `states` với đề `examId` đổi cờ đánh dấu; giữ nguyên các đề khác. */
+export function withBookmark(states: Map<string, UserExamState>, examId: string, bookmarked: boolean) {
+    const next = new Map(states);
+    next.set(examId, { ...(states.get(examId) ?? EMPTY_USER_STATE), bookmarked });
+    return next;
+}

@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { LuCalendarPlus, LuUserPlus } from 'react-icons/lu';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
+import { LoadError } from '@/components/load-error';
 import { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { combineAsync, useAsync } from '@/hooks/use-async';
 import { useUserStats } from '@/hooks/use-user-stats';
 import { getMonthTaskProgress, getPlanWeekCount, getPlanWeekNo } from '@/lib/data/study-plan';
 import { type ActivePlan, getActivePlan, getLatestInsight, getProfile } from '@/lib/data/user-data';
@@ -30,6 +32,11 @@ interface PlanState {
     profile: Profile | null;
     active: ActivePlan | null;
     insight: AiInsight | null;
+}
+
+async function loadPlanState(): Promise<PlanState> {
+    const [profile, active, insight] = await Promise.all([getProfile(), getActivePlan(), getLatestInsight()]);
+    return { profile, active, insight };
 }
 
 function NoPlanCard({ isGuest }: { isGuest: boolean }) {
@@ -60,17 +67,16 @@ function NoPlanCard({ isGuest }: { isGuest: boolean }) {
 
 /** Lịch học chỉ có ở tài khoản; render sau khi mount vì thống kê đọc bài làm trong localStorage. */
 export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
-    const stats = useUserStats(exams);
-    const book = useMistakeBook(patterns, exams);
-    const [state, setState] = useState<PlanState | null>(null);
+    const statsState = useUserStats(exams);
+    const bookState = useMistakeBook(patterns, exams);
+    const planState = useAsync(loadPlanState);
     const [weekNo, setWeekNo] = useState<number | null>(null);
+    const { failed, retry } = combineAsync(statsState, bookState, planState);
+    const { data: stats } = statsState;
+    const { data: book } = bookState;
+    const { data: state } = planState;
 
-    useEffect(() => {
-        Promise.all([getProfile(), getActivePlan(), getLatestInsight()]).then(([profile, active, insight]) =>
-            setState({ profile, active, insight }),
-        );
-    }, []);
-
+    if (failed) return <LoadError message="Không tải được lộ trình học." onRetry={retry} />;
     if (!stats || !book || !state) {
         return (
             <div className="flex flex-col gap-6" aria-busy="true" aria-label="Đang tải lộ trình">

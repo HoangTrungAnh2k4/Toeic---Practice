@@ -1,6 +1,7 @@
 'use client';
 
 import { use } from 'react';
+import { LoadError } from '@/components/load-error';
 import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { getMistakes, getMistakeSummary } from '../_lib/data';
@@ -34,8 +35,9 @@ function getEmptyVariant(query: MistakeQuery, summary: MistakeSummary): EmptyVar
  */
 export default function MistakesResults({ patterns, exams, searchParams }: MistakesResultsProps) {
     const query = parseMistakeQuery(use(searchParams));
-    const book = useMistakeBook(patterns, exams);
+    const { data: book, failed, retry } = useMistakeBook(patterns, exams);
 
+    if (failed) return <LoadError message="Không tải được sổ lỗi." onRetry={retry} />;
     if (!book) return <MistakesResultsSkeleton />;
 
     const items = getMistakes(book, query);

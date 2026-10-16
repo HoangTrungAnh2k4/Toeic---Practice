@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { LuTriangleAlert } from 'react-icons/lu';
-import { buttonVariants } from '@/components/ui/button';
+import { LuRotateCw, LuTriangleAlert } from 'react-icons/lu';
+import Button, { buttonVariants } from '@/components/ui/button';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
 import type { RoomPart } from '@/lib/exam-library/room';
 import { useCountdown } from '../_lib/useCountdown';
@@ -32,7 +32,7 @@ export interface WritingExamRoomProps {
 export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomProps) {
     const router = useRouter();
     const { questions } = part;
-    const { attempt, answers, isRestored, loadError, saveStatus, savedAt, updateAnswer, submit } = useWritingAttempt({
+    const { attempt, answers, isRestored, loadError, retryLoad, saveStatus, savedAt, updateAnswer, submit } = useWritingAttempt({
         examId: exam.id,
         partTemplateId: part.template.id,
         mode,
@@ -50,11 +50,19 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
                 className="flex flex-col items-center gap-3 mx-auto bg-white shadow-sm px-4 py-12 border border-sub2/30 rounded-xl w-full max-w-360 text-center"
             >
                 <LuTriangleAlert className="size-8 text-destructive" aria-hidden="true" />
-                <p className="font-semibold text-main text-sm">Không mở được phòng thi trên trình duyệt này</p>
-                <p className="text-subText text-xs">Trình duyệt đang chặn bộ nhớ cục bộ nên không thể lưu bài làm.</p>
-                <Link href="/writing" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
-                    Về thư viện đề
-                </Link>
+                <p className="font-semibold text-main text-sm">Không mở được phòng thi</p>
+                <p className="text-subText text-xs">
+                    Kiểm tra kết nối mạng rồi thử lại. Nếu vẫn lỗi, trình duyệt có thể đang chặn bộ nhớ cục bộ.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                    <Button type="button" variant="primary" size="sm" className="gap-2" onClick={retryLoad}>
+                        <LuRotateCw className="size-4" aria-hidden="true" />
+                        Thử lại
+                    </Button>
+                    <Link href="/writing" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+                        Về thư viện đề
+                    </Link>
+                </div>
             </div>
         );
     }

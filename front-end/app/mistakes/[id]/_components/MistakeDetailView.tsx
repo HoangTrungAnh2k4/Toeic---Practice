@@ -1,5 +1,6 @@
 'use client';
 
+import { LoadError } from '@/components/load-error';
 import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { getMistakeDetail } from '../../_lib/data';
@@ -22,7 +23,8 @@ interface MistakeDetailViewProps {
 
 /** Tiến độ và bằng chứng tính từ bài làm trong localStorage → render sau khi mount. */
 export default function MistakeDetailView({ id, patterns, exams }: MistakeDetailViewProps) {
-    const book = useMistakeBook(patterns, exams);
+    const { data: book, failed, retry } = useMistakeBook(patterns, exams);
+    if (failed) return <LoadError message="Không tải được chi tiết lỗi." onRetry={retry} />;
     if (!book) return <MistakeDetailSkeleton />;
 
     // Server đã chặn id không tồn tại; nhánh này chỉ phòng dữ liệu đổi giữa chừng

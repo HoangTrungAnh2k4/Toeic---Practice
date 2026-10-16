@@ -14,6 +14,7 @@ import {
     SKILL_STYLE,
     STATUS_GROUP,
 } from '@/app/setting/history/utils';
+import { LoadError } from '@/components/load-error';
 import { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -38,8 +39,9 @@ const STATUS_STYLE: Record<Exclude<StatusFilterType, 'all'>, { label: string; ba
 
 export default function RecentAttempt({ exams }: RecentAttemptProps) {
     const [filter, setFilter] = useState<SkillType>('all');
-    const rows = useHistoryRows(exams);
+    const { data: rows, failed, retry } = useHistoryRows(exams);
 
+    if (failed) return <LoadError message="Không tải được hoạt động gần đây." onRetry={retry} />;
     if (!rows) return <Skeleton className="rounded-xl h-72" aria-label="Đang tải hoạt động gần đây" />;
 
     const visible = rows.filter((row) => filter === 'all' || row.exam.skill === filter).slice(0, LIMIT);

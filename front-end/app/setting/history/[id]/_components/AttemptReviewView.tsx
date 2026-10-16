@@ -1,12 +1,14 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useCallback } from 'react';
 import { LuFileQuestion } from 'react-icons/lu';
 import { getMistakeIndex } from '@/app/mistakes/_lib/data';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
+import { LoadError } from '@/components/load-error';
+import { combineAsync, useAsync } from '@/hooks/use-async';
 import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
-import { AttemptReview, loadAttemptReview } from '../../_lib/review';
+import { loadAttemptReview } from '../../_lib/review';
 import { STATUS_GROUP } from '../../utils';
 import AttemptNotFound from '../not-found';
 import AttemptReviewSkeleton from './AttemptReviewSkeleton';
@@ -23,22 +25,21 @@ interface AttemptReviewViewProps {
     patterns: MistakePattern[];
 }
 
-/** Lượt làm của khách nằm trong localStorage → nạp sau khi mount; `undefined` = đang tải, `null` = không có. */
+/** Lượt làm của khách nằm trong localStorage → nạp sau khi mount. */
 export default function AttemptReviewView({ params, exams, patterns }: AttemptReviewViewProps) {
     const { id } = use(params);
-    const [review, setReview] = useState<AttemptReview | null | undefined>(undefined);
+    // Bọc lại vì `null` = không có lượt làm này, trùng với `null` = đang tải của `useAsync`
+    const reviewState = useAsync(
+        useCallback(async () => ({ review: await loadAttemptReview(id, exams) }), [id, exams]),
+    );
     // Trạng thái của mẫu lỗi (nhãn "Lỗi lặp lại") tính từ toàn bộ bài làm, không chỉ bài này
-    const book = useMistakeBook(patterns, exams);
+    const bookState = useMistakeBook(patterns, exams);
+    const { failed, retry } = combineAsync(reviewState, bookState);
+    const book = bookState.data;
 
-    useEffect(() => {
-        let cancelled = false;
-        loadAttemptReview(id, exams).then((result) => !cancelled && setReview(result));
-        return () => {
-            cancelled = true;
-        };
-    }, [id, exams]);
-
-    if (review === undefined || !book) return <AttemptReviewSkeleton />;
+    if (failed) return <LoadError message="Không tải được bài làm." onRetry={retry} />;
+    if (!reviewState.data || !book) return <AttemptReviewSkeleton />;
+    const { review } = reviewState.data;
     if (review === null) return <AttemptNotFound />;
 
     const mistakeIndex = getMistakeIndex(book);

@@ -62,6 +62,7 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
     const [answers, setAnswers] = useState<string[]>([]);
     const [isRestored, setIsRestored] = useState(false);
     const [loadError, setLoadError] = useState(false);
+    const [loadCount, setLoadCount] = useState(0);
     const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
     const [savedAt, setSavedAt] = useState<number | null>(null);
     const optionsRef = useRef(options);
@@ -84,6 +85,11 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         return () => {
             cancelled = true;
         };
+    }, [loadCount]);
+
+    const retryLoad = useCallback(() => {
+        setLoadError(false);
+        setLoadCount((n) => n + 1);
     }, []);
 
     /**
@@ -150,5 +156,5 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         }
     };
 
-    return { attempt, answers, isRestored, loadError, saveStatus, savedAt, updateAnswer, submit };
+    return { attempt, answers, isRestored, loadError, retryLoad, saveStatus, savedAt, updateAnswer, submit };
 }

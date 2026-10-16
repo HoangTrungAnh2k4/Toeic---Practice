@@ -1,21 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
+import { useAsync } from '@/hooks/use-async';
 import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
-import { buildMistakeBook, loadMistakeBookInput, MistakeBook } from './data';
+import { buildMistakeBook, loadMistakeBookInput } from './data';
 
-/** Bài làm của khách nằm trong localStorage nên sổ lỗi chỉ tính được sau khi mount; `null` khi đang tải. */
+/** Sổ lỗi tính từ bài làm của người dùng; `data` là `null` khi đang tải. */
 export function useMistakeBook(patterns: MistakePattern[], exams: ExamSummary[]) {
-    const [book, setBook] = useState<MistakeBook | null>(null);
-
-    useEffect(() => {
-        let cancelled = false;
-        loadMistakeBookInput(exams).then((input) => !cancelled && setBook(buildMistakeBook(patterns, input)));
-        return () => {
-            cancelled = true;
-        };
-    }, [patterns, exams]);
-
-    return book;
+    return useAsync(
+        useCallback(
+            async () => buildMistakeBook(patterns, await loadMistakeBookInput(exams)),
+            [patterns, exams],
+        ),
+    );
 }

@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { LuAlarmClock, LuCalendarCheck, LuFlame, LuSunMoon, LuTrophy } from 'react-icons/lu';
 import { getMistakes } from '@/app/mistakes/_lib/data';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
+import { LoadError } from '@/components/load-error';
 import { Skeleton } from '@/components/ui/skeleton';
+import { combineAsync, useAsync } from '@/hooks/use-async';
 import { useUserStats } from '@/hooks/use-user-stats';
 import { getMonthTaskProgress, getPlanWeekNo } from '@/lib/data/study-plan';
-import { type ActivePlan, getActivePlan, getProfile } from '@/lib/data/user-data';
-import type { MistakePattern, Profile } from '@/lib/domain/types';
+import { getActivePlan, getProfile } from '@/lib/data/user-data';
+import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { ProfileField } from '../types';
 import { formatDuration, getAverageGain, getRecentStudyDays, getScoreTrend } from '../utils';
@@ -24,6 +25,11 @@ interface ProfileViewProps {
 }
 
 const MISTAKE_LIMIT = 3;
+
+async function loadUser() {
+    const [profile, active] = await Promise.all([getProfile(), getActivePlan()]);
+    return { profile, active };
+}
 
 function ProfileSkeleton() {
     return (
@@ -43,14 +49,15 @@ function ProfileSkeleton() {
 
 /** Hồ sơ đọc bài làm trong localStorage → render sau khi mount. Khách không có mục tiêu, ngày thi, giờ học. */
 export default function ProfileView({ exams, patterns }: ProfileViewProps) {
-    const stats = useUserStats(exams);
-    const book = useMistakeBook(patterns, exams);
-    const [user, setUser] = useState<{ profile: Profile | null; active: ActivePlan | null } | null>(null);
+    const statsState = useUserStats(exams);
+    const bookState = useMistakeBook(patterns, exams);
+    const userState = useAsync(loadUser);
+    const { failed, retry } = combineAsync(statsState, bookState, userState);
+    const { data: stats } = statsState;
+    const { data: book } = bookState;
+    const { data: user } = userState;
 
-    useEffect(() => {
-        Promise.all([getProfile(), getActivePlan()]).then(([profile, active]) => setUser({ profile, active }));
-    }, []);
-
+    if (failed) return <LoadError message="Không tải được hồ sơ học tập." onRetry={retry} />;
     if (!stats || !book || !user) return <ProfileSkeleton />;
 
     const { profile, active } = user;

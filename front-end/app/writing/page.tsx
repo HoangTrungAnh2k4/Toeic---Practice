@@ -6,6 +6,7 @@ import { LibraryResultsSkeleton } from '@/components/exam-library/library-result
 import { StrategyTips } from '@/components/exam-library/strategy-tips';
 import { RawSearchParams } from '@/lib/exam-library/search-params';
 import { getLibraryExams } from '@/lib/exam-library/summaries';
+import { UserExamStatesProvider } from '@/lib/exam-library/use-user-exam-states';
 import WritingPageHeader from './_components/WritingPageHeader';
 import WritingRubricGuide from './_components/WritingRubricGuide';
 import { PART_STRATEGIES } from './utils';
@@ -20,13 +21,15 @@ export default async function WritingPage({ searchParams }: WritingPageProps) {
     return (
         <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
             <WritingPageHeader />
-            <LibraryHero skill="writing" exams={exams} />
-            <LibraryKpiCards skill="writing" exams={exams} />
+            <UserExamStatesProvider examIds={exams.map((exam) => exam.id)}>
+                <LibraryHero skill="writing" exams={exams} />
+                <LibraryKpiCards skill="writing" exams={exams} />
 
-            {/* Phụ thuộc searchParams → stream riêng, phần tĩnh xung quanh vẫn được prerender */}
-            <Suspense fallback={<LibraryResultsSkeleton />}>
-                <ExamLibraryResults skill="writing" exams={exams} searchParams={searchParams} />
-            </Suspense>
+                {/* Phụ thuộc searchParams → stream riêng, phần tĩnh xung quanh vẫn được prerender */}
+                <Suspense fallback={<LibraryResultsSkeleton />}>
+                    <ExamLibraryResults skill="writing" exams={exams} searchParams={searchParams} />
+                </Suspense>
+            </UserExamStatesProvider>
 
             <WritingRubricGuide />
             <StrategyTips skill="writing" strategies={PART_STRATEGIES} />
