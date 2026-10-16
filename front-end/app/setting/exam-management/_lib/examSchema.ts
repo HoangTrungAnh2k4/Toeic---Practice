@@ -49,7 +49,11 @@ export const speakingExamSchema = z
             .nullable(),
         edition: z.number('Vui lòng nhập năm ấn bản').int().min(2000, 'Năm không hợp lệ').max(2100, 'Năm không hợp lệ'),
         description: optionalText(500),
-        tags: z.array(z.string().trim().min(1).max(40)).max(10, 'Tối đa 10 tag'),
+        // Ô tag nhập dạng "a, b,": bỏ mục rỗng do dấu phẩy thừa
+        tags: z
+            .array(z.string().trim().max(40, 'Mỗi tag tối đa 40 ký tự'))
+            .transform((tags) => tags.filter(Boolean))
+            .pipe(z.array(z.string()).max(10, 'Tối đa 10 tag')),
         parts: z.array(partSchema),
     })
     .superRefine((exam, ctx) => {
