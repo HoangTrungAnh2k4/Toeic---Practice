@@ -390,6 +390,9 @@ isOneToOne: false
                            },
 "create_exam":
 { Args: { "payload": Json }; Returns: string
+                           },
+"refund_scoring_quota":
+{ Args: { "p_subject": string }; Returns: undefined
                            }
           }
           Enums: {

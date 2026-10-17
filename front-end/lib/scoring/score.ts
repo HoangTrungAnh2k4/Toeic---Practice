@@ -1,6 +1,6 @@
 import { readPcm16Mono } from '@/lib/audio/wav';
 import { assessPronunciation } from './azure';
-import { GEMMA_MODEL, gradeAnswer } from './gemma';
+import { gradeAnswer } from './gemma';
 import { transcribe, WHISPER_MODEL } from './groq';
 import { bandsToScore, fluencyMetrics, pronunciationToScore, speakingMaxScore } from './scale';
 
@@ -82,7 +82,7 @@ export async function scoreAnswer(question: QuestionToScore, audio: Blob): Promi
 
     const fluency = fluencyMetrics(segments, duration);
     const image = question.partNo === 2 && question.imagePath ? await loadImage(question.imagePath) : null;
-    const { feedback, ...bands } = await gradeAnswer({
+    const { feedback, model, ...bands } = await gradeAnswer({
         questionNumber: question.number,
         task: question.task,
         prompt: question.prompt,
@@ -98,6 +98,6 @@ export async function scoreAnswer(question: QuestionToScore, audio: Blob): Promi
         transcript,
         metrics: { ...bands, ...fluency },
         feedback,
-        scoring_model: `${WHISPER_MODEL}+${GEMMA_MODEL}`,
+        scoring_model: `${WHISPER_MODEL}+${model}`,
     };
 }

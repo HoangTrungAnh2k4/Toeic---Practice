@@ -3,6 +3,15 @@ import { ProviderQuotaError } from './errors';
 import type { FluencyMetrics } from './scale';
 
 export const GEMMA_MODEL = 'gemma-4-31b-it';
+/** Gemma trên Gemini API hay trả 500 và có lúc mất ~40s, nên lỗi/chậm/sai schema thì chấm bằng model này. */
+export const FALLBACK_MODEL = 'gemini-3.5-flash';
+
+/** Thứ tự gọi: Gemma một lần (timeout ngắn) rồi model dự phòng tối đa 2 lần. */
+const CALLS = [
+    { model: GEMMA_MODEL, timeoutMs: 20_000 },
+    { model: FALLBACK_MODEL, timeoutMs: 30_000 },
+    { model: FALLBACK_MODEL, timeoutMs: 30_000 },
+];
 
 const band = z.number().min(0).max(9);
 const gradeSchema = z.object({
@@ -66,8 +75,11 @@ interface GenerateResponse {
     candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[];
 }
 
-/** Chấm Part 2–5 bằng Gemma qua Gemini API; trả lời sai schema thì hỏi lại 1 lần. */
-export async function gradeAnswer(input: GradeInput): Promise<Grade> {
+/**
+ * Chấm Part 2–5 qua Gemini API: Gemma trước, lỗi mạng/5xx/429/timeout/sai schema thì chuyển model dự phòng.
+ * `model`: model đã chấm thành công. Mọi lượt đều 429 → `ProviderQuotaError`.
+ */
+export async function gradeAnswer(input: GradeInput): Promise<Grade & { model: string }> {
     const key = process.env.GEMINI_API_KEY;
     if (!key) throw new Error('GEMINI_API_KEY is not configured');
 
@@ -75,18 +87,26 @@ export async function gradeAnswer(input: GradeInput): Promise<Grade> {
         { text: buildPrompt(input) },
         ...(input.image ? [{ inline_data: { mime_type: input.image.mimeType, data: input.image.data } }] : []),
     ];
-    for (let attempt = 0; attempt < 2; attempt++) {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${GEMMA_MODEL}:generateContent`,
-            {
+    const failures: string[] = [];
+    for (const { model, timeoutMs } of CALLS) {
+        let response: Response;
+        try {
+            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
                 body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { temperature: 0.2 } }),
-                signal: AbortSignal.timeout(45_000),
-            },
-        );
-        if (response.status === 429) throw new ProviderQuotaError('Gemini');
-        if (!response.ok) throw new Error(`Gemma grading failed: ${response.status}`);
+                signal: AbortSignal.timeout(timeoutMs),
+            });
+        } catch (error) {
+            failures.push(`${model}: ${error instanceof Error ? error.name : 'network'}`);
+            continue;
+        }
+        if (!response.ok) {
+            // Kèm lý do của Google (vd. "API key not valid") để log chẩn đoán được
+            const body = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
+            failures.push(`${model}: ${response.status}${body?.error?.message ? ` ${body.error.message}` : ''}`);
+            continue;
+        }
 
         const body = (await response.json()) as GenerateResponse;
         const text = (body.candidates?.[0]?.content?.parts ?? [])
@@ -94,7 +114,9 @@ export async function gradeAnswer(input: GradeInput): Promise<Grade> {
             .map((part) => part.text ?? '')
             .join('');
         const grade = parseGrade(text);
-        if (grade) return grade;
+        if (grade) return { ...grade, model };
+        failures.push(`${model}: invalid grade`);
     }
-    throw new Error('Gemma returned an invalid grade');
+    if (failures.every((failure) => /: 429( |$)/.test(failure))) throw new ProviderQuotaError('Gemini');
+    throw new Error(`Grading failed (${failures.join(', ')})`);
 }

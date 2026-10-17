@@ -66,6 +66,12 @@ export async function POST(request: Request) {
     });
     if (quotaError) return fail('server_error', 500);
     if (!allowed) return fail('daily_limit', 429);
+    /** Chấm/lưu lỗi thì trả lại lượt, để client thử lại khi nộp bài không bị trừ thêm. */
+    const refund = async (error: string, status: number) => {
+        const { error: refundError } = await admin.rpc('refund_scoring_quota', { p_subject: subject });
+        if (refundError) console.error('Scoring quota refund failed', refundError);
+        return fail(error, status);
+    };
 
     let result;
     try {
@@ -82,17 +88,17 @@ export async function POST(request: Request) {
             audio,
         );
     } catch (error) {
-        if (error instanceof InvalidAudioError) return fail('invalid_audio', 400);
-        if (error instanceof ProviderQuotaError) return fail('provider_limit', 429);
+        if (error instanceof InvalidAudioError) return refund('invalid_audio', 400);
+        if (error instanceof ProviderQuotaError) return refund('provider_limit', 429);
         console.error('Speaking scoring failed', error);
-        return fail('scoring_failed', 502);
+        return refund('scoring_failed', 502);
     }
 
     if (userId) {
         const { error } = await admin
             .from('responses')
             .upsert({ attempt_id: attemptId, question_id: questionId, ...result }, { onConflict: 'attempt_id,question_id' });
-        if (error) return fail('server_error', 500);
+        if (error) return refund('server_error', 500);
     }
     return NextResponse.json(result);
 }
