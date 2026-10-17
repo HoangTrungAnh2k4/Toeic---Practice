@@ -1,12 +1,14 @@
 'use client';
 
 import { LuMic } from 'react-icons/lu';
-
+import { useInputLevel } from '@/app/setting/device-check/_lib/useInputLevel';
+import { getLevelZone, LEVEL_ZONE_LABEL, METER_MIN_DB } from '@/app/setting/device-check/utils';
 import { cn } from '@/lib/utils';
 
 interface AudioCaptureHudProps {
-    currentSeconds?: number;
-    totalSeconds?: number;
+    currentSeconds: number;
+    totalSeconds: number;
+    analyser: AnalyserNode | null;
 }
 
 // Mỗi cột là một mốc thời gian: cột đã qua tô vàng, cột chưa tới để mờ.
@@ -46,12 +48,14 @@ const WAVE_BARS = [
 ];
 
 const METER_SEGMENTS = 10;
-const METER_ACTIVE = 6;
 
-export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30 }: AudioCaptureHudProps) {
+export default function AudioCaptureHud({ currentSeconds, totalSeconds, analyser }: AudioCaptureHudProps) {
     const percentage = Math.min(100, Math.round((currentSeconds / totalSeconds) * 100));
     const playedBars = Math.round((percentage / 100) * WAVE_BARS.length);
     const remainingSeconds = Math.max(0, totalSeconds - currentSeconds);
+    const isRecording = remainingSeconds > 0;
+    const levelDb = useInputLevel(analyser);
+    const meterActive = Math.round(((levelDb - METER_MIN_DB) / -METER_MIN_DB) * METER_SEGMENTS);
 
     return (
         <div className="flex flex-col gap-4 bg-white p-4 border border-sub1 rounded-2xl h-full">
@@ -64,14 +68,18 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
                     <div className="flex flex-col gap-1">
                         <span className="flex items-center gap-2 font-medium text-sm">
                             <span className="relative flex size-2.5">
-                                <span className="inline-flex absolute bg-sub3 opacity-60 rounded-full size-full motion-safe:animate-ping" />
-                                <span className="inline-flex relative bg-sub3 rounded-full size-2.5" />
+                                {isRecording && (
+                                    <span className="inline-flex absolute bg-sub3 opacity-60 rounded-full size-full motion-safe:animate-ping" />
+                                )}
+                                <span
+                                    className={cn('inline-flex relative rounded-full size-2.5', isRecording ? 'bg-sub3' : 'bg-sub2')}
+                                />
                             </span>
-                            Đang ghi âm
+                            {isRecording ? 'Đang ghi âm' : 'Đã chốt bài nói'}
                         </span>
                         <span className="flex items-center gap-1.5 text-sub2 text-xs">
                             <LuMic className="size-3.5" aria-hidden="true" />
-                            Tín hiệu ổn định, 48 kHz
+                            Micro đang hoạt động
                         </span>
                     </div>
 
@@ -123,7 +131,9 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
             <div className="flex flex-col gap-2 px-1">
                 <div className="flex justify-between items-center text-main text-xs">
                     <span className="font-semibold">Âm lượng micro</span>
-                    <span className="font-semibold">-12 dB, mức tốt</span>
+                    <span className="font-semibold tabular-nums">
+                        {levelDb} dB, {LEVEL_ZONE_LABEL[getLevelZone(levelDb)].toLowerCase()}
+                    </span>
                 </div>
                 <div className="flex gap-1" aria-hidden="true">
                     {Array.from({ length: METER_SEGMENTS }, (_, idx) => (
@@ -131,8 +141,8 @@ export default function AudioCaptureHud({ currentSeconds = 12, totalSeconds = 30
                             key={idx}
                             className={cn(
                                 'flex-1 rounded-sm h-2',
-                                idx < METER_ACTIVE ? 'bg-main' : 'bg-sub1',
-                                idx >= METER_SEGMENTS - 2 && 'bg-sub3/40',
+                                idx < meterActive ? 'bg-main' : 'bg-sub1',
+                                idx >= METER_SEGMENTS - 2 && (idx < meterActive ? 'bg-sub3' : 'bg-sub3/40'),
                             )}
                         />
                     ))}

@@ -27,7 +27,7 @@
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ | Sprint |
 | --- | --- | --- | --- | --- | --- |
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
-| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | Todo | 0/6 | S1, S2 |
+| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 1/6 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | Todo | 0/6 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
@@ -61,7 +61,7 @@ Mục tiêu: không còn trang nào chỉ chặn phía client; phòng thi Speaki
 - [x] **E5-10** (P1, S) Phòng thi chặn đề chưa phát hành theo role (`lib/exam-library/room.ts:35`) — *cần E8-5*
 - [x] **E5-6** (P1, S) Xoá đề gọi API thật (hiện chỉ gỡ khỏi state — `app/setting/exam-management/_components/ExamLibrary.tsx:25`)
 - [x] **E10-3** (P1, S) CI: `lint`, `tsc --noEmit`, `test` trên mỗi PR (chưa có `.github/workflows`)
-- [ ] **E2-1** (P0, M) Ghi âm từng câu bằng `MediaRecorder` (tái dùng `useMicrophone`, `useTestRecorder` trong `app/setting/device-check/_lib`)
+- [x] **E2-1** (P0, M) Ghi âm từng câu bằng `MediaRecorder` (tái dùng `useMicrophone`, `useTestRecorder` trong `app/setting/device-check/_lib`)
 - [ ] **E2-2** (P0, M) Upload audio lên storage, lưu key vào `responses` — *chốt trước: Supabase Storage hay Cloudflare R2*
 - [ ] **E2-3** (P0, S) Tạo attempt khi vào phòng (`startAttempt`), cập nhật `submitted` khi nộp — bỏ `shortcut:` ở `SpeakingExamRoom.tsx:38`
 - [ ] **E2-6** (P1, S) Hộp thoại thoát phòng Speaking đang hard-code "TOEIC Speaking Mock Test 04 (Câu 3/11)" (`ExitConfirmDialog.tsx:38`) → lấy tên đề + câu hiện tại
