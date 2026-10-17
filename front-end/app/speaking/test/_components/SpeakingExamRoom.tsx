@@ -10,6 +10,7 @@ import MicrophoneAccessNotice from '@/app/setting/device-check/_components/Micro
 import { useMicrophone } from '@/app/setting/device-check/_lib/useMicrophone';
 import { useAnswerRecorder } from '../_lib/useAnswerRecorder';
 import { useSpeakingAttempt } from '../_lib/useSpeakingAttempt';
+import type { SpeakingPhase } from '../types';
 import { PART_DIRECTIONS } from '../utils';
 import AudioCaptureHud from './AudioCaptureHud';
 import DirectionsBanner from './DirectionsBanner';
@@ -38,8 +39,15 @@ function toSteps(parts: RoomPart[]) {
     );
 }
 
+type Step = ReturnType<typeof toSteps>[number];
+
+/** Giai đoạn đầu của câu và số giây của giai đoạn đó; Part không có thời gian chuẩn bị thì vào nói luôn. */
+function startOf(step: Step): { phase: SpeakingPhase; seconds: number } {
+    return step.prepSec > 0 ? { phase: 'prep', seconds: step.prepSec } : { phase: 'speak', seconds: step.speakSec };
+}
+
 /**
- * Phòng thi Speaking: ghi âm từng câu trong thời gian trả lời, gửi đi chấm khi chốt câu; đồng hồ chỉ chạy khi micro đang hoạt động.
+ * Phòng thi Speaking: mỗi câu chuẩn bị (không ghi âm) → trả lời (ghi âm) → chốt bài, gửi đi chấm khi chốt câu; đồng hồ chỉ chạy khi micro đang hoạt động.
  * shortcut: rời phòng giữa chừng thì attempt vẫn `in_progress`, câu chưa chấm mất audio và không làm tiếp được — E2-4.
  */
 export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoomProps) {
@@ -47,7 +55,8 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
     const steps = toSteps(parts);
     const [currentIndex, setCurrentIndex] = useState(0);
     const step = steps[currentIndex];
-    const [secondsRemaining, setSecondsRemaining] = useState(step.speakSec);
+    const [phase, setPhase] = useState(() => startOf(step).phase);
+    const [secondsRemaining, setSecondsRemaining] = useState(() => startOf(step).seconds);
     const [isExitModalOpen, setIsExitModalOpen] = useState(false);
     const mic = useMicrophone();
     const { start: startRecording, stop: stopRecording } = useAnswerRecorder(mic.stream);
@@ -66,28 +75,39 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
         if (blob) scoreAudio(step.question.id, blob, step.template.part_no);
     };
 
-    const finishOnTimeout = useEffectEvent(() => void saveAnswer());
+    const startSpeaking = () => {
+        setPhase('speak');
+        setSecondsRemaining(step.speakSec);
+    };
+
+    const tick = useEffectEvent(() => {
+        if (secondsRemaining > 1) setSecondsRemaining(secondsRemaining - 1);
+        else if (phase === 'prep') startSpeaking();
+        else {
+            setSecondsRemaining(0);
+            setPhase('done');
+            void saveAnswer();
+        }
+    });
     const startAnswer = useEffectEvent(() => {
-        if (secondsRemaining > 0) startRecording();
+        if (phase === 'speak') startRecording();
     });
 
-    // Ghi khi sang câu mới hoặc micro vừa bật lại
+    // Ghi khi vào giai đoạn trả lời (kể cả câu mới không có chuẩn bị) hoặc micro vừa bật lại
     useEffect(() => {
         if (mic.stream) startAnswer();
-    }, [mic.stream, currentIndex]);
+    }, [mic.stream, currentIndex, phase]);
 
     useEffect(() => {
-        if (!isMicReady || secondsRemaining <= 0) return;
-        const timer = setTimeout(() => {
-            if (secondsRemaining === 1) finishOnTimeout();
-            setSecondsRemaining((prev) => Math.max(0, prev - 1));
-        }, 1000);
+        if (!isMicReady || phase === 'done') return;
+        const timer = setTimeout(tick, 1000);
         return () => clearTimeout(timer);
-    }, [isMicReady, secondsRemaining]);
+    }, [isMicReady, phase, secondsRemaining]);
 
+    const isGuided = mode === 'guided';
     const isLast = currentIndex === steps.length - 1;
     // Chế độ có hướng dẫn không khóa thời gian: được chuyển câu bất cứ lúc nào
-    const canProceed = !isSubmitting && (mode === 'guided' || secondsRemaining === 0);
+    const canProceed = !isSubmitting && (isGuided || phase === 'done');
 
     const handleNext = async () => {
         await saveAnswer();
@@ -103,8 +123,10 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
             setSubmitFailed(true);
             return;
         }
+        const next = startOf(steps[currentIndex + 1]);
         setCurrentIndex(currentIndex + 1);
-        setSecondsRemaining(steps[currentIndex + 1].speakSec);
+        setPhase(next.phase);
+        setSecondsRemaining(next.seconds);
     };
 
     return (
@@ -114,6 +136,7 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                 mode={mode}
                 prepSec={step.prepSec}
                 speakSec={step.speakSec}
+                phase={phase}
                 secondsRemaining={secondsRemaining}
                 onOpenExitModal={() => setIsExitModalOpen(true)}
             />
@@ -158,9 +181,12 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                     <div className="lg:col-span-5">
                         {isMicReady ? (
                             <AudioCaptureHud
-                                currentSeconds={step.speakSec - secondsRemaining}
-                                totalSeconds={step.speakSec}
+                                phase={phase}
+                                secondsRemaining={secondsRemaining}
+                                totalSeconds={phase === 'prep' ? step.prepSec : step.speakSec}
                                 analyser={mic.analyser}
+                                isGuided={isGuided}
+                                onSkipPrep={startSpeaking}
                             />
                         ) : (
                             <MicrophoneAccessNotice
@@ -189,6 +215,7 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                 questions={steps.map(({ question, template }) => ({ number: question.number, task: template.task }))}
                 currentIndex={currentIndex}
                 speakSec={step.speakSec}
+                isGuided={isGuided}
                 canProceed={canProceed}
                 isLast={isLast}
                 isSubmitting={isSubmitting}
@@ -197,6 +224,9 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
 
             <ExitConfirmDialog
                 isOpen={isExitModalOpen}
+                examTitle={exam.title}
+                currentQuestion={step.question.number}
+                totalQuestions={steps.length}
                 onClose={() => setIsExitModalOpen(false)}
                 onConfirm={() => router.push('/speaking')}
             />

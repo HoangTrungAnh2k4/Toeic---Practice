@@ -1,7 +1,9 @@
 'use client';
 
+import { Fragment } from 'react';
 import { LuAudioLines, LuCheck, LuLock, LuLogOut, LuMic, LuShieldCheck } from 'react-icons/lu';
 import type { AttemptMode } from '@/lib/domain/types';
+import type { SpeakingPhase } from '../types';
 import { formatTime } from '../utils';
 
 const MODE_LABEL: Record<AttemptMode, string> = {
@@ -15,12 +17,32 @@ interface ExamHeaderProps {
     mode: AttemptMode;
     prepSec: number;
     speakSec: number;
+    phase: SpeakingPhase;
     secondsRemaining: number;
     onOpenExitModal: () => void;
 }
 
-export default function ExamHeader({ title, mode, prepSec, speakSec, secondsRemaining, onOpenExitModal }: ExamHeaderProps) {
-    const isFinished = secondsRemaining <= 0;
+/** Vị trí bước đang làm trên thanh bước; bước 1 (Hướng dẫn) luôn đã qua vì hướng dẫn hiện sẵn đầu câu. */
+const PHASE_STEP: Record<SpeakingPhase, number> = { prep: 1, speak: 2, done: 3 };
+
+const TIMER_TEXT: Record<SpeakingPhase, { title: string; hint: string }> = {
+    prep: { title: 'Thời gian chuẩn bị còn lại', hint: 'Đọc đề và chuẩn bị ý, chưa ghi âm' },
+    speak: { title: 'Thời gian trả lời còn lại', hint: 'Hãy nói to, rõ ràng vào micro' },
+    done: { title: 'Đã chốt bài nói', hint: 'Bấm Tiếp tục để sang câu sau' },
+};
+
+export default function ExamHeader({
+    title,
+    mode,
+    prepSec,
+    speakSec,
+    phase,
+    secondsRemaining,
+    onOpenExitModal,
+}: ExamHeaderProps) {
+    const isFinished = phase === 'done';
+    const current = PHASE_STEP[phase];
+    const steps = ['Hướng dẫn', `Chuẩn bị (${prepSec}s)`, `Trả lời (${speakSec}s)`, 'Chốt bài'];
 
     return (
         <header className="border rounded-xl w-full overflow-hidden">
@@ -50,10 +72,12 @@ export default function ExamHeader({ title, mode, prepSec, speakSec, secondsRema
                             <span className="uppercase tracking-wider">Chế độ: {MODE_LABEL[mode]}</span>
                         </div>
 
-                        <span className="inline-flex items-center gap-1.5 bg-sub1/10 px-2.5 py-1 rounded-full font-medium text-sub1/80 text-xs">
-                            <LuLock className="size-3.5 text-sub2" aria-hidden="true" />
-                            Không trợ giúp • Khóa nhảy câu
-                        </span>
+                        {mode !== 'guided' && (
+                            <span className="inline-flex items-center gap-1.5 bg-sub1/10 px-2.5 py-1 rounded-full font-medium text-sub1/80 text-xs">
+                                <LuLock className="size-3.5 text-sub2" aria-hidden="true" />
+                                Không trợ giúp • Khóa nhảy câu
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -78,57 +102,57 @@ export default function ExamHeader({ title, mode, prepSec, speakSec, secondsRema
             <div className="bg-white shadow-2xl px-4 sm:px-6 py-3.5 border-sub2/30 border-b">
                 <div className="flex md:flex-row flex-col justify-between items-center gap-4 mx-auto max-w-6xl">
                     <ol className="flex items-center gap-2 pb-1 md:pb-0 w-full md:w-auto overflow-x-auto text-xs">
-                        <li className="flex items-center gap-1.5 font-medium text-main/70 shrink-0">
-                            <span className="flex justify-center items-center bg-sub2 rounded-full size-5 text-white">
-                                <LuCheck className="size-3" aria-hidden="true" />
-                            </span>
-                            <span>1. Hướng dẫn</span>
-                        </li>
-
-                        <li aria-hidden="true" className="bg-sub2/60 w-4 h-px shrink-0" />
-
-                        <li className="flex items-center gap-1.5 font-medium text-main/70 shrink-0">
-                            <span className="flex justify-center items-center bg-sub2 rounded-full size-5 text-white">
-                                <LuCheck className="size-3" aria-hidden="true" />
-                            </span>
-                            <span>2. Chuẩn bị ({prepSec}s)</span>
-                        </li>
-
-                        <li aria-hidden="true" className="bg-sub2/60 w-4 h-px shrink-0" />
-
-                        <li
-                            aria-current="step"
-                            className="flex items-center gap-2 bg-main shadow-main/25 shadow-md px-3 py-1 rounded-full font-semibold text-sub1 shrink-0"
-                        >
-                            <span className="relative flex size-2">
-                                <span
-                                    className={`absolute inline-flex size-full rounded-full bg-sub3 opacity-75 ${
-                                        isFinished ? '' : 'animate-ping'
-                                    }`}
-                                />
-                                <span className="inline-flex relative bg-sub3 rounded-full size-2" />
-                            </span>
-                            <span>3. Trả lời ({speakSec}s)</span>
-                        </li>
-
-                        <li aria-hidden="true" className="bg-sub2/60 w-4 h-px shrink-0" />
-
-                        <li className="flex items-center gap-1.5 font-medium text-main/50 shrink-0">
-                            <span className="flex justify-center items-center border border-sub2/60 rounded-full size-5 text-[11px]">
-                                4
-                            </span>
-                            <span>Chốt bài</span>
-                        </li>
+                        {steps.map((label, idx) => (
+                            <Fragment key={label}>
+                                {idx > 0 && <li aria-hidden="true" className="bg-sub2/60 w-4 h-px shrink-0" />}
+                                {idx < current && (
+                                    <li className="flex items-center gap-1.5 font-medium text-main/70 shrink-0">
+                                        <span className="flex justify-center items-center bg-sub2 rounded-full size-5 text-white">
+                                            <LuCheck className="size-3" aria-hidden="true" />
+                                        </span>
+                                        <span>
+                                            {idx + 1}. {label}
+                                        </span>
+                                    </li>
+                                )}
+                                {idx === current && (
+                                    <li
+                                        aria-current="step"
+                                        className="flex items-center gap-2 bg-main shadow-main/25 shadow-md px-3 py-1 rounded-full font-semibold text-sub1 shrink-0"
+                                    >
+                                        <span className="relative flex size-2">
+                                            <span
+                                                className={`absolute inline-flex size-full rounded-full bg-sub3 opacity-75 ${
+                                                    isFinished ? '' : 'animate-ping'
+                                                }`}
+                                            />
+                                            <span className="inline-flex relative bg-sub3 rounded-full size-2" />
+                                        </span>
+                                        <span>
+                                            {idx + 1}. {label}
+                                        </span>
+                                    </li>
+                                )}
+                                {idx > current && (
+                                    <li className="flex items-center gap-1.5 font-medium text-main/50 shrink-0">
+                                        <span className="flex justify-center items-center border border-sub2/60 rounded-full size-5 text-[11px]">
+                                            {idx + 1}
+                                        </span>
+                                        <span>{label}</span>
+                                    </li>
+                                )}
+                            </Fragment>
+                        ))}
                     </ol>
 
                     <div className="flex justify-between md:justify-end items-center gap-4 w-full md:w-auto">
                         <div className="flex flex-col text-left md:text-right">
                             <span className="font-semibold text-main text-[11px] uppercase tracking-wider">
-                                Thời gian trả lời còn lại
+                                {TIMER_TEXT[phase].title}
                             </span>
                             <span className="flex md:justify-end items-center gap-1 text-main/70 text-xs">
                                 <LuMic className="size-3.5 text-sub2" aria-hidden="true" />
-                                Hãy nói to, rõ ràng vào micro
+                                {TIMER_TEXT[phase].hint}
                             </span>
                         </div>
 

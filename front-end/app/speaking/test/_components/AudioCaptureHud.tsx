@@ -1,15 +1,27 @@
 'use client';
 
-import { LuMic } from 'react-icons/lu';
+import { LuMic, LuSkipForward } from 'react-icons/lu';
 import { useInputLevel } from '@/app/setting/device-check/_lib/useInputLevel';
 import { getLevelZone, LEVEL_ZONE_LABEL, METER_MIN_DB } from '@/app/setting/device-check/utils';
 import { cn } from '@/lib/utils';
+import type { SpeakingPhase } from '../types';
 
 interface AudioCaptureHudProps {
-    currentSeconds: number;
+    phase: SpeakingPhase;
+    secondsRemaining: number;
+    /** Độ dài giai đoạn hiện tại (chuẩn bị hoặc trả lời). */
     totalSeconds: number;
     analyser: AnalyserNode | null;
+    isGuided: boolean;
+    /** Bỏ qua chuẩn bị, vào nói ngay (chỉ chế độ có hướng dẫn). */
+    onSkipPrep: () => void;
 }
+
+const PHASE_LABEL: Record<SpeakingPhase, string> = {
+    prep: 'Đang chuẩn bị, chưa ghi âm',
+    speak: 'Đang ghi âm',
+    done: 'Đã chốt bài nói',
+};
 
 // Mỗi cột là một mốc thời gian: cột đã qua tô vàng, cột chưa tới để mờ.
 const WAVE_BARS = [
@@ -49,11 +61,17 @@ const WAVE_BARS = [
 
 const METER_SEGMENTS = 10;
 
-export default function AudioCaptureHud({ currentSeconds, totalSeconds, analyser }: AudioCaptureHudProps) {
-    const percentage = Math.min(100, Math.round((currentSeconds / totalSeconds) * 100));
+export default function AudioCaptureHud({
+    phase,
+    secondsRemaining,
+    totalSeconds,
+    analyser,
+    isGuided,
+    onSkipPrep,
+}: AudioCaptureHudProps) {
+    const percentage = Math.min(100, Math.round(((totalSeconds - secondsRemaining) / totalSeconds) * 100));
     const playedBars = Math.round((percentage / 100) * WAVE_BARS.length);
-    const remainingSeconds = Math.max(0, totalSeconds - currentSeconds);
-    const isRecording = remainingSeconds > 0;
+    const isRecording = phase === 'speak';
     const levelDb = useInputLevel(analyser);
     const meterActive = Math.round(((levelDb - METER_MIN_DB) / -METER_MIN_DB) * METER_SEGMENTS);
 
@@ -61,7 +79,7 @@ export default function AudioCaptureHud({ currentSeconds, totalSeconds, analyser
         <div className="flex flex-col gap-4 bg-white p-4 border border-sub1 rounded-2xl h-full">
             {/* Recording console: waveform đóng vai trò timeline */}
             <section
-                aria-label="Bản ghi âm đang thực hiện"
+                aria-label={phase === 'prep' ? 'Thời gian chuẩn bị' : 'Bản ghi âm đang thực hiện'}
                 className="flex flex-col gap-5 bg-main p-5 rounded-xl text-sub1"
             >
                 <div className="flex justify-between items-start gap-4">
@@ -75,7 +93,7 @@ export default function AudioCaptureHud({ currentSeconds, totalSeconds, analyser
                                     className={cn('inline-flex relative rounded-full size-2.5', isRecording ? 'bg-sub3' : 'bg-sub2')}
                                 />
                             </span>
-                            {isRecording ? 'Đang ghi âm' : 'Đã chốt bài nói'}
+                            {PHASE_LABEL[phase]}
                         </span>
                         <span className="flex items-center gap-1.5 text-sub2 text-xs">
                             <LuMic className="size-3.5" aria-hidden="true" />
@@ -85,7 +103,7 @@ export default function AudioCaptureHud({ currentSeconds, totalSeconds, analyser
 
                     <div className="text-right">
                         <p className="font-semibold tabular-nums text-sub3 text-3xl leading-none">
-                            {remainingSeconds}s
+                            {secondsRemaining}s
                         </p>
                         <p className="mt-1 text-sub2 text-xs">còn lại</p>
                     </div>
@@ -95,7 +113,7 @@ export default function AudioCaptureHud({ currentSeconds, totalSeconds, analyser
                 <div>
                     <div
                         role="progressbar"
-                        aria-label="Tiến độ bài nói"
+                        aria-label={phase === 'prep' ? 'Tiến độ thời gian chuẩn bị' : 'Tiến độ bài nói'}
                         aria-valuenow={percentage}
                         aria-valuemin={0}
                         aria-valuemax={100}
@@ -152,12 +170,30 @@ export default function AudioCaptureHud({ currentSeconds, totalSeconds, analyser
                 </p>
             </div>
 
-            {/* Auto-submit notice */}
-            <div className="flex items-start gap-2.5 bg-sub1/60 mt-auto p-3 border-sub3 border-l-4 rounded-r-lg">
-                <p className="text-main/80 text-xs leading-relaxed">
-                    <span className="font-semibold text-main">Tự động nộp khi hết giờ.</span> Bài nói được chốt lúc
-                    00:00 và chuyển sang câu tiếp theo, bạn không thể thu âm lại.
-                </p>
+            {/* Cách chốt bài nói */}
+            <div className="flex flex-col gap-2.5 bg-sub1/60 mt-auto p-3 border-sub3 border-l-4 rounded-r-lg">
+                {phase === 'prep' ? (
+                    <p className="text-main/80 text-xs leading-relaxed">
+                        <span className="font-semibold text-main">Hết giờ chuẩn bị là bắt đầu ghi âm.</span> Đọc đề và
+                        sắp xếp ý trong lúc chờ.
+                    </p>
+                ) : (
+                    <p className="text-main/80 text-xs leading-relaxed">
+                        <span className="font-semibold text-main">Hết giờ là dừng ghi âm.</span>{' '}
+                        {isGuided ? 'Bấm Tiếp tục bất cứ lúc nào để chốt bài nói' : 'Bấm Tiếp tục để chốt bài nói'} và
+                        sang câu sau, bạn không thể thu âm lại.
+                    </p>
+                )}
+                {phase === 'prep' && isGuided && (
+                    <button
+                        type="button"
+                        onClick={onSkipPrep}
+                        className="inline-flex items-center self-start gap-1.5 bg-main hover:bg-sub3 px-3 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3 focus-visible:ring-offset-2 font-semibold text-sub1 hover:text-main text-xs transition-colors duration-200 cursor-pointer"
+                    >
+                        <LuSkipForward className="size-3.5" aria-hidden="true" />
+                        Bỏ qua chuẩn bị, nói ngay
+                    </button>
+                )}
             </div>
         </div>
     );

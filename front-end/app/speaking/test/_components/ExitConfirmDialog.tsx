@@ -4,11 +4,21 @@ import { LuTriangleAlert } from 'react-icons/lu';
 
 interface ExitConfirmDialogProps {
     isOpen: boolean;
+    examTitle: string;
+    currentQuestion: number;
+    totalQuestions: number;
     onClose: () => void;
     onConfirm: () => void;
 }
 
-export default function ExitConfirmDialog({ isOpen, onClose, onConfirm }: ExitConfirmDialogProps) {
+export default function ExitConfirmDialog({
+    isOpen,
+    examTitle,
+    currentQuestion,
+    totalQuestions,
+    onClose,
+    onConfirm,
+}: ExitConfirmDialogProps) {
     if (!isOpen) return null;
 
     return (
@@ -28,14 +38,14 @@ export default function ExitConfirmDialog({ isOpen, onClose, onConfirm }: ExitCo
                         Cảnh báo: Hủy bài thi thử?
                     </h3>
                     <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-                        Bạn đang ở giữa phần thi TOEIC Speaking. Nếu thoát ngay bây giờ, toàn bộ bản ghi âm và kết quả
-                        của các câu trước sẽ không được chấm điểm.
+                        Nếu thoát bây giờ, bài thi sẽ không có tổng điểm và không làm tiếp được. Câu đang ghi âm dở
+                        sẽ bị bỏ.
                     </p>
                 </div>
 
                 <div className="bg-muted p-3 rounded-lg text-foreground text-xs">
-                    Bài thi đang làm:{' '}
-                    <strong className="font-semibold text-primary">TOEIC Speaking Mock Test 04</strong> (Câu 3/11)
+                    Bài thi đang làm: <strong className="font-semibold text-primary">{examTitle}</strong>{' '}
+                    (Câu {currentQuestion}/{totalQuestions})
                 </div>
 
                 <div className="flex justify-end items-center gap-3 pt-2">

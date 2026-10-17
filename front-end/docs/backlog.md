@@ -27,9 +27,9 @@
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ | Sprint |
 | --- | --- | --- | --- | --- | --- |
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
-| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 3/6 | S1, S2 |
+| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 5/7 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 | S2 |
-| E4 | Pipeline chấm điểm (AI) | P0 | In progress | 2/6 | S2 – S4 |
+| E4 | Pipeline chấm điểm (AI) | P0 | In progress | 2/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | Todo | 0/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | Todo | 0/4 | S4, S6 |
@@ -64,7 +64,7 @@ Mục tiêu: không còn trang nào chỉ chặn phía client; phòng thi Speaki
 - [x] **E2-1** (P0, M) Ghi âm từng câu bằng `MediaRecorder` (tái dùng `useMicrophone`, `useTestRecorder` trong `app/setting/device-check/_lib`)
 - [x] **E2-2** (P0, M) ~~Upload audio lên storage~~ — *đổi hướng: không lưu audio, gửi thẳng đi chấm từ RAM (xem `docs/prd/scoring.md`); env R2 + `lib/r2.ts` giữ cho sau này*
 - [x] **E2-3** (P0, S) Tạo attempt khi vào phòng (`startAttempt`), cập nhật `submitted` khi nộp — bỏ `shortcut:` ở `SpeakingExamRoom.tsx:38`
-- [ ] **E2-6** (P1, S) Hộp thoại thoát phòng Speaking đang hard-code "TOEIC Speaking Mock Test 04 (Câu 3/11)" (`ExitConfirmDialog.tsx:38`) → lấy tên đề + câu hiện tại
+- [x] **E2-6** (P1, S) Hộp thoại thoát phòng Speaking đang hard-code "TOEIC Speaking Mock Test 04 (Câu 3/11)" (`ExitConfirmDialog.tsx:38`) → lấy tên đề + câu hiện tại
 
 ## Sprint 2 — Làm bài đủ 2 kỹ năng (02/11 – 13/11)
 
@@ -130,6 +130,8 @@ Mục tiêu: người dùng mới vào là có lộ trình; deploy production.
 Sau ra mắt, hoặc kéo vào sprint nào còn dư chỗ.
 
 - [ ] **E2-5** (P2, S) Nghe lại bản ghi trước khi nộp (chế độ `guided`)
+- [x] **E2-7** (P1, M) Phòng thi Speaking chưa có giai đoạn chuẩn bị: vào câu là ghi âm + đếm `speakSec` ngay, `prepSec` chỉ hiển thị (`SpeakingExamRoom.tsx`). Thêm giai đoạn chuẩn bị → trả lời → chốt bài; thanh bước ở `ExamHeader.tsx:80` đang hard-code (bước 1–2 luôn tích, bước 3 luôn active, "Chốt bài" không bao giờ sáng) → đọc theo giai đoạn. ~~Sửa kèm: chữ "Tự động nộp khi hết giờ…" sai, nhãn khóa câu hiện cả ở `guided`~~ — đã sửa 2026-10-17. Xong 2026-10-17: mỗi câu chuẩn bị (không ghi âm) → trả lời (ghi âm) → chốt bài; `guided` có nút bỏ qua chuẩn bị
+- [ ] **E4-7** (P1, S) Part 1 đọc sai đoạn văn vẫn được điểm (thử: đọc đoạn của câu 1 cho câu 2 → 2/3, "Đọc đủ 100%"): `lib/scoring/azure.ts` tắt miscue nên Azure ép lời nói về từ của đoạn mẫu, `completeness` tự đếm số từ → cần so transcript với đoạn mẫu (vd. nhận dạng không reference text rồi tính tỉ lệ từ khớp)
 - [x] **E5-9** (P2, M) Xem trước đề nháp — xong cùng E5-10: phòng thi đọc đề bằng phiên của người dùng phía server, admin bấm nút xem trước ở kho đề là vào được đề `draft`/`review`
 - [ ] **E5-11** (P2, S) Chế độ xem trước không lưu attempt: admin mở đề `draft`/`review` từ kho đề thì phòng thi Writing vẫn gọi `startAttempt` (`app/writing/test/_lib/useWritingAttempt.ts:33`), tạo attempt thật hiện trong lịch sử. Speaking sẽ dính khi làm E2-3 — *gộp khi làm E2-3*
 - [ ] **E8-8** (P1, S) `proxy.ts` gọi `supabase.auth.getClaims()` ở mọi request trang: chỉ xác thực JWT tại chỗ (JWKS cache) khi project ký bằng khoá bất đối xứng (local đang ES256). Project production còn dùng JWT secret cũ (HS256) thì mỗi request gọi Supabase Auth → bật JWT Signing Keys (ES256/RS256) trước khi ra mắt, hoặc thu hẹp `matcher`

@@ -8,6 +8,8 @@ interface QuestionProgressionProps {
     questions: ProgressQuestion[];
     currentIndex: number;
     speakSec: number;
+    /** Chế độ có hướng dẫn: được chuyển câu bất cứ lúc nào. */
+    isGuided: boolean;
     canProceed: boolean;
     isLast: boolean;
     /** Đã bấm Kết thúc, đang chờ chấm xong. */
@@ -19,6 +21,7 @@ export default function QuestionProgression({
     questions,
     currentIndex,
     speakSec,
+    isGuided,
     canProceed,
     isLast,
     isSubmitting = false,
@@ -43,10 +46,12 @@ export default function QuestionProgression({
                                 {completedCount}/{total}
                             </span>
                         </div>
-                        <span className="inline-flex items-center gap-1 text-sub2 text-[11px]">
-                            <LuLock className="size-3" aria-hidden="true" />
-                            Khóa tự chọn câu theo quy chế ETS
-                        </span>
+                        {!isGuided && (
+                            <span className="inline-flex items-center gap-1 text-sub2 text-[11px]">
+                                <LuLock className="size-3" aria-hidden="true" />
+                                Khóa tự chọn câu theo quy chế ETS
+                            </span>
+                        )}
                     </div>
 
                     <ol className="flex flex-wrap items-center gap-1.5" aria-label="Danh sách câu hỏi Speaking">
@@ -98,7 +103,9 @@ export default function QuestionProgression({
                             <div className="text-sub2 text-[11px]">
                                 {activeQuestion ? `Đang làm câu ${activeQuestion.number}` : 'Chuyển câu'}
                             </div>
-                            <div className="font-semibold text-main text-xs">Chuyển câu khi hết {speakSec}s</div>
+                            <div className="font-semibold text-main text-xs">
+                                {isGuided ? 'Chuyển câu bất cứ lúc nào' : `Chuyển câu khi hết ${speakSec}s`}
+                            </div>
                         </div>
                     </div>
 
