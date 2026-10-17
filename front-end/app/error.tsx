@@ -6,10 +6,9 @@ import Button from '@/components/ui/button';
 
 interface ErrorPageProps {
     error: Error & { digest?: string };
-    retry: () => void;
 }
 
-export default function ErrorPage({ error, retry }: ErrorPageProps) {
+export default function ErrorPage({ error }: ErrorPageProps) {
     useEffect(() => {
         console.error(error);
     }, [error]);
@@ -24,7 +23,7 @@ export default function ErrorPage({ error, retry }: ErrorPageProps) {
             </span>
             <h1 className="font-semibold text-main text-base">Đã có lỗi xảy ra</h1>
             <p className="max-w-md text-subText text-xs">Trang chưa tải được. Hãy thử lại sau giây lát.</p>
-            <Button variant="primary" size="sm" onClick={retry} className="gap-2 mt-2 text-xs">
+            <Button variant="primary" size="sm" onClick={() => window.location.reload()} className="gap-2 mt-2 text-xs">
                 <LuRefreshCw className="size-4" aria-hidden="true" />
                 Thử lại
             </Button>
