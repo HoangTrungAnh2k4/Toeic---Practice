@@ -31,6 +31,8 @@ export const CRITERION_LABEL: Record<Criterion, string> = {
     completeness: 'Hoàn thành nhiệm vụ',
     organization: 'Bố cục',
     support: 'Lý do & ví dụ',
+    fluency: 'Trôi chảy',
+    task_response: 'Đáp ứng yêu cầu',
 };
 
 export const SKILL_META: Record<MistakeSkill, { label: string; Icon: IconType; tile: string; badge: string; accent: string }> = {

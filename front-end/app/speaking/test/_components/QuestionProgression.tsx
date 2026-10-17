@@ -10,6 +10,8 @@ interface QuestionProgressionProps {
     speakSec: number;
     canProceed: boolean;
     isLast: boolean;
+    /** Đã bấm Kết thúc, đang chờ chấm xong. */
+    isSubmitting?: boolean;
     onNextQuestion: () => void;
 }
 
@@ -19,6 +21,7 @@ export default function QuestionProgression({
     speakSec,
     canProceed,
     isLast,
+    isSubmitting = false,
     onNextQuestion,
 }: QuestionProgressionProps) {
     const total = questions.length;
@@ -102,6 +105,7 @@ export default function QuestionProgression({
                     <button
                         type="button"
                         disabled={!canProceed}
+                        aria-busy={isSubmitting}
                         onClick={onNextQuestion}
                         className={cn(
                             'inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-xs transition-colors duration-200',
@@ -111,7 +115,7 @@ export default function QuestionProgression({
                                 : 'bg-sub1 text-sub2 cursor-not-allowed'
                         )}
                     >
-                        <span>{isLast ? 'Kết thúc' : 'Tiếp tục'}</span>
+                        <span>{isSubmitting ? 'Đang chấm bài…' : isLast ? 'Kết thúc' : 'Tiếp tục'}</span>
                         <LuArrowRight className="size-4" aria-hidden="true" />
                     </button>
                 </div>

@@ -10,6 +10,7 @@ import type {
     StudyPlan,
     StudyPlanWeek,
 } from '@/lib/domain/types';
+import { summarizeSpeaking, type ScoredQuestion } from '@/lib/scoring/scale';
 import { supabase } from '@/lib/supabase';
 import { readTable, writeTable } from './local-store';
 
@@ -163,7 +164,11 @@ export type ResponsePatch = Partial<Pick<AttemptResponse, 'text_answer' | 'audio
 /** Upsert theo cặp (attempt_id, question_id) — dùng cho autosave. */
 export async function saveResponse(attemptId: string, questionId: string, patch: ResponsePatch) {
     if (await sessionUserId()) return saveRemoteResponse(attemptId, questionId, patch);
+    return saveLocalResponse(attemptId, questionId, patch);
+}
 
+/** Khách: mọi cột (kể cả điểm) đều ghi vào localStorage. */
+function saveLocalResponse(attemptId: string, questionId: string, patch: Partial<AttemptResponse>) {
     const rows = readTable<AttemptResponse>(RESPONSES);
     const index = rows.findIndex((row) => row.attempt_id === attemptId && row.question_id === questionId);
     const base: AttemptResponse =
@@ -179,6 +184,8 @@ export async function saveResponse(attemptId: string, questionId: string, patch:
                   max_score: null,
                   metrics: {},
                   strengths: [],
+                  feedback: null,
+                  scoring_model: null,
                   updated_at: now(),
               }
             : rows[index];
@@ -188,6 +195,57 @@ export async function saveResponse(attemptId: string, questionId: string, patch:
     else rows[index] = saved;
     writeTable(RESPONSES, rows);
     return saved;
+}
+
+/** Nhà cung cấp hoặc hạn mức lượt chấm trong ngày đã hết (HTTP 429). */
+export class ScoringLimitError extends Error {}
+
+type AnswerScore = Pick<AttemptResponse, 'score' | 'max_score' | 'transcript' | 'metrics' | 'feedback' | 'scoring_model'>;
+
+/**
+ * Gửi bài nói của một câu đi chấm (`/api/speaking/score`); audio không được lưu ở đâu.
+ * Người đăng nhập: server đã ghi điểm vào `responses`. Khách: lưu kết quả vào localStorage.
+ */
+export async function scoreSpeakingAnswer(attemptId: string, questionId: string, audio: Blob) {
+    const form = new FormData();
+    form.append('audio', audio);
+    form.append('attemptId', attemptId);
+    form.append('questionId', questionId);
+    const response = await fetch('/api/speaking/score', { method: 'POST', body: form });
+    if (response.status === 429) throw new ScoringLimitError();
+    if (!response.ok) throw new Error(`Scoring failed: ${response.status}`);
+
+    const result = (await response.json()) as AnswerScore;
+    if (!(await sessionUserId())) saveLocalResponse(attemptId, questionId, result);
+    return result;
+}
+
+/** Nộp bài Speaking: tính tổng 0–200 từ điểm từng câu và đóng attempt (`scored`). */
+export async function finalizeSpeakingAttempt(attemptId: string, questions: ScoredQuestion[]) {
+    if (await sessionUserId()) {
+        const response = await fetch('/api/speaking/finalize', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ attemptId }),
+        });
+        if (!response.ok) throw new Error(`Finalize failed: ${response.status}`);
+        return;
+    }
+
+    const summary = summarizeSpeaking(questions, await listResponses(attemptId));
+    const rows = readTable<Attempt>(ATTEMPTS);
+    const index = rows.findIndex((attempt) => attempt.id === attemptId);
+    if (index === -1) throw new Error(`Không tìm thấy bài làm ${attemptId}.`);
+    rows[index] = {
+        ...rows[index],
+        status: 'scored',
+        submitted_at: now(),
+        scored_at: now(),
+        score: summary.score,
+        feedback_summary: summary.feedbackSummary,
+        scoring_error: summary.scoringError,
+    };
+    writeTable(ATTEMPTS, rows);
 }
 
 /**

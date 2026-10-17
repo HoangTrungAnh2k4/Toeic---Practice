@@ -26,7 +26,9 @@ export type Criterion =
     | 'relevance'
     | 'completeness'
     | 'organization'
-    | 'support';
+    | 'support'
+    | 'fluency'
+    | 'task_response';
 
 export type Severity = 'high' | 'medium' | 'low';
 
@@ -163,6 +165,10 @@ export interface AttemptResponse {
     /** Chỉ số phụ: phát âm, độ trễ (giây), số từ... */
     metrics: Record<string, number>;
     strengths: string[];
+    /** Nhận xét ngắn (tiếng Việt) của khâu chấm. */
+    feedback: string | null;
+    /** Dịch vụ/model đã chấm câu này, để hiệu chỉnh điểm sau. */
+    scoring_model: string | null;
     updated_at: string;
 }
 

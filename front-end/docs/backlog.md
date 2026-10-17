@@ -27,9 +27,9 @@
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ | Sprint |
 | --- | --- | --- | --- | --- | --- |
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
-| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 1/6 | S1, S2 |
+| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 3/6 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 | S2 |
-| E4 | Pipeline chấm điểm (AI) | P0 | Todo | 0/6 | S2 – S4 |
+| E4 | Pipeline chấm điểm (AI) | P0 | In progress | 2/6 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | Todo | 0/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | Todo | 0/4 | S4, S6 |
@@ -62,8 +62,8 @@ Mục tiêu: không còn trang nào chỉ chặn phía client; phòng thi Speaki
 - [x] **E5-6** (P1, S) Xoá đề gọi API thật (hiện chỉ gỡ khỏi state — `app/setting/exam-management/_components/ExamLibrary.tsx:25`)
 - [x] **E10-3** (P1, S) CI: `lint`, `tsc --noEmit`, `test` trên mỗi PR (chưa có `.github/workflows`)
 - [x] **E2-1** (P0, M) Ghi âm từng câu bằng `MediaRecorder` (tái dùng `useMicrophone`, `useTestRecorder` trong `app/setting/device-check/_lib`)
-- [ ] **E2-2** (P0, M) Upload audio lên storage, lưu key vào `responses` — *chốt trước: Supabase Storage hay Cloudflare R2*
-- [ ] **E2-3** (P0, S) Tạo attempt khi vào phòng (`startAttempt`), cập nhật `submitted` khi nộp — bỏ `shortcut:` ở `SpeakingExamRoom.tsx:38`
+- [x] **E2-2** (P0, M) ~~Upload audio lên storage~~ — *đổi hướng: không lưu audio, gửi thẳng đi chấm từ RAM (xem `docs/prd/scoring.md`); env R2 + `lib/r2.ts` giữ cho sau này*
+- [x] **E2-3** (P0, S) Tạo attempt khi vào phòng (`startAttempt`), cập nhật `submitted` khi nộp — bỏ `shortcut:` ở `SpeakingExamRoom.tsx:38`
 - [ ] **E2-6** (P1, S) Hộp thoại thoát phòng Speaking đang hard-code "TOEIC Speaking Mock Test 04 (Câu 3/11)" (`ExitConfirmDialog.tsx:38`) → lấy tên đề + câu hiện tại
 
 ## Sprint 2 — Làm bài đủ 2 kỹ năng (02/11 – 13/11)
@@ -76,7 +76,7 @@ Mục tiêu: thí sinh làm trọn đề Speaking (11 câu) và Writing (8 câu)
 - [ ] **E2-4** (P1, M) Xử lý gián đoạn Speaking: mất mạng, đóng tab, từ chối mic → `interrupted`, cho làm tiếp
 - [ ] **E9-9** (P2, S) Lưu Writing lúc đóng tab có thể bị huỷ, mất ~600ms gõ cuối (`shortcut:` ở `useWritingAttempt.ts:103`) — gộp khi làm E3-4
 - [ ] **E9-8** (P2, S) Khách đang trong phòng thi mà đăng nhập ở tab khác → lượt lưu kế tiếp gửi attempt id cục bộ lên Supabase và báo lỗi (nợ từ E1-5)
-- [ ] **E4-1** (P0, S) Viết PRD `docs/prd/scoring.md`: tiêu chí (`criterion` enum), thang điểm TOEIC, nhà cung cấp STT/LLM, chi phí mỗi bài, SLA
+- [x] **E4-1** (P0, S) Viết PRD `docs/prd/scoring.md`: tiêu chí (`criterion` enum), thang điểm TOEIC, nhà cung cấp STT/LLM, chi phí mỗi bài, SLA
 
 ## Sprint 3 — Có điểm (16/11 – 27/11)
 
@@ -84,8 +84,8 @@ Mục tiêu: bài nộp được chấm tự động, `score`/`scoring_error` kh
 
 > ⚠️ Sprint nặng nhất (2 task L). Nếu trễ: đẩy E4-4 sang S4, tạm chấm đồng bộ.
 
-- [ ] **E4-2** (P0, L) Backend/Edge Function: speech-to-text cho Speaking
-- [ ] **E4-3** (P0, L) Chấm theo rubric bằng LLM → `score`, nhận xét, `annotations` theo câu
+- [x] **E4-2** (P0, L) Backend/Edge Function: speech-to-text cho Speaking — *Route Handler `app/api/speaking/score`: Azure (Part 1), Groq Whisper (Part 2–5)*
+- [ ] **E4-3** (P0, L) Chấm theo rubric bằng LLM → `score`, nhận xét, `annotations` theo câu — *Speaking đã chấm điểm + nhận xét bằng Gemma; còn `annotations` và Writing*
 - [ ] **E4-4** (P0, M) Hàng đợi + trạng thái `scoring` → `scored` / lỗi; retry
 
 ## Sprint 4 — Kết quả + khép vòng học (30/11 – 11/12)

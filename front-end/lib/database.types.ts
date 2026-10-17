@@ -287,14 +287,14 @@ isOneToOne: false
                   ]
                 },"responses": {
                   Row: {
-                    "attempt_id": string,"audio_path": string | null,"id": string,"max_score": number | null,"metrics": NonNullable<Json>,"question_id": string,"score": number | null,"strengths": NonNullable<Json>,"text_answer": string | null,"transcript": string | null,"updated_at": string
+                    "attempt_id": string,"audio_path": string | null,"feedback": string | null,"id": string,"max_score": number | null,"metrics": NonNullable<Json>,"question_id": string,"score": number | null,"scoring_model": string | null,"strengths": NonNullable<Json>,"text_answer": string | null,"transcript": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempt_id": string,"audio_path"?: string | null,"id"?: string,"max_score"?: number | null,"metrics"?: NonNullable<Json>,"question_id": string,"score"?: number | null,"strengths"?: NonNullable<Json>,"text_answer"?: string | null,"transcript"?: string | null,"updated_at"?: string
+                    "attempt_id": string,"audio_path"?: string | null,"feedback"?: string | null,"id"?: string,"max_score"?: number | null,"metrics"?: NonNullable<Json>,"question_id": string,"score"?: number | null,"scoring_model"?: string | null,"strengths"?: NonNullable<Json>,"text_answer"?: string | null,"transcript"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "attempt_id"?: string,"audio_path"?: string | null,"id"?: string,"max_score"?: number | null,"metrics"?: NonNullable<Json>,"question_id"?: string,"score"?: number | null,"strengths"?: NonNullable<Json>,"text_answer"?: string | null,"transcript"?: string | null,"updated_at"?: string
+                    "attempt_id"?: string,"audio_path"?: string | null,"feedback"?: string | null,"id"?: string,"max_score"?: number | null,"metrics"?: NonNullable<Json>,"question_id"?: string,"score"?: number | null,"scoring_model"?: string | null,"strengths"?: NonNullable<Json>,"text_answer"?: string | null,"transcript"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -321,6 +321,20 @@ isOneToOne: false
                   }
                   Update: {
                     "level"?: number,"min_score"?: number,"skill"?: Database["public"]['Enums']["skill"]
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"scoring_usage": {
+                  Row: {
+                    "day": string,"subject": string,"used": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "day": string,"subject": string,"used"?: number
+                  }
+                  Update: {
+                    "day"?: string,"subject"?: string,"used"?: number
                   }
                   Relationships: [
                     
@@ -371,12 +385,15 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "create_exam":
+            "consume_scoring_quota":
+{ Args: { "p_limit": number,"p_subject": string }; Returns: boolean
+                           },
+"create_exam":
 { Args: { "payload": Json }; Returns: string
                            }
           }
           Enums: {
-            "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published","plan_status": "active"|"archived","plan_task_kind": "speaking"|"writing"|"review"|"mock"|"summary","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
+            "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support"|"fluency"|"task_response","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published","plan_status": "active"|"archived","plan_task_kind": "speaking"|"writing"|"review"|"mock"|"summary","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -496,7 +513,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "attempt_mode": ["cbt", "timed", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published"],"plan_status": ["active", "archived"],"plan_task_kind": ["speaking", "writing", "review", "mock", "summary"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
+            "attempt_mode": ["cbt", "timed", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support", "fluency", "task_response"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published"],"plan_status": ["active", "archived"],"plan_task_kind": ["speaking", "writing", "review", "mock", "summary"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
           }
         }
 } as const

@@ -3,6 +3,8 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
     /* config options here */
     cacheComponents: true,
+    // Speech SDK dùng module Node (ws, https-proxy-agent), chạy thẳng từ node_modules thay vì bundle
+    serverExternalPackages: ['microsoft-cognitiveservices-speech-sdk'],
     partialPrefetching: true,
     turbopack: {
         rules: {

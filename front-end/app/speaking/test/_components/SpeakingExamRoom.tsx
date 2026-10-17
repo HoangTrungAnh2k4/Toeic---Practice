@@ -1,13 +1,15 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { LuInfo } from 'react-icons/lu';
+import { useEffect, useEffectEvent, useState } from 'react';
+import { LuInfo, LuTriangleAlert } from 'react-icons/lu';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
 import type { RoomPart } from '@/lib/exam-library/room';
+import { getAttemptHref } from '@/app/setting/history/utils';
 import MicrophoneAccessNotice from '@/app/setting/device-check/_components/MicrophoneAccessNotice';
 import { useMicrophone } from '@/app/setting/device-check/_lib/useMicrophone';
 import { useAnswerRecorder } from '../_lib/useAnswerRecorder';
+import { useSpeakingAttempt } from '../_lib/useSpeakingAttempt';
 import { PART_DIRECTIONS } from '../utils';
 import AudioCaptureHud from './AudioCaptureHud';
 import DirectionsBanner from './DirectionsBanner';
@@ -37,8 +39,8 @@ function toSteps(parts: RoomPart[]) {
 }
 
 /**
- * Phòng thi Speaking: ghi âm từng câu trong thời gian trả lời; đồng hồ chỉ chạy khi micro đang hoạt động.
- * shortcut: chưa tạo attempt và bản ghi chỉ nằm trong bộ nhớ tab (mất khi rời phòng) — E2-2/E2-3 upload và lưu bài.
+ * Phòng thi Speaking: ghi âm từng câu trong thời gian trả lời, gửi đi chấm khi chốt câu; đồng hồ chỉ chạy khi micro đang hoạt động.
+ * shortcut: rời phòng giữa chừng thì attempt vẫn `in_progress`, câu chưa chấm mất audio và không làm tiếp được — E2-4.
  */
 export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoomProps) {
     const router = useRouter();
@@ -49,16 +51,22 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
     const [isExitModalOpen, setIsExitModalOpen] = useState(false);
     const mic = useMicrophone();
     const { start: startRecording, stop: stopRecording } = useAnswerRecorder(mic.stream);
-    const recordingsRef = useRef(new Map<string, Blob>());
+    const { scoreAudio, submit, getAttempt } = useSpeakingAttempt(
+        exam.id,
+        mode,
+        steps.map(({ question }) => question),
+    );
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitFailed, setSubmitFailed] = useState(false);
     const isMicReady = mic.status === 'active';
 
-    /** Chốt bài nói của câu hiện tại; gọi lại khi đã chốt thì không ghi đè bản ghi cũ. */
-    const saveAnswer = async (questionId: string) => {
+    /** Chốt bài nói của câu hiện tại và gửi đi chấm; gọi lại khi đã chốt thì không gửi lại. */
+    const saveAnswer = async () => {
         const blob = await stopRecording();
-        if (blob) recordingsRef.current.set(questionId, blob);
+        if (blob) scoreAudio(step.question.id, blob, step.template.part_no);
     };
 
-    const finishOnTimeout = useEffectEvent(() => void saveAnswer(step.question.id));
+    const finishOnTimeout = useEffectEvent(() => void saveAnswer());
     const startAnswer = useEffectEvent(() => {
         if (secondsRemaining > 0) startRecording();
     });
@@ -79,12 +87,20 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
 
     const isLast = currentIndex === steps.length - 1;
     // Chế độ có hướng dẫn không khóa thời gian: được chuyển câu bất cứ lúc nào
-    const canProceed = mode === 'guided' || secondsRemaining === 0;
+    const canProceed = !isSubmitting && (mode === 'guided' || secondsRemaining === 0);
 
     const handleNext = async () => {
-        await saveAnswer(step.question.id);
+        await saveAnswer();
         if (isLast) {
-            router.push('/speaking');
+            setIsSubmitting(true);
+            setSubmitFailed(false);
+            if ((await submit()) !== 'error') {
+                // Hết lượt chấm (`limit`) vẫn nộp được; trang kết quả ghi rõ câu chưa có điểm
+                router.push(getAttemptHref((await getAttempt()).id));
+                return;
+            }
+            setIsSubmitting(false);
+            setSubmitFailed(true);
             return;
         }
         setCurrentIndex(currentIndex + 1);
@@ -108,7 +124,8 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                     className="flex items-start gap-2 bg-sub3/10 px-4 py-3 border border-sub3/50 rounded-xl text-main text-xs leading-relaxed"
                 >
                     <LuInfo className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    Bài nói được ghi âm trên máy bạn nhưng chưa lưu lên hệ thống: rời phòng thi là mất bản ghi.
+                    Bài nói được chấm ngay sau mỗi câu và không được lưu lại: Part 1 gửi Microsoft Azure, Part 2–5 gửi
+                    Groq để chuyển thành chữ rồi Google Gemma chấm điểm.
                 </p>
 
                 <DirectionsBanner
@@ -150,11 +167,23 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                                 status={mic.status}
                                 hasAccess={mic.hasAccess}
                                 onRequestAccess={() => void mic.start(mic.deviceId || undefined)}
+                                privacyNote="Bài nói được gửi đi chấm điểm rồi bỏ, không được lưu lại."
                             />
                         )}
                     </div>
                 </div>
             </main>
+
+            {submitFailed && (
+                <p
+                    role="alert"
+                    className="flex items-start gap-2 bg-destructive/10 mt-6 px-4 py-3 border border-destructive/40 rounded-xl text-destructive text-xs leading-relaxed"
+                >
+                    <LuTriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                    Chưa chấm xong bài nói. Kiểm tra kết nối mạng rồi bấm Kết thúc lần nữa; bản ghi vẫn còn trên máy
+                    cho tới khi bạn rời phòng thi.
+                </p>
+            )}
 
             <QuestionProgression
                 questions={steps.map(({ question, template }) => ({ number: question.number, task: template.task }))}
@@ -162,6 +191,7 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                 speakSec={step.speakSec}
                 canProceed={canProceed}
                 isLast={isLast}
+                isSubmitting={isSubmitting}
                 onNextQuestion={() => void handleNext()}
             />
 

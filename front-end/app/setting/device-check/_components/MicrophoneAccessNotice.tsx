@@ -9,10 +9,17 @@ interface MicrophoneAccessNoticeProps {
     /** Đã từng cấp quyền: lúc chờ chỉ là bật lại micro, không còn hộp thoại xin quyền. */
     hasAccess: boolean;
     onRequestAccess: () => void;
+    /** Câu nói rõ âm thanh đi đâu, hiện trong lời mời cấp quyền. */
+    privacyNote?: string;
 }
 
 /** Hiển thị khi micro chưa hoạt động: lời mời cấp quyền, trạng thái chờ hoặc lỗi kèm cách khắc phục. */
-export default function MicrophoneAccessNotice({ status, hasAccess, onRequestAccess }: MicrophoneAccessNoticeProps) {
+export default function MicrophoneAccessNotice({
+    status,
+    hasAccess,
+    onRequestAccess,
+    privacyNote = 'Âm thanh chỉ được xử lý ngay trên máy của bạn, không được tải lên hay lưu lại.',
+}: MicrophoneAccessNoticeProps) {
     if (isMicIssue(status)) {
         const { title, description } = MIC_ISSUE_COPY[status];
         const canRetry = !PERMANENT_MIC_ISSUES.includes(status);
@@ -45,8 +52,7 @@ export default function MicrophoneAccessNotice({ status, hasAccess, onRequestAcc
 
     const isRequesting = status === 'requesting';
     let title = 'Cho phép truy cập micro';
-    let description =
-        'Trình duyệt sẽ hỏi quyền dùng micro. Âm thanh chỉ được xử lý ngay trên máy của bạn, không được tải lên hay lưu lại.';
+    let description = `Trình duyệt sẽ hỏi quyền dùng micro. ${privacyNote}`;
     if (isRequesting && hasAccess) {
         title = 'Đang bật lại micro…';
         description = 'Micro bạn đã chọn sẽ sẵn sàng trong giây lát.';
