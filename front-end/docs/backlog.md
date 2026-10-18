@@ -85,7 +85,7 @@ Mục tiêu: bài nộp được chấm tự động, `score`/`scoring_error` kh
 > ⚠️ Sprint nặng nhất (2 task L). Nếu trễ: đẩy E4-4 sang S4, tạm chấm đồng bộ.
 
 - [x] **E4-2** (P0, L) Backend/Edge Function: speech-to-text cho Speaking — *Route Handler `app/api/speaking/score`: Azure (Part 1), Groq Whisper (Part 2–5)*
-- [ ] **E4-3** (P0, L) Chấm theo rubric bằng LLM → `score`, nhận xét, `annotations` theo câu — *Speaking đã chấm điểm + nhận xét bằng Gemma; còn `annotations` và Writing*
+- [ ] **E4-3** (P0, L) Chấm theo rubric bằng LLM → `score`, nhận xét, `annotations` theo câu — *Speaking đã chấm điểm + nhận xét bằng LLM trên Groq; còn `annotations` và Writing*
 - [ ] **E4-4** (P0, M) Hàng đợi + trạng thái `scoring` → `scored` / lỗi; retry
 
 ## Sprint 4 — Kết quả + khép vòng học (30/11 – 11/12)

@@ -82,7 +82,7 @@ export interface FluencyMetrics {
     response_delay_sec: number;
 }
 
-/** Số đo Fluency từ timestamp Whisper, gửi kèm transcript để Gemma chấm Fluency có căn cứ. */
+/** Số đo Fluency từ timestamp Whisper, gửi kèm transcript để LLM chấm Fluency có căn cứ. */
 export function fluencyMetrics(segments: TranscriptSegment[], durationSec: number): FluencyMetrics {
     const words = segments.reduce((sum, segment) => sum + segment.text.split(/\s+/).filter(Boolean).length, 0);
     const spokenSec = segments.reduce((sum, segment) => sum + Math.max(0, segment.end - segment.start), 0);

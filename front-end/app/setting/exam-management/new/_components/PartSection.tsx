@@ -112,7 +112,7 @@ export default function PartSection({ template, index }: PartSectionProps) {
                         </FormField>
 
                         {template.part_no === 2 && (
-                            <div className="gap-4 grid sm:grid-cols-2">
+                            <>
                                 <FormField
                                     label="Đường dẫn ảnh"
                                     required
@@ -124,12 +124,12 @@ export default function PartSection({ template, index }: PartSectionProps) {
                                 <FormField
                                     label="Mô tả ảnh"
                                     required
-                                    description="Dành cho trình đọc màn hình."
+                                    description="Tả chi tiết bằng tiếng Anh: số người, vị trí, trang phục, hành động, đồ vật, bối cảnh. AI chấm điểm dựa trên mô tả này, trình đọc màn hình cũng đọc nó."
                                     error={errorOf(`${name}.image_alt`)}
                                 >
-                                    {(control) => <Input {...control} {...register(`${name}.image_alt`)} />}
+                                    {(control) => <Textarea {...control} rows={5} {...register(`${name}.image_alt`)} />}
                                 </FormField>
-                            </div>
+                            </>
                         )}
 
                         <div className="gap-4 grid sm:grid-cols-2">

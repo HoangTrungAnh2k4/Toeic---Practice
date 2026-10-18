@@ -1,7 +1,7 @@
 import { readPcm16Mono } from '@/lib/audio/wav';
 import { assessPronunciation } from './azure';
-import { gradeAnswer } from './gemma';
-import { transcribe, WHISPER_MODEL } from './groq';
+import { gradeAnswer } from './grade';
+import { transcribe } from './groq';
 import { bandsToScore, fluencyMetrics, pronunciationToScore, speakingMaxScore } from './scale';
 
 export interface QuestionToScore {
@@ -10,7 +10,6 @@ export interface QuestionToScore {
     task: string;
     prompt: string;
     context: string | null;
-    imagePath: string | null;
     imageAlt: string | null;
 }
 
@@ -26,23 +25,6 @@ export interface AnswerScore {
 
 export class InvalidAudioError extends Error {}
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-
-/** Ảnh đề Part 2 dạng base64 cho Gemma; `null` (dùng `image_alt`) khi không phải URL https hoặc tải lỗi. */
-async function loadImage(path: string) {
-    if (!path.startsWith('https://')) return null;
-    try {
-        const response = await fetch(path, { signal: AbortSignal.timeout(10_000) });
-        const mimeType = response.headers.get('content-type')?.split(';')[0] ?? '';
-        if (!response.ok || !mimeType.startsWith('image/')) return null;
-        const bytes = await response.arrayBuffer();
-        if (bytes.byteLength > MAX_IMAGE_BYTES) return null;
-        return { mimeType, data: Buffer.from(bytes).toString('base64') };
-    } catch {
-        return null;
-    }
-}
-
 const silent = (max: number, model: string): AnswerScore => ({
     score: 0,
     max_score: max,
@@ -54,7 +36,7 @@ const silent = (max: number, model: string): AnswerScore => ({
 
 /**
  * Chấm một câu Speaking từ audio trên RAM: Part 1 → Azure Pronunciation Assessment (audio phải là WAV 16 kHz),
- * Part 2–5 → Groq Whisper lấy transcript rồi Gemma chấm theo rubric IELTS. Audio không được ghi ra đâu cả.
+ * Part 2–5 → Groq Whisper lấy transcript rồi LLM trên Groq chấm theo rubric IELTS. Audio không được ghi ra đâu cả.
  */
 export async function scoreAnswer(question: QuestionToScore, audio: Blob): Promise<AnswerScore> {
     const max = speakingMaxScore(question.number);
@@ -77,17 +59,15 @@ export async function scoreAnswer(question: QuestionToScore, audio: Blob): Promi
         };
     }
 
-    const { transcript, segments, duration } = await transcribe(audio);
-    if (!transcript) return silent(max, WHISPER_MODEL);
+    const { transcript, segments, duration, model: whisperModel } = await transcribe(audio);
+    if (!transcript) return silent(max, whisperModel);
 
     const fluency = fluencyMetrics(segments, duration);
-    const image = question.partNo === 2 && question.imagePath ? await loadImage(question.imagePath) : null;
     const { feedback, model, ...bands } = await gradeAnswer({
         questionNumber: question.number,
         task: question.task,
         prompt: question.prompt,
         context: question.context,
-        image,
         imageAlt: question.imageAlt,
         transcript,
         fluency,
@@ -98,6 +78,6 @@ export async function scoreAnswer(question: QuestionToScore, audio: Blob): Promi
         transcript,
         metrics: { ...bands, ...fluency },
         feedback,
-        scoring_model: `${WHISPER_MODEL}+${model}`,
+        scoring_model: `${whisperModel}+${model}`,
     };
 }

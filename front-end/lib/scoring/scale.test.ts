@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { parseGrade } from './gemma';
+import { parseGrade } from './grade';
 import {
     aggregatePronunciation,
     bandsToScore,

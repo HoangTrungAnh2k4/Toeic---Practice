@@ -23,7 +23,7 @@ Kho đề hiện chỉ có dữ liệu mock trong `lib/data/content.ts`, và m�
 
 - Chỉ làm kỹ năng Speaking, nhập bằng form theo từng Part.
 - Chỉ tạo mới và lưu ở trạng thái `draft`.
-- Media nhập dưới dạng text: Part 2 điền thẳng key hoặc URL ảnh vào `image_path` cùng `image_alt`.
+- Media nhập dưới dạng text: Part 2 điền thẳng key hoặc URL ảnh vào `image_path` cùng `image_alt` (tả chi tiết bằng tiếng Anh, tối đa 1.000 ký tự: vừa là alt cho trình đọc màn hình, vừa là đầu vào duy nhất về ảnh khi AI chấm Part 2).
 - Trang Quản trị đề thi đọc đề từ Supabase.
 
 **Ngoài phạm vi**

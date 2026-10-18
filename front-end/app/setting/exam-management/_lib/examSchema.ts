@@ -25,7 +25,8 @@ const questionSchema = z.object({
     number: z.number().int(),
     prompt: requiredText('Vui lòng nhập nội dung câu hỏi', 2000),
     image_path: optionalText(500),
-    image_alt: optionalText(300),
+    // Đủ dài để tả chi tiết: model chấm Part 2 chỉ đọc mô tả, không xem ảnh
+    image_alt: optionalText(1000),
     sample_answer: optionalText(3000),
     hint: optionalText(500),
 });

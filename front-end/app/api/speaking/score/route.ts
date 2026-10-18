@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     // Client mang phiên: RLS chỉ trả câu của đề đã phát hành (hoặc đề nháp với admin)
     const { data: question, error: questionError } = await supabase
         .from('questions')
-        .select('number, prompt, image_path, image_alt, exam_parts!inner(exam_id, context, part_template_id)')
+        .select('number, prompt, image_alt, exam_parts!inner(exam_id, context, part_template_id)')
         .eq('id', questionId)
         .maybeSingle();
     if (questionError) return fail('server_error', 500);
@@ -82,7 +82,6 @@ export async function POST(request: Request) {
                 task: template.task,
                 prompt: question.prompt,
                 context: question.exam_parts.context,
-                imagePath: question.image_path,
                 imageAlt: question.image_alt,
             },
             audio,

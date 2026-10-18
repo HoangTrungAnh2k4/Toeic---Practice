@@ -148,7 +148,7 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                 >
                     <LuInfo className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     Bài nói được chấm ngay sau mỗi câu và không được lưu lại: Part 1 gửi Microsoft Azure, Part 2–5 gửi
-                    Groq để chuyển thành chữ rồi Google Gemma chấm điểm.
+                    Groq để chuyển thành chữ và chấm điểm.
                 </p>
 
                 <DirectionsBanner
