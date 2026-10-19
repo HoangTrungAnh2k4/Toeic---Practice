@@ -11,7 +11,7 @@ export default function SettingPageHeader() {
                     aria-label="Breadcrumb"
                     className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
                 >
-                    <span>TOEIC Speaking & Writing</span>
+                   
                     <LuChevronRight className="size-3.5" aria-hidden="true" />
                     <span className="text-main" aria-current="page">
                         Cài đặt

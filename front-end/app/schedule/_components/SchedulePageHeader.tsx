@@ -23,7 +23,7 @@ export default function SchedulePageHeader({ rationale, showActions }: ScheduleP
                         aria-label="Breadcrumb"
                         className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
                     >
-                        <span>TOEIC Speaking & Writing</span>
+                       
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
                         <span className="text-main">Kế hoạch học thích ứng</span>
                     </nav>
@@ -38,7 +38,7 @@ export default function SchedulePageHeader({ rationale, showActions }: ScheduleP
 
             {/* Header Actions */}
             {showActions && (
-            <div className="flex flex-wrap items-center gap-3 self-start xl:self-auto shrink-0">
+            <div className="flex flex-wrap items-center self-start xl:self-auto gap-3 shrink-0">
                 <Link
                     href="/setting/profile"
                     className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-white')}

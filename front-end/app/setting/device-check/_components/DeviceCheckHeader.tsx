@@ -17,11 +17,11 @@ export default function DeviceCheckHeader() {
                         aria-label="Breadcrumb"
                         className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
                     >
-                        <span>TOEIC Speaking & Writing</span>
+                       
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
                         <Link
                             href={SETTING_BASE_PATH}
-                            className="hover:text-main rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                            className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:text-main transition-colors"
                         >
                             Cài đặt
                         </Link>

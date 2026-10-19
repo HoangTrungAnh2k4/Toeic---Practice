@@ -13,7 +13,7 @@ export default function WritingPageHeader() {
                         aria-label="Breadcrumb"
                         className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
                     >
-                        <span>TOEIC Speaking & Writing</span>
+                       
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
                         <span className="text-main">Phòng thi Writing (CBT)</span>
                     </nav>
@@ -31,7 +31,7 @@ export default function WritingPageHeader() {
             {/* Engine status */}
             <div
                 role="status"
-                className="flex items-center gap-2 self-start xl:self-auto bg-white shadow-sm px-3 py-1.5 border border-sub2/30 rounded-full shrink-0"
+                className="flex items-center self-start xl:self-auto gap-2 bg-white shadow-sm px-3 py-1.5 border border-sub2/30 rounded-full shrink-0"
             >
                 <span className="bg-sub3 rounded-full size-2 animate-pulse" aria-hidden="true" />
                 <span className="font-semibold text-main text-xs">ETS Writing Engine v3.2 đang hoạt động</span>

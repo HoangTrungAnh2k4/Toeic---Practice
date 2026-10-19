@@ -41,8 +41,8 @@ export default function GoogleAuthButton({ label, remember = true }: GoogleAuthB
                 onClick={onClick}
                 disabled={pending}
             >
-                <FcGoogle aria-hidden="true" className="size-5" />
-                {pending ? 'Đang chuyển sang Google...' : label}
+                <FcGoogle aria-hidden="true" className="mr-1 size-5" />
+                {pending ? 'Đang chuyển  Google...' : label}
             </Button>
             <AuthFormError message={error} />
         </div>

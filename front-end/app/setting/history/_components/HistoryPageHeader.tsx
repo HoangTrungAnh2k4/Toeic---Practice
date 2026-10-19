@@ -16,11 +16,11 @@ export default function HistoryPageHeader() {
                         aria-label="Breadcrumb"
                         className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
                     >
-                        <span>TOEIC Speaking & Writing</span>
+                       
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
                         <Link
                             href={SETTING_BASE_PATH}
-                            className="hover:text-main rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                            className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:text-main transition-colors"
                         >
                             Cài đặt
                         </Link>
@@ -40,7 +40,7 @@ export default function HistoryPageHeader() {
             </div>
 
             {/* Header Actions */}
-            <div className="flex flex-wrap items-center gap-3 self-start xl:self-auto shrink-0">
+            <div className="flex flex-wrap items-center self-start xl:self-auto gap-3 shrink-0">
                 <Button type="button" size="md" variant="third" className="gap-2 bg-white">
                     <LuDownload className="size-4" aria-hidden="true" />
                     <span>Báo cáo (PDF)</span>
