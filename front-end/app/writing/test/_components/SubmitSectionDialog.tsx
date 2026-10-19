@@ -17,12 +17,27 @@ interface SubmitSectionDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     answers: string[];
+    /** Số thứ tự của câu đầu tiên trong Part. */
+    firstNumber: number;
+    /** Nhóm câu của Part, vd "Câu 1–5". */
+    rangeLabel: string;
+    /** Nộp xong chuyển sang Part tiếp theo thay vì về thư viện đề. */
+    hasNextPart: boolean;
     isTimeUp: boolean;
     onConfirm: () => void;
 }
 
-export default function SubmitSectionDialog({ open, onOpenChange, answers, isTimeUp, onConfirm }: SubmitSectionDialogProps) {
-    const unanswered = answers.flatMap((answer, index) => (answer.trim() ? [] : [index + 1]));
+export default function SubmitSectionDialog({
+    open,
+    onOpenChange,
+    answers,
+    firstNumber,
+    rangeLabel,
+    hasNextPart,
+    isTimeUp,
+    onConfirm,
+}: SubmitSectionDialogProps) {
+    const unanswered = answers.flatMap((answer, index) => (answer.trim() ? [] : [firstNumber + index]));
     const answeredCount = answers.length - unanswered.length;
 
     return (
@@ -32,9 +47,11 @@ export default function SubmitSectionDialog({ open, onOpenChange, answers, isTim
                     <AlertDialogMedia className="bg-sub3 text-main">
                         <LuCircleCheckBig aria-hidden="true" />
                     </AlertDialogMedia>
-                    <AlertDialogTitle className="font-bold text-main text-lg">Xác nhận nộp bài Câu 1–5</AlertDialogTitle>
+                    <AlertDialogTitle className="font-bold text-main text-lg">Xác nhận nộp bài {rangeLabel}</AlertDialogTitle>
                     <AlertDialogDescription className="text-subText">
-                        Phòng thi hiện mới có nhóm Câu 1–5; phần Email (Câu 6–7) và Essay (Câu 8) sẽ được bổ sung sau.
+                        {hasNextPart
+                            ? 'Nộp xong bạn chuyển ngay sang nhóm câu tiếp theo, đồng hồ của nhóm đó bắt đầu chạy.'
+                            : 'Đây là nhóm câu cuối của lượt làm, nộp xong bạn quay về thư viện đề.'}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -57,7 +74,7 @@ export default function SubmitSectionDialog({ open, onOpenChange, answers, isTim
 
                     <ul className="flex flex-col gap-1.5 pl-5 text-subText text-xs leading-relaxed list-disc">
                         <li>
-                            Bạn <strong className="text-main">không thể quay lại</strong> chỉnh sửa Câu 1–5 sau khi nộp.
+                            Bạn <strong className="text-main">không thể quay lại</strong> chỉnh sửa {rangeLabel} sau khi nộp.
                         </li>
                     </ul>
                 </div>
@@ -65,7 +82,7 @@ export default function SubmitSectionDialog({ open, onOpenChange, answers, isTim
                 <AlertDialogFooter className="bg-sub1/40 border-sub2/20">
                     {!isTimeUp && (
                         <AlertDialogCancel variant="third" size="md" className="bg-white">
-                            Tiếp tục làm Câu 1–5
+                            Tiếp tục làm {rangeLabel}
                         </AlertDialogCancel>
                     )}
                     <AlertDialogAction variant="primary" size="md" onClick={onConfirm}>

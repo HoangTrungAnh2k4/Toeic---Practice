@@ -2,6 +2,11 @@ import { LuChevronLeft, LuChevronRight, LuCircleCheckBig, LuLightbulb, LuTimerOf
 import Button from '@/components/ui/button';
 
 interface ExamNavigationProps {
+    partNo: number;
+    /** Nhóm câu của Part, vd "Câu 1–5". */
+    rangeLabel: string;
+    /** Phạm vi vừa hết giờ: cả Part (Q1-5) hoặc riêng câu đang làm (Q6-7). */
+    timeUpLabel: string;
     currentIndex: number;
     totalQuestions: number;
     isTimeUp: boolean;
@@ -10,7 +15,17 @@ interface ExamNavigationProps {
     onFinish: () => void;
 }
 
+/** Lời khuyên theo Part (key = `part_no`). */
+const TIPS: Record<number, string> = {
+    1: 'Không viết hai câu riêng lẻ. Dùng liên từ phụ thuộc (while, because, although) hoặc mệnh đề quan hệ để tạo một câu phức tự nhiên và đạt trọn 3/3 điểm.',
+    2: 'Trả lời đủ mọi yêu cầu trong đề (số câu hỏi, đề xuất, thông tin cần nêu), có lời chào, mở thư, kết thư và ký tên. Thiếu một yêu cầu là khó đạt 4/4.',
+    3: 'Nêu rõ quan điểm ngay ở mở bài, mỗi đoạn thân bài một lý do kèm ví dụ cụ thể, kết bài nhắc lại quan điểm. Dành 3–5 phút cuối để đọc lại và sửa lỗi.',
+};
+
 export default function ExamNavigation({
+    partNo,
+    rangeLabel,
+    timeUpLabel,
     currentIndex,
     totalQuestions,
     isTimeUp,
@@ -30,9 +45,10 @@ export default function ExamNavigation({
                 >
                     <LuTimerOff className="mt-0.5 size-5 text-destructive shrink-0" aria-hidden="true" />
                     <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-destructive">Đã hết 8 phút của nhóm 1</span>
+                        <span className="font-semibold text-destructive">Đã hết giờ của {timeUpLabel}</span>
                         <span className="text-subText text-xs">
-                            Bài làm đã được khóa và lưu lại. Hãy nộp bài để lưu kết quả.
+                            Bài làm đã được khóa và lưu lại.{' '}
+                            {isLast ? 'Hãy nộp bài để lưu kết quả.' : 'Hãy chuyển sang câu tiếp theo.'}
                         </span>
                     </div>
                 </div>
@@ -68,7 +84,7 @@ export default function ExamNavigation({
 
                 <Button type="button" size="md" variant="primary" onClick={onFinish} className="gap-1.5">
                     <LuCircleCheckBig className="size-4" aria-hidden="true" />
-                    <span>Nộp bài Câu 1–5</span>
+                    <span>Nộp bài {rangeLabel}</span>
                 </Button>
             </div>
 
@@ -78,10 +94,7 @@ export default function ExamNavigation({
                 </span>
                 <div className="flex flex-col gap-1 text-xs leading-relaxed">
                     <span className="font-semibold text-main text-sm">Lời khuyên giám khảo</span>
-                    <span className="text-subText">
-                        Không viết hai câu riêng lẻ. Dùng liên từ phụ thuộc (while, because, although) hoặc mệnh đề
-                        quan hệ để tạo một câu phức tự nhiên và đạt trọn 3/3 điểm.
-                    </span>
+                    <span className="text-subText">{TIPS[partNo]}</span>
                 </div>
             </aside>
         </div>

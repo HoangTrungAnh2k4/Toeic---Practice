@@ -3,21 +3,24 @@ import { cn } from '@/lib/utils';
 
 interface QuestionNavigatorProps {
     answers: string[];
+    partNo: number;
+    /** Số thứ tự của câu đầu tiên trong Part (vd. 6 cho Q6-7). */
+    firstNumber: number;
     currentIndex: number;
     onSelect: (index: number) => void;
 }
 
-export default function QuestionNavigator({ answers, currentIndex, onSelect }: QuestionNavigatorProps) {
+export default function QuestionNavigator({ answers, partNo, firstNumber, currentIndex, onSelect }: QuestionNavigatorProps) {
     const answeredCount = answers.filter((answer) => answer.trim()).length;
     const progressPercent = Math.round((answeredCount / answers.length) * 100);
 
     return (
         <nav
-            aria-label="Chọn câu hỏi trong nhóm 1"
+            aria-label={`Chọn câu hỏi trong nhóm ${partNo}`}
             className="flex md:flex-row flex-col justify-between md:items-center gap-3 bg-white shadow-sm p-4 border border-sub2/30 rounded-xl"
         >
             <div className="flex flex-wrap items-center gap-3">
-                <span className="font-semibold text-main text-xs uppercase tracking-wider">Câu hỏi nhóm 1</span>
+                <span className="font-semibold text-main text-xs uppercase tracking-wider">Câu hỏi nhóm {partNo}</span>
                 <ol className="flex flex-wrap items-center gap-1.5">
                     {answers.map((answer, index) => {
                         const isCurrent = index === currentIndex;
@@ -28,7 +31,7 @@ export default function QuestionNavigator({ answers, currentIndex, onSelect }: Q
                                     type="button"
                                     onClick={() => onSelect(index)}
                                     aria-current={isCurrent ? 'step' : undefined}
-                                    aria-label={`Câu ${index + 1}${isAnswered ? ', đã có câu trả lời' : ', chưa trả lời'}`}
+                                    aria-label={`Câu ${firstNumber + index}${isAnswered ? ', đã có câu trả lời' : ', chưa trả lời'}`}
                                     className={cn(
                                         'flex justify-center items-center gap-0.5 rounded-lg size-9 font-semibold tabular-nums text-xs transition-colors duration-200 cursor-pointer',
                                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3 focus-visible:ring-offset-2',
@@ -39,7 +42,7 @@ export default function QuestionNavigator({ answers, currentIndex, onSelect }: Q
                                     )}
                                 >
                                     {!isCurrent && isAnswered && <LuCheck className="size-3" aria-hidden="true" />}
-                                    {index + 1}
+                                    {firstNumber + index}
                                 </button>
                             </li>
                         );

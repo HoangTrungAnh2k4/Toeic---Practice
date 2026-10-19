@@ -18,16 +18,25 @@ export interface ExamRoom {
 
 const MODES: AttemptMode[] = ['cbt', 'timed', 'guided'];
 
-/** Đọc `id` và `mode` của phòng thi từ URL; mode không hợp lệ rơi về thi thử CBT. */
-export function parseRoomParams(raw: RawSearchParams): { examId: string | null; mode: AttemptMode } {
+/**
+ * Đọc `id`, `mode`, `part` (id của Part template) của phòng thi từ URL; mode không hợp lệ rơi về thi thử CBT,
+ * `part` thiếu hoặc không hợp lệ là `null`.
+ */
+export function parseRoomParams(raw: RawSearchParams): {
+    examId: string | null;
+    mode: AttemptMode;
+    partTemplateId: number | null;
+} {
     const pick = (key: string) => {
         const value = raw[key];
         return Array.isArray(value) ? value[0] : value;
     };
     const mode = pick('mode');
+    const part = Number(pick('part'));
     return {
         examId: pick('id') ?? null,
         mode: MODES.find((item) => item === mode) ?? 'cbt',
+        partTemplateId: Number.isInteger(part) && part > 0 ? part : null,
     };
 }
 

@@ -107,6 +107,11 @@ export function getPartTemplates(skill: Skill): PartTemplate[] {
     return PART_TEMPLATES.filter((part) => part.skill === skill);
 }
 
+/** Tổng thời gian làm một Part: đồng hồ chung, hoặc cộng thời gian từng câu (`null` khi không có cả hai). */
+export function getPartDurationSec(part: PartTemplate): number | null {
+    return part.section_sec ?? part.response_sec?.reduce((sum, sec) => sum + sec, 0) ?? null;
+}
+
 /** Part chứa câu `number` của kỹ năng `skill`. */
 export function findPartTemplate(skill: Skill, number: number): PartTemplate | undefined {
     return PART_TEMPLATES.find((part) => part.skill === skill && number >= part.q_from && number <= part.q_to);

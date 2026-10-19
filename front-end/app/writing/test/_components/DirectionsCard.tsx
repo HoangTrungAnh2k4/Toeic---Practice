@@ -1,11 +1,36 @@
+import type { ReactNode } from 'react';
 import { LuInfo } from 'react-icons/lu';
 import { TOTAL_EXAM_QUESTIONS } from '../utils';
 
 interface DirectionsCardProps {
+    partNo: number;
     questionNumber: number;
 }
 
-export default function DirectionsCard({ questionNumber }: DirectionsCardProps) {
+/** Lời dẫn theo Part (key = `part_no`). */
+const DIRECTIONS: Record<number, ReactNode> = {
+    1: (
+        <>
+            Write <strong>ONE</strong> sentence that is based on the picture. You must use the <strong>TWO</strong>{' '}
+            words or phrases provided. You may change the forms of the words and you may use them in any order.
+        </>
+    ),
+    2: (
+        <>
+            Read the e-mail and write a response. Your response will be scored on the quality and variety of your
+            sentences, vocabulary, and organization. You have <strong>10 minutes</strong> for each e-mail.
+        </>
+    ),
+    3: (
+        <>
+            Write an essay in response to a question that asks you to state, explain, and support your opinion on an
+            issue. Typically, an effective essay will contain a minimum of <strong>300 words</strong>. You have{' '}
+            <strong>30 minutes</strong> to plan, write, and revise your essay.
+        </>
+    ),
+};
+
+export default function DirectionsCard({ partNo, questionNumber }: DirectionsCardProps) {
     return (
         <section
             aria-labelledby="writing-directions-title"
@@ -23,11 +48,7 @@ export default function DirectionsCard({ questionNumber }: DirectionsCardProps) 
                         Question {questionNumber} of {TOTAL_EXAM_QUESTIONS}
                     </span>
                 </div>
-                <p className="text-main text-sm leading-relaxed">
-                    Write <strong>ONE</strong> sentence that is based on the picture. You must use the{' '}
-                    <strong>TWO</strong> words or phrases provided. You may change the forms of the words and you may
-                    use them in any order.
-                </p>
+                <p className="text-main text-sm leading-relaxed">{DIRECTIONS[partNo]}</p>
             </div>
         </section>
     );

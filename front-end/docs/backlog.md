@@ -28,7 +28,7 @@
 | --- | --- | --- | --- | --- | --- |
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 5/7 | S1, S2 |
-| E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 1/4 | S2 |
+| E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 3/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | In progress | 2/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | Todo | 0/4 | S4, S6 |
@@ -70,8 +70,8 @@ Mục tiêu: không còn trang nào chỉ chặn phía client; phòng thi Speaki
 
 Mục tiêu: thí sinh làm trọn đề Speaking (11 câu) và Writing (8 câu), bài không mất khi gián đoạn. PRD chấm điểm được duyệt để S3 bắt tay ngay.
 
-- [ ] **E3-2** (P0, M) Writing Part 2 (Q6–7): trả lời email (`WritingExamRoom` hiện chỉ nhận một `RoomPart` Q1–5)
-- [ ] **E3-3** (P0, M) Writing Part 3 (Q8): bài luận ý kiến, đếm từ (`countWords` có sẵn trong `app/writing/test/utils.ts`)
+- [x] **E3-2** (P0, M) Writing Part 2 (Q6–7): trả lời email — *mỗi Part một attempt, phòng thi chọn Part qua `?part=<part_template_id>`, nộp Part 1 tự sang Part 2; `ends_at` của Part tính giờ từng câu = tổng `response_sec` (migration `20261019120000`), đồng hồ từng câu chia từ `started_at`*
+- [x] **E3-3** (P0, M) Writing Part 3 (Q8): bài luận ý kiến, đếm từ — *nộp Part 2 tự sang Part 3; `EssayStimulus` (thang 0–5), editor hiện số từ so với mục tiêu ≥ 300 (`ESSAY_MIN_WORDS`), đồng hồ 30 phút từ `response_sec`*
 - [ ] **E3-4** (P1, S) Autosave bài viết (debounce) + khôi phục khi tải lại trang
 - [ ] **E2-4** (P1, M) Xử lý gián đoạn Speaking: mất mạng, đóng tab, từ chối mic → `interrupted`, cho làm tiếp
 - [ ] **E9-9** (P2, S) Lưu Writing lúc đóng tab có thể bị huỷ, mất ~600ms gõ cuối (`shortcut:` ở `useWritingAttempt.ts:103`) — gộp khi làm E3-4

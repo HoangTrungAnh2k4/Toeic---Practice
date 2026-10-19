@@ -6,11 +6,15 @@ import { useState } from 'react';
 import { LuRotateCw, LuTriangleAlert } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
+import { getPartDurationSec } from '@/lib/domain/parts';
 import type { RoomPart } from '@/lib/exam-library/room';
+import { buildTestHref } from '@/lib/exam-library/search-params';
 import { useCountdown } from '../_lib/useCountdown';
 import { useWritingAttempt } from '../_lib/useWritingAttempt';
-import { findKeywordUsage } from '../utils';
+import { findKeywordUsage, formatQuestionRange, getQuestionDeadline } from '../utils';
 import DirectionsCard from './DirectionsCard';
+import EmailStimulus from './EmailStimulus';
+import EssayStimulus from './EssayStimulus';
 import ExamNavigation from './ExamNavigation';
 import ExitExamDialog from './ExitExamDialog';
 import PictureStimulus from './PictureStimulus';
@@ -24,23 +28,24 @@ type ExamDialog = 'exit' | 'submit' | null;
 
 export interface WritingExamRoomProps {
     exam: Exam;
-    /** Phòng thi hiện chỉ có nhóm Q1-5 (Writing Part 1). */
+    /** Mỗi Part là một lượt làm riêng; nộp xong chuyển sang `nextPartTemplateId` (nếu có). */
     part: RoomPart;
+    nextPartTemplateId: number | null;
     mode: AttemptMode;
 }
 
-export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomProps) {
+export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }: WritingExamRoomProps) {
     const router = useRouter();
-    const { questions } = part;
+    const { template, questions } = part;
     const { attempt, answers, isRestored, loadError, retryLoad, saveStatus, savedAt, updateAnswer, submit } = useWritingAttempt({
         examId: exam.id,
-        partTemplateId: part.template.id,
+        partTemplateId: template.id,
         mode,
-        durationSec: part.template.section_sec,
+        durationSec: getPartDurationSec(template),
         questions,
     });
-    const secondsLeft = useCountdown(attempt?.ends_at ? Date.parse(attempt.ends_at) : null);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const secondsLeft = useCountdown(attempt ? getQuestionDeadline(attempt, template, currentIndex) : null);
     const [openDialog, setOpenDialog] = useState<ExamDialog>(null);
 
     if (loadError) {
@@ -70,6 +75,10 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
     if (!attempt) return <WritingExamRoomSkeleton />;
 
     const isTimeUp = secondsLeft === 0;
+    const isLastQuestion = currentIndex === questions.length - 1;
+    // Part tính giờ từng câu: hết giờ câu đang xem chưa phải hết giờ cả Part, trừ khi là câu cuối
+    const isPartTimeUp = isTimeUp && (!template.response_sec || isLastQuestion);
+    const rangeLabel = formatQuestionRange(template);
     const question = questions[currentIndex];
     const keywords = question.keywords ?? [];
     const answer = answers[currentIndex] ?? '';
@@ -81,7 +90,8 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
 
     const handleSubmit = async () => {
         // Lỗi hiện ở trạng thái lưu trên header, ở lại phòng để thử nộp lại
-        if (await submit()) router.push('/writing');
+        if (!(await submit())) return;
+        router.push(nextPartTemplateId ? buildTestHref('writing', exam.id, attempt.mode, nextPartTemplateId) : '/writing');
     };
 
     return (
@@ -89,6 +99,8 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
             <WritingExamHeader
                 title={exam.title}
                 mode={attempt.mode}
+                template={template}
+                questionNumber={question.number}
                 secondsLeft={secondsLeft}
                 saveStatus={saveStatus}
                 savedAt={savedAt}
@@ -96,17 +108,29 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
                 onExit={() => setOpenDialog('exit')}
             />
 
-            <QuestionNavigator answers={answers} currentIndex={currentIndex} onSelect={setCurrentIndex} />
+            <QuestionNavigator
+                answers={answers}
+                partNo={template.part_no}
+                firstNumber={template.q_from}
+                currentIndex={currentIndex}
+                onSelect={setCurrentIndex}
+            />
 
             <main className="items-start gap-6 grid grid-cols-1 lg:grid-cols-12">
-                {/* Stimulus: directions + picture + keywords */}
+                {/* Stimulus: directions + picture/email/essay */}
                 <div className="flex flex-col gap-4 lg:col-span-6">
-                    <DirectionsCard questionNumber={question.number} />
-                    <PictureStimulus
-                        question={question}
-                        total={questions.length}
-                        keywordUsages={keywordUsages}
-                    />
+                    <DirectionsCard partNo={template.part_no} questionNumber={question.number} />
+                    {template.part_no === 1 ? (
+                        <PictureStimulus
+                            question={question}
+                            total={questions.length}
+                            keywordUsages={keywordUsages}
+                        />
+                    ) : template.part_no === 2 ? (
+                        <EmailStimulus question={question} email={question.stimulus ?? part.part.context} />
+                    ) : (
+                        <EssayStimulus question={question} context={question.stimulus ?? part.part.context} />
+                    )}
                 </div>
 
                 {/* Response editor & navigation */}
@@ -114,6 +138,7 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
                     <ResponseEditor
                         // Đổi câu → reset lịch sử Undo/Redo của câu trước
                         key={question.id}
+                        partNo={template.part_no}
                         questionNumber={question.number}
                         value={answer}
                         onChange={(value) => updateAnswer(currentIndex, value)}
@@ -122,6 +147,9 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
                         isLocked={isTimeUp}
                     />
                     <ExamNavigation
+                        partNo={template.part_no}
+                        rangeLabel={rangeLabel}
+                        timeUpLabel={template.response_sec ? `Câu ${question.number}` : rangeLabel}
                         currentIndex={currentIndex}
                         totalQuestions={questions.length}
                         isTimeUp={isTimeUp}
@@ -136,13 +164,17 @@ export default function WritingExamRoom({ exam, part, mode }: WritingExamRoomPro
                 open={openDialog === 'submit'}
                 onOpenChange={handleDialogChange('submit')}
                 answers={answers}
-                isTimeUp={isTimeUp}
+                firstNumber={template.q_from}
+                rangeLabel={rangeLabel}
+                hasNextPart={nextPartTemplateId !== null}
+                isTimeUp={isPartTimeUp}
                 onConfirm={handleSubmit}
             />
             <ExitExamDialog
                 open={openDialog === 'exit'}
                 onOpenChange={handleDialogChange('exit')}
                 title={exam.title}
+                partNo={template.part_no}
                 answeredCount={answeredCount}
                 totalQuestions={questions.length}
                 onConfirm={() => router.push('/writing')}

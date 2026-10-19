@@ -17,6 +17,7 @@ interface ExitExamDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     title: string;
+    partNo: number;
     answeredCount: number;
     totalQuestions: number;
     onConfirm: () => void;
@@ -26,7 +27,8 @@ export default function ExitExamDialog({
     open,
     onOpenChange,
     title,
-    answeredCount, 
+    partNo,
+    answeredCount,
     totalQuestions,
     onConfirm,
 }: ExitExamDialogProps) {
@@ -48,7 +50,7 @@ export default function ExitExamDialog({
                     <strong className="font-semibold tabular-nums text-main">
                         {answeredCount}/{totalQuestions}
                     </strong>{' '}
-                    câu nhóm 1
+                    câu nhóm {partNo}
                 </p>
 
                 <AlertDialogFooter className="bg-sub1/40 border-sub2/20">

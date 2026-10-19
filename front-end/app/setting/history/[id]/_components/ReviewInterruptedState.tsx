@@ -36,7 +36,7 @@ export default function ReviewInterruptedState({ row }: ReviewInterruptedStatePr
 
             <div className="flex flex-wrap gap-3">
                 <Link
-                    href={buildTestHref(exam.skill, exam.id, attempt.mode)}
+                    href={buildTestHref(exam.skill, exam.id, attempt.mode, attempt.part_template_id)}
                     className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}
                 >
                     <LuPlay className="size-4" aria-hidden="true" />

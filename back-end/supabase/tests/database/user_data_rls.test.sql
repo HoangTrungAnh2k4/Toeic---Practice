@@ -1,6 +1,6 @@
 -- Owner-only access to attempts, responses, annotations, bookmarks.
 begin;
-select plan(11);
+select plan(12);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
@@ -27,6 +27,15 @@ select is(
   (select ends_at - started_at from public.attempts where id = '40000000-0000-0000-0000-000000000002'),
   interval '480 seconds',
   'ends_at is derived from the part section time'
+);
+
+insert into public.attempts (id, user_id, exam_id, part_template_id, mode) values
+  ('40000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', 7, 'timed');
+
+select is(
+  (select ends_at - started_at from public.attempts where id = '40000000-0000-0000-0000-000000000003'),
+  interval '1200 seconds',
+  'ends_at sums the question times when a part has no shared section time'
 );
 
 set local role authenticated;

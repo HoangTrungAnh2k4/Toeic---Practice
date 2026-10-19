@@ -17,9 +17,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useTextHistory } from '../_lib/useTextHistory';
 import { KeywordStatus, RequiredKeyword } from '../types';
-import { countSentences, countWords, OPTIMAL_WORD_RANGE } from '../utils';
+import { countSentences, countWords, ESSAY_MIN_WORDS, OPTIMAL_WORD_RANGE } from '../utils';
 
 interface ResponseEditorProps {
+    /** Part 1 viết một câu với từ khóa bắt buộc; Part 3 là bài luận có mục tiêu số từ; Part 2 là đoạn văn tự do. */
+    partNo: number;
     questionNumber: number;
     value: string;
     onChange: (value: string) => void;
@@ -59,6 +61,7 @@ function ToolbarButton({ icon: Icon, label, shortcut, disabled, onClick }: Toolb
 }
 
 export default function ResponseEditor({
+    partNo,
     questionNumber,
     value,
     onChange,
@@ -66,6 +69,8 @@ export default function ResponseEditor({
     keywordUsages,
     isLocked,
 }: ResponseEditorProps) {
+    const isSentence = partNo === 1;
+    const isEssay = partNo === 3;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [notice, setNotice] = useState<string | null>(null);
     const { commit, undo, redo, canUndo, canRedo } = useTextHistory(value, onChange);
@@ -78,6 +83,7 @@ export default function ResponseEditor({
     const wordCount = countWords(value);
     const sentenceCount = countSentences(value);
     const isWordCountOptimal = wordCount >= OPTIMAL_WORD_RANGE.min && wordCount <= OPTIMAL_WORD_RANGE.max;
+    const isEssayLengthMet = wordCount >= ESSAY_MIN_WORDS;
 
     const getSelection = () => {
         const el = textareaRef.current;
@@ -156,16 +162,18 @@ export default function ResponseEditor({
                     <ToolbarButton icon={LuUndo2} label="Undo" shortcut="Ctrl+Z" disabled={isLocked || !canUndo} onClick={() => withFocus(undo)} />
                     <ToolbarButton icon={LuRedo2} label="Redo" shortcut="Ctrl+Y" disabled={isLocked || !canRedo} onClick={() => withFocus(redo)} />
                 </div>
-                <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-semibold text-[11px]', statusClass)}>
-                    <StatusIcon className="size-3.5" aria-hidden="true" />
-                    {usedCount}/{keywords.length} từ khóa
-                </span>
+                {isSentence && (
+                    <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-semibold text-[11px]', statusClass)}>
+                        <StatusIcon className="size-3.5" aria-hidden="true" />
+                        {usedCount}/{keywords.length} từ khóa
+                    </span>
+                )}
             </div>
 
             {/* Response area */}
             <div className="flex flex-col gap-3 p-4 sm:p-5">
                 <label htmlFor={textareaId} className="font-semibold text-subText text-xs uppercase tracking-wider">
-                    Your Response — một câu hoàn chỉnh
+                    {isSentence ? 'Your Response — một câu hoàn chỉnh' : 'Your Response'}
                 </label>
                 <Textarea
                     ref={textareaRef}
@@ -180,10 +188,13 @@ export default function ResponseEditor({
                     autoCapitalize="none"
                     autoComplete="off"
                     placeholder="Nhập câu trả lời của bạn tại đây..."
-                    className="bg-white read-only:bg-sub1/40 p-4 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 min-h-48 text-main md:text-base text-base leading-relaxed resize-y placeholder:text-sub2"
+                    className={cn(
+                        'bg-white read-only:bg-sub1/40 p-4 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 text-main md:text-base text-base leading-relaxed resize-y placeholder:text-sub2',
+                        isSentence ? 'min-h-48' : 'min-h-96',
+                    )}
                 />
 
-                {sentenceCount > 1 && (
+                {isSentence && sentenceCount > 1 && (
                     <p className="flex items-start gap-2 bg-sub3/15 p-3 border border-sub3/50 rounded-lg text-main text-xs leading-relaxed">
                         <LuTriangleAlert className="mt-0.5 size-4 text-main shrink-0" aria-hidden="true" />
                         <span>
@@ -207,9 +218,23 @@ export default function ResponseEditor({
                     <span className="flex items-baseline gap-1.5">
                         Số từ:
                         <strong className="font-bold tabular-nums text-main text-base">{wordCount}</strong>
-                        <span className={cn(isWordCountOptimal ? 'text-sub2' : 'text-subText')}>
-                            (tối ưu {OPTIMAL_WORD_RANGE.min}–{OPTIMAL_WORD_RANGE.max})
-                        </span>
+                        {isSentence && (
+                            <span className={cn(isWordCountOptimal ? 'text-sub2' : 'text-subText')}>
+                                (tối ưu {OPTIMAL_WORD_RANGE.min}–{OPTIMAL_WORD_RANGE.max})
+                            </span>
+                        )}
+                        {isEssay && (
+                            <span className="inline-flex items-center gap-1 self-center">
+                                {isEssayLengthMet ? (
+                                    <>
+                                        <LuCircleCheck className="size-3.5 text-main" aria-hidden="true" />
+                                        <span className="font-semibold text-main">đạt mục tiêu ≥ {ESSAY_MIN_WORDS}</span>
+                                    </>
+                                ) : (
+                                    `/ mục tiêu ≥ ${ESSAY_MIN_WORDS} (còn ${ESSAY_MIN_WORDS - wordCount})`
+                                )}
+                            </span>
+                        )}
                     </span>
                     <span className="bg-sub2/40 w-px h-4" aria-hidden="true" />
                     <span>
@@ -217,26 +242,28 @@ export default function ResponseEditor({
                     </span>
                 </div>
 
-                <ul className="flex flex-wrap items-center gap-1.5" aria-label="Từ khóa đã phát hiện">
-                    {keywords.map((keyword, index) => {
-                        const usage = keywordUsages[index];
-                        return (
-                            <li
-                                key={keyword.word}
-                                className={cn(
-                                    'px-2 py-0.5 rounded font-semibold text-[11px]',
-                                    usage ? 'bg-sub2 text-white' : 'bg-white text-subText border border-dashed border-sub2/60',
-                                )}
-                            >
-                                {usage
-                                    ? usage.toLowerCase() === keyword.word
-                                        ? `"${usage}"`
-                                        : `"${usage}" (${keyword.word})`
-                                    : `Thiếu "${keyword.word}"`}
-                            </li>
-                        );
-                    })}
-                </ul>
+                {isSentence && (
+                    <ul className="flex flex-wrap items-center gap-1.5" aria-label="Từ khóa đã phát hiện">
+                        {keywords.map((keyword, index) => {
+                            const usage = keywordUsages[index];
+                            return (
+                                <li
+                                    key={keyword.word}
+                                    className={cn(
+                                        'px-2 py-0.5 rounded font-semibold text-[11px]',
+                                        usage ? 'bg-sub2 text-white' : 'bg-white text-subText border border-dashed border-sub2/60',
+                                    )}
+                                >
+                                    {usage
+                                        ? usage.toLowerCase() === keyword.word
+                                            ? `"${usage}"`
+                                            : `"${usage}" (${keyword.word})`
+                                        : `Thiếu "${keyword.word}"`}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
             </div>
         </section>
     );

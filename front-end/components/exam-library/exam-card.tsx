@@ -236,7 +236,7 @@ function InProgressCard({ skill, entry, onToggleBookmark }: ExamCardProps) {
             }
             footer={
                 <Link
-                    href={buildTestHref(skill, exam.id, attempt?.mode)}
+                    href={buildTestHref(skill, exam.id, attempt?.mode, attempt?.part_template_id)}
                     className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 w-full')}
                 >
                     <LuStepForward className="size-4" aria-hidden="true" />

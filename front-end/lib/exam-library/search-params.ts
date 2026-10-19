@@ -74,9 +74,10 @@ export function buildLibraryHref(skill: Skill, query: LibraryQuery, patch: Parti
     return search ? `/${skill}?${search}` : `/${skill}`;
 }
 
-/** Link vào phòng thi của đề; bỏ trống `mode` = thi thử chuẩn CBT. */
-export function buildTestHref(skill: Skill, examId: string, mode?: AttemptMode) {
+/** Link vào phòng thi của đề; bỏ trống `mode` = thi thử chuẩn CBT, bỏ trống `partTemplateId` = Part đầu tiên. */
+export function buildTestHref(skill: Skill, examId: string, mode?: AttemptMode, partTemplateId?: number | null) {
     const params = new URLSearchParams({ id: examId });
     if (mode) params.set('mode', mode);
+    if (partTemplateId) params.set('part', String(partTemplateId));
     return `/${skill}/test?${params}`;
 }

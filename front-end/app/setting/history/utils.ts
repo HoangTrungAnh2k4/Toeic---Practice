@@ -76,7 +76,11 @@ export const getAttemptHref = (attemptId: string, annotationId?: string) =>
 export function getAttemptAction({ attempt, exam }: HistoryRow) {
     switch (STATUS_GROUP[attempt.status]) {
         case 'in_progress':
-            return { label: 'Tiếp tục làm bài', href: buildTestHref(exam.skill, exam.id, attempt.mode), primary: true };
+            return {
+                label: 'Tiếp tục làm bài',
+                href: buildTestHref(exam.skill, exam.id, attempt.mode, attempt.part_template_id),
+                primary: true,
+            };
         case 'scored':
             return { label: 'Xem lại chi tiết', href: getAttemptHref(attempt.id), primary: true };
         case 'pending':

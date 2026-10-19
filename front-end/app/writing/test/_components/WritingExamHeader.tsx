@@ -1,5 +1,5 @@
 import { LuCheck, LuCloudAlert, LuLoaderCircle, LuLock, LuLogOut, LuPenLine, LuSave, LuTimer } from 'react-icons/lu';
-import type { AttemptMode } from '@/lib/domain/types';
+import type { AttemptMode, PartTemplate } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
 import { SaveStatus } from '../types';
 import { EXAM_SECTIONS, formatTime, TIME_WARNING_SECONDS } from '../utils';
@@ -7,6 +7,9 @@ import { EXAM_SECTIONS, formatTime, TIME_WARNING_SECONDS } from '../utils';
 interface WritingExamHeaderProps {
     title: string;
     mode: AttemptMode;
+    template: PartTemplate;
+    /** Câu đang làm; Part tính giờ từng câu hiển thị đồng hồ của câu này. */
+    questionNumber: number;
     /** `null` = không giới hạn giờ (chế độ có hướng dẫn). */
     secondsLeft: number | null;
     saveStatus: SaveStatus;
@@ -14,8 +17,6 @@ interface WritingExamHeaderProps {
     isRestored: boolean;
     onExit: () => void;
 }
-
-const ACTIVE_SECTION_INDEX = 0;
 
 const MODE_LABEL: Record<AttemptMode, string> = {
     cbt: 'Thi thử chuẩn CBT',
@@ -60,6 +61,8 @@ function SaveIndicator({ saveStatus, savedAt, isRestored }: Pick<WritingExamHead
 export default function WritingExamHeader({
     title,
     mode,
+    template,
+    questionNumber,
     secondsLeft,
     saveStatus,
     savedAt,
@@ -70,6 +73,15 @@ export default function WritingExamHeader({
     const isTimeUp = secondsLeft === 0;
     const isWarning = !isUntimed && !isTimeUp && secondsLeft <= TIME_WARNING_SECONDS;
     const timeLabel = isUntimed ? 'Không giới hạn' : formatTime(secondsLeft);
+    const activeSectionIndex = template.part_no - 1;
+    const { q_from, q_to, section_sec, response_sec } = template;
+    const timerScope = section_sec ? `Q${q_from}–${q_to}` : `Q${questionNumber}`;
+    const questionMin = (response_sec?.[questionNumber - q_from] ?? 0) / 60;
+    const timeNote = section_sec
+        ? `${section_sec / 60} phút dùng chung cho ${q_to - q_from + 1} câu`
+        : q_from === q_to
+          ? `${questionMin} phút cho câu này`
+          : `${questionMin} phút mỗi câu, giờ dư của câu trước được cộng dồn`;
 
     return (
         <header className="shadow-sm border border-sub2/30 rounded-xl w-full overflow-hidden">
@@ -125,8 +137,8 @@ export default function WritingExamHeader({
                 <div className="flex md:flex-row flex-col justify-between items-center gap-4">
                     <ol aria-label="Các nhóm câu hỏi" className="flex items-center gap-2 pb-1 md:pb-0 w-full md:w-auto overflow-x-auto text-xs">
                         {EXAM_SECTIONS.map((section, index) => {
-                            const isActive = index === ACTIVE_SECTION_INDEX;
-                            const isDone = index < ACTIVE_SECTION_INDEX;
+                            const isActive = index === activeSectionIndex;
+                            const isDone = index < activeSectionIndex;
                             return (
                                 <li key={section.id} className="flex items-center gap-2 shrink-0">
                                     {index > 0 && <span className="bg-sub2/60 w-4 h-px" aria-hidden="true" />}
@@ -154,14 +166,14 @@ export default function WritingExamHeader({
                     <div className="flex justify-between md:justify-end items-center gap-4 w-full md:w-auto">
                         <div className="flex flex-col text-left md:text-right">
                             <span className="font-semibold text-[11px] text-main uppercase tracking-wider">
-                                Thời gian còn lại (Q1–5)
+                                Thời gian còn lại ({timerScope})
                             </span>
                             <span className="text-subText text-xs">
                                 {isUntimed
                                     ? 'Tự do thời gian, có thể làm lại nhiều lần'
                                     : isTimeUp
                                       ? 'Đã hết giờ — bài làm bị khóa'
-                                      : '8 phút dùng chung cho 5 câu'}
+                                      : timeNote}
                             </span>
                         </div>
 

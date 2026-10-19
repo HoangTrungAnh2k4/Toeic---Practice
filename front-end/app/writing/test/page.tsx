@@ -16,15 +16,25 @@ interface WritingTestPageProps {
 }
 
 async function WritingExamRoomContent({ searchParams }: WritingTestPageProps) {
-    const { examId, mode } = parseRoomParams(await searchParams);
+    const { examId, mode, partTemplateId } = parseRoomParams(await searchParams);
     if (!examId) redirect('/writing');
 
     const room = await getExamRoom('writing', examId, await createServerSupabase());
-    // Phòng thi hiện mới có nhóm Q1-5 (Part 1); Q6-8 làm sau
-    const part = room?.parts.find((item) => item.template.part_no === 1);
+    const parts = room?.parts ?? [];
+    const index = partTemplateId === null ? 0 : parts.findIndex((item) => item.template.id === partTemplateId);
+    const part = parts[index];
     if (!room || !part) notFound();
 
-    return <WritingExamRoomLoader exam={room.exam} part={part} mode={mode} />;
+    return (
+        <WritingExamRoomLoader
+            // Mỗi Part một lượt làm: sang Part mới phải mount lại phòng thi để tạo/khôi phục attempt của Part đó
+            key={part.template.id}
+            exam={room.exam}
+            part={part}
+            nextPartTemplateId={parts[index + 1]?.template.id ?? null}
+            mode={mode}
+        />
+    );
 }
 
 export default function WritingTestPage({ searchParams }: WritingTestPageProps) {
