@@ -155,14 +155,14 @@ isOneToOne: false
                   ]
                 },"exams": {
                   Row: {
-                    "code": string,"created_at": string,"created_by": string | null,"description": string | null,"edition": number,"id": string,"is_verified": boolean,"published_at": string | null,"review_note": string | null,"skill": Database["public"]['Enums']["skill"],"source": Database["public"]['Enums']["exam_source"],"status": Database["public"]['Enums']["exam_status"],"tags": (string)[],"target_level": number | null,"title": string,"topic": string,"updated_at": string
+                    "code": string,"created_at": string,"created_by": string | null,"edition": number,"id": string,"is_verified": boolean,"published_at": string | null,"review_note": string | null,"skill": Database["public"]['Enums']["skill"],"source": Database["public"]['Enums']["exam_source"],"status": Database["public"]['Enums']["exam_status"],"target_level": number | null,"title": string,"topic": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "code": string,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"edition": number,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill": Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"tags"?: (string)[],"target_level"?: number | null,"title": string,"topic": string,"updated_at"?: string
+                    "code": string,"created_at"?: string,"created_by"?: string | null,"edition": number,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill": Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"target_level"?: number | null,"title": string,"topic": string,"updated_at"?: string
                   }
                   Update: {
-                    "code"?: string,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"edition"?: number,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill"?: Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"tags"?: (string)[],"target_level"?: number | null,"title"?: string,"topic"?: string,"updated_at"?: string
+                    "code"?: string,"created_at"?: string,"created_by"?: string | null,"edition"?: number,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill"?: Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"target_level"?: number | null,"title"?: string,"topic"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -267,14 +267,14 @@ isOneToOne: false
                   ]
                 },"questions": {
                   Row: {
-                    "audio_path": string | null,"exam_part_id": string,"hint": string | null,"id": string,"image_alt": string | null,"image_path": string | null,"keywords": Json | null,"number": number,"prompt": string,"sample_answer": string | null,"stimulus": string | null
+                    "audio_path": string | null,"exam_part_id": string,"id": string,"image_alt": string | null,"image_path": string | null,"keywords": Json | null,"number": number,"prompt": string,"sample_answer": string | null,"stimulus": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "audio_path"?: string | null,"exam_part_id": string,"hint"?: string | null,"id"?: string,"image_alt"?: string | null,"image_path"?: string | null,"keywords"?: Json | null,"number": number,"prompt": string,"sample_answer"?: string | null,"stimulus"?: string | null
+                    "audio_path"?: string | null,"exam_part_id": string,"id"?: string,"image_alt"?: string | null,"image_path"?: string | null,"keywords"?: Json | null,"number": number,"prompt": string,"sample_answer"?: string | null,"stimulus"?: string | null
                   }
                   Update: {
-                    "audio_path"?: string | null,"exam_part_id"?: string,"hint"?: string | null,"id"?: string,"image_alt"?: string | null,"image_path"?: string | null,"keywords"?: Json | null,"number"?: number,"prompt"?: string,"sample_answer"?: string | null,"stimulus"?: string | null
+                    "audio_path"?: string | null,"exam_part_id"?: string,"id"?: string,"image_alt"?: string | null,"image_path"?: string | null,"keywords"?: Json | null,"number"?: number,"prompt"?: string,"sample_answer"?: string | null,"stimulus"?: string | null
                   }
                   Relationships: [
                     {

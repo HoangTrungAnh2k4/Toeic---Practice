@@ -1,12 +1,12 @@
 'use client';
 
-import { type FieldErrors, useFormContext } from 'react-hook-form';
+import { Controller, type FieldErrors, useFormContext } from 'react-hook-form';
 import { LuCircleAlert } from 'react-icons/lu';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { PartTemplate } from '@/lib/domain/types';
 import type { SpeakingExamInput, SpeakingExamValues } from '../../_lib/examSchema';
 import FormField from './FormField';
+import ImageUploadField from './ImageUploadField';
 
 /** Nhãn ô nhập riêng theo Part; Part không có `context` thì không hiện ô ngữ liệu chung. */
 const PART_COPY: Record<number, { prompt: string; promptHint?: string; context?: { label: string; description: string } }> = {
@@ -39,7 +39,7 @@ interface PartSectionProps {
 }
 
 export default function PartSection({ template, index }: PartSectionProps) {
-    const { register, getFieldState, formState, getValues } = useFormContext<
+    const { register, control, getFieldState, formState, getValues } = useFormContext<
         SpeakingExamInput,
         unknown,
         SpeakingExamValues
@@ -109,14 +109,23 @@ export default function PartSection({ template, index }: PartSectionProps) {
 
                         {template.part_no === 2 && (
                             <>
-                                <FormField
-                                    label="Đường dẫn ảnh"
-                                    required
-                                    description="Key hoặc URL ảnh trên Cloudflare."
-                                    error={errorOf(`${name}.image_path`)}
-                                >
-                                    {(control) => <Input {...control} {...register(`${name}.image_path`)} />}
-                                </FormField>
+                                <Controller
+                                    name={`${name}.image`}
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                        <FormField label="Ảnh" required error={fieldState.error?.message}>
+                                            {(controlProps) => (
+                                                <ImageUploadField
+                                                    control={controlProps}
+                                                    value={field.value}
+                                                    alt={`Ảnh câu ${question.number}`}
+                                                    onChange={field.onChange}
+                                                    onBlur={field.onBlur}
+                                                />
+                                            )}
+                                        </FormField>
+                                    )}
+                                />
                                 <FormField
                                     label="Mô tả ảnh"
                                     required
@@ -128,14 +137,9 @@ export default function PartSection({ template, index }: PartSectionProps) {
                             </>
                         )}
 
-                        <div className="gap-4 grid sm:grid-cols-2">
-                            <FormField label="Gợi ý" error={errorOf(`${name}.hint`)}>
-                                {(control) => <Input {...control} {...register(`${name}.hint`)} />}
-                            </FormField>
-                            <FormField label="Bài mẫu" error={errorOf(`${name}.sample_answer`)}>
-                                {(control) => <Textarea {...control} rows={2} {...register(`${name}.sample_answer`)} />}
-                            </FormField>
-                        </div>
+                        <FormField label="Bài mẫu" error={errorOf(`${name}.sample_answer`)}>
+                            {(control) => <Textarea {...control} rows={2} {...register(`${name}.sample_answer`)} />}
+                        </FormField>
                     </fieldset>
                 );
             })}

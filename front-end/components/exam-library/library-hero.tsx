@@ -53,11 +53,6 @@ export function LibraryHero({ skill, exams }: LibraryHeroProps) {
                                 >
                                     {recommended.title}
                                 </h2>
-                                {recommended.description && (
-                                    <p className="max-w-2xl text-sub1 text-sm leading-relaxed">
-                                        {recommended.description}
-                                    </p>
-                                )}
                             </div>
 
                             <ul className="flex flex-wrap gap-x-4 gap-y-2 font-medium text-sub1 text-xs">

@@ -17,11 +17,6 @@ const nextConfig: NextConfig = {
     async redirects() {
         return [
             {
-                source: '/',
-                destination: '/overview',
-                permanent: false,
-            },
-            {
                 source: '/history/:path*',
                 destination: '/setting/history/:path*',
                 permanent: true,

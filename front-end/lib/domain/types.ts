@@ -78,8 +78,6 @@ export interface Exam {
     is_verified: boolean;
     topic: string;
     target_level: number | null;
-    description: string | null;
-    tags: string[];
     /** Ghi chú thẩm định cho admin: thiếu ảnh, cần kiểm tra audio... */
     review_note: string | null;
     created_by: string | null;
@@ -127,7 +125,6 @@ export interface Question {
     /** Từ khoá bắt buộc (Writing Q1-5). */
     keywords: RequiredKeyword[] | null;
     sample_answer: string | null;
-    hint: string | null;
 }
 
 export interface Attempt {

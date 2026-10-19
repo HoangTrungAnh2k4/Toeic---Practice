@@ -8,10 +8,9 @@ import { LuCircleAlert, LuSave } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { TOPIC_OPTIONS } from '@/lib/exam-library/options';
-import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { toExamFormData } from '../../_lib/examFormData';
 import {
     emptySpeakingExam,
     SPEAKING_PART_TEMPLATES,
@@ -31,10 +30,13 @@ const LEVEL_ITEMS = [
     ...Array.from({ length: 9 }, (_, index) => ({ value: String(index + 1), label: `Level ${index + 1}` })),
 ];
 
-/** Lỗi Postgres từ `create_exam` → thông báo cho admin. */
+/** Mã lỗi từ `POST /api/exams` → thông báo cho admin. */
 const SAVE_ERROR: Record<string, string> = {
-    '42501': 'Tài khoản của bạn không có quyền tạo đề.',
-    '22023': 'Cấu trúc đề không khớp 5 Part chuẩn. Vui lòng tải lại trang và thử lại.',
+    unauthorized: 'Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.',
+    forbidden: 'Tài khoản của bạn không có quyền tạo đề.',
+    invalid_structure: 'Cấu trúc đề không khớp 5 Part chuẩn. Vui lòng tải lại trang và thử lại.',
+    invalid_body: 'Dữ liệu đề không hợp lệ. Vui lòng kiểm tra lại các ô và ảnh.',
+    upload_failed: 'Không tải được ảnh lên nên đề chưa được tạo. Vui lòng thử lại.',
 };
 
 export default function ExamBuilderForm() {
@@ -46,11 +48,11 @@ export default function ExamBuilderForm() {
     const { register, control, formState } = form;
 
     const onSubmit = form.handleSubmit(async (values) => {
-        const { error } = await supabase.rpc('create_exam', { payload: { ...values, skill: 'speaking' } });
-        if (!error) return router.push(`${EXAM_MANAGEMENT_PATH}?created=${encodeURIComponent(values.code)}`);
+        const response = await fetch('/api/exams', { method: 'POST', body: toExamFormData(values) }).catch(() => null);
+        const body = await response?.json().catch(() => null);
+        if (response?.ok) return router.push(`${EXAM_MANAGEMENT_PATH}?created=${body.id}`);
 
-        if (error.code === '23505') return form.setError('code', { message: 'Mã đề đã tồn tại' }, { shouldFocus: true });
-        form.setError('root', { message: SAVE_ERROR[error.code] ?? 'Không lưu được đề. Vui lòng thử lại.' });
+        form.setError('root', { message: SAVE_ERROR[body?.error] ?? 'Không lưu được đề. Vui lòng thử lại.' });
     });
 
     return (
@@ -64,14 +66,9 @@ export default function ExamBuilderForm() {
                         Thông tin chung
                     </h2>
 
-                    <div className="gap-4 grid sm:grid-cols-[minmax(0,12rem)_1fr]">
-                        <FormField label="Mã đề" required error={formState.errors.code?.message}>
-                            {(controlProps) => <Input {...controlProps} placeholder="ETS SP-11" {...register('code')} />}
-                        </FormField>
-                        <FormField label="Tiêu đề" required error={formState.errors.title?.message}>
-                            {(controlProps) => <Input {...controlProps} {...register('title')} />}
-                        </FormField>
-                    </div>
+                    <FormField label="Tiêu đề" required error={formState.errors.title?.message}>
+                        {(controlProps) => <Input {...controlProps} {...register('title')} />}
+                    </FormField>
 
                     <div className="gap-4 grid sm:grid-cols-3">
                         <Controller
@@ -135,33 +132,6 @@ export default function ExamBuilderForm() {
                             )}
                         </FormField>
                     </div>
-
-                    <FormField label="Mô tả" error={formState.errors.description?.message}>
-                        {(controlProps) => <Textarea {...controlProps} rows={2} {...register('description')} />}
-                    </FormField>
-
-                    <Controller
-                        name="tags"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <FormField
-                                label="Tag"
-                                description="Cách nhau bởi dấu phẩy, ví dụ: Part2-Office, Part5-Opinion."
-                                error={fieldState.error?.message ?? fieldState.error?.root?.message}
-                            >
-                                {(controlProps) => (
-                                    <Input
-                                        {...controlProps}
-                                        ref={field.ref}
-                                        name={field.name}
-                                        onBlur={field.onBlur}
-                                        value={field.value.join(',')}
-                                        onChange={(event) => field.onChange(event.target.value.split(','))}
-                                    />
-                                )}
-                            </FormField>
-                        )}
-                    />
                 </section>
 
                 {SPEAKING_PART_TEMPLATES.map((template, index) => (

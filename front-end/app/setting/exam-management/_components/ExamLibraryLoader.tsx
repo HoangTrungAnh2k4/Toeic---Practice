@@ -13,14 +13,15 @@ type LoadState =
     | { status: 'error' }
     | { status: 'ready'; exams: ExamLibraryItem[]; notice: string };
 
-/** Form tạo đề chuyển về đây kèm `?created=<mã đề>`; đọc một lần rồi xoá khỏi URL để tải lại không báo lại. */
-function takeCreatedNotice(): string {
+/** Form tạo đề chuyển về đây kèm `?created=<id đề>`; đọc một lần rồi xoá khỏi URL để tải lại không báo lại. */
+function takeCreatedNotice(exams: ExamLibraryItem[]): string {
     const url = new URL(window.location.href);
-    const code = url.searchParams.get('created');
-    if (!code) return '';
+    const id = url.searchParams.get('created');
+    if (!id) return '';
     url.searchParams.delete('created');
     window.history.replaceState(null, '', url);
-    return `Đã tạo đề ${code} ở trạng thái nháp.`;
+    const code = exams.find((exam) => exam.id === id)?.code;
+    return code ? `Đã tạo đề ${code} ở trạng thái nháp.` : '';
 }
 
 export default function ExamLibraryLoader() {
@@ -28,7 +29,7 @@ export default function ExamLibraryLoader() {
 
     const load = useCallback(() => {
         getExamLibrary()
-            .then((exams) => setState({ status: 'ready', exams, notice: takeCreatedNotice() }))
+            .then((exams) => setState({ status: 'ready', exams, notice: takeCreatedNotice(exams) }))
             .catch(() => setState({ status: 'error' }));
     }, []);
 

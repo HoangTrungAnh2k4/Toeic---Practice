@@ -35,7 +35,7 @@ export async function listQuestions(examId: string, db: SupabaseClient<Database>
         .from('questions')
         // inner join chỉ để lọc theo đề, không lấy cột nào của exam_parts
         .select(
-            'id, exam_part_id, number, prompt, stimulus, image_path, image_alt, audio_path, keywords, sample_answer, hint, exam_parts!inner()',
+            'id, exam_part_id, number, prompt, stimulus, image_path, image_alt, audio_path, keywords, sample_answer, exam_parts!inner()',
         )
         .eq('exam_parts.exam_id', examId)
         .order('number');

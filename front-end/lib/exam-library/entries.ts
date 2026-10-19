@@ -91,7 +91,7 @@ export function filterEntries(entries: LibraryEntry[], { tab, searchQuery, targe
         if (status !== 'all' && user.progress !== status) return false;
         if (topic !== 'all' && exam.topic !== topic) return false;
         if (!keyword) return true;
-        return [exam.code, exam.title, ...exam.tags].some((field) => field.toLowerCase().includes(keyword));
+        return [exam.code, exam.title].some((field) => field.toLowerCase().includes(keyword));
     });
 }
 

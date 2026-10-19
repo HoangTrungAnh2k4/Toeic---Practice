@@ -56,20 +56,36 @@ export function presignUrl({ method, url, headers = {}, accessKeyId, secretAcces
     return `${url.origin}${url.pathname}?${query}&X-Amz-Signature=${signature}`;
 }
 
-/** URL PUT lên bucket R2, hết hạn sau 5 phút; ký cả `content-length` để client không upload quá kích thước đã khai. */
-export function presignR2Put(key: string, contentLength: number) {
+/** URL ký sẵn tới object `key` trong bucket R2, hết hạn sau 5 phút. */
+function presignR2(method: 'PUT' | 'DELETE', key: string, headers?: Record<string, string>) {
     const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET } = process.env;
     if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET) {
         throw new Error('R2 env is not configured');
     }
     return presignUrl({
-        method: 'PUT',
+        method,
         url: new URL(`https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET}/${key}`),
-        headers: { 'content-length': String(contentLength) },
+        headers,
         accessKeyId: R2_ACCESS_KEY_ID,
         secretAccessKey: R2_SECRET_ACCESS_KEY,
         region: 'auto',
         expiresSec: 300,
         date: new Date(),
     });
+}
+
+/** Tải file lên R2 từ server; ký cả `content-length` để R2 từ chối body khác kích thước đã khai. */
+export async function putR2Object(key: string, file: Blob) {
+    const response = await fetch(presignR2('PUT', key, { 'content-length': String(file.size) }), {
+        method: 'PUT',
+        headers: { 'content-type': file.type },
+        body: file,
+        signal: AbortSignal.timeout(30_000),
+    });
+    if (!response.ok) throw new Error(`R2 PUT ${key} failed with ${response.status}`);
+}
+
+export async function deleteR2Object(key: string) {
+    const response = await fetch(presignR2('DELETE', key), { method: 'DELETE', signal: AbortSignal.timeout(30_000) });
+    if (!response.ok) throw new Error(`R2 DELETE ${key} failed with ${response.status}`);
 }

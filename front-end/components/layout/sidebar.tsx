@@ -43,9 +43,8 @@ export function Sidebar() {
         <>
             <MobileTopBar activeIndex={activeIndex} user={user} />
             <aside
-                className={`sidebar-root sticky top-0 z-10 hidden md:flex h-dvh shrink-0 flex-col self-start bg-main to-main transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
-                    collapsed ? 'w-20' : 'w-64'
-                }`}
+                className={`sidebar-root sticky top-0 z-10 hidden md:flex h-dvh shrink-0 flex-col self-start bg-main to-main transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${collapsed ? 'w-20' : 'w-64'
+                    }`}
             >
                 <style>{`
         @keyframes sidebar-in {
@@ -83,11 +82,10 @@ export function Sidebar() {
                         {/* Logo đầy đủ */}
                         <span
                             aria-hidden={collapsed}
-                            className={`absolute inset-0 transition-all duration-1000 ease-[cubic-bezier(0.34,1.4,0.64,1)] ${
-                                collapsed
-                                    ? 'pointer-events-none -translate-x-6 scale-75 opacity-0'
-                                    : 'translate-x-0 scale-100 opacity-100'
-                            }`}
+                            className={`absolute inset-0 transition-all duration-1000 ease-[cubic-bezier(0.34,1.4,0.64,1)] ${collapsed
+                                ? 'pointer-events-none -translate-x-6 scale-75 opacity-0'
+                                : 'translate-x-0 scale-100 opacity-100'
+                                }`}
                         >
                             <Image
                                 src="/img/logo.png"
@@ -101,11 +99,10 @@ export function Sidebar() {
                         {/* Logo thu gọn */}
                         <span
                             aria-hidden={!collapsed}
-                            className={`absolute inset-x-0 inset-y-1 transition-all duration-1000 ease-[cubic-bezier(0.34,1.4,0.64,1)] ${
-                                collapsed
-                                    ? 'translate-x-0 scale-100 rotate-0 opacity-100'
-                                    : 'pointer-events-none translate-x-6 scale-50 -rotate-12 opacity-0'
-                            }`}
+                            className={`absolute inset-x-0 inset-y-1 transition-all duration-1000 ease-[cubic-bezier(0.34,1.4,0.64,1)] ${collapsed
+                                ? 'translate-x-0 scale-100 rotate-0 opacity-100'
+                                : 'pointer-events-none translate-x-6 scale-50 -rotate-12 opacity-0'
+                                }`}
                         >
                             <Image
                                 src="/img/sub_logo.png"
@@ -151,9 +148,8 @@ function SidebarNav({ activeIndex, collapsed, onNavigate }: SidebarNavProps) {
             {/* Thanh trượt: pill sáng + 2 góc bo ngược (trên & dưới) nối liền với nội dung */}
             <div
                 aria-hidden
-                className={`pointer-events-none absolute -right-px left-1 top-0 h-16 rounded-l-full bg-canvas transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.4,0.64,1)] before:absolute before:-top-8 before:right-0 before:h-8 before:w-8 before:bg-[radial-gradient(circle_at_0_0,transparent_31.5px,var(--canvas)_32px)] before:content-[''] after:absolute after:-bottom-8 after:right-0 after:h-8 after:w-8 after:bg-[radial-gradient(circle_at_0_100%,transparent_31.5px,var(--canvas)_32px)] after:content-[''] ${
-                    activeIndex < 0 ? 'opacity-0' : 'opacity-100'
-                }`}
+                className={`pointer-events-none absolute -right-px left-2 top-0  h-16 rounded-l-full bg-canvas transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.4,0.64,1)] before:absolute before:-top-8 before:right-0 before:h-8 before:w-8 before:bg-[radial-gradient(circle_at_0_0,transparent_31.5px,var(--canvas)_32px)] before:content-[''] after:absolute after:-bottom-8 after:right-0 after:h-8 after:w-8 after:bg-[radial-gradient(circle_at_0_100%,transparent_31.5px,var(--canvas)_32px)] after:content-[''] ${activeIndex < 0 ? 'opacity-0' : 'opacity-100'
+                    }`}
                 style={{ transform: `translateY(${Math.max(activeIndex, 0) * ITEM_H}px)` }}
             />
 
@@ -173,22 +169,19 @@ function SidebarNav({ activeIndex, collapsed, onNavigate }: SidebarNavProps) {
                                 href={item.href}
                                 onClick={onNavigate}
                                 aria-current={active ? 'page' : undefined}
-                                className={`group relative z-10 flex h-16 items-center gap-4 transition-[padding] duration-500 ${!active ? 'hover:bg-white/10' : ''} ${
-                                    collapsed ? 'pl-6' : 'pl-9'
-                                }`}
+                                className={`group relative z-10 flex h-16 items-center gap-4 transition-[padding] duration-500 ${!active ? 'hover:bg-white/10' : ''} ${collapsed ? 'pl-6' : 'pl-9'
+                                    }`}
                             >
                                 <Icon
                                     // key đổi theo active để chạy lại animation "pop" mỗi lần được chọn
                                     key={active ? 'on' : 'off'}
-                                    className={`h-6 w-6 shrink-0 transition-all duration-300 group-hover:-rotate-12 group-hover:scale-110 ${
-                                        active ? 'text-black' : 'text-white'
-                                    }`}
+                                    className={`h-6 w-6 shrink-0 transition-all duration-300 group-hover:-rotate-12 group-hover:scale-110 ${active ? 'text-black' : 'text-white'
+                                        }`}
                                     style={active ? { animation: 'sidebar-pop 500ms ease-out both' } : undefined}
                                 />
                                 <span
-                                    className={`whitespace-nowrap text-base font-medium transition-all duration-300 group-hover:translate-x-1 ${
-                                        active ? 'text-black' : 'text-white'
-                                    } ${collapsed ? 'pointer-events-none -translate-x-3 opacity-0' : 'opacity-100'}`}
+                                    className={`whitespace-nowrap text-base font-medium transition-all duration-300 group-hover:translate-x-1 ${active ? 'text-black' : 'text-white'
+                                        } ${collapsed ? 'pointer-events-none -translate-x-3 opacity-0' : 'opacity-100'}`}
                                 >
                                     {item.label}
                                 </span>
@@ -220,7 +213,7 @@ function MobileTopBar({ activeIndex, user }: MobileTopBarProps) {
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger
                     aria-label="Mở menu điều hướng"
-                    className="flex justify-center items-center hover:bg-white/10 rounded-lg size-10 text-white focus-visible:outline-2 focus-visible:outline-sub3 cursor-pointer"
+                    className="flex justify-center items-center hover:bg-white/10 rounded-lg focus-visible:outline-2 focus-visible:outline-sub3 size-10 text-white cursor-pointer"
                 >
                     <LuMenu aria-hidden="true" className="size-6" />
                 </SheetTrigger>
@@ -238,7 +231,7 @@ function MobileTopBar({ activeIndex, user }: MobileTopBarProps) {
                         </div>
                         <SheetClose
                             aria-label="Đóng menu"
-                            className="flex justify-center items-center hover:bg-white/10 rounded-lg size-10 text-white focus-visible:outline-2 focus-visible:outline-sub3 cursor-pointer"
+                            className="flex justify-center items-center hover:bg-white/10 rounded-lg focus-visible:outline-2 focus-visible:outline-sub3 size-10 text-white cursor-pointer"
                         >
                             <LuX aria-hidden="true" className="size-5" />
                         </SheetClose>

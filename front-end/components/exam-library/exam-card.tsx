@@ -54,7 +54,7 @@ interface CardShellProps extends Pick<ExamCardProps, 'entry' | 'onToggleBookmark
     meta: ReactNode;
     footer: ReactNode;
     className?: string;
-    children: ReactNode;
+    children?: ReactNode;
 }
 
 function CardShell({ entry, onToggleBookmark, badge, badgeTone, meta, footer, className, children }: CardShellProps) {
@@ -157,20 +157,7 @@ function NotStartedCard({ skill, entry, isRecommended, onToggleBookmark }: ExamC
                     </div>
                 </>
             }
-        >
-            {exam.tags.length > 0 && (
-                <ul className="flex flex-wrap gap-1.5" aria-label="Chủ đề trong đề">
-                    {exam.tags.map((tag) => (
-                        <li key={tag} className="bg-sub1/60 px-1.5 py-0.5 rounded font-medium text-[11px] text-main">
-                            #{tag}
-                        </li>
-                    ))}
-                </ul>
-            )}
-            {exam.description && (
-                <p className="text-subText text-xs line-clamp-2 leading-relaxed">{exam.description}</p>
-            )}
-        </CardShell>
+        />
     );
 }
 

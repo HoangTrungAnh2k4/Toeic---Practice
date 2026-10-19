@@ -1,5 +1,5 @@
 begin;
-select plan(5);
+select plan(7);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
@@ -10,7 +10,7 @@ update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-00
 -- A complete speaking exam built from the part templates; tests mutate copies of it.
 create temp table fixture as
 select jsonb_build_object(
-  'skill', 'speaking', 'code', 'SP-T', 'title', 'Test', 'edition', 2026, 'topic', 'office', 'tags', '[]'::jsonb,
+  'skill', 'speaking', 'title', 'Test', 'edition', 2026, 'topic', 'office',
   'parts', (
     select jsonb_agg(jsonb_build_object(
       'part_template_id', pt.id,
@@ -44,7 +44,7 @@ select throws_ok(
   'a part with a missing question is rejected'
 );
 
-select is_empty($$select 1 from public.exams where code = 'SP-T'$$, 'a rejected exam leaves no rows behind');
+select is_empty($$select 1 from public.exams where title = 'Test'$$, 'a rejected exam leaves no rows behind');
 
 select lives_ok(
   $$select public.create_exam((select payload from fixture))$$,
@@ -52,15 +52,25 @@ select lives_ok(
 );
 
 select results_eq(
-  $$select e.status::text, e.created_by, count(q.id)
+  $$select e.status::text, e.created_by, count(q.id), e.code ~ '^SP-\d{4}$'
     from public.exams e
     join public.exam_parts ep on ep.exam_id = e.id
     join public.questions q on q.exam_part_id = ep.id
-    where e.code = 'SP-T'
-    group by e.status, e.created_by$$,
-  $$values ('draft', '00000000-0000-0000-0000-000000000002'::uuid, 11::bigint)$$,
-  'the exam is a draft owned by the admin with all 11 questions'
+    where e.title = 'Test'
+    group by e.status, e.created_by, e.code$$,
+  $$values ('draft', '00000000-0000-0000-0000-000000000002'::uuid, 11::bigint, true)$$,
+  'the exam is a draft owned by the admin with all 11 questions and a generated code'
 );
+
+-- Codes stay generated even when an admin writes the table directly.
+insert into public.exams (skill, code, title, edition, topic) values ('speaking', 'SP-T', 'Direct', 2026, 'office');
+select ok(
+  (select code ~ '^SP-\d{4}$' and code <> (select code from public.exams where title = 'Test') from public.exams where title = 'Direct'),
+  'a code sent on insert is replaced by a new generated one'
+);
+
+update public.exams set code = 'SP-T' where title = 'Direct';
+select isnt((select code from public.exams where title = 'Direct'), 'SP-T', 'the code cannot be changed by an update');
 
 select * from finish();
 rollback;

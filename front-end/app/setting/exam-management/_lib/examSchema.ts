@@ -10,25 +10,34 @@ const TOPICS = ['office', 'customer', 'retail', 'travel', 'tech', 'logistics', '
 const IMAGE_PART_NO = 2;
 const CONTEXT_PART_NOS = new Set([3, 4]);
 
+export const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+// 2 ảnh Part 2 gửi chung một request, phải dưới giới hạn body 10 MB mà proxy.ts buffer
+export const MAX_IMAGE_MB = 4;
+
 const requiredText = (message: string, max: number) =>
     z.string().trim().min(1, message).max(max, `Tối đa ${max} ký tự`);
 
-/** Ô bỏ trống lưu thành `null`, đúng với cột nullable trong DB. */
+/** Ô bỏ trống lưu thành `null`, đúng với cột nullable trong DB; nhận cả `null` để server parse lại được output. */
 const optionalText = (max: number) =>
     z
         .string()
         .trim()
         .max(max, `Tối đa ${max} ký tự`)
+        .nullable()
         .transform((value) => value || null);
 
 const questionSchema = z.object({
     number: z.number().int(),
     prompt: requiredText('Vui lòng nhập nội dung câu hỏi', 2000),
-    image_path: optionalText(500),
+    /** Ảnh giữ trong RAM tới khi lưu đề; server ghi DB trước rồi mới tải lên R2. */
+    image: z
+        .file()
+        .mime([...IMAGE_TYPES], 'Chỉ nhận ảnh JPG, PNG hoặc WebP')
+        .max(MAX_IMAGE_MB * 1024 * 1024, `Ảnh tối đa ${MAX_IMAGE_MB} MB`)
+        .nullable(),
     // Đủ dài để tả chi tiết: model chấm Part 2 chỉ đọc mô tả, không xem ảnh
     image_alt: optionalText(1000),
     sample_answer: optionalText(3000),
-    hint: optionalText(500),
 });
 
 const partSchema = z.object({
@@ -39,7 +48,6 @@ const partSchema = z.object({
 
 export const speakingExamSchema = z
     .object({
-        code: requiredText('Vui lòng nhập mã đề', 30),
         title: requiredText('Vui lòng nhập tiêu đề', 150),
         topic: z.enum(TOPICS, 'Vui lòng chọn chủ đề'),
         target_level: z
@@ -49,12 +57,6 @@ export const speakingExamSchema = z
             .max(9, 'Level từ 1 đến 9')
             .nullable(),
         edition: z.number('Vui lòng nhập năm ấn bản').int().min(2000, 'Năm không hợp lệ').max(2100, 'Năm không hợp lệ'),
-        description: optionalText(500),
-        // Ô tag nhập dạng "a, b,": bỏ mục rỗng do dấu phẩy thừa
-        tags: z
-            .array(z.string().trim().max(40, 'Mỗi tag tối đa 40 ký tự'))
-            .transform((tags) => tags.filter(Boolean))
-            .pipe(z.array(z.string()).max(10, 'Tối đa 10 tag')),
         parts: z.array(partSchema),
     })
     .superRefine((exam, ctx) => {
@@ -87,24 +89,25 @@ export const speakingExamSchema = z
                 ctx.addIssue({ code: 'custom', path: [...path, 'context'], message: 'Vui lòng nhập ngữ liệu chung' });
             }
 
-            if (template.part_no === IMAGE_PART_NO) {
-                part.questions.forEach((question, index) => {
-                    if (!question.image_path) {
-                        ctx.addIssue({
-                            code: 'custom',
-                            path: [...path, 'questions', index, 'image_path'],
-                            message: 'Vui lòng nhập đường dẫn ảnh',
-                        });
+            part.questions.forEach((question, index) => {
+                const at = [...path, 'questions', index];
+                if (template.part_no !== IMAGE_PART_NO) {
+                    if (question.image) {
+                        ctx.addIssue({ code: 'custom', path: [...at, 'image'], message: `Part ${template.part_no} không có ảnh` });
                     }
-                    if (!question.image_alt) {
-                        ctx.addIssue({
-                            code: 'custom',
-                            path: [...path, 'questions', index, 'image_alt'],
-                            message: 'Vui lòng mô tả ảnh cho trình đọc màn hình',
-                        });
-                    }
-                });
-            }
+                    return;
+                }
+                if (!question.image) {
+                    ctx.addIssue({ code: 'custom', path: [...at, 'image'], message: 'Vui lòng chọn hoặc dán ảnh' });
+                }
+                if (!question.image_alt) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        path: [...at, 'image_alt'],
+                        message: 'Vui lòng mô tả ảnh cho trình đọc màn hình',
+                    });
+                }
+            });
         });
     });
 
@@ -114,23 +117,19 @@ export type SpeakingExamValues = z.output<typeof speakingExamSchema>;
 /** Khung đề rỗng đủ 5 Part / 11 câu cho giá trị mặc định của form. */
 export function emptySpeakingExam(): SpeakingExamInput {
     return {
-        code: '',
         title: '',
         topic: 'office',
         target_level: null,
         edition: new Date().getFullYear(),
-        description: '',
-        tags: [],
         parts: SPEAKING_PART_TEMPLATES.map((template) => ({
             part_template_id: template.id,
             context: '',
             questions: Array.from({ length: template.q_to - template.q_from + 1 }, (_, index) => ({
                 number: template.q_from + index,
                 prompt: '',
-                image_path: '',
+                image: null,
                 image_alt: '',
                 sample_answer: '',
-                hint: '',
             })),
         })),
     };
