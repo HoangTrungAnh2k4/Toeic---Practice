@@ -43,7 +43,6 @@ function EmptyRow({ isLibraryEmpty, onResetFilters }: { isLibraryEmpty: boolean;
                             href="/setting/exam-management/new"
                             className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 mt-2 text-xs')}
                         >
-                            <LuPlus className="size-4" aria-hidden="true" />
                             Tạo đề
                         </Link>
                     ) : (
@@ -52,7 +51,7 @@ function EmptyRow({ isLibraryEmpty, onResetFilters }: { isLibraryEmpty: boolean;
                             variant="third"
                             size="sm"
                             onClick={onResetFilters}
-                            className="mt-2 bg-white text-xs"
+                            className="bg-white mt-2 font-medium"
                         >
                             Xóa bộ lọc
                         </Button>
@@ -123,7 +122,7 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetF
                                             >
                                                 {skill.label}
                                             </span>
-                                            <span className="text-subText tabular-nums">
+                                            <span className="tabular-nums text-subText">
                                                 {exam.questionCount} câu · {exam.durationMin} phút
                                             </span>
                                         </div>
@@ -148,7 +147,7 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetF
                                             <span className="font-semibold tabular-nums text-main">
                                                 {formatCount(exam.stats?.attempt_count ?? 0)} lượt
                                             </span>
-                                            <span className="text-subText tabular-nums">
+                                            <span className="tabular-nums text-subText">
                                                 {exam.stats
                                                     ? `${formatCount(exam.stats.completion_rate)}% hoàn thành`
                                                     : 'Chưa mở công khai'}

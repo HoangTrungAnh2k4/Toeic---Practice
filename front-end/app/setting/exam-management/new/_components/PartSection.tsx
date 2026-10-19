@@ -63,11 +63,7 @@ export default function PartSection({ template, index }: PartSectionProps) {
                     <h2 id={titleId} className="font-semibold text-main text-base">
                         Part {template.part_no} · {template.task}
                     </h2>
-                    <p className="font-medium text-subText text-sm">
-                        {template.q_from === template.q_to
-                            ? `Câu ${template.q_from}`
-                            : `Câu ${template.q_from}–${template.q_to}`}
-                    </p>
+
                 </div>
                 {errorCount > 0 && (
                     <span className="inline-flex items-center gap-1 bg-destructive/10 px-2 py-0.5 rounded-md font-semibold text-[0.6875rem] text-destructive tracking-wider">

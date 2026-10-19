@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { LuDownload } from 'react-icons/lu';
-import Button from '@/components/ui/button';
+import { LuDownload, LuPlus } from 'react-icons/lu';
+import Button, { buttonVariants } from '@/components/ui/button';
 import { deleteExam } from '../_lib/data';
 import { downloadJson } from '../_lib/downloadJson';
 import { ExamLibraryItem } from '../types';
@@ -16,6 +16,8 @@ import {
 import DeleteExamDialog from './DeleteExamDialog';
 import ExamLibraryFilters from './ExamLibraryFilters';
 import ExamLibraryTable from './ExamLibraryTable';
+import Link from 'next/dist/client/link';
+import { cn } from 'cn';
 
 interface ExamLibraryProps {
     initialExams: ExamLibraryItem[];
@@ -75,21 +77,29 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
                         Quản lý, kiểm duyệt và phân phối bộ đề Speaking & Writing cho luyện tập và thi thử.
                     </p>
                 </div>
-                <div className="flex items-center gap-3 self-start sm:self-auto">
-                    <span role="status" aria-live="polite" className="font-semibold text-main text-xs">
-                        {notice}
-                    </span>
-                    <Button
-                        type="button"
-                        variant="third"
-                        size="sm"
-                        onClick={handleExport}
-                        disabled={filteredExams.length === 0}
-                        className="gap-1.5 bg-white text-xs shrink-0"
+                <div className='flex gap-3'>
+                    <Link
+                        href="/setting/exam-management/new"
+                        className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 self-start xl:self-auto shrink-0')}
                     >
-                        <LuDownload className="size-3.5" aria-hidden="true" />
-                        Xuất JSON
-                    </Button>
+                        Tạo đề Speaking
+                    </Link>
+                    <div className="flex items-center self-start sm:self-auto gap-3">
+                        <span role="status" aria-live="polite" className="font-semibold text-main text-xs">
+                            {notice}
+                        </span>
+                        <Button
+                            type="button"
+                            variant="third"
+                            size="sm"
+                            onClick={handleExport}
+                            disabled={filteredExams.length === 0}
+                            className="gap-1.5 bg-white text-xs shrink-0"
+                        >
+                            <LuDownload className="size-3.5" aria-hidden="true" />
+                            Xuất JSON
+                        </Button>
+                    </div>
                 </div>
             </div>
 

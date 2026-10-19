@@ -11,6 +11,8 @@ import HistoryKpiBento from './HistoryKpiBento';
 import HistoryPagination from './HistoryPagination';
 import HistoryResultsSkeleton from './HistoryResultsSkeleton';
 import HistoryTable from './HistoryTable';
+import Button from '@/components/ui/button';
+import { LuDownload } from 'react-icons/lu';
 
 interface HistoryResultsProps {
     exams: ExamSummary[];
@@ -34,11 +36,17 @@ export default function HistoryResults({ exams, searchParams }: HistoryResultsPr
         // `group` + `data-pending` từ client islands → làm mờ bảng khi URL đang đổi
         <div className="group flex flex-col gap-6">
             <HistoryKpiBento kpis={getHistoryKpis(rows)} />
+            <div className="flex flex-wrap items-center self-start xl:self-auto gap-3 ml-auto shrink-0">
+                <Button type="button" size="md" variant="third" className="gap-2 bg-white">
+                    <LuDownload className="size-4" aria-hidden="true" />
+                    <span>Báo cáo (PDF)</span>
+                </Button>
+            </div>
             <HistoryFilters query={query} skillCounts={countSkills(rows)} displayedCount={result.total} />
 
             <section
                 aria-label="Danh sách lượt làm bài"
-                className="bg-white shadow-sm border border-sub2/30 rounded-xl overflow-hidden group-has-data-pending:opacity-60 transition-opacity"
+                className="bg-white group-has-data-pending:opacity-60 shadow-sm border border-sub2/30 rounded-xl overflow-hidden transition-opacity"
             >
                 <HistoryTable rows={result.items} hasAnyAttempt={rows.length > 0} />
                 <HistoryPagination
