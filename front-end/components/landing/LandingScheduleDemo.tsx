@@ -15,7 +15,7 @@ export default function LandingScheduleDemo({ children }: { children: React.Reac
     const moved = taskDay !== START_DAY;
 
     return (
-        <div className="items-center gap-10 grid lg:grid-cols-[2fr_3fr]">
+        <div className="items-center gap-10 grid lg:grid-cols-[2fr_3fr] bg-red-400">
             <div className="flex flex-col items-start gap-6">
                 {children}
                 <button
@@ -56,7 +56,7 @@ export default function LandingScheduleDemo({ children }: { children: React.Reac
                                 >
                                     {isDone && <LuCheck aria-label="Đã xong" className="size-4" />}
                                     {hasTask && (
-                                        <span className="font-bold text-main text-[0.6875rem] leading-tight">
+                                        <span className="font-bold text-[0.6875rem] text-main leading-tight">
                                             Part 3<br />45&apos;
                                         </span>
                                     )}

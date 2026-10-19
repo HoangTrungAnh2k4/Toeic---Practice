@@ -11,7 +11,7 @@ const NAV = [
 
 export default function LandingHeader() {
     return (
-        <header className="flex justify-between items-center gap-4">
+        <header className="flex flex-1 justify-between items-center gap-4 mx-auto w-full max-w-300">
             <Link href="/" className="flex items-center gap-2.5">
                 <span className="place-items-center grid bg-main rounded-lg size-10">
                     <Image src="/img/sub_logo.png" alt="" width={32} height={32} className="size-8" />
@@ -20,10 +20,10 @@ export default function LandingHeader() {
             </Link>
 
             <nav aria-label="Điều hướng landing" className="hidden md:block">
-                <ul className="flex gap-6 font-medium text-subText text-sm">
+                <ul className="flex gap-6 font-medium text-subText text-base">
                     {NAV.map(({ label, href }) => (
                         <li key={href}>
-                            <a href={href} className="hover:text-main">
+                            <a href={href} className="font-bold hover:text-main">
                                 {label}
                             </a>
                         </li>
@@ -31,14 +31,10 @@ export default function LandingHeader() {
                 </ul>
             </nav>
 
-            <div className="flex items-center gap-3">
-                <Link href="/login" className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'hidden sm:inline-flex')}>
-                    Đăng nhập
-                </Link>
-                <Link href="/overview" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
-                    Vào luyện tập
-                </Link>
-            </div>
+            <Link href="/login" className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'hidden sm:inline-flex')}>
+                Đăng nhập
+            </Link>
+
         </header>
     );
 }

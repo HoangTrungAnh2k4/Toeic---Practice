@@ -1,10 +1,16 @@
 import { LuBookCheck, LuClock, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 
-// Class phải là chuỗi tĩnh để Tailwind sinh ra; lệch delay âm để các cột sóng không nhấp nhô cùng nhịp
+// Class phải là chuỗi tĩnh để Tailwind sinh ra
 const BAR_HEIGHTS = ['h-3', 'h-6', 'h-9', 'h-5', 'h-10', 'h-7', 'h-4', 'h-8', 'h-10', 'h-6', 'h-3', 'h-7'];
-const BAR_DELAYS = ['[animation-delay:-100ms]', '[animation-delay:-450ms]', '[animation-delay:-800ms]', '[animation-delay:-250ms]', '[animation-delay:-650ms]'];
-const BARS = Array.from({ length: 28 }, (_, i) => cn(BAR_HEIGHTS[i % BAR_HEIGHTS.length], BAR_DELAYS[i % BAR_DELAYS.length]));
+// Mỗi cột có nhịp và độ lệch riêng (giả ngẫu nhiên, cố định để server/client khớp nhau) nên nảy độc lập như giọng nói thật
+const BARS = Array.from({ length: 28 }, (_, i) => ({
+    className: BAR_HEIGHTS[i % BAR_HEIGHTS.length],
+    style: {
+        animationDuration: `${700 + ((i * 337) % 900)}ms`,
+        animationDelay: `-${(i * 541) % 1500}ms`,
+    },
+}));
 
 const ESSAY_LINES = ['w-full', 'w-11/12', 'w-full', 'w-4/5', 'w-full', 'w-2/3'];
 
@@ -25,7 +31,7 @@ export default function LandingHeroVisual() {
                         <LuPenLine aria-hidden="true" className="size-3.5" />
                         Writing, câu 8
                     </span>
-                    <span className="flex items-center gap-1 font-mono text-subText text-xs">
+                    <span className="flex items-center gap-1 font-bold text-subText text-xs">
                         <LuClock aria-hidden="true" className="size-3" />
                         42:10
                     </span>
@@ -57,7 +63,7 @@ export default function LandingHeroVisual() {
                 <p className="mt-2 font-bold text-main text-sm">Speaking, câu 3: Describe a picture</p>
                 <div className="flex items-center gap-1 mt-4 h-10">
                     {BARS.map((bar, i) => (
-                        <span key={i} className={cn('flex-1 bg-main rounded-full motion-safe:animate-wave', bar)} />
+                        <span key={i} style={bar.style} className={cn('flex-1 bg-main rounded-full motion-safe:animate-wave', bar.className)} />
                     ))}
                 </div>
                 <div className="bg-sub1 mt-4 rounded-full h-2 overflow-hidden">
@@ -74,7 +80,7 @@ export default function LandingHeroVisual() {
             >
                 <span className="font-semibold text-main text-xs">Điểm Speaking</span>
                 <span className="font-bold text-main text-4xl tracking-tight">
-                    170<span className="font-semibold text-main/70 text-base">/200</span>
+                    170<span className="font-semibold text-main text-base">/200</span>
                 </span>
             </div>
 
@@ -82,14 +88,14 @@ export default function LandingHeroVisual() {
             <div
                 className={cn(
                     CARD,
-                    'right-5 bottom-8 flex items-start gap-2.5 p-3 w-1/2 rotate-2 motion-safe:animate-slide-left motion-safe:[animation-delay:1300ms]',
+                    'right-5 bottom-8 flex items-start w-fit gap-2.5 p-3  rotate-2 motion-safe:animate-slide-left motion-safe:[animation-delay:1300ms]',
                 )}
             >
                 <span className="place-items-center grid bg-success border-2 border-black rounded-lg size-8 shrink-0">
                     <LuBookCheck aria-hidden="true" className="size-4" />
                 </span>
-                <span className="flex flex-col">
-                    <span className="font-semibold text-main text-xs">Thiếu -s số nhiều</span>
+                <span className="flex flex-col gap-0.5">
+                    <span className="font-semibold text-[#333] text-xs">Thiếu -s số nhiều</span>
                     <span className="font-medium text-subText text-xs">Lặp lại 3 lần, đã vào sổ lỗi</span>
                 </span>
             </div>

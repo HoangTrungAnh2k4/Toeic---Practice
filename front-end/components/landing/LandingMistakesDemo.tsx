@@ -19,7 +19,7 @@ const MISTAKES: DemoMistake[] = [
     {
         id: 'article',
         level: 'Lớn',
-        levelTone: 'bg-main text-white',
+        levelTone: 'bg-sub3 text-main',
         title: 'Thiếu mạo từ a/an/the',
         repeats: 9,
         example: (
@@ -32,7 +32,7 @@ const MISTAKES: DemoMistake[] = [
     {
         id: 'ending',
         level: 'Vừa',
-        levelTone: 'bg-sub3 text-main',
+        levelTone: 'bg-main text-white',
         title: 'Nuốt âm cuối /s/ /t/',
         repeats: 6,
         example: '"works", "last week"',
@@ -55,7 +55,7 @@ export default function LandingMistakesDemo() {
     const open = MISTAKES.length - fixed.length;
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 mx-auto w-full max-w-300">
             <ul className="gap-6 grid md:grid-cols-3">
                 {MISTAKES.map(({ id, level, levelTone, title, repeats, example, tilt }) => {
                     const isFixed = fixed.includes(id);
@@ -63,7 +63,7 @@ export default function LandingMistakesDemo() {
                         <li
                             key={id}
                             className={cn(
-                                'relative flex flex-col items-start gap-1.5 bg-card bg-ruled shadow-[6px_6px_0_0_#000] p-5 border-2 border-black rounded-sm',
+                                'relative flex flex-col items-start gap-1.5 bg-[repeating-linear-gradient(transparent_0_26px,var(--sub1)_27px,transparent_28px)] bg-white shadow-[6px_6px_0_0_#F5B841] p-5 border rounded-sm',
                                 tilt,
                             )}
                         >
@@ -72,7 +72,7 @@ export default function LandingMistakesDemo() {
                             </span>
                             <h3 className={cn('mt-1 font-semibold text-main text-lg', isFixed && 'line-through decoration-2')}>{title}</h3>
                             <p className="font-medium text-subText text-sm">Lặp lại {repeats} lần</p>
-                            <p className="text-main text-sm [&_del]:text-subText">{example}</p>
+                            <p className="text-main [&_del]:text-subText text-sm">{example}</p>
                             <button
                                 type="button"
                                 disabled={isFixed}
@@ -93,14 +93,14 @@ export default function LandingMistakesDemo() {
                 })}
             </ul>
 
-            <p className="flex flex-wrap items-center gap-2 font-semibold text-main text-sm" aria-live="polite">
+            <p className="flex flex-wrap items-center gap-2 font-semibold text-white text-sm" aria-live="polite">
                 Lỗi đang mở:
                 <span className="bg-main px-2 py-0.5 rounded-md text-sub3">{open}</span>
-                <span className="font-hand font-normal text-subText text-lg">
+                <span className="font-hand font-normal text-[#999] text-lg">
                     {open > 0 ? 'bấm "Luyện sửa" để đóng dấu' : 'sạch sổ! Đây là cách Toeco giúp bạn lên điểm'}
                 </span>
                 {open === 0 && (
-                    <button type="button" onClick={() => setFixed([])} className="text-subText text-xs underline">
+                    <button type="button" onClick={() => setFixed([])} className="text-sub3 text-xs underline cursor-pointer">
                         Làm lại
                     </button>
                 )}
