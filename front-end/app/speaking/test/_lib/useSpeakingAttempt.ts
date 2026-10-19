@@ -1,8 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toWav16k } from '@/lib/audio/wav';
-import { finalizeSpeakingAttempt, scoreSpeakingAnswer, ScoringLimitError, startAttempt } from '@/lib/data/user-data';
+import {
+    finalizeSpeakingAttempt,
+    resumeOrStartAttempt,
+    scoreSpeakingAnswer,
+    ScoringLimitError,
+    updateAttempt,
+} from '@/lib/data/user-data';
 import type { Attempt, AttemptMode } from '@/lib/domain/types';
 import type { ScoredQuestion } from '@/lib/scoring/scale';
 
@@ -15,41 +21,48 @@ interface PendingAnswer {
 export type SubmitResult = 'ok' | 'limit' | 'error';
 
 /**
- * Lượt thi Speaking: tạo attempt khi vào phòng, gửi bài nói từng câu đi chấm ngay khi chốt (chạy nền, audio chỉ
- * nằm trên RAM). Nộp bài: chờ các câu đang chấm, thử lại câu lỗi rồi tính tổng điểm.
+ * Lượt thi Speaking: làm tiếp lượt dở của đề (câu đã chấm được bỏ qua) hoặc tạo lượt mới; gửi bài nói từng câu đi chấm
+ * ngay khi chốt (chạy nền, audio chỉ nằm trên RAM). Nộp bài: chờ các câu đang chấm, thử lại câu lỗi rồi tính tổng điểm.
+ * Rời phòng khi câu chưa chấm xong thì mất audio câu đó, lần vào sau làm lại từ câu đó.
  */
 export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions: ScoredQuestion[]) {
-    // Ref giữ nguyên qua lần mount lại của StrictMode nên không tạo trùng attempt
-    const attemptRef = useRef<Promise<Attempt> | null>(null);
+    const [attempt, setAttempt] = useState<Attempt | null>(null);
+    /** Câu đã được chấm ở lần vào phòng trước. */
+    const [answeredIds, setAnsweredIds] = useState<ReadonlySet<string>>(new Set());
+    const [loadError, setLoadError] = useState(false);
+    const [loadCount, setLoadCount] = useState(0);
     /** Câu chưa chấm xong; giữ audio để nộp bài thử lại khi lỗi mạng. */
     const pendingRef = useRef(new Map<string, PendingAnswer>());
     const tasksRef = useRef(new Map<string, Promise<void>>());
     const limitedRef = useRef(false);
 
-    const getAttempt = useCallback(() => {
-        attemptRef.current ??= startAttempt({
-            exam_id: examId,
-            part_template_id: null,
-            mode,
-            duration_sec: null,
-        }).catch((error: unknown) => {
-            attemptRef.current = null;
-            throw error;
-        });
-        return attemptRef.current;
-    }, [examId, mode]);
-
     useEffect(() => {
-        // Tạo sớm; lỗi thì lần chấm/nộp bài sau thử lại
-        getAttempt().catch(() => {});
-    }, [getAttempt]);
+        let cancelled = false;
+        resumeOrStartAttempt({ exam_id: examId, part_template_id: null, mode, duration_sec: null })
+            .then((result) => {
+                if (cancelled) return;
+                setAttempt(result.attempt);
+                // Khâu chấm chỉ ghi `responses` khi chấm xong nên có dòng là câu đã có điểm
+                setAnsweredIds(new Set(result.responses.map((response) => response.question_id)));
+            })
+            .catch(() => !cancelled && setLoadError(true));
+        return () => {
+            cancelled = true;
+        };
+    }, [examId, mode, loadCount]);
+
+    const retryLoad = useCallback(() => {
+        setLoadError(false);
+        setLoadCount((n) => n + 1);
+    }, []);
 
     const scoreAudio = useCallback(
         (questionId: string, audio: Blob, partNo: number) => {
+            if (!attempt) return;
             const answer = { audio, partNo };
             pendingRef.current.set(questionId, answer);
-            const task = Promise.all([getAttempt(), partNo === 1 ? toWav16k(audio) : audio])
-                .then(([attempt, upload]) => scoreSpeakingAnswer(attempt.id, questionId, upload))
+            const task = Promise.resolve(partNo === 1 ? toWav16k(audio) : audio)
+                .then((upload) => scoreSpeakingAnswer(attempt.id, questionId, upload))
                 .then(
                     () => {
                         if (pendingRef.current.get(questionId) === answer) pendingRef.current.delete(questionId);
@@ -63,22 +76,30 @@ export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions:
                 );
             tasksRef.current.set(questionId, task);
         },
-        [getAttempt],
+        [attempt],
     );
 
     const submit = async (): Promise<SubmitResult> => {
+        if (!attempt) return 'error';
         await Promise.all(tasksRef.current.values());
         for (const [questionId, { audio, partNo }] of pendingRef.current) scoreAudio(questionId, audio, partNo);
         await Promise.all(tasksRef.current.values());
         if (pendingRef.current.size > 0) return 'error';
 
         try {
-            await finalizeSpeakingAttempt((await getAttempt()).id, questions);
+            await finalizeSpeakingAttempt(attempt.id, questions);
             return limitedRef.current ? 'limit' : 'ok';
         } catch {
             return 'error';
         }
     };
 
-    return { scoreAudio, submit, getAttempt };
+    /** Thoát giữa chừng: đánh dấu `interrupted` để lịch sử hiện "Bị gián đoạn"; lần vào sau vẫn làm tiếp được. */
+    const leave = async () => {
+        if (!attempt) return;
+        // Lỗi thì lượt làm giữ `in_progress`, vẫn làm tiếp được nên không chặn việc thoát
+        await updateAttempt(attempt.id, { status: 'interrupted' }).catch(() => undefined);
+    };
+
+    return { attempt, answeredIds, loadError, retryLoad, scoreAudio, submit, leave };
 }

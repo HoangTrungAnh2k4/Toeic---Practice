@@ -67,6 +67,15 @@ async function sessionUserId(): Promise<string | null> {
     return data.session?.user.id ?? null;
 }
 
+/**
+ * Dữ liệu của attempt nằm trên Supabase? Attempt tạo lúc còn là khách ở lại localStorage cho tới khi xong, kể cả khi
+ * người dùng đăng nhập ở tab khác giữa chừng — không thì lượt lưu kế tiếp gửi id cục bộ lên Supabase và lỗi.
+ */
+async function isRemoteAttempt(attemptId: string): Promise<boolean> {
+    if (readTable<Attempt>(ATTEMPTS).some((attempt) => attempt.id === attemptId)) return false;
+    return (await sessionUserId()) !== null;
+}
+
 /** Mới nhất trước. */
 export async function listAttempts(): Promise<Attempt[]> {
     if (!(await sessionUserId())) {
@@ -79,7 +88,7 @@ export async function listAttempts(): Promise<Attempt[]> {
 }
 
 export async function getAttempt(id: string): Promise<Attempt | null> {
-    if (!(await sessionUserId())) return readTable<Attempt>(ATTEMPTS).find((attempt) => attempt.id === id) ?? null;
+    if (!(await isRemoteAttempt(id))) return readTable<Attempt>(ATTEMPTS).find((attempt) => attempt.id === id) ?? null;
 
     const { data, error } = await supabase.from('attempts').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
@@ -127,11 +136,41 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
     return attempt;
 }
 
+/**
+ * Lượt làm dở (đang làm hoặc đã thoát giữa chừng) của đúng đề & Part kèm câu đã trả lời; lượt `interrupted` được
+ * mở lại thành `in_progress`. Không có thì tạo lượt mới.
+ */
+async function resumeOrStart(input: StartAttemptInput) {
+    const existing = (await listAttempts()).find(
+        (attempt) =>
+            attempt.exam_id === input.exam_id &&
+            attempt.part_template_id === input.part_template_id &&
+            (attempt.status === 'in_progress' || attempt.status === 'interrupted'),
+    );
+    if (!existing) return { attempt: await startAttempt(input), responses: [] as AttemptResponse[], isRestored: false };
+
+    const attempt = existing.status === 'interrupted' ? await updateAttempt(existing.id, { status: 'in_progress' }) : existing;
+    return { attempt, responses: await listResponses(attempt.id), isRestored: true };
+}
+
+const pendingResumes = new Map<string, ReturnType<typeof resumeOrStart>>();
+
+/** Gọi trùng cho cùng đề & Part (StrictMode chạy effect 2 lần) dùng chung một lần khởi tạo, không tạo trùng attempt. */
+export function resumeOrStartAttempt(input: StartAttemptInput) {
+    const key = `${input.exam_id}:${input.part_template_id}`;
+    let promise = pendingResumes.get(key);
+    if (!promise) {
+        promise = resumeOrStart(input).finally(() => pendingResumes.delete(key));
+        pendingResumes.set(key, promise);
+    }
+    return promise;
+}
+
 /** Chỉ các cột client được phép sửa (grant trên `attempts`); điểm do khâu chấm ghi. */
 export type AttemptPatch = Partial<Pick<Attempt, 'status' | 'sample_viewed' | 'submitted_at'>>;
 
 export async function updateAttempt(id: string, patch: AttemptPatch): Promise<Attempt> {
-    if (await sessionUserId()) {
+    if (await isRemoteAttempt(id)) {
         // RLS chỉ cho sửa attempt `in_progress` của chính mình → không khớp dòng nào thì single() báo lỗi
         const { data, error } = await supabase.from('attempts').update(patch).eq('id', id).select().single();
         if (error) throw error;
@@ -149,7 +188,7 @@ export async function updateAttempt(id: string, patch: AttemptPatch): Promise<At
 }
 
 export async function listResponses(attemptId: string): Promise<AttemptResponse[]> {
-    if (!(await sessionUserId())) {
+    if (!(await isRemoteAttempt(attemptId))) {
         return readTable<AttemptResponse>(RESPONSES).filter((response) => response.attempt_id === attemptId);
     }
     const { data, error } = await supabase.from('responses').select('*').eq('attempt_id', attemptId);
@@ -163,7 +202,7 @@ export type ResponsePatch = Partial<Pick<AttemptResponse, 'text_answer' | 'audio
 
 /** Upsert theo cặp (attempt_id, question_id) — dùng cho autosave. */
 export async function saveResponse(attemptId: string, questionId: string, patch: ResponsePatch) {
-    if (await sessionUserId()) return saveRemoteResponse(attemptId, questionId, patch);
+    if (await isRemoteAttempt(attemptId)) return saveRemoteResponse(attemptId, questionId, patch);
     return saveLocalResponse(attemptId, questionId, patch);
 }
 
@@ -216,13 +255,13 @@ export async function scoreSpeakingAnswer(attemptId: string, questionId: string,
     if (!response.ok) throw new Error(`Scoring failed: ${response.status}`);
 
     const result = (await response.json()) as AnswerScore;
-    if (!(await sessionUserId())) saveLocalResponse(attemptId, questionId, result);
+    if (!(await isRemoteAttempt(attemptId))) saveLocalResponse(attemptId, questionId, result);
     return result;
 }
 
 /** Nộp bài Speaking: tính tổng 0–200 từ điểm từng câu và đóng attempt (`scored`). */
 export async function finalizeSpeakingAttempt(attemptId: string, questions: ScoredQuestion[]) {
-    if (await sessionUserId()) {
+    if (await isRemoteAttempt(attemptId)) {
         const response = await fetch('/api/speaking/finalize', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },

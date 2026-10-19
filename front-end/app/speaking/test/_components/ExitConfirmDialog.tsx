@@ -35,11 +35,11 @@ export default function ExitConfirmDialog({
 
                 <div className="flex flex-col gap-1.5">
                     <h3 id="exit-modal-title" className="font-semibold text-foreground text-base">
-                        Cảnh báo: Hủy bài thi thử?
+                        Thoát phòng thi?
                     </h3>
                     <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-                        Nếu thoát bây giờ, bài thi sẽ không có tổng điểm và không làm tiếp được. Câu đang ghi âm dở
-                        sẽ bị bỏ.
+                        Bài thi được lưu ở trạng thái gián đoạn, chưa có tổng điểm. Mở lại đề từ thư viện để làm tiếp
+                        từ câu chưa được chấm; câu đang ghi âm dở sẽ bị bỏ.
                     </p>
                 </div>
 

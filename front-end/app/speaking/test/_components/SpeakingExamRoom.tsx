@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useEffectEvent, useState } from 'react';
-import { LuInfo, LuTriangleAlert } from 'react-icons/lu';
+import { LuInfo, LuRotateCw, LuTriangleAlert } from 'react-icons/lu';
+import Button, { buttonVariants } from '@/components/ui/button';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
 import type { RoomPart } from '@/lib/exam-library/room';
 import { getAttemptHref } from '@/app/setting/history/utils';
@@ -46,25 +48,82 @@ function startOf(step: Step): { phase: SpeakingPhase; seconds: number } {
     return step.prepSec > 0 ? { phase: 'prep', seconds: step.prepSec } : { phase: 'speak', seconds: step.speakSec };
 }
 
-/**
- * Phòng thi Speaking: mỗi câu chuẩn bị (không ghi âm) → trả lời (ghi âm) → chốt bài, gửi đi chấm khi chốt câu; đồng hồ chỉ chạy khi micro đang hoạt động.
- * shortcut: rời phòng giữa chừng thì attempt vẫn `in_progress`, câu chưa chấm mất audio và không làm tiếp được — E2-4.
- */
+/** Mở lượt làm (tiếp tục lượt dở hoặc tạo mới) rồi vào phòng thi từ câu đầu tiên chưa được chấm. */
 export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoomProps) {
-    const router = useRouter();
     const steps = toSteps(parts);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const step = steps[currentIndex];
-    const [phase, setPhase] = useState(() => startOf(step).phase);
-    const [secondsRemaining, setSecondsRemaining] = useState(() => startOf(step).seconds);
-    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
-    const mic = useMicrophone();
-    const { start: startRecording, stop: stopRecording } = useAnswerRecorder(mic.stream);
-    const { scoreAudio, submit, getAttempt } = useSpeakingAttempt(
+    const session = useSpeakingAttempt(
         exam.id,
         mode,
         steps.map(({ question }) => question),
     );
+
+    if (session.loadError) {
+        return (
+            <div
+                role="alert"
+                className="flex flex-col items-center gap-3 bg-white shadow-sm mx-auto mt-6 px-4 py-12 border border-sub2/30 rounded-xl w-full max-w-6xl text-center"
+            >
+                <LuTriangleAlert className="size-8 text-destructive" aria-hidden="true" />
+                <p className="font-semibold text-main text-sm">Không mở được phòng thi</p>
+                <p className="text-subText text-xs">Kiểm tra kết nối mạng rồi thử lại.</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                    <Button type="button" variant="primary" size="sm" className="gap-2" onClick={session.retryLoad}>
+                        <LuRotateCw className="size-4" aria-hidden="true" />
+                        Thử lại
+                    </Button>
+                    <Link href="/speaking" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+                        Về thư viện đề
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    if (!session.attempt) {
+        return (
+            <p role="status" className="p-6 text-subText text-sm">
+                Đang chuẩn bị phòng thi Speaking...
+            </p>
+        );
+    }
+
+    const firstOpen = steps.findIndex(({ question }) => !session.answeredIds.has(question.id));
+    return (
+        <SpeakingExamSession
+            exam={exam}
+            steps={steps}
+            // Làm tiếp theo chế độ của lượt làm, không theo link vừa bấm
+            mode={session.attempt.mode}
+            attemptId={session.attempt.id}
+            startIndex={firstOpen === -1 ? steps.length - 1 : firstOpen}
+            isFinished={firstOpen === -1}
+            session={session}
+        />
+    );
+}
+
+interface SpeakingExamSessionProps {
+    exam: Exam;
+    steps: Step[];
+    mode: AttemptMode;
+    attemptId: string;
+    startIndex: number;
+    /** Mọi câu đã được chấm ở lần trước: chỉ còn bấm Kết thúc để nộp. */
+    isFinished: boolean;
+    session: Pick<ReturnType<typeof useSpeakingAttempt>, 'scoreAudio' | 'submit' | 'leave'>;
+}
+
+/** Phòng thi Speaking: mỗi câu chuẩn bị (không ghi âm) → trả lời (ghi âm) → chốt bài, gửi đi chấm khi chốt câu; đồng hồ chỉ chạy khi micro đang hoạt động. */
+function SpeakingExamSession({ exam, steps, mode, attemptId, startIndex, isFinished, session }: SpeakingExamSessionProps) {
+    const router = useRouter();
+    const { scoreAudio, submit, leave } = session;
+    const [currentIndex, setCurrentIndex] = useState(startIndex);
+    const step = steps[currentIndex];
+    const [phase, setPhase] = useState<SpeakingPhase>(() => (isFinished ? 'done' : startOf(step).phase));
+    const [secondsRemaining, setSecondsRemaining] = useState(() => (isFinished ? 0 : startOf(step).seconds));
+    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+    const mic = useMicrophone();
+    const { start: startRecording, stop: stopRecording } = useAnswerRecorder(mic.stream);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitFailed, setSubmitFailed] = useState(false);
     const isMicReady = mic.status === 'active';
@@ -116,7 +175,7 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
             setSubmitFailed(false);
             if ((await submit()) !== 'error') {
                 // Hết lượt chấm (`limit`) vẫn nộp được; trang kết quả ghi rõ câu chưa có điểm
-                router.push(getAttemptHref((await getAttempt()).id));
+                router.push(getAttemptHref(attemptId));
                 return;
             }
             setIsSubmitting(false);
@@ -228,7 +287,10 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
                 currentQuestion={step.question.number}
                 totalQuestions={steps.length}
                 onClose={() => setIsExitModalOpen(false)}
-                onConfirm={() => router.push('/speaking')}
+                onConfirm={async () => {
+                    await leave();
+                    router.push('/speaking');
+                }}
             />
         </div>
     );

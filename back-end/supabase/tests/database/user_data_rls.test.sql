@@ -1,6 +1,6 @@
 -- Owner-only access to attempts, responses, annotations, bookmarks.
 begin;
-select plan(12);
+select plan(14);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
@@ -70,6 +70,17 @@ select lives_ok(
   $$insert into public.responses (attempt_id, question_id, text_answer)
     select id, '30000000-0000-0000-0000-000000000001', 'mine' from public.attempts$$,
   'students can answer their own attempts'
+);
+
+select lives_ok(
+  $$update public.attempts set status = 'interrupted' where mode = 'guided'$$,
+  'students can leave their own attempts'
+);
+
+select results_eq(
+  $$update public.attempts set status = 'in_progress' where mode = 'guided' returning status::text$$,
+  $$values ('in_progress')$$,
+  'students can resume their own interrupted attempts'
 );
 
 select throws_ok(

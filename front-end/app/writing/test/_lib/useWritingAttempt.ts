@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { listAttempts, listResponses, saveResponse, startAttempt, updateAttempt } from '@/lib/data/user-data';
+import { readTable, writeTable } from '@/lib/data/local-store';
+import { resumeOrStartAttempt, saveResponse, updateAttempt } from '@/lib/data/user-data';
 import type { Attempt, AttemptMode, Question } from '@/lib/domain/types';
 import { SaveStatus } from '../types';
 
@@ -14,42 +15,61 @@ interface UseWritingAttemptOptions {
     questions: Question[];
 }
 
-/** Lượt làm đang dở của đúng đề & Part này, hoặc tạo lượt mới. */
-async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questions }: UseWritingAttemptOptions) {
-    const attempts = await listAttempts();
-    const existing = attempts.find(
-        (attempt) =>
-            attempt.exam_id === examId && attempt.part_template_id === partTemplateId && attempt.status === 'in_progress',
-    );
+interface Draft {
+    attempt_id: string;
+    question_id: string;
+    text: string;
+}
 
-    if (existing) {
-        const responses = await listResponses(existing.id);
-        const answers = questions.map(
-            (question) => responses.find((response) => response.question_id === question.id)?.text_answer ?? '',
-        );
-        return { attempt: existing, answers, isRestored: true };
+const DRAFTS = 'writing-drafts';
+
+function writeDrafts(rows: Draft[]) {
+    try {
+        writeTable(DRAFTS, rows);
+    } catch {
+        // Nháp chỉ là lớp dự phòng; lỗi lưu thật vẫn hiện qua saveStatus
     }
+}
 
-    const attempt = await startAttempt({
+/**
+ * Bản nháp trên localStorage của câu chưa chắc đã lưu lên server: ghi đồng bộ mỗi lần gõ nên đóng tab ngay cũng
+ * không mất chữ, lần vào sau khôi phục từ đây.
+ */
+function saveDraft(draft: Draft) {
+    const rows = readTable<Draft>(DRAFTS).filter(
+        (row) => row.attempt_id !== draft.attempt_id || row.question_id !== draft.question_id,
+    );
+    writeDrafts([...rows, draft]);
+}
+
+/** Xoá nháp của lượt làm; có `saved` thì chỉ xoá nháp của câu đó nếu nội dung trùng bản vừa lưu (chưa gõ thêm). */
+function clearDrafts(attemptId: string, saved?: Omit<Draft, 'attempt_id'>) {
+    const rows = readTable<Draft>(DRAFTS);
+    const remaining = rows.filter(
+        (row) =>
+            row.attempt_id !== attemptId ||
+            (saved !== undefined && (row.question_id !== saved.question_id || row.text !== saved.text)),
+    );
+    if (remaining.length !== rows.length) writeDrafts(remaining);
+}
+
+/** Lượt làm dở của đúng đề & Part (hoặc lượt mới) kèm câu trả lời đã lưu; nháp chưa kịp lưu được ưu tiên. */
+async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questions }: UseWritingAttemptOptions) {
+    const { attempt, responses, isRestored } = await resumeOrStartAttempt({
         exam_id: examId,
         part_template_id: partTemplateId,
         mode,
         duration_sec: mode === 'guided' ? null : durationSec,
     });
-    return { attempt, answers: questions.map(() => ''), isRestored: false };
-}
-
-/** Dùng chung một lần khởi tạo cho cùng đề & Part — StrictMode chạy effect 2 lần sẽ tạo trùng attempt. */
-const pendingStarts = new Map<string, ReturnType<typeof resumeOrStart>>();
-
-function resumeOrStartOnce(options: UseWritingAttemptOptions) {
-    const key = `${options.examId}:${options.partTemplateId}`;
-    let promise = pendingStarts.get(key);
-    if (!promise) {
-        promise = resumeOrStart(options).finally(() => pendingStarts.delete(key));
-        pendingStarts.set(key, promise);
-    }
-    return promise;
+    const drafts = readTable<Draft>(DRAFTS).filter((row) => row.attempt_id === attempt.id);
+    // Nháp còn lại nghĩa là lần trước chưa kịp lưu lên server → dùng nháp và đưa vào hàng chờ lưu
+    const unsaved = new Map<number, string>();
+    const answers = questions.map((question, index) => {
+        const draft = drafts.find((row) => row.question_id === question.id);
+        if (draft) unsaved.set(index, draft.text);
+        return draft?.text ?? responses.find((response) => response.question_id === question.id)?.text_answer ?? '';
+    });
+    return { attempt, answers, unsaved, isRestored };
 }
 
 /**
@@ -74,11 +94,12 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
 
     useEffect(() => {
         let cancelled = false;
-        resumeOrStartOnce(optionsRef.current)
+        resumeOrStart(optionsRef.current)
             .then((result) => {
                 if (cancelled) return;
                 setAttempt(result.attempt);
                 setAnswers(result.answers);
+                pendingRef.current = new Map(result.unsaved);
                 setIsRestored(result.isRestored);
             })
             .catch(() => !cancelled && setLoadError(true));
@@ -100,11 +121,13 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         clearTimeout(timeoutRef.current);
         if (!attempt) return savingRef.current;
 
-        // shortcut: lưu lên Supabase lúc đóng tab có thể bị huỷ giữa chừng (mất phần gõ trong ~600ms cuối);
-        // thêm fetch keepalive hoặc bản nháp localStorage nếu người dùng báo mất chữ.
+        // Lưu lúc đóng tab có thể bị huỷ giữa chừng; chữ vẫn còn trong nháp localStorage để lần sau khôi phục
         const batch = [...pendingRef.current].map(([index, text]) =>
             saveResponse(attempt.id, questions[index].id, { text_answer: text }).then(
-                () => true,
+                () => {
+                    clearDrafts(attempt.id, { question_id: questions[index].id, text });
+                    return true;
+                },
                 () => {
                     if (!pendingRef.current.has(index)) pendingRef.current.set(index, text);
                     setSaveStatus('error');
@@ -130,6 +153,7 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         setAnswers((prev) => prev.map((answer, i) => (i === index ? value : answer)));
         setSaveStatus('saving');
         pendingRef.current.set(index, value);
+        if (attempt) saveDraft({ attempt_id: attempt.id, question_id: questions[index].id, text: value });
 
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
@@ -149,6 +173,7 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         if (!(await flush()) || pendingRef.current.size > 0) return false;
         try {
             await updateAttempt(attempt.id, { status: 'submitted', submitted_at: new Date().toISOString() });
+            clearDrafts(attempt.id);
             return true;
         } catch {
             setSaveStatus('error');

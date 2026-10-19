@@ -27,14 +27,14 @@
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ | Sprint |
 | --- | --- | --- | --- | --- | --- |
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
-| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 5/7 | S1, S2 |
-| E3 | Phòng thi Writing đủ 8 câu | P0 | In progress | 3/4 | S2 |
+| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 6/7 | S1, S2 |
+| E3 | Phòng thi Writing đủ 8 câu | P0 | Done | 4/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | In progress | 2/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | Todo | 0/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | Todo | 0/4 | S4, S6 |
 | E8 | Auth & bảo mật | P1 | In progress | 5/8 | S1, S5, S6 |
-| E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | Todo | 0/12 | rải rác |
+| E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 2/12 | rải rác |
 | E10 | Phát hành | P1 | In progress | 1/5 | S1, S6 |
 
 ## Lịch Sprint
@@ -43,7 +43,7 @@
 | --- | --- | --- | --- | --- |
 | S0 | → 2026-10-16 | Dữ liệu người dùng lên Supabase | — | Done |
 | S1 | 19/10 – 30/10 | Chặn route phía server + Speaking ghi âm được | ~7 ngày | Todo |
-| S2 | 02/11 – 13/11 | Làm bài đủ 2 kỹ năng, chốt PRD chấm điểm | ~6,5 ngày | Todo |
+| S2 | 02/11 – 13/11 | Làm bài đủ 2 kỹ năng, chốt PRD chấm điểm | ~6,5 ngày | Done |
 | S3 | 16/11 – 27/11 | Có điểm (STT + chấm rubric + hàng đợi) | ~9,5 ngày ⚠️ | Todo |
 | S4 | 30/11 – 11/12 | Trang kết quả + khép vòng học trên dữ liệu thật | ~6,5 ngày | Todo |
 | S5 | 14/12 – 25/12 | Quản trị đề đủ Speaking + Writing | ~6,5 ngày | Todo |
@@ -72,10 +72,10 @@ Mục tiêu: thí sinh làm trọn đề Speaking (11 câu) và Writing (8 câu)
 
 - [x] **E3-2** (P0, M) Writing Part 2 (Q6–7): trả lời email — *mỗi Part một attempt, phòng thi chọn Part qua `?part=<part_template_id>`, nộp Part 1 tự sang Part 2; `ends_at` của Part tính giờ từng câu = tổng `response_sec` (migration `20261019120000`), đồng hồ từng câu chia từ `started_at`*
 - [x] **E3-3** (P0, M) Writing Part 3 (Q8): bài luận ý kiến, đếm từ — *nộp Part 2 tự sang Part 3; `EssayStimulus` (thang 0–5), editor hiện số từ so với mục tiêu ≥ 300 (`ESSAY_MIN_WORDS`), đồng hồ 30 phút từ `response_sec`*
-- [ ] **E3-4** (P1, S) Autosave bài viết (debounce) + khôi phục khi tải lại trang
-- [ ] **E2-4** (P1, M) Xử lý gián đoạn Speaking: mất mạng, đóng tab, từ chối mic → `interrupted`, cho làm tiếp
-- [ ] **E9-9** (P2, S) Lưu Writing lúc đóng tab có thể bị huỷ, mất ~600ms gõ cuối (`shortcut:` ở `useWritingAttempt.ts:103`) — gộp khi làm E3-4
-- [ ] **E9-8** (P2, S) Khách đang trong phòng thi mà đăng nhập ở tab khác → lượt lưu kế tiếp gửi attempt id cục bộ lên Supabase và báo lỗi (nợ từ E1-5)
+- [x] **E3-4** (P1, S) Autosave bài viết (debounce) + khôi phục khi tải lại trang — *debounce 600ms + khôi phục đã có từ E1-3; thêm bản nháp localStorage (`writing-drafts`) ghi đồng bộ mỗi lần gõ, xoá khi đã lưu đúng nội dung đó hoặc khi nộp; khôi phục ưu tiên nháp và đưa vào hàng chờ lưu*
+- [x] **E2-4** (P1, M) Xử lý gián đoạn Speaking: mất mạng, đóng tab, từ chối mic → `interrupted`, cho làm tiếp — *vào phòng là làm tiếp lượt `in_progress`/`interrupted` của đề (`resumeOrStartAttempt`, dùng chung với Writing), bỏ qua câu đã có điểm; bấm Thoát → `interrupted`; đóng tab/tải lại giữ `in_progress` (ghi lúc `pagehide` dễ bị huỷ và chạy đua với lần mở lại); RLS cho mở lại lượt `interrupted` (migration `20261019130000`). Mất mạng/từ chối mic: giữ cơ chế cũ (chấm lại khi nộp, đồng hồ dừng khi mic tắt)*
+- [x] **E9-9** (P2, S) Lưu Writing lúc đóng tab có thể bị huỷ, mất ~600ms gõ cuối — *xong cùng E3-4 (bản nháp localStorage)*
+- [x] **E9-8** (P2, S) Khách đang trong phòng thi mà đăng nhập ở tab khác → lượt lưu kế tiếp gửi attempt id cục bộ lên Supabase và báo lỗi (nợ từ E1-5) — *hàm theo attempt chọn nguồn theo nơi attempt nằm (`isRemoteAttempt`). Còn lại: Speaking chấm câu kế tiếp vẫn 404 vì route `/api/speaking/score` thấy có phiên nên tìm attempt trên DB*
 - [x] **E4-1** (P0, S) Viết PRD `docs/prd/scoring.md`: tiêu chí (`criterion` enum), thang điểm TOEIC, nhà cung cấp STT/LLM, chi phí mỗi bài, SLA
 
 ## Sprint 3 — Có điểm (16/11 – 27/11)
