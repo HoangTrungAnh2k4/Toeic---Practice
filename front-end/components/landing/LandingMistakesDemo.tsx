@@ -63,7 +63,7 @@ export default function LandingMistakesDemo() {
                         <li
                             key={id}
                             className={cn(
-                                'relative flex flex-col items-start gap-1.5 bg-[repeating-linear-gradient(transparent_0_26px,var(--sub1)_27px,transparent_28px)] bg-white shadow-[6px_6px_0_0_#F5B841] p-5 border rounded-sm',
+                                'relative flex flex-col items-start gap-1.5 bg-[repeating-linear-gradient(transparent_0_26px,#ccc_27px,transparent_28px)] bg-white shadow-[6px_6px_0_0_#F5B841] p-5 border rounded-sm',
                                 tilt,
                             )}
                         >

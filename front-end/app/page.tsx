@@ -4,6 +4,7 @@ import LandingHeader from '../components/landing/LandingHeader';
 import LandingHero from '../components/landing/LandingHero';
 import LandingMistakes from '../components/landing/LandingMistakes';
 import { LandingSchedule } from '../components/landing/LandingSchedule';
+import { SiteFooter } from '@/components/layout/footer/site-footer';
 
 // Font viết tay chỉ dùng ở landing (chú thích, chữ sửa lỗi)
 const patrickHand = Patrick_Hand({ weight: '400', variable: '--font-patrick-hand', subsets: ['latin', 'vietnamese'] });
@@ -22,6 +23,7 @@ export default function Home() {
                 <LandingMistakes />
                 <LandingSchedule />
             </main>
+            <SiteFooter />
         </div>
     );
 }

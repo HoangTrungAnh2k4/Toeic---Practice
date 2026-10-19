@@ -18,8 +18,8 @@ const BARS = Array.from({ length: BAR_COUNT }, (_, i) => {
             '--h-max': `${hMax}%`,
             '--h-mid': `${hMid}%`,
             '--h-low': `${hLow}%`,
-            // Tốc độ nhanh hơn (450ms - 850ms) để bám sát nhịp nói thật
-            animationDuration: `${450 + ((i * 437) % 600)}ms`,
+            // Tốc độ nhanh hơn (550ms - 1150ms) để bám sát nhịp nói thật
+            animationDuration: `${550 + ((i * 537) % 600)}ms`,
             animationDelay: `-${(i * 541) % 1500}ms`,
         } as CSSProperties,
     };
