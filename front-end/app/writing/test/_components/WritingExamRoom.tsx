@@ -9,6 +9,7 @@ import type { AttemptMode, Exam } from '@/lib/domain/types';
 import { getPartDurationSec } from '@/lib/domain/parts';
 import type { RoomPart } from '@/lib/exam-library/room';
 import { buildTestHref } from '@/lib/exam-library/search-params';
+import { getAttemptHref } from '@/app/setting/history/utils';
 import { useCountdown } from '../_lib/useCountdown';
 import { useWritingAttempt } from '../_lib/useWritingAttempt';
 import { findKeywordUsage, formatQuestionRange, getQuestionDeadline } from '../utils';
@@ -91,7 +92,10 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
     const handleSubmit = async () => {
         // Lỗi hiện ở trạng thái lưu trên header, ở lại phòng để thử nộp lại
         if (!(await submit())) return;
-        router.push(nextPartTemplateId ? buildTestHref('writing', exam.id, attempt.mode, nextPartTemplateId) : '/writing');
+        // Part cuối: sang trang kết quả, trang đó chờ chấm xong rồi hiện điểm
+        router.push(
+            nextPartTemplateId ? buildTestHref('writing', exam.id, attempt.mode, nextPartTemplateId) : getAttemptHref(attempt.id),
+        );
     };
 
     return (

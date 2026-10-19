@@ -28,17 +28,19 @@ export async function loadHistoryRows(exams: ExamSummary[]): Promise<HistoryRow[
     const examById = new Map(exams.map((exam) => [exam.id, exam]));
     const attempts = (await listAttempts()).filter((attempt) => examById.has(attempt.exam_id));
 
-    // Duyệt cũ → mới để đánh số lần làm và so điểm với lượt đã chấm liền trước của cùng đề
+    // Duyệt cũ → mới để đánh số lần làm và so điểm với lượt đã chấm liền trước của cùng đề & cùng phạm vi
+    // (Writing mỗi Part một lượt làm: Part 2 không so với Part 1)
     const seen = new Map<string, { count: number; lastScore: number | null }>();
     const derived = new Map<string, { attemptNo: number; scoreDelta: number | null }>();
     for (const attempt of [...attempts].reverse()) {
-        const prev = seen.get(attempt.exam_id) ?? { count: 0, lastScore: null };
+        const key = `${attempt.exam_id}:${attempt.part_template_id}`;
+        const prev = seen.get(key) ?? { count: 0, lastScore: null };
         const score = attempt.status === 'scored' ? attempt.score : null;
         derived.set(attempt.id, {
             attemptNo: prev.count + 1,
             scoreDelta: score !== null && prev.lastScore !== null ? score - prev.lastScore : null,
         });
-        seen.set(attempt.exam_id, { count: prev.count + 1, lastScore: score ?? prev.lastScore });
+        seen.set(key, { count: prev.count + 1, lastScore: score ?? prev.lastScore });
     }
 
     return Promise.all(

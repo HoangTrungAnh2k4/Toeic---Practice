@@ -1,12 +1,13 @@
 'use client';
 
-import { use, useCallback } from 'react';
+import { use, useCallback, useEffect } from 'react';
 import { LuFileQuestion } from 'react-icons/lu';
 import { getMistakeIndex } from '@/app/mistakes/_lib/data';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
 import { LoadError } from '@/components/load-error';
 import { combineAsync, useAsync } from '@/hooks/use-async';
 import { scoreWritingAttempt } from '@/lib/data/user-data';
+import { canRescore } from '@/lib/scoring/scale';
 import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { loadAttemptReview } from '../../_lib/review';
@@ -19,6 +20,9 @@ import ReviewQuestionCard from './ReviewQuestionCard';
 import ReviewQuestionNav from './ReviewQuestionNav';
 import ReviewScoreSummary from './ReviewScoreSummary';
 import ReviewScoringState from './ReviewScoringState';
+
+/** Chu kỳ tải lại khi bài đang chấm; tự dừng khi có điểm, chấm lỗi hoặc lượt chấm quá hạn (`canRescore`). */
+const SCORING_POLL_MS = 4000;
 
 interface AttemptReviewViewProps {
     params: Promise<{ id: string }>;
@@ -37,6 +41,15 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
     const bookState = useMistakeBook(patterns, exams);
     const { failed, retry } = combineAsync(reviewState, bookState);
     const book = bookState.data;
+    const attempt = reviewState.data?.review?.row.attempt;
+    const reload = reviewState.retry;
+
+    useEffect(() => {
+        if (!attempt || STATUS_GROUP[attempt.status] !== 'pending' || canRescore(attempt)) return;
+        // Tải lại giữ dữ liệu cũ trên màn (không về skeleton) cho tới khi có kết quả mới
+        const timer = setTimeout(reload, SCORING_POLL_MS);
+        return () => clearTimeout(timer);
+    }, [attempt, reload]);
 
     if (failed) return <LoadError message="Không tải được bài làm." onRetry={retry} />;
     if (!reviewState.data || !book) return <AttemptReviewSkeleton />;
@@ -92,7 +105,12 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
     return (
         <>
             <ReviewHeader row={row} />
-            <ReviewScoreSummary row={row} questions={questions} mistakeIndex={mistakeIndex} />
+            <ReviewScoreSummary
+                row={row}
+                questions={questions}
+                mistakeIndex={mistakeIndex}
+                writingTotal={review.writingTotal}
+            />
 
             {questions.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 bg-card shadow-sm px-4 py-12 border border-sub2/30 rounded-xl text-center">

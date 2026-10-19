@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { summarizeWriting } from './scale';
+import { canRescore, SCORING_STALE_MS, summarizeWriting } from './scale';
 import { locateAnnotations, parseWritingGrade } from './writing';
 
 const annotation = (quote: string) => ({
@@ -60,5 +60,33 @@ describe('summarizeWriting', () => {
         const summary = summarizeWriting([q('q8', 8)], []);
         expect(summary.score).toBe(0);
         expect(summary.scoringError).toContain('1 câu chưa có điểm');
+    });
+});
+
+describe('canRescore', () => {
+    const NOW = Date.parse('2026-11-02T00:10:00Z');
+    const ago = (ms: number) => new Date(NOW - ms).toISOString();
+    const attempt = (patch: Partial<Parameters<typeof canRescore>[0]>) => ({
+        status: 'submitted' as const,
+        scoring_error: null,
+        scoring_started_at: null,
+        submitted_at: ago(1000),
+        ...patch,
+    });
+
+    it('waits while a fresh submission or scoring run is in flight', () => {
+        expect(canRescore(attempt({}), NOW)).toBe(false);
+        expect(canRescore(attempt({ status: 'scoring', scoring_started_at: ago(1000) }), NOW)).toBe(false);
+    });
+
+    it('allows rescoring after an error or once a run is stale', () => {
+        expect(canRescore(attempt({ scoring_error: 'Lỗi' }), NOW)).toBe(true);
+        expect(canRescore(attempt({ submitted_at: ago(SCORING_STALE_MS + 1) }), NOW)).toBe(true);
+        expect(canRescore(attempt({ status: 'scoring', scoring_started_at: ago(SCORING_STALE_MS + 1) }), NOW)).toBe(true);
+    });
+
+    it('never rescores attempts that are scored or still open', () => {
+        expect(canRescore(attempt({ status: 'scored' }), NOW)).toBe(false);
+        expect(canRescore(attempt({ status: 'in_progress', scoring_error: 'x' }), NOW)).toBe(false);
     });
 });

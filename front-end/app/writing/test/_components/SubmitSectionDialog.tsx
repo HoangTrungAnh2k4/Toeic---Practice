@@ -51,7 +51,7 @@ export default function SubmitSectionDialog({
                     <AlertDialogDescription className="text-subText">
                         {hasNextPart
                             ? 'Nộp xong bạn chuyển ngay sang nhóm câu tiếp theo, đồng hồ của nhóm đó bắt đầu chạy.'
-                            : 'Đây là nhóm câu cuối của lượt làm, nộp xong bạn quay về thư viện đề.'}
+                            : 'Đây là nhóm câu cuối, nộp xong bạn xem điểm và nhận xét ngay khi AI chấm xong.'}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 

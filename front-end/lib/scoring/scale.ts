@@ -19,11 +19,19 @@ export const SCORE_ERROR_MESSAGE: Record<ScoreError, string> = {
 /** Lượt `scoring` lâu hơn mốc này coi như đã hỏng giữa chừng (route hết giờ/sập, khách đóng tab) → được chấm lại. */
 export const SCORING_STALE_MS = 2 * 60_000;
 
-/** Bài Writing đã nộp mà chưa có điểm (chưa chấm, chấm lỗi, hoặc lượt chấm đã hỏng) → được chấm lại. */
-export function canRescore(attempt: Pick<Attempt, 'status' | 'scoring_started_at'>, now = Date.now()) {
-    if (attempt.status === 'submitted') return true;
-    const startedAt = attempt.scoring_started_at ? Date.parse(attempt.scoring_started_at) : 0;
-    return attempt.status === 'scoring' && now - startedAt > SCORING_STALE_MS;
+/**
+ * Bài đã nộp mà chưa có điểm được chấm lại khi chấm lỗi, hoặc đã quá `SCORING_STALE_MS` kể từ lúc bắt đầu chấm/nộp
+ * (lượt chấm hỏng giữa chừng, khách đóng tab trước khi gửi). Chưa tới mốc đó thì coi như đang chấm: trang xem bài chờ.
+ */
+export function canRescore(
+    attempt: Pick<Attempt, 'status' | 'scoring_error' | 'scoring_started_at' | 'submitted_at'>,
+    now = Date.now(),
+) {
+    if (attempt.status !== 'submitted' && attempt.status !== 'scoring') return false;
+    if (attempt.scoring_error) return true;
+    const since = Date.parse(attempt.scoring_started_at ?? attempt.submitted_at ?? '');
+    // Thiếu mốc thời gian (NaN) cũng cho chấm lại, không bắt chờ mãi
+    return !(now - since < SCORING_STALE_MS);
 }
 
 /** Thang ETS của câu Writing: Q1-5 0–3, Q6-7 0–4, Q8 0–5. */

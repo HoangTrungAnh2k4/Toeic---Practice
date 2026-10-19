@@ -1,5 +1,6 @@
 import { listAnnotations, listResponses } from '@/lib/data/user-data';
-import { getExamRoom } from '@/lib/exam-library/room';
+import { getExamRoom, type ExamRoom } from '@/lib/exam-library/room';
+import { summarizeWriting } from '@/lib/scoring/scale';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { HistoryRow, ReviewQuestion } from '../types';
 import { loadHistoryRows } from './data';
@@ -7,6 +8,21 @@ import { loadHistoryRows } from './data';
 export interface AttemptReview {
     row: HistoryRow;
     questions: ReviewQuestion[];
+    /** Writing: tổng 0–200 cả bài từ lượt đã chấm gần nhất của mọi Part; `null` khi chưa đủ Part hoặc không phải Writing. */
+    writingTotal: number | null;
+}
+
+/** Mỗi Part Writing là một lượt làm riêng: gộp lượt đã chấm gần nhất (`rows` mới nhất trước) của từng Part. */
+async function loadWritingTotal(rows: HistoryRow[], { exam, parts }: ExamRoom) {
+    const latest = parts.map(({ template }) =>
+        rows.find(
+            ({ attempt }) =>
+                attempt.exam_id === exam.id && attempt.part_template_id === template.id && attempt.status === 'scored',
+        ),
+    );
+    if (parts.length === 0 || latest.some((row) => !row)) return null;
+    const responses = await Promise.all(latest.map((row) => listResponses((row as HistoryRow).attempt.id)));
+    return summarizeWriting(parts.flatMap((part) => part.questions), responses.flat()).score;
 }
 
 /**
@@ -14,11 +30,13 @@ export interface AttemptReview {
  * shortcut: nạp mọi lượt để có số lần làm & chênh điểm; đổi sang query một attempt khi có backend.
  */
 export async function loadAttemptReview(id: string, exams: ExamSummary[]): Promise<AttemptReview | null> {
-    const row = (await loadHistoryRows(exams)).find((item) => item.attempt.id === id);
+    const rows = await loadHistoryRows(exams);
+    const row = rows.find((item) => item.attempt.id === id);
     if (!row) return null;
 
     const { attempt, exam } = row;
     const [room, responses] = await Promise.all([getExamRoom(exam.skill, exam.id), listResponses(attempt.id)]);
+    const writingTotal = room && exam.skill === 'writing' && attempt.status === 'scored' ? await loadWritingTotal(rows, room) : null;
     const annotations = await listAnnotations(responses.map((response) => response.id));
 
     const questions = (room?.parts ?? [])
@@ -35,5 +53,5 @@ export async function loadAttemptReview(id: string, exams: ExamSummary[]): Promi
                 };
             }),
         );
-    return { row, questions };
+    return { row, questions, writingTotal };
 }

@@ -10,11 +10,13 @@ interface ReviewScoreSummaryProps {
     row: HistoryRow;
     questions: ReviewQuestion[];
     mistakeIndex: Record<string, MistakeItem>;
+    /** Tổng 0–200 cả bài Writing (lượt chấm gần nhất của mỗi Part). */
+    writingTotal: number | null;
 }
 
 const LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider';
 
-export default function ReviewScoreSummary({ row, questions, mistakeIndex }: ReviewScoreSummaryProps) {
+export default function ReviewScoreSummary({ row, questions, mistakeIndex, writingTotal }: ReviewScoreSummaryProps) {
     const { attempt, exam, scoreDelta } = row;
     const { score, feedback_summary: feedbackSummary } = attempt;
     const annotations = questions.flatMap((q) => q.annotations);
@@ -42,7 +44,9 @@ export default function ReviewScoreSummary({ row, questions, mistakeIndex }: Rev
             {/* Score */}
             <div className="flex flex-col justify-between gap-4 bg-main shadow-main/20 shadow-md p-5 rounded-xl">
                 <div className="flex flex-col gap-1">
-                    <span className="font-semibold text-sub1 text-xs uppercase tracking-wider">Điểm quy đổi</span>
+                    <span className="font-semibold text-sub1 text-xs uppercase tracking-wider">
+                        {attempt.part_template_id === null ? 'Điểm quy đổi' : 'Điểm quy đổi của Part'}
+                    </span>
                     <div className="flex flex-wrap items-baseline gap-2">
                         <span className="font-bold text-sub1 text-4xl tabular-nums tracking-tight">{score ?? '—'}</span>
                         <span className="font-semibold text-sub1/80 text-sm">/ 200</span>
@@ -54,6 +58,12 @@ export default function ReviewScoreSummary({ row, questions, mistakeIndex }: Rev
                     </div>
                 </div>
                 <div className="flex flex-col gap-1 bg-sub1/10 px-3 py-2 rounded-lg text-sub1 text-xs">
+                    {writingTotal !== null && (
+                        <strong className="font-semibold text-sub1">
+                            Tổng cả bài Writing: {writingTotal}/200 · Level {getScoreLevel('writing', writingTotal)}{' '}
+                            <span className="font-normal text-sub1/80">(lượt chấm gần nhất của mỗi Part)</span>
+                        </strong>
+                    )}
                     {feedbackSummary && <span>{feedbackSummary}</span>}
                     {scoreDelta !== null && (
                         <strong className="font-semibold text-sub3">
