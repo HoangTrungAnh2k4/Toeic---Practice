@@ -8,7 +8,7 @@ insert into auth.users (
   confirmation_token, recovery_token, email_change_token_new, email_change
 ) values (
   '00000000-0000-0000-0000-000000000000', 'a0000000-0000-4000-8000-00000000ad01', 'authenticated', 'authenticated',
-  'admin@toeco.test', extensions.crypt('Toeco-admin-7eb1d03f1', extensions.gen_salt('bf')), now(),
+  'admin@gmail.com', extensions.crypt('123456', extensions.gen_salt('bf')), now(),
   '{"provider": "email", "providers": ["email"]}', '{"full_name": "Admin Test"}', now(), now(),
   '', '', '', ''
 );

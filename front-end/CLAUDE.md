@@ -13,7 +13,6 @@ Mandatory rules for every AI agent working in this frontend project.
 - Use brand tokens (`bg-main`, `text-subText`...) instead of hex or arbitrary values.
 - Precedence with ponytail: ponytail governs logic and code volume; this file governs UI. Table and dropdown: ALWAYS shadcn (`Table`, `DropdownMenu`, `Select`), never raw `<table>`/`<select>` or custom dropdowns, even when ponytail says "use native". All other components: follow ponytail (native HTML elements + Tailwind are fine). Never drop for brevity: loading/empty/error states, aria/keyboard support, Form + zod, design tokens. Do not use ponytail "ultra" mode.
 - Search by name to find reusable components before creating new ones; don't scan unrelated folders.
-- Must not edit file functional-requirements.md
 
 ---
 
