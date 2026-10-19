@@ -1,5 +1,7 @@
 import type { Attempt, PartTemplate } from '@/lib/domain/types';
-import { ExamSection, RequiredKeyword } from './types';
+import { ExamSection } from './types';
+
+export { countSentences, countWords, findKeywordUsage } from '@/lib/domain/writing-text';
 
 export const TIME_WARNING_SECONDS = 60;
 
@@ -42,24 +44,3 @@ export function getQuestionDeadline(attempt: Attempt, template: PartTemplate, in
     return Math.min(endsAt, Date.parse(attempt.started_at) + elapsedSec * 1000);
 }
 
-export function countWords(text: string): number {
-    const trimmed = text.trim();
-    return trimmed ? trimmed.split(/\s+/).length : 0;
-}
-
-/** Đếm số câu dựa trên dấu kết thúc câu — dùng để cảnh báo viết quá 1 câu ở Part 1. */
-export function countSentences(text: string): number {
-    return text.split(/[.!?]+(?=\s|$)/).filter((part) => part.trim()).length;
-}
-
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/** Trả về dạng từ khóa thí sinh đã dùng, hoặc `null` nếu chưa xuất hiện. */
-export function findKeywordUsage(text: string, keyword: RequiredKeyword): string | null {
-    for (const form of keyword.forms) {
-        const pattern = new RegExp(`\\b${escapeRegExp(form).replace(/\s+/g, '\\s+')}\\b`, 'i');
-        const match = text.match(pattern);
-        if (match) return match[0];
-    }
-    return null;
-}

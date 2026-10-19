@@ -1,12 +1,28 @@
-import { LuBrain } from 'react-icons/lu';
+import { useState } from 'react';
+import { LuBrain, LuRotateCw } from 'react-icons/lu';
+import Button from '@/components/ui/button';
+import { canRescore } from '@/lib/scoring/scale';
 import { HistoryRow } from '../../types';
 
 interface ReviewScoringStateProps {
     row: HistoryRow;
+    /** Chấm lại bài chưa có điểm (Writing); bỏ trống thì không có nút. */
+    onRescore?: () => Promise<void>;
 }
 
-export default function ReviewScoringState({ row }: ReviewScoringStateProps) {
+export default function ReviewScoringState({ row, onRescore }: ReviewScoringStateProps) {
     const { scoring_error: scoringError } = row.attempt;
+    const [isRescoring, setIsRescoring] = useState(false);
+    const showRescore = onRescore && (isRescoring || canRescore(row.attempt));
+
+    const handleRescore = async () => {
+        setIsRescoring(true);
+        try {
+            await onRescore?.();
+        } finally {
+            setIsRescoring(false);
+        }
+    };
 
     return (
         <section
@@ -28,6 +44,19 @@ export default function ReviewScoringState({ row }: ReviewScoringStateProps) {
                     {scoringError && <p className="font-semibold text-main text-sm">Lỗi khi chấm: {scoringError}</p>}
                 </div>
             </div>
+            {showRescore && (
+                <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    className="gap-2 self-start"
+                    disabled={isRescoring}
+                    onClick={() => void handleRescore()}
+                >
+                    <LuRotateCw className={isRescoring ? 'size-4 animate-spin' : 'size-4'} aria-hidden="true" />
+                    {isRescoring ? 'Đang chấm lại...' : 'Chấm lại'}
+                </Button>
+            )}
         </section>
     );
 }

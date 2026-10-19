@@ -63,32 +63,39 @@ ${imageAlt}
         .join('\n\n');
 }
 
-/** Lấy object JSON đầu tiên trong câu trả lời (model hay bọc trong ```json). `null` khi sai schema. */
-export function parseGrade(text: string): Grade | null {
+/** Lấy object JSON trong câu trả lời của model (hay bọc trong ```json) theo `schema`. `null` khi sai schema. */
+export function parseJsonObject<T extends z.ZodType>(text: string, schema: T): z.output<T> | null {
     const start = text.indexOf('{');
     const end = text.lastIndexOf('}');
     if (start === -1 || end < start) return null;
     try {
-        const result = gradeSchema.safeParse(JSON.parse(text.slice(start, end + 1)));
+        const result = schema.safeParse(JSON.parse(text.slice(start, end + 1)));
         return result.success ? result.data : null;
     } catch {
         return null;
     }
 }
 
+export const parseGrade = (text: string): Grade | null => parseJsonObject(text, gradeSchema);
+
 interface ChatResponse {
     choices?: { message?: { content?: string | null } }[];
 }
 
+/** Chấm Speaking Part 2–5 qua Groq. */
+export const gradeAnswer = (input: GradeInput) => chatJson(buildPrompt(input), parseGrade);
+
 /**
- * Chấm Part 2–5 qua Groq, xoay vòng `MODELS`: lỗi mạng/5xx/429/timeout/sai schema thì chuyển model kế.
- * `model`: model đã chấm thành công. Mọi model đều 429 (hoặc đang chờ hết hạn) → `ProviderQuotaError`.
+ * Gửi một prompt chấm bài tới Groq, xoay vòng `MODELS`: lỗi mạng/5xx/429/timeout/`parse` trả `null` thì chuyển model
+ * kế. `model`: model trả kết quả hợp lệ. Mọi model đều 429 (hoặc đang chờ hết hạn) → `ProviderQuotaError`.
  */
-export async function gradeAnswer(input: GradeInput): Promise<Grade & { model: string }> {
+export async function chatJson<T extends object>(
+    content: string,
+    parse: (text: string) => T | null,
+): Promise<T & { model: string }> {
     const key = process.env.GROQ_API_KEY;
     if (!key) throw new Error('GROQ_API_KEY is not configured');
 
-    const content = buildPrompt(input);
     const failures: string[] = [];
     for (const { model, reasoning_effort } of MODELS) {
         if (isCoolingDown(model)) {
@@ -122,8 +129,8 @@ export async function gradeAnswer(input: GradeInput): Promise<Grade & { model: s
         }
 
         const body = (await response.json()) as ChatResponse;
-        const grade = parseGrade(body.choices?.[0]?.message?.content ?? '');
-        if (grade) return { ...grade, model };
+        const result = parse(body.choices?.[0]?.message?.content ?? '');
+        if (result) return { ...result, model };
         failures.push(`${model}: invalid grade`);
     }
     if (allRateLimited(failures)) throw new ProviderQuotaError('Groq');

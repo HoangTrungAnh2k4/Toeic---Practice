@@ -6,6 +6,7 @@ import { getMistakeIndex } from '@/app/mistakes/_lib/data';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
 import { LoadError } from '@/components/load-error';
 import { combineAsync, useAsync } from '@/hooks/use-async';
+import { scoreWritingAttempt } from '@/lib/data/user-data';
 import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { loadAttemptReview } from '../../_lib/review';
@@ -61,7 +62,20 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
         return (
             <>
                 <ReviewHeader row={row} />
-                <ReviewScoringState row={row} />
+                <ReviewScoringState
+                    row={row}
+                    onRescore={
+                        isSpeaking
+                            ? undefined
+                            : async () => {
+                                  await scoreWritingAttempt(
+                                      row.attempt,
+                                      questions.map(({ question }) => question),
+                                  ).catch(() => undefined);
+                                  reviewState.retry();
+                              }
+                    }
+                />
                 {questions.map((question) => (
                     <ReviewQuestionCard
                         key={question.question.id}

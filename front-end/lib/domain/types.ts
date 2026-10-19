@@ -146,6 +146,8 @@ export interface Attempt {
     score: number | null;
     feedback_summary: string | null;
     scoring_error: string | null;
+    /** Lúc lượt chấm hiện tại bắt đầu; lượt `scoring` quá lâu coi như đã hỏng và được chấm lại. */
+    scoring_started_at: string | null;
 }
 
 /** Row của bảng `responses` — đặt tên khác để không trùng kiểu `Response` của Fetch API. */

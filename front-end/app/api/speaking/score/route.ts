@@ -1,16 +1,14 @@
-import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
 import { ProviderQuotaError } from '@/lib/scoring/errors';
+import { scoringQuota } from '@/lib/scoring/quota';
 import { InvalidAudioError, scoreAnswer } from '@/lib/scoring/score';
 import { createAdminSupabase } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 
 /** WAV 16 kHz 45s ≈ 1,4 MB; WebM 60s vài trăm KB. */
 const MAX_AUDIO_BYTES = 5 * 1024 * 1024;
-/** Số câu được chấm mỗi ngày: khách 3 bài, người đăng nhập 5 bài (11 câu/bài). */
-const DAILY_LIMIT = { guest: 33, user: 55 };
 
 const fieldsSchema = z.object({ questionId: z.uuid(), attemptId: z.uuid() });
 
@@ -56,20 +54,12 @@ export async function POST(request: Request) {
         if (!attempt) return fail('attempt_not_found', 404);
     }
 
-    const admin = createAdminSupabase();
-    // shortcut: IP băm sha256 không muối, đủ để không lưu IP thô; thêm secret salt nếu cần chống dò ngược
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
-    const subject = userId ? `user:${userId}` : `ip:${createHash('sha256').update(ip).digest('hex')}`;
-    const { data: allowed, error: quotaError } = await admin.rpc('consume_scoring_quota', {
-        p_subject: subject,
-        p_limit: userId ? DAILY_LIMIT.user : DAILY_LIMIT.guest,
-    });
-    if (quotaError) return fail('server_error', 500);
+    const quota = scoringQuota(request, userId);
+    const allowed = await quota.consume().catch(() => null);
+    if (allowed === null) return fail('server_error', 500);
     if (!allowed) return fail('daily_limit', 429);
-    /** Chấm/lưu lỗi thì trả lại lượt, để client thử lại khi nộp bài không bị trừ thêm. */
     const refund = async (error: string, status: number) => {
-        const { error: refundError } = await admin.rpc('refund_scoring_quota', { p_subject: subject });
-        if (refundError) console.error('Scoring quota refund failed', refundError);
+        await quota.refund();
         return fail(error, status);
     };
 
@@ -94,7 +84,7 @@ export async function POST(request: Request) {
     }
 
     if (userId) {
-        const { error } = await admin
+        const { error } = await createAdminSupabase()
             .from('responses')
             .upsert({ attempt_id: attemptId, question_id: questionId, ...result }, { onConflict: 'attempt_id,question_id' });
         if (error) return refund('server_error', 500);

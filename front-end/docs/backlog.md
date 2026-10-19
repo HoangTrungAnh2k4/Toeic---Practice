@@ -29,7 +29,7 @@
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 6/7 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | Done | 4/4 | S2 |
-| E4 | Pipeline chấm điểm (AI) | P0 | In progress | 2/7 | S2 – S4 |
+| E4 | Pipeline chấm điểm (AI) | P0 | In progress | 3/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | Todo | 0/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | Todo | 0/4 | S4, S6 |
@@ -85,8 +85,8 @@ Mục tiêu: bài nộp được chấm tự động, `score`/`scoring_error` kh
 > ⚠️ Sprint nặng nhất (2 task L). Nếu trễ: đẩy E4-4 sang S4, tạm chấm đồng bộ.
 
 - [x] **E4-2** (P0, L) Backend/Edge Function: speech-to-text cho Speaking — *Route Handler `app/api/speaking/score`: Azure (Part 1), Groq Whisper (Part 2–5)*
-- [ ] **E4-3** (P0, L) Chấm theo rubric bằng LLM → `score`, nhận xét, `annotations` theo câu — *Speaking đã chấm điểm + nhận xét bằng LLM trên Groq; còn `annotations` và Writing*
-- [ ] **E4-4** (P0, M) Hàng đợi + trạng thái `scoring` → `scored` / lỗi; retry
+- [ ] **E4-3** (P0, L) Chấm theo rubric bằng LLM → `score`, nhận xét, `annotations` theo câu — *Speaking đã chấm điểm + nhận xét; Writing xong theo [`writing-scoring.md`](prd/writing-scoring.md): rubric ETS, điểm theo Part, `annotations` có vị trí. Còn `annotations` cho Speaking*
+- [x] **E4-4** (P0, M) Hàng đợi + trạng thái `scoring` → `scored` / lỗi; retry — *thu gọn theo PRD Writing: chấm đồng bộ ngay khi nộp (chạy nền, không chặn chuyển Part), chiếm lượt `submitted → scoring` có điều kiện, lỗi thì `scoring_error` + nút "Chấm lại" (chỉ chấm câu chưa có điểm, lượt kẹt > 2 phút được chiếm lại). Không có worker/tự retry*
 
 ## Sprint 4 — Kết quả + khép vòng học (30/11 – 11/12)
 

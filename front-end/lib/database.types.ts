@@ -71,14 +71,14 @@ isOneToOne: false
                   ]
                 },"attempts": {
                   Row: {
-                    "ends_at": string | null,"exam_id": string,"feedback_summary": string | null,"id": string,"mode": Database["public"]['Enums']["attempt_mode"],"part_template_id": number | null,"sample_viewed": boolean,"score": number | null,"scored_at": string | null,"scoring_error": string | null,"started_at": string,"status": Database["public"]['Enums']["attempt_status"],"submitted_at": string | null,"user_id": string
+                    "ends_at": string | null,"exam_id": string,"feedback_summary": string | null,"id": string,"mode": Database["public"]['Enums']["attempt_mode"],"part_template_id": number | null,"sample_viewed": boolean,"score": number | null,"scored_at": string | null,"scoring_error": string | null,"scoring_started_at": string | null,"started_at": string,"status": Database["public"]['Enums']["attempt_status"],"submitted_at": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ends_at"?: string | null,"exam_id": string,"feedback_summary"?: string | null,"id"?: string,"mode": Database["public"]['Enums']["attempt_mode"],"part_template_id"?: number | null,"sample_viewed"?: boolean,"score"?: number | null,"scored_at"?: string | null,"scoring_error"?: string | null,"started_at"?: string,"status"?: Database["public"]['Enums']["attempt_status"],"submitted_at"?: string | null,"user_id"?: string
+                    "ends_at"?: string | null,"exam_id": string,"feedback_summary"?: string | null,"id"?: string,"mode": Database["public"]['Enums']["attempt_mode"],"part_template_id"?: number | null,"sample_viewed"?: boolean,"score"?: number | null,"scored_at"?: string | null,"scoring_error"?: string | null,"scoring_started_at"?: string | null,"started_at"?: string,"status"?: Database["public"]['Enums']["attempt_status"],"submitted_at"?: string | null,"user_id"?: string
                   }
                   Update: {
-                    "ends_at"?: string | null,"exam_id"?: string,"feedback_summary"?: string | null,"id"?: string,"mode"?: Database["public"]['Enums']["attempt_mode"],"part_template_id"?: number | null,"sample_viewed"?: boolean,"score"?: number | null,"scored_at"?: string | null,"scoring_error"?: string | null,"started_at"?: string,"status"?: Database["public"]['Enums']["attempt_status"],"submitted_at"?: string | null,"user_id"?: string
+                    "ends_at"?: string | null,"exam_id"?: string,"feedback_summary"?: string | null,"id"?: string,"mode"?: Database["public"]['Enums']["attempt_mode"],"part_template_id"?: number | null,"sample_viewed"?: boolean,"score"?: number | null,"scored_at"?: string | null,"scoring_error"?: string | null,"scoring_started_at"?: string | null,"started_at"?: string,"status"?: Database["public"]['Enums']["attempt_status"],"submitted_at"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readTable, writeTable } from '@/lib/data/local-store';
-import { resumeOrStartAttempt, saveResponse, updateAttempt } from '@/lib/data/user-data';
+import { resumeOrStartAttempt, saveResponse, scoreWritingAttempt, updateAttempt } from '@/lib/data/user-data';
 import type { Attempt, AttemptMode, Question } from '@/lib/domain/types';
 import { SaveStatus } from '../types';
 
@@ -166,7 +166,10 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         }, AUTOSAVE_DELAY_MS);
     };
 
-    /** Nộp bài: lưu nốt phần đang chờ rồi đóng lượt làm. Trả `false` (trạng thái `error`) khi chưa lưu/nộp được. */
+    /**
+     * Nộp bài: lưu nốt phần đang chờ, đóng lượt làm rồi gửi chấm chạy nền (không chờ, phòng thi chuyển Part ngay).
+     * Trả `false` (trạng thái `error`) khi chưa lưu/nộp được.
+     */
     const submit = async () => {
         if (!attempt) return false;
         // Câu lưu lỗi đã quay lại hàng chờ → còn câu chờ nghĩa là chưa lưu đủ
@@ -174,6 +177,8 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
         try {
             await updateAttempt(attempt.id, { status: 'submitted', submitted_at: new Date().toISOString() });
             clearDrafts(attempt.id);
+            // Chấm lỗi/mất mạng: attempt giữ `submitted`, trang xem bài cho chấm lại
+            scoreWritingAttempt(attempt, questions).catch(() => undefined);
             return true;
         } catch {
             setSaveStatus('error');

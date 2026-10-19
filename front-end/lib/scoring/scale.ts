@@ -1,7 +1,33 @@
-/** Quy đổi điểm Speaking (docs/prd/scoring.md). Thuần, dùng chung cho route chấm (server) và khách (client). */
+/**
+ * Quy đổi điểm Speaking (docs/prd/scoring.md) và Writing (docs/prd/writing-scoring.md). Thuần, dùng chung cho route chấm
+ * (server) và khách (client).
+ */
+import type { Attempt } from '@/lib/domain/types';
 
 /** Điểm tối đa của câu theo ETS: câu 11 (nêu quan điểm) 0–5, còn lại 0–3. */
 export const speakingMaxScore = (questionNumber: number) => (questionNumber === 11 ? 5 : 3);
+
+export type ScoreError = 'daily_limit' | 'provider_limit' | 'scoring_failed';
+
+/** Lý do chấm lỗi hiện cho người học (`attempts.scoring_error`). */
+export const SCORE_ERROR_MESSAGE: Record<ScoreError, string> = {
+    daily_limit: 'Hết lượt chấm hôm nay, hãy chấm lại vào ngày mai.',
+    provider_limit: 'Hết lượt chấm miễn phí, hãy thử chấm lại sau.',
+    scoring_failed: 'Chấm bài bị lỗi, hãy thử chấm lại.',
+};
+
+/** Lượt `scoring` lâu hơn mốc này coi như đã hỏng giữa chừng (route hết giờ/sập, khách đóng tab) → được chấm lại. */
+export const SCORING_STALE_MS = 2 * 60_000;
+
+/** Bài Writing đã nộp mà chưa có điểm (chưa chấm, chấm lỗi, hoặc lượt chấm đã hỏng) → được chấm lại. */
+export function canRescore(attempt: Pick<Attempt, 'status' | 'scoring_started_at'>, now = Date.now()) {
+    if (attempt.status === 'submitted') return true;
+    const startedAt = attempt.scoring_started_at ? Date.parse(attempt.scoring_started_at) : 0;
+    return attempt.status === 'scoring' && now - startedAt > SCORING_STALE_MS;
+}
+
+/** Thang ETS của câu Writing: Q1-5 0–3, Q6-7 0–4, Q8 0–5. */
+export const writingMaxScore = (questionNumber: number) => (questionNumber <= 5 ? 3 : questionNumber <= 7 ? 4 : 5);
 
 const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length;
 
@@ -107,12 +133,27 @@ export interface ScoredResponse {
     feedback: string | null;
 }
 
-/** Tổng kết lượt thi: câu chưa có điểm (không ghi âm/chấm lỗi) tính 0. */
-export function summarizeSpeaking(questions: ScoredQuestion[], responses: ScoredResponse[]) {
+/** Tổng kết lượt thi Speaking: câu chưa có điểm (không ghi âm/chấm lỗi) tính 0. */
+export const summarizeSpeaking = (questions: ScoredQuestion[], responses: ScoredResponse[]) =>
+    summarize(questions, responses, speakingMaxScore, 'không ghi âm được hoặc chấm lỗi');
+
+/**
+ * Tổng kết Writing trên các câu được truyền vào: một Part → điểm ước lượng 0–200 của Part; câu của cả 3 Part (lần nộp
+ * gần nhất) → tổng cả bài. Câu chưa có điểm tính 0.
+ */
+export const summarizeWriting = (questions: ScoredQuestion[], responses: ScoredResponse[]) =>
+    summarize(questions, responses, writingMaxScore, 'chấm lỗi');
+
+function summarize(
+    questions: ScoredQuestion[],
+    responses: ScoredResponse[],
+    maxScore: (questionNumber: number) => number,
+    unscoredReason: string,
+) {
     const byQuestion = new Map(responses.map((response) => [response.question_id, response]));
     const sorted = [...questions].sort((a, b) => a.number - b.number);
     const raw = sorted.reduce((sum, question) => sum + (byQuestion.get(question.id)?.score ?? 0), 0);
-    const maxRaw = sorted.reduce((sum, question) => sum + speakingMaxScore(question.number), 0);
+    const maxRaw = sorted.reduce((sum, question) => sum + maxScore(question.number), 0);
     const unscored = sorted.filter((question) => byQuestion.get(question.id)?.score == null).length;
     const feedbackSummary = sorted
         .flatMap((question) => {
@@ -123,6 +164,6 @@ export function summarizeSpeaking(questions: ScoredQuestion[], responses: Scored
     return {
         score: toScaledScore(raw, maxRaw),
         feedbackSummary: feedbackSummary || null,
-        scoringError: unscored > 0 ? `${unscored} câu chưa có điểm (không ghi âm được hoặc chấm lỗi), tính 0 điểm.` : null,
+        scoringError: unscored > 0 ? `${unscored} câu chưa có điểm (${unscoredReason}), tính 0 điểm.` : null,
     };
 }

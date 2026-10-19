@@ -10,7 +10,13 @@ import type {
     StudyPlan,
     StudyPlanWeek,
 } from '@/lib/domain/types';
-import { summarizeSpeaking, type ScoredQuestion } from '@/lib/scoring/scale';
+import {
+    SCORE_ERROR_MESSAGE,
+    summarizeSpeaking,
+    summarizeWriting,
+    type ScoredQuestion,
+} from '@/lib/scoring/scale';
+import type { WritingOutcome } from '@/lib/scoring/writing';
 import { supabase } from '@/lib/supabase';
 import { readTable, writeTable } from './local-store';
 
@@ -131,6 +137,7 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
         score: null,
         feedback_summary: null,
         scoring_error: null,
+        scoring_started_at: null,
     };
     writeTable(ATTEMPTS, [...readTable<Attempt>(ATTEMPTS), attempt]);
     return attempt;
@@ -177,6 +184,11 @@ export async function updateAttempt(id: string, patch: AttemptPatch): Promise<At
         return data;
     }
 
+    return patchLocalAttempt(id, patch);
+}
+
+/** Khách: mọi cột của attempt (kể cả điểm) đều ghi vào localStorage. */
+function patchLocalAttempt(id: string, patch: Partial<Attempt>): Attempt {
     const rows = readTable<Attempt>(ATTEMPTS);
     const index = rows.findIndex((attempt) => attempt.id === id);
     if (index === -1) throw new Error(`Không tìm thấy bài làm ${id}.`);
@@ -272,19 +284,88 @@ export async function finalizeSpeakingAttempt(attemptId: string, questions: Scor
     }
 
     const summary = summarizeSpeaking(questions, await listResponses(attemptId));
-    const rows = readTable<Attempt>(ATTEMPTS);
-    const index = rows.findIndex((attempt) => attempt.id === attemptId);
-    if (index === -1) throw new Error(`Không tìm thấy bài làm ${attemptId}.`);
-    rows[index] = {
-        ...rows[index],
+    patchLocalAttempt(attemptId, {
         status: 'scored',
         submitted_at: now(),
         scored_at: now(),
         score: summary.score,
         feedback_summary: summary.feedbackSummary,
         scoring_error: summary.scoringError,
-    };
-    writeTable(ATTEMPTS, rows);
+    });
+}
+
+/**
+ * Chấm một Part Writing đã nộp (`/api/writing/score`), gọi chạy nền sau khi nộp hoặc khi bấm "Chấm lại".
+ * Người đăng nhập: route tự ghi kết quả lên DB. Khách: gửi bài các câu chưa có điểm, lưu điểm + annotations vào
+ * localStorage rồi tự tổng kết; lỗi ghi vào `scoring_error` để trang xem bài cho chấm lại.
+ */
+export async function scoreWritingAttempt(attempt: Attempt, questions: ScoredQuestion[]): Promise<void> {
+    if (await isRemoteAttempt(attempt.id)) {
+        await fetch('/api/writing/score', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ attemptId: attempt.id }),
+        });
+        return;
+    }
+
+    patchLocalAttempt(attempt.id, { status: 'scoring', scoring_started_at: now() });
+    try {
+        const responses = await listResponses(attempt.id);
+        const answerOf = (questionId: string) => responses.find((response) => response.question_id === questionId);
+        const pending = questions.filter((question) => answerOf(question.id)?.score == null);
+        let scoringError: string | null = null;
+
+        if (pending.length > 0) {
+            const response = await fetch('/api/writing/score', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    examId: attempt.exam_id,
+                    partTemplateId: attempt.part_template_id,
+                    answers: pending.map((question) => ({
+                        questionId: question.id,
+                        text: answerOf(question.id)?.text_answer ?? '',
+                    })),
+                }),
+            });
+            const body = (await response.json().catch(() => null)) as { outcomes?: WritingOutcome[] } | null;
+            if (!body?.outcomes) throw new Error(`Writing scoring failed: ${response.status}`);
+
+            for (const outcome of body.outcomes) {
+                if ('error' in outcome) {
+                    scoringError ??= SCORE_ERROR_MESSAGE[outcome.error];
+                    continue;
+                }
+                const { annotations, ...score } = outcome.result;
+                const saved = saveLocalResponse(attempt.id, outcome.questionId, score);
+                const kept = readTable<Annotation>(ANNOTATIONS).filter((row) => row.response_id !== saved.id);
+                const added = annotations.map((annotation) => ({
+                    ...annotation,
+                    id: crypto.randomUUID(),
+                    response_id: saved.id,
+                    mistake_pattern_id: null,
+                    at_sec: null,
+                }));
+                writeTable(ANNOTATIONS, [...kept, ...added]);
+            }
+        }
+
+        if (scoringError) {
+            patchLocalAttempt(attempt.id, { status: 'submitted', scoring_error: scoringError });
+            return;
+        }
+        const summary = summarizeWriting(questions, await listResponses(attempt.id));
+        patchLocalAttempt(attempt.id, {
+            status: 'scored',
+            scored_at: now(),
+            score: summary.score,
+            feedback_summary: summary.feedbackSummary,
+            scoring_error: null,
+        });
+    } catch {
+        patchLocalAttempt(attempt.id, { status: 'submitted', scoring_error: SCORE_ERROR_MESSAGE.scoring_failed });
+    }
 }
 
 /**
