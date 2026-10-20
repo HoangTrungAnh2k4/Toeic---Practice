@@ -120,7 +120,7 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
                     <TodayFocus day={currentWeek.days.find((day) => day.status === 'today')} />
                 </div>
                 <div className="xl:col-span-5">
-                    <FlexibilityPanel minutesPerDay={active.plan.minutes_per_day} />
+                    <FlexibilityPanel planId={active.plan.id} minutesPerDay={active.plan.minutes_per_day} />
                 </div>
             </div>
 

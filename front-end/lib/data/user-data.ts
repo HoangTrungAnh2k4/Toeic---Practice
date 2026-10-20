@@ -54,12 +54,39 @@ export interface ActivePlan {
     tasks: PlanTask[];
 }
 
-/**
- * Lộ trình `active` của người dùng đã đăng nhập; khách không có lộ trình.
- * shortcut: chưa có auth nên luôn trả `null`; đọc `study_plans`, `study_plan_weeks`, `plan_tasks` khi nối Supabase.
- */
+/** Lộ trình `active` mới nhất của người dùng đã đăng nhập; khách không có lộ trình. */
 export async function getActivePlan(): Promise<ActivePlan | null> {
-    return null;
+    if (!(await sessionUserId())) return null;
+    // RLS chỉ trả lộ trình của chính mình
+    const { data: plan, error } = await supabase
+        .from('study_plans')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    if (error) throw error;
+    if (!plan) return null;
+
+    const [weeks, tasks] = await Promise.all([
+        supabase.from('study_plan_weeks').select('*').eq('plan_id', plan.id).order('week_no'),
+        supabase.from('plan_tasks').select('*').eq('plan_id', plan.id).order('scheduled_date').order('sort_order'),
+    ]);
+    if (weeks.error) throw weeks.error;
+    if (tasks.error) throw tasks.error;
+    return { plan, weeks: weeks.data, tasks: tasks.data };
+}
+
+/** Đổi thời lượng mỗi buổi học của lộ trình. */
+export async function updatePlanMinutes(planId: string, minutesPerDay: number): Promise<void> {
+    const { data, error } = await supabase
+        .from('study_plans')
+        .update({ minutes_per_day: minutesPerDay })
+        .eq('id', planId)
+        .select('id');
+    if (error) throw error;
+    // RLS chặn thì không báo lỗi, chỉ cập nhật 0 dòng
+    if (data.length === 0) throw new Error('Plan not found');
 }
 
 /** shortcut: chưa có auth nên luôn trả `null`; đọc bản mới nhất của `ai_insights` khi nối Supabase. */
@@ -82,13 +109,17 @@ async function isRemoteAttempt(attemptId: string): Promise<boolean> {
     return (await sessionUserId()) !== null;
 }
 
-/** Mới nhất trước. */
-export async function listAttempts(): Promise<Attempt[]> {
+/** Lượt làm của người dùng, mới nhất trước; truyền `examId` để chỉ lấy lượt của một đề. */
+export async function listAttempts(examId?: string): Promise<Attempt[]> {
     if (!(await sessionUserId())) {
-        return readTable<Attempt>(ATTEMPTS).sort((a, b) => b.started_at.localeCompare(a.started_at));
+        return readTable<Attempt>(ATTEMPTS)
+            .filter((attempt) => !examId || attempt.exam_id === examId)
+            .sort((a, b) => b.started_at.localeCompare(a.started_at));
     }
     // RLS chỉ trả attempt của chính mình
-    const { data, error } = await supabase.from('attempts').select('*').order('started_at', { ascending: false });
+    let query = supabase.from('attempts').select('*');
+    if (examId) query = query.eq('exam_id', examId);
+    const { data, error } = await query.order('started_at', { ascending: false });
     if (error) throw error;
     return data;
 }
@@ -97,6 +128,8 @@ export async function getAttempt(id: string): Promise<Attempt | null> {
     if (!(await isRemoteAttempt(id))) return readTable<Attempt>(ATTEMPTS).find((attempt) => attempt.id === id) ?? null;
 
     const { data, error } = await supabase.from('attempts').select('*').eq('id', id).maybeSingle();
+    // 22P02: id trên URL không phải uuid → coi như không tồn tại thay vì lỗi tải
+    if (error?.code === '22P02') return null;
     if (error) throw error;
     return data;
 }
@@ -148,9 +181,8 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
  * mở lại thành `in_progress`. Không có thì tạo lượt mới.
  */
 async function resumeOrStart(input: StartAttemptInput) {
-    const existing = (await listAttempts()).find(
+    const existing = (await listAttempts(input.exam_id)).find(
         (attempt) =>
-            attempt.exam_id === input.exam_id &&
             attempt.part_template_id === input.part_template_id &&
             (attempt.status === 'in_progress' || attempt.status === 'interrupted'),
     );

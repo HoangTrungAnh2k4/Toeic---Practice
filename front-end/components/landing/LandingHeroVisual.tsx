@@ -1,29 +1,6 @@
 import { LuBookCheck, LuClock, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
-import { CSSProperties } from 'react';
-
-const BAR_COUNT = 28;
-
-const BARS = Array.from({ length: BAR_COUNT }, (_, i) => {
-    // Tạo hình quả trám nhẹ: các cột ở hai đầu hơi thấp hơn ở giữa để nhìn tự nhiên hơn
-    const edgeFactor = Math.sin(((i + 1) / (BAR_COUNT + 1)) * Math.PI); // 0.1 -> 1 -> 0.1
-    const baseMax = 45 + ((i * 293) % 55); // 45% -> 100%
-
-    const hMax = Math.max(30, Math.round(baseMax * (0.4 + 0.6 * edgeFactor)));
-    const hMid = Math.max(24, Math.round(hMax * (0.55 + ((i * 137) % 30) / 100)));
-    const hLow = Math.max(18, Math.round(hMax * (0.25 + ((i * 73) % 20) / 100)));
-
-    return {
-        style: {
-            '--h-max': `${hMax}%`,
-            '--h-mid': `${hMid}%`,
-            '--h-low': `${hLow}%`,
-            // Tốc độ nhanh hơn (550ms - 1150ms) để bám sát nhịp nói thật
-            animationDuration: `${550 + ((i * 537) % 600)}ms`,
-            animationDelay: `-${(i * 541) % 1500}ms`,
-        } as CSSProperties,
-    };
-});
+import VoiceWave from './VoiceWave';
 
 const ESSAY_LINES = ['w-full', 'w-11/12', 'w-full', 'w-4/5', 'w-full', 'w-2/3'];
 
@@ -74,15 +51,7 @@ export default function LandingHeroVisual() {
                     <span className="font-mono font-semibold text-main text-xs">00:27</span>
                 </div>
                 <p className="mt-2 font-bold text-main text-sm">Speaking, câu 3: Describe a picture</p>
-                <div className="flex justify-between items-center gap-1.5 mt-4 h-10">
-                    {BARS.map((bar, i) => (
-                        <span
-                            key={i}
-                            style={bar.style}
-                            className="flex-1 bg-main rounded-full max-w-[8px] min-h-[8px] motion-safe:animate-voice-wave"
-                        />
-                    ))}
-                </div>
+                <VoiceWave className="mt-4" />
                 <div className="bg-sub1 mt-4 rounded-full h-2 overflow-hidden">
                     <div className="bg-sub3 rounded-full h-full origin-left motion-safe:animate-drain" />
                 </div>

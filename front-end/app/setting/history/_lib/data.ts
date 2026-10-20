@@ -23,10 +23,11 @@ function countQuestions(attempt: Attempt, exam: ExamSummary) {
 /**
  * Lượt làm của người dùng kèm đề, mới nhất trước. Lượt của đề không còn trong `exams` bị bỏ qua.
  * Chỉ đếm câu đã trả lời cho lượt chưa nộp (đang làm, gián đoạn) vì chỉ chúng cần hiển thị tiến độ.
+ * `examId`: chỉ nạp lượt của một đề (đủ để đánh số lần làm và chênh điểm của các lượt thuộc đề đó).
  */
-export async function loadHistoryRows(exams: ExamSummary[]): Promise<HistoryRow[]> {
+export async function loadHistoryRows(exams: ExamSummary[], examId?: string): Promise<HistoryRow[]> {
     const examById = new Map(exams.map((exam) => [exam.id, exam]));
-    const attempts = (await listAttempts()).filter((attempt) => examById.has(attempt.exam_id));
+    const attempts = (await listAttempts(examId)).filter((attempt) => examById.has(attempt.exam_id));
 
     // Duyệt cũ → mới để đánh số lần làm và so điểm với lượt đã chấm liền trước của cùng đề & cùng phạm vi
     // (Writing mỗi Part một lượt làm: Part 2 không so với Part 1)

@@ -124,7 +124,7 @@ function ScheduleCard({
           onClick={() => setActiveDay((prev) => (prev < 6 ? prev + 1 : 1))}
           className={`${NEO_BTN} bg-white text-[#3C3454] !py-1.5 !px-3 !text-xs`}
         >
-          Hôm nay tôi bận <Calendar className="w-3.5 h-3.5" />
+          Hôm nay tôi bận
         </button>
       </div>
 

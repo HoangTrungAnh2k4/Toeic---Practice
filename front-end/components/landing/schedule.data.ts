@@ -230,7 +230,11 @@ export const FAQS = [
   },
   {
     q: 'Giới hạn chấm bài Speaking bằng AI mỗi ngày là bao nhiêu?',
-    a: 'Để đảm bảo tốc độ xử lý âm thanh và chấm điểm tức thì: Chế độ khách được chấm miễn phí 3 bài Speaking/ngày; Tài khoản đăng nhập được chấm 5 bài Speaking/ngày.',
+    a: 'Hạn mức tính theo số câu và dùng chung cho Speaking lẫn Writing: Chế độ khách được chấm 33 câu/ngày (khoảng 3 bài Speaking đầy đủ), tài khoản đăng nhập được chấm 55 câu/ngày (khoảng 5 bài). Hạn mức làm mới mỗi ngày theo giờ Việt Nam.',
+  },
+  {
+    q: 'Đề trên Toeco có đúng cấu trúc đề thi thật không?',
+    a: 'Có. Mọi đề theo đúng format TOEIC Speaking & Writing hiện hành của ETS: Speaking 11 câu trong khoảng 20 phút, Writing 8 câu trong 60 phút, cùng thứ tự Part và cùng thời gian chuẩn bị, trả lời cho từng câu.',
   },
   {
     q: 'Điểm số và nhận xét của AI trên Toeco có giống thi thật không?',

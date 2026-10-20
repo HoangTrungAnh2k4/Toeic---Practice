@@ -5,13 +5,13 @@ import { cn } from '@/lib/utils';
 
 const NAV = [
     { label: 'Tính năng', href: '#tinh-nang' },
-    { label: 'Cách hoạt động', href: '#cach-hoat-dong' },
+    { label: 'Chuẩn ETS', href: '#chuan-ets' },
     { label: 'Câu hỏi', href: '#faq' },
 ];
 
 export default function LandingHeader() {
     return (
-        <header className="flex flex-1 justify-between items-center gap-4 mx-auto w-full max-w-300">
+        <header className="flex flex-1 justify-between items-center gap-4 mx-auto pb-3 w-full max-w-300">
             <Link href="/" className="flex items-center gap-2.5">
                 <span className="place-items-center grid bg-main rounded-lg size-10">
                     <Image src="/img/sub_logo.png" alt="" width={32} height={32} className="size-8" />

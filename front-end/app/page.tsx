@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { Patrick_Hand } from 'next/font/google';
+import BackToTop from '../components/landing/BackToTop';
+import LandingEtsFormat from '../components/landing/LandingEtsFormat';
+import LandingFaq from '../components/landing/LandingFaq';
 import LandingHeader from '../components/landing/LandingHeader';
 import LandingHero from '../components/landing/LandingHero';
 import LandingMistakes from '../components/landing/LandingMistakes';
@@ -14,16 +17,19 @@ export const metadata: Metadata = {
 };
 
 /** Landing page: giới thiệu tính năng và dẫn người dùng vào luyện tập. */
-export default function Home() {
+export default function LandingPage() {
     return (
-        <div data-landing className={`${patrickHand.variable} flex flex-col gap-20 pb-6 w-full`}>
+        <div data-landing className={`${patrickHand.variable} flex flex-col    w-full`}>
             <LandingHeader />
             <main className="flex flex-col items-center">
                 <LandingHero />
                 <LandingMistakes />
                 <LandingSchedule />
+                <LandingEtsFormat />
+                <LandingFaq />
             </main>
             <SiteFooter />
+            <BackToTop />
         </div>
     );
 }

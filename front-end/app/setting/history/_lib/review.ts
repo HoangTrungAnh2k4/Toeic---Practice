@@ -1,4 +1,4 @@
-import { listAnnotations, listResponses } from '@/lib/data/user-data';
+import { getAttempt, listAnnotations, listResponses } from '@/lib/data/user-data';
 import { getExamRoom, type ExamRoom } from '@/lib/exam-library/room';
 import { summarizeWriting } from '@/lib/scoring/scale';
 import type { ExamSummary } from '@/lib/exam-library/types';
@@ -27,10 +27,12 @@ async function loadWritingTotal(rows: HistoryRow[], { exam, parts }: ExamRoom) {
 
 /**
  * Lượt làm kèm từng câu thuộc phạm vi lượt làm, câu trả lời và nhận xét; `null` nếu không tồn tại.
- * shortcut: nạp mọi lượt để có số lần làm & chênh điểm; đổi sang query một attempt khi có backend.
+ * Chỉ nạp các lượt cùng đề: đủ cho số lần làm, chênh điểm và tổng Writing.
  */
 export async function loadAttemptReview(id: string, exams: ExamSummary[]): Promise<AttemptReview | null> {
-    const rows = await loadHistoryRows(exams);
+    const target = await getAttempt(id);
+    if (!target) return null;
+    const rows = await loadHistoryRows(exams, target.exam_id);
     const row = rows.find((item) => item.attempt.id === id);
     if (!row) return null;
 

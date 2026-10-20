@@ -29,10 +29,10 @@
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 6/7 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | Done | 4/4 | S2 |
-| E4 | Pipeline chấm điểm (AI) | P0 | In progress | 4/7 | S2 – S4 |
+| E4 | Pipeline chấm điểm (AI) | P0 | In progress | 5/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
-| E6 | Lộ trình học & AI insight | P1 | Todo | 0/4 | S4, S6 |
-| E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | Todo | 0/4 | S4, S6 |
+| E6 | Lộ trình học & AI insight | P1 | In progress | 2/4 | S4, S6 |
+| E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 2/4 | S4, S6 |
 | E8 | Auth & bảo mật | P1 | In progress | 5/8 | S1, S5, S6 |
 | E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 2/12 | rải rác |
 | E10 | Phát hành | P1 | In progress | 1/5 | S1, S6 |
@@ -45,7 +45,7 @@
 | S1 | 19/10 – 30/10 | Chặn route phía server + Speaking ghi âm được | ~7 ngày | Todo |
 | S2 | 02/11 – 13/11 | Làm bài đủ 2 kỹ năng, chốt PRD chấm điểm | ~6,5 ngày | Done |
 | S3 | 16/11 – 27/11 | Có điểm (STT + chấm rubric + hàng đợi) | ~9,5 ngày ⚠️ | Todo |
-| S4 | 30/11 – 11/12 | Trang kết quả + khép vòng học trên dữ liệu thật | ~6,5 ngày | Todo |
+| S4 | 30/11 – 11/12 | Trang kết quả + khép vòng học trên dữ liệu thật | ~6,5 ngày | In progress |
 | S5 | 14/12 – 25/12 | Quản trị đề đủ Speaking + Writing | ~6,5 ngày | Todo |
 | S6 | 28/12 – 08/01/2027 | Sinh lộ trình + ra mắt | ~8 ngày | Todo |
 
@@ -93,12 +93,12 @@ Mục tiêu: bài nộp được chấm tự động, `score`/`scoring_error` kh
 Mục tiêu: xem điểm ngay sau khi nộp; Lịch sử, Sổ lỗi, Lộ trình đọc dữ liệu thật thay vì mock/tính tạm.
 
 - [x] **E4-5** (P1, M) UI chờ chấm (polling hoặc realtime) + trang kết quả (`ReviewScoringState`, `ReviewScoreSummary` có sẵn) — *trang xem bài tải lại mỗi 4s khi bài đang chấm, dừng khi có điểm/lỗi/quá 2 phút (`canRescore`); nộp Part Writing cuối → sang trang kết quả; hiện tổng 0–200 cả bài Writing (lượt chấm gần nhất của mỗi Part); lịch sử đánh số lần làm và chênh điểm theo đề + Part*
-- [ ] **E4-6** (P1, S) Test logic quy đổi điểm (`lib/domain/score-levels.ts`)
-- [ ] **E7-1** (P1, S) View `exam_stats` → số lượt làm mỗi đề (`lib/data/content.ts:42`)
-- [ ] **E7-2** (P1, S) Lịch sử: query một attempt thay vì tải hết (`app/setting/history/_lib/review.ts:14`)
+- [x] **E4-6** (P1, S) Test logic quy đổi điểm (`lib/domain/score-levels.ts`)
+- [x] **E7-1** (P1, S) View `exam_stats` → số lượt làm mỗi đề (`lib/data/content.ts:42`) — *view chạy quyền owner để đếm lượt của mọi người, chỉ admin thấy dòng*
+- [x] **E7-2** (P1, S) Lịch sử: query một attempt thay vì tải hết (`app/setting/history/_lib/review.ts:14`) — *trang xem bài nạp attempt rồi chỉ các lượt cùng đề*
 - [ ] **E7-3** (P1, M) Sổ lỗi sinh pattern từ `annotations` thật (`lib/data/mistake-patterns.ts`) — *cần E4-3*
-- [ ] **E6-1** (P1, M) `getActivePlan` đọc `study_plans`, `study_plan_weeks`, `plan_tasks` (hiện luôn `null` — `lib/data/user-data.ts:52`)
-- [ ] **E6-3** (P1, S) Ghi `minutes_per_day` khi đổi thời lượng (`SessionDurationSwitch.tsx:12`)
+- [x] **E6-1** (P1, M) `getActivePlan` đọc `study_plans`, `study_plan_weeks`, `plan_tasks` (hiện luôn `null` — `lib/data/user-data.ts:52`)
+- [x] **E6-3** (P1, S) Ghi `minutes_per_day` khi đổi thời lượng (`SessionDurationSwitch.tsx:12`)
 
 ## Sprint 5 — Quản trị đề đủ (14/12 – 25/12)
 

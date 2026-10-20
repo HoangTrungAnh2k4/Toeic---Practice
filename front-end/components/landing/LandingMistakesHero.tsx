@@ -5,11 +5,16 @@ import { cn } from '@/lib/utils';
 import LandingHeroVisual from './LandingHeroVisual';
 
 /** Một từ sai bị gạch, chữ sửa viết tay nổi phía trên. */
-function Fix({ wrong, right }: { wrong: string; right: string }) {
+export function Fix({ wrong, right, className }: { wrong: string; right: string; className?: string }) {
     return (
         <span className="inline-block relative">
             <del className="decoration-2 decoration-sub3">{wrong}</del>
-            <ins className="-top-7 left-1/2 absolute font-hand text-sub3 text-2xl no-underline whitespace-nowrap -rotate-3 -translate-x-1/2">
+            <ins
+                className={cn(
+                    '-top-7 left-1/2 absolute font-hand text-sub3 text-2xl no-underline whitespace-nowrap -rotate-3 -translate-x-1/2',
+                    className,
+                )}
+            >
                 {right}
             </ins>
         </span>
@@ -26,7 +31,7 @@ export default function LandingMistakesHero() {
     return (
         <section
             aria-labelledby="hero-title"
-            className="items-center gap-12 grid lg:grid-cols-2 mx-auto py-10 sm:py-14 max-w-300"
+            className="items-center gap-12 grid lg:grid-cols-2 mx-auto py-4 max-w-300"
         >
             <div className="flex flex-col items-start gap-8 min-w-0">
                 <div className="flex flex-col gap-3">
@@ -36,14 +41,14 @@ export default function LandingMistakesHero() {
                     >
                         Biết mình
                         <br />
-                        <span className="inline-block bg-sub3 shadow-[5px_5px_0_0_#000] mt-2 mr-1 px-3 border-2 border-black rounded-lg text-main -rotate-2">
+                        <span className="inline-block bg-sub3 mt-2 mr-1 px-3 rounded-lg text-main -rotate-2">
                             sai
                         </span>{' '}
                         ở đâu<span className="text-success">.</span>
                     </h1>
                 </div>
 
-                <figure className="relative bg-black/40 shadow-[0_6px_0_0_var(--sub3)] px-5 pt-9 pb-5 border-2 border-black rounded-xl w-full motion-safe:animate-rise motion-safe:[animation-delay:200ms]">
+                <figure className="relative bg-black/80 px-5 pt-9 pb-5 border-2 border-black rounded-xl w-full motion-safe:animate-rise motion-safe:[animation-delay:200ms]">
                     <figcaption className="-top-3.5 left-5 absolute bg-white px-2.5 py-0.5 border-2 border-black rounded-md font-semibold text-[#333] text-xs">
                         Bài Writing của bạn, Part 2
                     </figcaption>

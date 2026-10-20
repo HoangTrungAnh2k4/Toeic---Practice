@@ -8,10 +8,11 @@ const QUICK_ACTIONS: { id: string; label: string; Icon: IconType }[] = [
 ];
 
 interface FlexibilityPanelProps {
+    planId: string;
     minutesPerDay: number;
 }
 
-export default function FlexibilityPanel({ minutesPerDay }: FlexibilityPanelProps) {
+export default function FlexibilityPanel({ planId, minutesPerDay }: FlexibilityPanelProps) {
     return (
         <section
             aria-labelledby="flexibility-title"
@@ -48,7 +49,7 @@ export default function FlexibilityPanel({ minutesPerDay }: FlexibilityPanelProp
                         />
                     </button>
                 ))}
-                <SessionDurationSwitch defaultValue={minutesPerDay} />
+                <SessionDurationSwitch planId={planId} defaultValue={minutesPerDay} />
             </div>
 
             <div className="flex items-start gap-3 bg-sub3/10 mt-auto p-3 border border-sub3/50 rounded-lg">

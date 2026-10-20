@@ -123,6 +123,33 @@
             transform: scale(1.35);
         }
     }
+
+    /* Phiếu trôi lơ lửng (animate `translate` riêng để không đè rotate/transform sẵn có) */
+    --animate-float: float 6s ease-in-out infinite;
+    /* Vòng sóng toả ra quanh nút ghi âm */
+    --animate-pulse-ring: pulse-ring 1.6s ease-out infinite;
+    /* Thanh thời gian chạy đầy trong 60s, dùng lại keyframes grow-x */
+    --animate-countdown: grow-x 60s linear infinite;
+
+    @keyframes float {
+        50% {
+            translate: 0 -10px;
+        }
+    }
+    @keyframes pulse-ring {
+        from {
+            transform: scale(0.9);
+        }
+        to {
+            transform: scale(1.35);
+            opacity: 0;
+        }
+    }
+}
+
+/* Giấy kẻ dòng 28px (khớp leading-7), nền trắng sẵn vì cn() gộp bg-ruled với bg-white */
+@utility bg-ruled {
+    background-image: repeating-linear-gradient(var(--card) 0 27px, var(--sub1) 27px 28px);
 }
 
 /* Chấm bi sáng trên nền tối (khối minh hoạ landing) */
@@ -137,6 +164,12 @@
         linear-gradient(color-mix(in srgb, var(--sub1) 85%, var(--main)) 1px, transparent 1px),
         linear-gradient(90deg, color-mix(in srgb, var(--sub1) 85%, var(--main)) 1px, transparent 1px);
     background-size: 36px 36px;
+}
+
+/* Vạch chéo: phần thời gian chuẩn bị trên dải đề thi (landing, section chuẩn ETS) */
+@utility bg-hatch {
+    background-color: var(--sub1);
+    background-image: repeating-linear-gradient(-45deg, var(--sub2) 0 1.5px, transparent 1.5px 6px);
 }
 
 /* Nền chấm bi neo-brutalist (trang auth) */
@@ -223,7 +256,7 @@
 
 @layer base {
     * {
-        @apply border-border outline-ring/50;
+        @apply border-border outline-ring/50 scroll-smooth;
     }
     body {
         @apply bg-background font-sans text-foreground;

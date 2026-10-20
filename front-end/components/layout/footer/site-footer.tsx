@@ -15,7 +15,7 @@ export function SiteFooter() {
             <div className="flex flex-col gap-12 mx-auto w-full max-w-360">
                 <div className="gap-10 @4xl:gap-8 grid @2xl:grid-cols-2 @4xl:grid-cols-12">
                     {/* Thương hiệu + tác giả */}
-                    <div className="flex flex-col gap-6 @4xl:col-span-4">
+                    <div className="flex flex-col gap-6 @4xl:col-span-3">
                         <p className="max-w-xs text-sub1/75 text-sm leading-6">
                             Luyện TOEIC Speaking và Writing mỗi ngày, có điểm và nhận xét ngay sau khi nộp bài.
                         </p>
@@ -72,26 +72,28 @@ export function SiteFooter() {
                     </section>
 
                     {/* Liên kết */}
-                    {linkGroups.map((group) => (
-                        <nav key={group.title} aria-label={group.title} className="@4xl:col-span-2">
-                            <h2 className="font-semibold text-white text-sm">{group.title}</h2>
-                            <ul className="flex flex-col gap-3 mt-4">
-                                {group.links.map((link) => (
-                                    <li key={link.label}>
-                                        <Link
-                                            href={link.href}
-                                            className={cn(
-                                                'rounded-sm text-sub1/75 hover:text-white text-sm transition-colors',
-                                                focusRing,
-                                            )}
-                                        >
-                                            {link.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </nav>
-                    ))}
+                    <div className="flex justify-evenly @4xl:col-span-4">
+                        {linkGroups.map((group) => (
+                            <nav key={group.title} aria-label={group.title} className="">
+                                <h2 className="font-semibold text-white text-sm">{group.title}</h2>
+                                <ul className="flex flex-col gap-3 mt-4">
+                                    {group.links.map((link) => (
+                                        <li key={link.label}>
+                                            <Link
+                                                href={link.href}
+                                                className={cn(
+                                                    'rounded-sm text-sub1/75 hover:text-white text-sm transition-colors',
+                                                    focusRing,
+                                                )}
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </nav>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="flex @3xl:flex-row flex-col @3xl:justify-between gap-2 @3xl:gap-8 pt-6 border-sub2/30 border-t text-sub1/70 text-xs leading-5">

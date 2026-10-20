@@ -382,7 +382,21 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "exam_stats": {
+                  Row: {
+                    "attempt_count": number | null,"completion_rate": number | null,"exam_id": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "attempts_exam_id_fkey"
+      columns: ["exam_id"]
+isOneToOne: false
+      referencedRelation: "exams"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
           }
           Functions: {
             "consume_scoring_quota":

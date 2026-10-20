@@ -26,7 +26,6 @@ export default function LandingScheduleWeek() {
                         onClick={() => setFocusDay((d) => (d < 6 ? d + 1 : 1))}
                         className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-1.5 bg-card')}
                     >
-                        <LuCalendarClock aria-hidden="true" className="size-4" />
                         Hôm nay tôi bận
                     </button>
                 </div>

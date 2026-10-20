@@ -44,7 +44,10 @@ export async function listQuestions(examId: string, db: SupabaseClient<Database>
     return data as Question[];
 }
 
-// shortcut: chưa có view `exam_stats` nên chưa có thống kê lượt làm; đọc view khi backend thêm.
-export async function listExamStats(): Promise<ExamStats[]> {
-    return [];
+/** Lượt làm mỗi đề (view `exam_stats`); chỉ phiên admin nhận được dòng, người khác nhận mảng rỗng. */
+export async function listExamStats(db: SupabaseClient<Database> = supabase): Promise<ExamStats[]> {
+    const { data, error } = await db.from('exam_stats').select('exam_id, attempt_count, completion_rate');
+    if (error) throw error;
+    // Cột của view luôn nullable trong type sinh ra, nhưng `group by exam_id` + `count` không bao giờ ra null
+    return data as ExamStats[];
 }
