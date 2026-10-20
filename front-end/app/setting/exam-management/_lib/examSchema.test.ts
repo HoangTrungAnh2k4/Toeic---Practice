@@ -147,6 +147,16 @@ describe('examSchema — Writing', () => {
         );
     });
 
+    it('khi sửa đề, ảnh đã có trên R2 (`image_path`) thay được cho ảnh mới', () => {
+        const exam = validWriting();
+        exam.parts[0].questions[0].image = null;
+        exam.parts[0].questions[0].image_path = 'https://r2.example/exam-images/a.webp';
+        expect(examSchema.safeParse(exam).success).toBe(true);
+
+        exam.parts[2].questions[0].image_path = 'https://r2.example/exam-images/b.webp';
+        expect(issuePaths(exam)).toEqual(['parts.2.questions.0.image']);
+    });
+
     it('chặn đề Writing mang khung Part của Speaking', () => {
         const exam = { ...validSpeaking(), skill: 'writing' as const };
         expect(issuePaths(exam)).toEqual(['parts']);

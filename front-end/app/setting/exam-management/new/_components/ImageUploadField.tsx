@@ -12,13 +12,24 @@ interface ImageUploadFieldProps {
     control: ControlProps;
     /** Ảnh đã nén, chỉ nằm trong RAM; tải lên R2 khi lưu đề. */
     value: File | null;
+    /** Ảnh đang có trên R2 (sửa đề); ảnh mới chọn thì thay ảnh này khi lưu. */
+    existingUrl?: string | null;
     /** Alt cho ảnh xem trước. */
     alt: string;
     onChange: (file: File | null) => void;
+    onRemoveExisting?: () => void;
     onBlur: () => void;
 }
 
-export default function ImageUploadField({ control, value, alt, onChange, onBlur }: ImageUploadFieldProps) {
+export default function ImageUploadField({
+    control,
+    value,
+    existingUrl,
+    alt,
+    onChange,
+    onRemoveExisting,
+    onBlur,
+}: ImageUploadFieldProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [error, setError] = useState('');
@@ -71,6 +82,8 @@ export default function ImageUploadField({ control, value, alt, onChange, onBlur
             <div className="relative flex justify-center items-center bg-sub1 rounded-lg w-full sm:w-48 aspect-4/3 overflow-hidden shrink-0">
                 {value && previewUrl ? (
                     <Image src={previewUrl} alt={alt} fill unoptimized className="object-cover" />
+                ) : !value && existingUrl ? (
+                    <Image src={existingUrl} alt={alt} fill unoptimized className="object-cover" />
                 ) : (
                     <LuImageUp className="size-8 text-sub2" aria-hidden="true" />
                 )}
@@ -97,9 +110,9 @@ export default function ImageUploadField({ control, value, alt, onChange, onBlur
                         ) : (
                             <LuImageUp className="size-4" aria-hidden="true" />
                         )}
-                        {compressing ? 'Đang nén ảnh...' : value ? 'Đổi ảnh' : 'Chọn ảnh'}
+                        {compressing ? 'Đang nén ảnh...' : value || existingUrl ? 'Đổi ảnh' : 'Chọn ảnh'}
                     </Button>
-                    {value && (
+                    {(value || existingUrl) && (
                         <Button
                             type="button"
                             variant="outline"
@@ -107,7 +120,9 @@ export default function ImageUploadField({ control, value, alt, onChange, onBlur
                             className="gap-2"
                             onClick={() => {
                                 setError('');
-                                onChange(null);
+                                // Xoá ảnh mới chọn thì quay về ảnh đang có; không có ảnh mới thì bỏ ảnh đang có
+                                if (value) onChange(null);
+                                else onRemoveExisting?.();
                             }}
                         >
                             <LuTrash2 className="size-4" aria-hidden="true" />

@@ -30,7 +30,7 @@
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 6/7 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | Done | 4/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | In progress | 5/7 | S2 – S4 |
-| E5 | Quản trị đề (admin) | P1 | In progress | 9/11 | S1, S5 |
+| E5 | Quản trị đề (admin) | P1 | In progress | 10/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | In progress | 2/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 2/4 | S4, S6 |
 | E8 | Auth & bảo mật | P1 | In progress | 5/8 | S1, S5, S6 |
@@ -102,10 +102,10 @@ Mục tiêu: xem điểm ngay sau khi nộp; Lịch sử, Sổ lỗi, Lộ trìn
 
 ## Sprint 5 — Quản trị đề đủ (14/12 – 25/12)
 
-Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, không cần sửa DB tay. PRD: [`docs/prd/exam-builder.md`](prd/exam-builder.md), [`docs/prd/writing-exam-builder.md`](prd/writing-exam-builder.md)
+Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, không cần sửa DB tay. PRD: [`docs/prd/exam-builder.md`](prd/exam-builder.md), [`docs/prd/writing-exam-builder.md`](prd/writing-exam-builder.md), [`docs/prd/exam-edit.md`](prd/exam-edit.md)
 
 - [x] **E5-7** (P1, L) Form tạo đề Writing (3 Part) — tái dùng `ExamBuilderForm`, `PartSection`, `examSchema` — *ảnh Q1–5 nén phía trình duyệt rồi lên R2, email lưu text `questions.stimulus`, admin chỉ nhập 2 từ khoá gốc, AI tự đánh giá cách dùng*
-- [ ] **E5-8** (P1, M) Sửa đề + chuyển trạng thái `draft → review → published`
+- [x] **E5-8** (P1, M) Sửa đề + chuyển trạng thái `draft → review → published` — *đề đã có lượt làm chỉ sửa thông tin chung; trả về nháp bắt buộc lý do; phát hành bị chặn khi thiếu dữ liệu; thay ảnh thì xoá ảnh cũ trên R2. Xoá đề cũng xoá ảnh R2*
 - [ ] **E8-6** (P1, S) Quên mật khẩu / đặt lại mật khẩu (chưa có route nào)
 - [ ] **E9-10** (P2, S) supabase-js tự retry GET 3 lần nên báo lỗi hiện sau ~15 giây → giảm retry hoặc timeout cho trang đọc dữ liệu (nợ từ E1-6)
 

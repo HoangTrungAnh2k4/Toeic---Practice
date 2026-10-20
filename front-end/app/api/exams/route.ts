@@ -1,11 +1,9 @@
-import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { fromExamFormData } from '@/app/setting/exam-management/_lib/examFormData';
-import { examSchema } from '@/app/setting/exam-management/_lib/examSchema';
+import { examSchema, toKeywordRows } from '@/app/setting/exam-management/_lib/examSchema';
+import { newExamImage, r2PublicBase } from '@/lib/exam-images';
 import { deleteR2Object, putR2Object } from '@/lib/r2';
 import { createServerSupabase } from '@/lib/supabase-server';
-
-const EXTENSION: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 
 /** Lỗi Postgres từ `create_exam` → mã lỗi + HTTP status cho client. */
 const RPC_ERROR: Record<string, [string, number]> = {
@@ -28,7 +26,7 @@ export async function POST(request: Request) {
     const exam = examSchema.safeParse(form && fromExamFormData(form));
     if (!exam.success) return fail('invalid_body', 400);
 
-    const publicBase = process.env.R2_PUBLIC_URL?.replace(/\/$/, '');
+    const publicBase = r2PublicBase();
     if (!publicBase) return fail('server_error', 500);
 
     const uploads: { key: string; file: File }[] = [];
@@ -37,12 +35,11 @@ export async function POST(request: Request) {
         parts: exam.data.parts.map((part) => ({
             ...part,
             questions: part.questions.map(({ image, keywords, ...rest }) => {
-                // `forms` rỗng: chỉ lưu từ gốc, AI tự đánh giá dạng từ khi chấm
-                const question = { ...rest, keywords: keywords.length ? keywords.map((word) => ({ word, forms: [] })) : null };
+                const question = { ...rest, keywords: toKeywordRows(keywords) };
                 if (!image) return { ...question, image_path: null };
-                const key = `exam-images/${randomUUID()}.${EXTENSION[image.type]}`;
+                const { key, path } = newExamImage(publicBase, image);
                 uploads.push({ key, file: image });
-                return { ...question, image_path: `${publicBase}/${key}` };
+                return { ...question, image_path: path };
             }),
         })),
     };

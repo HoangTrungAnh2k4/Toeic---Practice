@@ -71,7 +71,11 @@ interface PartSectionProps {
 }
 
 export default function PartSection({ skill, template, index }: PartSectionProps) {
-    const { register, control, getFieldState, formState, getValues } = useFormContext<ExamInput, unknown, ExamValues>();
+    const { register, control, getFieldState, formState, getValues, watch, setValue } = useFormContext<
+        ExamInput,
+        unknown,
+        ExamValues
+    >();
     const partErrors = (formState.errors.parts as FieldErrors<ExamInput['parts']> | undefined)?.[index];
     const errorCount = countErrors(partErrors);
     const copy = PART_COPY[skill][template.part_no];
@@ -162,8 +166,15 @@ export default function PartSection({ skill, template, index }: PartSectionProps
                                                 <ImageUploadField
                                                     control={controlProps}
                                                     value={field.value}
+                                                    existingUrl={watch(`${name}.image_path`)}
                                                     alt={`Ảnh câu ${question.number}`}
                                                     onChange={field.onChange}
+                                                    onRemoveExisting={() =>
+                                                        setValue(`${name}.image_path`, null, {
+                                                            shouldDirty: true,
+                                                            shouldValidate: formState.isSubmitted,
+                                                        })
+                                                    }
                                                     onBlur={field.onBlur}
                                                 />
                                             )}

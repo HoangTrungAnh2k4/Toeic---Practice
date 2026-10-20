@@ -13,7 +13,10 @@ import {
     filterExams,
     getTabCounts,
 } from '../utils';
+import type { ExamStatus } from '@/lib/domain/types';
+import { STATUS_STYLE } from '../_lib/examStyle';
 import DeleteExamDialog from './DeleteExamDialog';
+import ExamStatusDialog from './ExamStatusDialog';
 import ExamLibraryFilters from './ExamLibraryFilters';
 import ExamLibraryTable from './ExamLibraryTable';
 import Link from 'next/dist/client/link';
@@ -31,6 +34,8 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
     const [deleteTarget, setDeleteTarget] = useState<ExamLibraryItem | null>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [notice, setNotice] = useState(initialNotice);
+    const [statusChange, setStatusChange] = useState<{ exam: ExamLibraryItem; to: ExamStatus } | null>(null);
+    const [isStatusOpen, setIsStatusOpen] = useState(false);
 
     const tabCounts = useMemo(() => getTabCounts(exams), [exams]);
     const filteredExams = useMemo(() => filterExams(exams, filters), [exams, filters]);
@@ -58,6 +63,17 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
         if (error) return setNotice(error);
         setExams((prev) => prev.filter((exam) => exam.id !== id));
         setNotice(`Đã xóa đề ${code} khỏi kho.`);
+    };
+
+    const handleRequestStatus = (exam: ExamLibraryItem, to: ExamStatus) => {
+        setStatusChange({ exam, to });
+        setIsStatusOpen(true);
+    };
+
+    const handleStatusChanged = (target: ExamLibraryItem, status: ExamStatus, note: string | null) => {
+        setIsStatusOpen(false);
+        setExams((prev) => prev.map((exam) => (exam.id === target.id ? { ...exam, status, review_note: note } : exam)));
+        setNotice(`Đề ${target.code} đã chuyển sang ${STATUS_STYLE[status].label}.`);
     };
 
     const handleExport = () => {
@@ -122,7 +138,17 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
                 exams={filteredExams}
                 totalCount={exams.length}
                 onDelete={handleRequestDelete}
+                onChangeStatus={handleRequestStatus}
                 onResetFilters={handleResetFilters}
+            />
+
+            <ExamStatusDialog
+                key={statusChange ? `${statusChange.exam.id}:${statusChange.to}` : 'none'}
+                open={isStatusOpen}
+                exam={statusChange?.exam ?? null}
+                target={statusChange?.to ?? null}
+                onOpenChange={setIsStatusOpen}
+                onChanged={handleStatusChanged}
             />
 
             <DeleteExamDialog

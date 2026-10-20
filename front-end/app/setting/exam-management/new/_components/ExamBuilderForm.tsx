@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LuCircleAlert, LuSave } from 'react-icons/lu';
+import { LuCircleAlert, LuLock, LuSave } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,7 +13,7 @@ import type { Skill } from '@/lib/domain/types';
 import { TOPIC_OPTIONS } from '@/lib/exam-library/options';
 import { cn } from '@/lib/utils';
 import { toExamFormData } from '../../_lib/examFormData';
-import { emptyExam, type ExamInput, examSchema, type ExamValues } from '../../_lib/examSchema';
+import { emptyExam, examInfoSchema, type ExamInput, examSchema, type ExamValues } from '../../_lib/examSchema';
 import FormField from './FormField';
 import PartSection from './PartSection';
 
@@ -32,21 +32,39 @@ const SAVE_ERROR: Record<string, string> = {
     forbidden: 'Tài khoản của bạn không có quyền tạo đề.',
     invalid_structure: 'Cấu trúc đề không khớp khung Part chuẩn. Vui lòng tải lại trang và thử lại.',
     invalid_body: 'Dữ liệu đề không hợp lệ. Vui lòng kiểm tra lại các ô và ảnh.',
-    upload_failed: 'Không tải được ảnh lên nên đề chưa được tạo. Vui lòng thử lại.',
+    upload_failed: 'Không tải được ảnh lên nên đề chưa được lưu. Vui lòng thử lại.',
+    has_attempts: 'Đề vừa có người làm nên chỉ sửa được thông tin chung. Vui lòng tải lại trang.',
+    not_found: 'Không tìm thấy đề hoặc bạn không có quyền sửa.',
 };
 
-export default function ExamBuilderForm({ skill }: { skill: Skill }) {
+interface ExamBuilderFormProps {
+    skill: Skill;
+    /** Sửa đề: id đề và giá trị hiện có; bỏ trống là tạo đề mới. */
+    exam?: { id: string; values: ExamInput; locked: boolean };
+}
+
+export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
     const router = useRouter();
+    const locked = exam?.locked ?? false;
     const form = useForm<ExamInput, unknown, ExamValues>({
-        resolver: zodResolver(examSchema),
-        defaultValues: emptyExam(skill),
+        // Đề đã có lượt làm chỉ kiểm tra thông tin chung: đề cũ thiếu dữ liệu ở Part vẫn đổi tên được. Khi đó giá trị
+        // submit chỉ còn thông tin chung, đúng thứ gửi kèm `scope=info`
+        resolver: (locked ? zodResolver(examInfoSchema) : zodResolver(examSchema)) as unknown as Resolver<
+            ExamInput,
+            unknown,
+            ExamValues
+        >,
+        defaultValues: exam?.values ?? emptyExam(skill),
     });
     const { register, control, formState } = form;
 
     const onSubmit = form.handleSubmit(async (values) => {
-        const response = await fetch('/api/exams', { method: 'POST', body: toExamFormData(values) }).catch(() => null);
+        const request = exam
+            ? fetch(`/api/exams/${exam.id}`, { method: 'PUT', body: toExamFormData(values, locked ? 'info' : undefined) })
+            : fetch('/api/exams', { method: 'POST', body: toExamFormData(values) });
+        const response = await request.catch(() => null);
         const body = await response?.json().catch(() => null);
-        if (response?.ok) return router.push(`${EXAM_MANAGEMENT_PATH}?created=${body.id}`);
+        if (response?.ok) return router.push(`${EXAM_MANAGEMENT_PATH}?${exam ? 'updated' : 'created'}=${body.id}`);
 
         form.setError('root', { message: SAVE_ERROR[body?.error] ?? 'Không lưu được đề. Vui lòng thử lại.' });
     });
@@ -130,9 +148,20 @@ export default function ExamBuilderForm({ skill }: { skill: Skill }) {
                     </div>
                 </section>
 
-                {getPartTemplates(skill).map((template, index) => (
-                    <PartSection key={template.id} skill={skill} template={template} index={index} />
-                ))}
+                {locked && (
+                    <p role="note" className="flex items-start gap-2 bg-sub3/15 p-4 border border-sub3/50 rounded-xl text-main text-sm">
+                        <LuLock aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                        Đề đã có người làm nên nội dung các Part bị khoá, để bài làm cũ trong Lịch sử luôn khớp với đề. Muốn đổi
+                        nội dung, hãy tạo đề mới.
+                    </p>
+                )}
+
+                {/* `disabled` khoá mọi ô và nút chọn ảnh bên trong khi đề đã có lượt làm */}
+                <fieldset disabled={locked} className="flex flex-col gap-6 disabled:opacity-70 min-w-0">
+                    {getPartTemplates(skill).map((template, index) => (
+                        <PartSection key={template.id} skill={skill} template={template} index={index} />
+                    ))}
+                </fieldset>
 
                 {formState.errors.root?.message && (
                     <p role="alert" className="flex items-start gap-2 font-medium text-destructive text-sm">
@@ -147,7 +176,7 @@ export default function ExamBuilderForm({ skill }: { skill: Skill }) {
                     </Link>
                     <Button type="submit" variant="primary" size="md" className="gap-2" disabled={formState.isSubmitting}>
                         <LuSave className="size-4" aria-hidden="true" />
-                        {formState.isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
+                        {formState.isSubmitting ? 'Đang lưu...' : exam ? 'Lưu thay đổi' : 'Lưu nháp'}
                     </Button>
                 </div>
             </form>

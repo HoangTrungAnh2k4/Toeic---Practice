@@ -1,8 +1,12 @@
-import type { ExamValues } from './examSchema';
+import type { ExamInfoValues, ExamValues } from './examSchema';
 
-/** File không đi qua JSON: mỗi ảnh thành một field `image-<n>`, JSON giữ tên field đó ở chỗ của ảnh. */
-export function toExamFormData(values: ExamValues): FormData {
+/**
+ * File không đi qua JSON: mỗi ảnh thành một field `image-<n>`, JSON giữ tên field đó ở chỗ của ảnh.
+ * `scope=info`: sửa đề đã có lượt làm, chỉ gửi thông tin chung.
+ */
+export function toExamFormData(values: ExamValues | ExamInfoValues, scope?: 'info'): FormData {
     const body = new FormData();
+    if (scope) body.append('scope', scope);
     let count = 0;
     const payload = JSON.stringify(values, (_key, value) => {
         if (!(value instanceof File)) return value;

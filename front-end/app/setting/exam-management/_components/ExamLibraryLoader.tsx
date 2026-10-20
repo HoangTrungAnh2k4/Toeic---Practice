@@ -13,15 +13,18 @@ type LoadState =
     | { status: 'error' }
     | { status: 'ready'; exams: ExamLibraryItem[]; notice: string };
 
-/** Form tạo đề chuyển về đây kèm `?created=<id đề>`; đọc một lần rồi xoá khỏi URL để tải lại không báo lại. */
-function takeCreatedNotice(exams: ExamLibraryItem[]): string {
+/** Form tạo/sửa đề chuyển về đây kèm `?created=` / `?updated=<id đề>`; đọc một lần rồi xoá khỏi URL để tải lại không báo lại. */
+function takeSavedNotice(exams: ExamLibraryItem[]): string {
     const url = new URL(window.location.href);
-    const id = url.searchParams.get('created');
+    const created = url.searchParams.get('created');
+    const id = created ?? url.searchParams.get('updated');
     if (!id) return '';
     url.searchParams.delete('created');
+    url.searchParams.delete('updated');
     window.history.replaceState(null, '', url);
     const code = exams.find((exam) => exam.id === id)?.code;
-    return code ? `Đã tạo đề ${code} ở trạng thái nháp.` : '';
+    if (!code) return '';
+    return created ? `Đã tạo đề ${code} ở trạng thái nháp.` : `Đã lưu thay đổi của đề ${code}.`;
 }
 
 export default function ExamLibraryLoader() {
@@ -29,7 +32,7 @@ export default function ExamLibraryLoader() {
 
     const load = useCallback(() => {
         getExamLibrary()
-            .then((exams) => setState({ status: 'ready', exams, notice: takeCreatedNotice(exams) }))
+            .then((exams) => setState({ status: 'ready', exams, notice: takeSavedNotice(exams) }))
             .catch(() => setState({ status: 'error' }));
     }, []);
 

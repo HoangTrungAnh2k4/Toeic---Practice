@@ -407,6 +407,9 @@ isOneToOne: false
                            },
 "refund_scoring_quota":
 { Args: { "p_subject": string }; Returns: undefined
+                           },
+"update_exam":
+{ Args: { "payload": Json,"target_exam_id": string }; Returns: undefined
                            }
           }
           Enums: {

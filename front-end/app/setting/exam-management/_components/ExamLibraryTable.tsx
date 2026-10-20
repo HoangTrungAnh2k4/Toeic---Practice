@@ -1,9 +1,19 @@
 import Link from 'next/link';
-import { LuBadgeCheck, LuClock3, LuEye, LuInbox, LuPlus, LuSearchX, LuTrash2 } from 'react-icons/lu';
+import { LuBadgeCheck, LuClock3, LuEllipsisVertical, LuEye, LuInbox, LuPencil, LuSearchX, LuTrash2 } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { SKILL_STYLE, SOURCE_LABEL, STATUS_STYLE } from '../_lib/examStyle';
+import type { ExamStatus } from '@/lib/domain/types';
+import { getNextStatuses } from '../_lib/examStatus';
+import { SKILL_STYLE, SOURCE_LABEL, STATUS_ACTION, STATUS_STYLE } from '../_lib/examStyle';
 import { ExamLibraryItem } from '../types';
 import { buildTestHref } from '@/lib/exam-library/search-params';
 import { formatCount } from '../utils';
@@ -12,6 +22,7 @@ interface ExamLibraryTableProps {
     exams: ExamLibraryItem[];
     totalCount: number;
     onDelete: (exam: ExamLibraryItem) => void;
+    onChangeStatus: (exam: ExamLibraryItem, status: ExamStatus) => void;
     onResetFilters: () => void;
 }
 
@@ -62,7 +73,7 @@ function EmptyRow({ isLibraryEmpty, onResetFilters }: { isLibraryEmpty: boolean;
     );
 }
 
-export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetFilters }: ExamLibraryTableProps) {
+export default function ExamLibraryTable({ exams, totalCount, onDelete, onChangeStatus, onResetFilters }: ExamLibraryTableProps) {
     return (
         <div className="flex flex-col bg-white shadow-sm border border-sub2/30 rounded-xl overflow-hidden">
             <Table>
@@ -175,6 +186,37 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onResetF
                                             >
                                                 <LuEye className="size-4" aria-hidden="true" />
                                             </Link>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger
+                                                    aria-label={`Thao tác với ${exam.title}`}
+                                                    title="Sửa, đổi trạng thái"
+                                                    className={cn(ICON_ACTION_CLASS, 'hover:bg-sub1 data-popup-open:bg-sub1')}
+                                                >
+                                                    <LuEllipsisVertical className="size-4" aria-hidden="true" />
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-48">
+                                                    <DropdownMenuGroup>
+                                                        <DropdownMenuItem
+                                                            render={<Link href={`/setting/exam-management/${exam.id}/edit`} />}
+                                                        >
+                                                            <LuPencil aria-hidden="true" />
+                                                            Sửa đề
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuGroup>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuGroup>
+                                                        {getNextStatuses(exam.status).map((next) => {
+                                                            const action = STATUS_ACTION[next];
+                                                            return (
+                                                                <DropdownMenuItem key={next} onClick={() => onChangeStatus(exam, next)}>
+                                                                    <action.Icon aria-hidden="true" />
+                                                                    {action.label}
+                                                                </DropdownMenuItem>
+                                                            );
+                                                        })}
+                                                    </DropdownMenuGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                             <button
                                                 type="button"
                                                 onClick={() => onDelete(exam)}

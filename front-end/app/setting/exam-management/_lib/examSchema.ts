@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { getPartTemplates } from '@/lib/domain/parts';
 import type { Skill } from '@/lib/domain/types';
+import type { ExamRoom } from '@/lib/exam-library/room';
 import type { Topic } from '@/lib/exam-library/types';
 
 const TOPICS = ['office', 'customer', 'retail', 'travel', 'tech', 'logistics', 'strategy'] as const satisfies readonly Topic[];
@@ -49,7 +50,9 @@ const questionSchema = z.object({
     prompt: requiredText('Vui lòng nhập nội dung câu hỏi', 2000),
     /** Email đề Writing Q6–7, lưu text vào `questions.stimulus`. */
     stimulus: optionalText(4000),
-    /** Ảnh giữ trong RAM tới khi lưu đề; server ghi DB trước rồi mới tải lên R2. */
+    /** Ảnh đã có trên R2 khi sửa đề; server chỉ chấp nhận đúng ảnh hiện tại của câu. */
+    image_path: z.string().max(500).nullable(),
+    /** Ảnh mới giữ trong RAM tới khi lưu đề, thay cho `image_path`. */
     image: z
         .file()
         .mime([...IMAGE_TYPES], 'Chỉ nhận ảnh JPG, PNG hoặc WebP')
@@ -68,18 +71,22 @@ const partSchema = z.object({
     questions: z.array(questionSchema),
 });
 
-export const examSchema = z
-    .object({
+/** Thông tin chung: đề đã có lượt làm chỉ sửa được phần này. */
+export const examInfoSchema = z.object({
+    title: requiredText('Vui lòng nhập tiêu đề', 150),
+    topic: z.enum(TOPICS, 'Vui lòng chọn chủ đề'),
+    target_level: z
+        .number('Vui lòng chọn level mục tiêu')
+        .int()
+        .min(1, 'Level từ 1 đến 9')
+        .max(9, 'Level từ 1 đến 9')
+        .nullable(),
+    edition: z.number('Vui lòng nhập năm ấn bản').int().min(2000, 'Năm không hợp lệ').max(2100, 'Năm không hợp lệ'),
+});
+
+export const examSchema = examInfoSchema
+    .extend({
         skill: z.enum(['speaking', 'writing']),
-        title: requiredText('Vui lòng nhập tiêu đề', 150),
-        topic: z.enum(TOPICS, 'Vui lòng chọn chủ đề'),
-        target_level: z
-            .number('Vui lòng chọn level mục tiêu')
-            .int()
-            .min(1, 'Level từ 1 đến 9')
-            .max(9, 'Level từ 1 đến 9')
-            .nullable(),
-        edition: z.number('Vui lòng nhập năm ấn bản').int().min(2000, 'Năm không hợp lệ').max(2100, 'Năm không hợp lệ'),
         parts: z.array(partSchema),
     })
     .superRefine((exam, ctx) => {
@@ -113,8 +120,9 @@ export const examSchema = z
 
             part.questions.forEach((question, index) => {
                 const at = [...path, 'questions', index];
-                if (!fields.image && question.image) issue([...at, 'image'], `Part ${template.part_no} không có ảnh`);
-                if (fields.image && !question.image) issue([...at, 'image'], 'Vui lòng chọn hoặc dán ảnh');
+                const hasImage = Boolean(question.image || question.image_path);
+                if (!fields.image && hasImage) issue([...at, 'image'], `Part ${template.part_no} không có ảnh`);
+                if (fields.image && !hasImage) issue([...at, 'image'], 'Vui lòng chọn hoặc dán ảnh');
                 if (fields.image && !question.image_alt) issue([...at, 'image_alt'], 'Vui lòng mô tả chi tiết ảnh');
                 if (fields.stimulus && !question.stimulus) issue([...at, 'stimulus'], 'Vui lòng nhập nội dung email');
 
@@ -134,8 +142,12 @@ export const examSchema = z
         });
     });
 
+/** Từ khoá form → cột `questions.keywords`: chỉ từ gốc, `forms` rỗng vì AI tự đánh giá dạng từ khi chấm. */
+export const toKeywordRows = (keywords: string[]) => (keywords.length ? keywords.map((word) => ({ word, forms: [] })) : null);
+
 export type ExamInput = z.input<typeof examSchema>;
 export type ExamValues = z.output<typeof examSchema>;
+export type ExamInfoValues = z.output<typeof examInfoSchema>;
 
 /** Yêu cầu chung của Writing Q1–5 theo ETS; điền sẵn để admin khỏi gõ lại 5 lần. */
 const PICTURE_SENTENCE_PROMPT = 'Write ONE sentence based on the picture. Use the TWO words or phrases under the picture.';
@@ -155,11 +167,46 @@ export function emptyExam(skill: Skill): ExamInput {
                 number: template.q_from + index,
                 prompt: skill === 'writing' && template.part_no === 1 ? PICTURE_SENTENCE_PROMPT : '',
                 stimulus: '',
+                image_path: null,
                 image: null,
                 image_alt: '',
                 keywords: getPartFields(skill, template.part_no).keywords ? Array(KEYWORD_COUNT).fill('') : [],
                 sample_answer: '',
             })),
         })),
+    };
+}
+
+/** Đề đọc từ DB → giá trị form sửa đề; ảnh có sẵn giữ ở `image_path`, từ khoá chỉ lấy từ gốc. */
+export function examToFormValues({ exam, parts }: ExamRoom): ExamInput {
+    const empty = emptyExam(exam.skill);
+    return {
+        ...empty,
+        title: exam.title,
+        topic: TOPICS.find((topic) => topic === exam.topic) ?? empty.topic,
+        target_level: exam.target_level,
+        edition: exam.edition,
+        parts: empty.parts.map((part) => {
+            const source = parts.find((item) => item.template.id === part.part_template_id);
+            return {
+                ...part,
+                context: source?.part.context ?? '',
+                questions: part.questions.map((question) => {
+                    const row = source?.questions.find((item) => item.number === question.number);
+                    if (!row) return question;
+                    const words = (row.keywords ?? []).map((keyword) => keyword.word);
+                    return {
+                        ...question,
+                        prompt: row.prompt,
+                        stimulus: row.stimulus ?? '',
+                        image_path: row.image_path,
+                        image_alt: row.image_alt ?? '',
+                        // Giữ đúng số ô từ khoá của Part; đề cũ thiếu từ thì để ô trống cho admin điền
+                        keywords: question.keywords.map((_, index) => words[index] ?? ''),
+                        sample_answer: row.sample_answer ?? '',
+                    };
+                }),
+            };
+        }),
     };
 }
