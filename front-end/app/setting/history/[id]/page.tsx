@@ -1,8 +1,13 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
 import AttemptReviewSkeleton from './_components/AttemptReviewSkeleton';
 import AttemptReviewView from './_components/AttemptReviewView';
+
+export const metadata: Metadata = {
+    title: 'Xem lại bài làm | Toeco',
+};
 
 interface AttemptReviewPageProps {
     params: Promise<{ id: string }>;

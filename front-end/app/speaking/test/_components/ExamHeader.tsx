@@ -110,7 +110,8 @@ export default function ExamHeader({
                                         <span className="flex justify-center items-center bg-sub2 rounded-full size-5 text-white">
                                             <LuCheck className="size-3" aria-hidden="true" />
                                         </span>
-                                        <span>
+                                        {/* 375px không đủ chỗ cho cả 4 nhãn: chỉ giữ nhãn bước hiện tại */}
+                                        <span className="max-sm:sr-only">
                                             {idx + 1}. {label}
                                         </span>
                                     </li>
@@ -138,7 +139,7 @@ export default function ExamHeader({
                                         <span className="flex justify-center items-center border border-sub2/60 rounded-full size-5 text-[11px]">
                                             {idx + 1}
                                         </span>
-                                        <span>{label}</span>
+                                        <span className="max-sm:sr-only">{label}</span>
                                     </li>
                                 )}
                             </Fragment>

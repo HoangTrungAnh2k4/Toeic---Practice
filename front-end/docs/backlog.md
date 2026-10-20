@@ -27,15 +27,15 @@
 | ID | Epic | Ưu tiên | Trạng thái | Tiến độ | Sprint |
 | --- | --- | --- | --- | --- | --- |
 | E1 | Lưu dữ liệu người dùng trên Supabase | P0 | Done | 6/6 | S0 |
-| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 6/7 | S1, S2 |
+| E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 6/8 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | Done | 4/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | In progress | 5/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 10/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | In progress | 2/4 | S4, S6 |
-| E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 2/4 | S4, S6 |
-| E8 | Auth & bảo mật | P1 | In progress | 6/8 | S1, S5, S6 |
-| E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 3/12 | rải rác |
-| E10 | Phát hành | P1 | In progress | 1/5 | S1, S6 |
+| E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 3/4 | S4, S6 |
+| E8 | Auth & bảo mật | P1 | In progress | 7/9 | S1, S5, S6 |
+| E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 4/12 | rải rác |
+| E10 | Phát hành | P1 | In progress | 2/5 | S1, S6 |
 
 ## Lịch Sprint
 
@@ -47,7 +47,7 @@
 | S3 | 16/11 – 27/11 | Có điểm (STT + chấm rubric + hàng đợi) | ~9,5 ngày ⚠️ | Todo |
 | S4 | 30/11 – 11/12 | Trang kết quả + khép vòng học trên dữ liệu thật | ~6,5 ngày | In progress |
 | S5 | 14/12 – 25/12 | Quản trị đề đủ Speaking + Writing | ~6,5 ngày | Done |
-| S6 | 28/12 – 08/01/2027 | Sinh lộ trình + ra mắt | ~8 ngày | Todo |
+| S6 | 28/12 – 08/01/2027 | Sinh lộ trình + ra mắt | ~8 ngày | In progress |
 
 > Tải tính theo S = ½ ngày, M = 1,5 ngày, L = 4 ngày; mỗi sprint ~10 ngày làm việc, chừa ~30% cho bug/review.
 
@@ -114,14 +114,14 @@ Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, kh�
 Mục tiêu: người dùng mới vào là có lộ trình; deploy production.
 
 - [ ] **E6-2** (P1, L) Sinh lộ trình từ mục tiêu điểm + ngày thi (AI hoặc rule-based)
-- [ ] **E7-4** (P2, S) Kiểm tra Overview/Chart với dữ liệu thật, empty state cho user mới
-- [ ] **E8-7** (P1, S) Rà RLS toàn bộ bảng trước khi phát hành (bổ sung pgTAP trong `back-end/supabase/tests`)
-- [ ] **E9-2** (P2, S) Thay dữ liệu mock ở footer (`components/layout/footer/footer-data.ts`)
-- [ ] **E9-6** (P2, S) Responsive check ở 375px cho 2 phòng thi
-- [ ] **E10-1** (P1, S) Biến môi trường production (Supabase, storage, AI key) + tách project dev/prod
+- [x] **E7-4** (P2, S) Kiểm tra Overview/Chart với dữ liệu thật, empty state cho user mới — *empty state đã đủ (thẻ mục tiêu, chart, hoạt động gần đây). Sửa lỗi: Writing lưu mỗi Part một lượt nên `fullTestScores` không bao giờ có điểm Writing → thẻ Writing ở Overview/Profile/Schedule luôn "Chưa có bài làm cả đề"; giờ lượt chấm làm đủ mọi Part sinh một điểm cả bài (`combineWritingScores`, gộp lượt gần nhất mỗi Part như trang xem bài) + test. Sửa icon Speaking/Writing bị đảo ở banner*
+- [x] **E8-7** (P1, S) Rà RLS toàn bộ bảng trước khi phát hành — *16/16 bảng bật RLS, không thấy lỗ hổng; thêm `launch_rls.test.sql` (20 test: anon, profiles, lộ trình, ai_insights, scoring_usage, bảng danh mục, tự chuyển `scored`). Còn lại xem E8-9*
+- [ ] **E9-2** (P2, S) Thay dữ liệu mock ở footer (`components/layout/footer/footer-data.ts`) — *đã thay "Nguồn đề thi" mock bằng "Kho đề" đếm đề `published` thật, link Kiểm tra micro/loa. Còn chờ: link GitHub/LinkedIn/email thật, đích cho "Hướng dẫn làm bài", "Báo lỗi đề thi", "Góp ý", 3 trang chính sách (chưa có route)*
+- [x] **E9-6** (P2, S) Responsive check ở 375px cho 2 phòng thi — *không tràn trang; thanh bước Speaking (488px) và nhóm câu Writing (520px) bị khuất trong khung 310px → dưới `sm` chỉ hiện nhãn bước hiện tại (nhãn khác `sr-only`). Đã đo Speaking câu 1 + Writing 3 Part; Speaking Part 2–5 chỉ rà class, chưa render (cần ghi âm qua từng câu)*
+- [ ] **E10-1** (P1, S) Biến môi trường production (Supabase, storage, AI key, `NEXT_PUBLIC_SITE_URL`) + tách project dev/prod; dán template `recovery.html` vào Dashboard (Auth → Email Templates → Reset Password)
 - [ ] **E10-2** (P1, S) Deploy (Vercel) + domain — *cần E10-1*
 - [ ] **E10-4** (P2, S) Theo dõi lỗi (Sentry hoặc tương đương) + analytics cơ bản
-- [ ] **E10-5** (P2, S) SEO cơ bản: metadata cho mọi trang (hiện mới 9 trang có), `sitemap`, `robots`, OG image
+- [x] **E10-5** (P2, S) SEO cơ bản — *metadata cho 10 trang còn thiếu, `lang="vi"`, `metadataBase` + OG/Twitter ở root, `app/sitemap.ts` (5 trang công khai), `app/robots.ts` (chặn `/api`, `/setting`, phòng thi), `app/opengraph-image.tsx`. Production cần `NEXT_PUBLIC_SITE_URL` (gộp vào E10-1)*
 
 ---
 
@@ -143,6 +143,8 @@ Sau ra mắt, hoặc kéo vào sprint nào còn dư chỗ.
 - [ ] **E9-7** (P3, S) Chạy `/ponytail-debt` định kỳ, đóng các `shortcut:` đã xử lý
 - [ ] **E9-11** (P2, S) Thử trên app nhánh lỗi của `/mistakes/[id]`, `/setting/history/[id]`, phòng thi (khi API sập, server không lấy được đề nên rơi vào `app/error.tsx`)
 - [ ] **E9-12** (P3, S) Xoá SVG mẫu của Next không dùng: `public/{file,globe,next,window}.svg`
+- [ ] **E2-8** (P2, S) Vào phòng Speaking bằng `?mode=guided` khi đang có lượt CBT dở của đề → mở lại lượt CBT (khoá nhảy câu): `resumeOrStart` (`lib/data/user-data.ts`) chỉ khớp đề + Part, không xét `mode`. Writing cũng dùng chung hàm này
+- [ ] **E8-9** (P3, S) Siết grant thừa (RLS đã chặn nên không khai thác được): `anon`/`authenticated` còn quyền INSERT `profiles` (kể cả cột `role`) và TRUNCATE trên các bảng `public` (mặc định Supabase, PostgREST không gọi được)
 
 ---
 

@@ -6,6 +6,7 @@ import { Sidebar, SidebarFallback } from '@/components/layout/sidebar';
 import { SiteFooter } from '@/components/layout/footer/site-footer';
 import { HideOnExam } from '@/components/layout/footer/hide-on-exam';
 import { HideOnAuth } from '@/components/layout/hide-on-auth';
+import { SITE_URL } from '@/lib/site';
 
 const roboto = Roboto({
     weight: ['300', '400', '500', '700'],
@@ -18,12 +19,18 @@ const geistMono = Geist_Mono({
     subsets: ['latin'],
 });
 
+const DESCRIPTION =
+    'Luyện TOEIC Speaking & Writing sát format ETS: phòng thi có ghi âm, chấm điểm bằng AI theo rubric và nhận xét ngay sau khi nộp.';
+
 export const metadata: Metadata = {
+    metadataBase: new URL(SITE_URL),
     title: 'Toeco',
-    description: 'Practice TOEIC anytime, anywhere',
+    description: DESCRIPTION,
     icons: {
         icon: '/favicon.ico',
     },
+    openGraph: { type: 'website', siteName: 'Toeco', locale: 'vi_VN', description: DESCRIPTION },
+    twitter: { card: 'summary_large_image' },
 };
 
 export default function RootLayout({
@@ -32,7 +39,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="vi">
             <body className={`${roboto.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col md:flex-row`}>
                 {/* usePathname cần Suspense trên các route có param động (cacheComponents) */}
                 <Suspense fallback={<SidebarFallback />}>

@@ -3,12 +3,10 @@ import { LuGithub, LuLinkedin, LuMail } from 'react-icons/lu';
 
 /**
  * Dữ liệu hiển thị ở footer toàn cục.
- * Hiện đang là dữ liệu mock — thay bằng thông tin thật (link cá nhân, số đề) khi có.
+ * Số đề đọc từ Supabase ở `site-footer.tsx`. Link cá nhân và link `#` vẫn là mock, chờ thông tin thật.
  */
 
 export type SocialLink = { label: string; href: string; icon: IconType };
-
-export type ExamSource = { name: string; note: string; count: string };
 
 export type FooterLinkGroup = { title: string; links: { label: string; href: string }[] };
 
@@ -23,19 +21,12 @@ export const author = {
     ] satisfies SocialLink[],
 };
 
-export const examSources: ExamSource[] = [
-    { name: 'ETS TOEIC SW Official Test Prep', note: 'Sách luyện thi chính thức', count: '4 đề' },
-    { name: 'Đề mẫu trên ets.org', note: 'Bản công khai của ETS', count: '2 đề' },
-    { name: 'Toeco biên soạn', note: 'Bám sát format đề thi 2026', count: '18 đề' },
-    { name: 'Cộng đồng đóng góp', note: 'Đã qua kiểm duyệt', count: '236 câu' },
-];
-
 export const linkGroups: FooterLinkGroup[] = [
     {
         title: 'Hỗ trợ',
         links: [
             { label: 'Hướng dẫn làm bài', href: '#' },
-            { label: 'Kiểm tra micro và loa', href: '#' },
+            { label: 'Kiểm tra micro và loa', href: '/setting/device-check' },
             { label: 'Báo lỗi đề thi', href: '#' },
             { label: 'Góp ý tính năng', href: '#' },
         ],

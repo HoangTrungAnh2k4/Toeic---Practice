@@ -13,8 +13,8 @@ type ExamFormat = {
 };
 
 const EXAM_FORMATS: ExamFormat[] = [
-    { icon: FaPenNib, skill: 'Speaking', detail: '11 câu trong 20 phút' },
-    { icon: FaMicrophoneLines, skill: 'Writing', detail: '8 câu trong 60 phút' },
+    { icon: FaMicrophoneLines, skill: 'Speaking', detail: '11 câu trong 20 phút' },
+    { icon: FaPenNib, skill: 'Writing', detail: '8 câu trong 60 phút' },
 ];
 
 const ENTER = 'motion-safe:animate-rise';

@@ -1,9 +1,15 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
 import MistakeDetailSkeleton from './_components/MistakeDetailSkeleton';
 import MistakeDetailView from './_components/MistakeDetailView';
+
+export const metadata: Metadata = {
+    title: 'Chi tiết lỗi | Toeco',
+    description: 'Vì sao mắc lỗi, ví dụ từ bài làm và cách sửa.',
+};
 
 interface MistakeDetailPageProps {
     params: Promise<{ id: string }>;

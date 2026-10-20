@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ExamLibraryResults } from '@/components/exam-library/exam-library-results';
 import { LibraryHero } from '@/components/exam-library/library-hero';
@@ -9,6 +10,11 @@ import { getLibraryExams } from '@/lib/exam-library/summaries';
 import { UserExamStatesProvider } from '@/lib/exam-library/use-user-exam-states';
 import SpeakingRubricGuide from './_components/SpeakingRubricGuide';
 import { PART_STRATEGIES } from './utils';
+
+export const metadata: Metadata = {
+    title: 'Đề TOEIC Speaking | Toeco',
+    description: 'Kho đề TOEIC Speaking 11 câu theo format ETS, chấm điểm bằng AI ngay sau khi nộp.',
+};
 
 interface SpeakingPageProps {
     searchParams: Promise<RawSearchParams>;

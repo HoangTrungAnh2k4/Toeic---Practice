@@ -141,7 +141,7 @@ export default function WritingExamHeader({
                             const isDone = index < activeSectionIndex;
                             return (
                                 <li key={section.id} className="flex items-center gap-2 shrink-0">
-                                    {index > 0 && <span className="bg-sub2/60 w-4 h-px" aria-hidden="true" />}
+                                    {index > 0 && <span className="max-sm:hidden bg-sub2/60 w-4 h-px" aria-hidden="true" />}
                                     <span
                                         aria-current={isActive ? 'step' : undefined}
                                         className={cn(
@@ -154,8 +154,10 @@ export default function WritingExamHeader({
                                         {isActive && <span className="bg-sub3 rounded-full size-2" aria-hidden="true" />}
                                         {isDone && <LuCheck className="size-3.5 text-sub2" aria-hidden="true" />}
                                         {!isActive && !isDone && <LuLock className="size-3.5" aria-hidden="true" />}
+                                        {/* 375px không đủ chỗ cho cả 3 nhãn: nhóm chưa/đã làm chỉ hiện số câu */}
                                         <span>
-                                            {section.range}: {section.label}
+                                            {section.range}
+                                            <span className={cn(!isActive && 'max-sm:sr-only')}>: {section.label}</span>
                                         </span>
                                     </span>
                                 </li>

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { GuestDataNotice } from '@/components/user/guest-data-notice';
 import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
@@ -5,6 +6,11 @@ import FooterAssurance from './_components/footerAssurance';
 import OverviewProgress from './_components/overviewProgress';
 import RecentAttempt from './_components/_recentAttempt/recentAttempt';
 import WelcomeBanner from './_components/welcome';
+
+export const metadata: Metadata = {
+    title: 'Tổng quan | Toeco',
+    description: 'Tiến độ, điểm gần nhất và mục tiêu luyện TOEIC Speaking & Writing của bạn.',
+};
 
 export default async function Overview() {
     const [exams, patterns] = await Promise.all([getExamSummaries(), listMistakePatterns()]);

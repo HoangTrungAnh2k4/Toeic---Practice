@@ -1,5 +1,10 @@
+import type { Metadata } from 'next';
 import SettingGroupSection from './_components/SettingGroupSection';
 import { SETTING_GROUPS } from './utils';
+
+export const metadata: Metadata = {
+    title: 'Cài đặt | Toeco',
+};
 
 export default function SettingPage() {
     return (

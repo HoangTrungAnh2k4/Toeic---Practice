@@ -1,9 +1,14 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { GuestDataNotice } from '@/components/user/guest-data-notice';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
 import HistoryResults from './_components/HistoryResults';
 import HistoryResultsSkeleton from './_components/HistoryResultsSkeleton';
 import { RawSearchParams } from './_lib/searchParams';
+
+export const metadata: Metadata = {
+    title: 'Lịch sử làm bài | Toeco',
+};
 
 interface HistoryPageProps {
     searchParams: Promise<RawSearchParams>;

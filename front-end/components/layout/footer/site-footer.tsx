@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import packageJson from '@/package.json';
 import { cn } from '@/lib/utils';
-import { author, copyrightYear, examSources, linkGroups } from './footer-data';
+import { getExamSummaries } from '@/lib/exam-library/summaries';
+import type { Skill } from '@/lib/domain/types';
+import { author, copyrightYear, linkGroups } from './footer-data';
 
 const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sub3';
 
@@ -9,7 +11,24 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
  * Footer toàn cục. Nền `bg-main` nối liền với đáy sidebar thành khung chữ L;
  * pseudo-element `before` tạo góc bo ngược bên trái để vùng nội dung phía trên trông như được bo tròn.
  */
-export function SiteFooter() {
+const SKILL_ROWS: { skill: Skill; name: string; note: string; href: string }[] = [
+    { skill: 'speaking', name: 'TOEIC Speaking', note: '11 câu, 5 Part', href: '/speaking' },
+    { skill: 'writing', name: 'TOEIC Writing', note: '8 câu, 3 Part', href: '/writing' },
+];
+
+/** Số đề đã phát hành mỗi kỹ năng; lỗi thì ẩn khối thay vì làm hỏng cả trang (footer nằm ở root layout). */
+async function countPublishedExams() {
+    try {
+        const exams = await getExamSummaries();
+        return (skill: Skill) => exams.filter((exam) => exam.skill === skill && exam.status === 'published').length;
+    } catch {
+        return null;
+    }
+}
+
+export async function SiteFooter() {
+    const countBySkill = await countPublishedExams();
+
     return (
         <footer className="@container before:-top-6 before:left-0 before:absolute relative bg-main before:bg-[radial-gradient(circle_at_100%_0,transparent_23.5px,var(--main)_24px)] px-4 sm:px-8 pt-12 pb-8 before:size-6 text-sub1 before:content-['']">
             <div className="flex flex-col gap-12 mx-auto w-full max-w-360">
@@ -48,27 +67,36 @@ export function SiteFooter() {
                         </div>
                     </div>
 
-                    {/* Nguồn đề thi */}
-                    <section aria-labelledby="footer-sources" className="@4xl:col-span-4">
-                        <h2 id="footer-sources" className="font-semibold text-white text-sm">
-                            Nguồn đề thi
-                        </h2>
-                        <dl className="mt-4 divide-y divide-sub2/30">
-                            {examSources.map((source) => (
-                                <div
-                                    key={source.name}
-                                    className="flex justify-between items-baseline gap-4 py-2.5 first:pt-0"
-                                >
-                                    <dt className="flex flex-col">
-                                        <span className="text-white text-sm">{source.name}</span>
-                                        <span className="text-sub1/70 text-xs">{source.note}</span>
-                                    </dt>
-                                    <dd className="font-semibold tabular-nums text-sub3 text-sm shrink-0">
-                                        {source.count}
-                                    </dd>
-                                </div>
-                            ))}
-                        </dl>
+                    {/* Kho đề */}
+                    <section aria-labelledby="footer-library" className="@4xl:col-span-4">
+                        {countBySkill && (
+                            <>
+                                <h2 id="footer-library" className="font-semibold text-white text-sm">
+                                    Kho đề
+                                </h2>
+                                <dl className="mt-4 divide-y divide-sub2/30">
+                                    {SKILL_ROWS.map(({ skill, name, note, href }) => (
+                                        <div
+                                            key={skill}
+                                            className="flex justify-between items-baseline gap-4 py-2.5 first:pt-0"
+                                        >
+                                            <dt className="flex flex-col">
+                                                <Link
+                                                    href={href}
+                                                    className={cn('rounded-sm text-white hover:text-sub3 text-sm', focusRing)}
+                                                >
+                                                    {name}
+                                                </Link>
+                                                <span className="text-sub1/70 text-xs">{note}</span>
+                                            </dt>
+                                            <dd className="font-semibold tabular-nums text-sub3 text-sm shrink-0">
+                                                {countBySkill(skill)} đề
+                                            </dd>
+                                        </div>
+                                    ))}
+                                </dl>
+                            </>
+                        )}
                     </section>
 
                     {/* Liên kết */}

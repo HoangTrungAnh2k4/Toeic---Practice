@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ExamLibraryResults } from '@/components/exam-library/exam-library-results';
 import { LibraryHero } from '@/components/exam-library/library-hero';
@@ -10,6 +11,11 @@ import { UserExamStatesProvider } from '@/lib/exam-library/use-user-exam-states'
 import WritingPageHeader from './_components/WritingPageHeader';
 import WritingRubricGuide from './_components/WritingRubricGuide';
 import { PART_STRATEGIES } from './utils';
+
+export const metadata: Metadata = {
+    title: 'Đề TOEIC Writing | Toeco',
+    description: 'Kho đề TOEIC Writing 8 câu theo format ETS, chấm theo rubric và chỉ rõ lỗi cần sửa.',
+};
 
 interface WritingPageProps {
     searchParams: Promise<RawSearchParams>;

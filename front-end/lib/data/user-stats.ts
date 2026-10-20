@@ -1,7 +1,11 @@
 import { PART_TEMPLATES } from '@/lib/domain/parts';
+import { summarizeWriting } from '@/lib/scoring/scale';
 import type {
     Attempt,
     Exam,
+    ExamPart,
+    Question,
+    AttemptResponse,
     Skill,
     UserPartStats,
     UserSkillStats,
@@ -62,28 +66,64 @@ function getStreaks(days: Set<string>, now: Date) {
     return { current, best };
 }
 
-/** Tổng điểm / điểm tối đa của các câu đã chấm, gom theo Part. */
-async function scorePartsOf(attempts: Attempt[]) {
-    const totals = new Map<number, { score: number; max: number }>();
-    await Promise.all(
+/** Câu trả lời, Part và câu hỏi của một lượt đã chấm; nạp một lần, dùng cho điểm theo Part và điểm Writing cả bài. */
+export interface AttemptDetails {
+    responses: AttemptResponse[];
+    parts: ExamPart[];
+    questions: Question[];
+}
+
+async function loadAttemptDetails(attempts: Attempt[]) {
+    const entries = await Promise.all(
         attempts.map(async (attempt) => {
             const [responses, parts, questions] = await Promise.all([
                 listResponses(attempt.id),
                 listExamParts(attempt.exam_id),
                 listQuestions(attempt.exam_id),
             ]);
-            const partTemplateOf = new Map(parts.map((part) => [part.id, part.part_template_id]));
-            const examPartOf = new Map(questions.map((question) => [question.id, question.exam_part_id]));
-            for (const { question_id, score, max_score } of responses) {
-                const examPartId = examPartOf.get(question_id);
-                const partTemplateId = examPartId && partTemplateOf.get(examPartId);
-                if (!partTemplateId || score === null || !max_score) continue;
-                const total = totals.get(partTemplateId) ?? { score: 0, max: 0 };
-                totals.set(partTemplateId, { score: total.score + score, max: total.max + max_score });
-            }
+            return [attempt.id, { responses, parts, questions }] as const;
         }),
     );
+    return new Map<string, AttemptDetails>(entries);
+}
+
+/** Tổng điểm / điểm tối đa của các câu đã chấm, gom theo Part. */
+function scoreParts(details: Iterable<AttemptDetails>) {
+    const totals = new Map<number, { score: number; max: number }>();
+    for (const { responses, parts, questions } of details) {
+        const partTemplateOf = new Map(parts.map((part) => [part.id, part.part_template_id]));
+        const examPartOf = new Map(questions.map((question) => [question.id, question.exam_part_id]));
+        for (const { question_id, score, max_score } of responses) {
+            const examPartId = examPartOf.get(question_id);
+            const partTemplateId = examPartId && partTemplateOf.get(examPartId);
+            if (!partTemplateId || score === null || !max_score) continue;
+            const total = totals.get(partTemplateId) ?? { score: 0, max: 0 };
+            totals.set(partTemplateId, { score: total.score + score, max: total.max + max_score });
+        }
+    }
     return totals;
+}
+
+/**
+ * Writing lưu mỗi Part một lượt: lượt chấm nào làm đề đủ mọi Part thì sinh một điểm cả bài, gộp lượt chấm gần nhất của
+ * từng Part (giống tổng ở trang xem bài). `attempts` là lượt Writing theo từng Part đã chấm.
+ */
+export function combineWritingScores(attempts: Attempt[], details: Map<string, AttemptDetails>) {
+    const latestByExam = new Map<string, Map<number, Attempt>>();
+    const scores: UserStats['fullTestScores'] = [];
+    const byScoredAt = [...attempts].sort((a, b) => (a.scored_at ?? '').localeCompare(b.scored_at ?? ''));
+    for (const attempt of byScoredAt) {
+        const detail = details.get(attempt.id);
+        if (attempt.part_template_id === null || !attempt.scored_at || !detail) continue;
+        const latest = latestByExam.get(attempt.exam_id) ?? new Map<number, Attempt>();
+        latestByExam.set(attempt.exam_id, latest.set(attempt.part_template_id, attempt));
+        if (!detail.parts.every((part) => latest.has(part.part_template_id))) continue;
+
+        const responses = [...latest.values()].flatMap((item) => details.get(item.id)?.responses ?? []);
+        const { score } = summarizeWriting(detail.questions, responses);
+        scores.push({ attempt_id: attempt.id, skill: 'writing', score, scored_at: attempt.scored_at });
+    }
+    return scores;
 }
 
 /** Thống kê từ bài làm của người dùng. Lượt của đề không còn trong `exams` bị bỏ qua. */
@@ -95,11 +135,18 @@ export async function loadUserStats(exams: Exam[], now = new Date()): Promise<Us
     // Có trong `skillOf` nhờ filter phía trên
     const skillOfAttempt = (attempt: Attempt) => skillOf.get(attempt.exam_id) as Skill;
 
-    const fullTestScores = scored.flatMap((attempt) =>
-        attempt.part_template_id === null && attempt.score !== null && attempt.scored_at
-            ? [{ attempt_id: attempt.id, skill: skillOfAttempt(attempt), score: attempt.score, scored_at: attempt.scored_at }]
-            : [],
-    );
+    const details = await loadAttemptDetails(scored);
+    const fullTestScores = [
+        ...scored.flatMap((attempt) =>
+            attempt.part_template_id === null && attempt.score !== null && attempt.scored_at
+                ? [{ attempt_id: attempt.id, skill: skillOfAttempt(attempt), score: attempt.score, scored_at: attempt.scored_at }]
+                : [],
+        ),
+        ...combineWritingScores(
+            scored.filter((attempt) => skillOfAttempt(attempt) === 'writing'),
+            details,
+        ),
+    ].sort((a, b) => a.scored_at.localeCompare(b.scored_at));
 
     const skillStats = (skill: Skill): UserSkillStats => {
         const latest = fullTestScores.filter((item) => item.skill === skill).at(-1);
@@ -116,7 +163,7 @@ export async function loadUserStats(exams: Exam[], now = new Date()): Promise<Us
         };
     };
 
-    const partTotals = await scorePartsOf(scored);
+    const partTotals = scoreParts(details.values());
     const parts: UserPartStats[] = PART_TEMPLATES.map((template) => {
         const total = partTotals.get(template.id);
         return {
