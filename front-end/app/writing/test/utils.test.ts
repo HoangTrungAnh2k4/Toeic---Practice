@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
 import type { Attempt } from '@/lib/domain/types';
-import { getQuestionDeadline } from './utils';
+import { findKeywordUsage, getQuestionDeadline } from './utils';
 
 const START = Date.parse('2026-11-02T00:00:00Z');
 const attemptFor = (endsAfterSec: number | null) =>
@@ -32,5 +32,18 @@ describe('getQuestionDeadline', () => {
 
     it('has no deadline in guided mode', () => {
         expect(getQuestionDeadline(attemptFor(null), template(7), 0)).toBeNull();
+    });
+});
+
+describe('findKeywordUsage', () => {
+    it('nhận từ gốc kèm hậu tố khi đề chỉ có từ gốc', () => {
+        expect(findKeywordUsage('He is carrying two desks.', { word: 'carry', forms: [] })).toBe('carrying');
+        expect(findKeywordUsage('Two desks are empty.', { word: 'desk', forms: [] })).toBe('desks');
+        expect(findKeywordUsage('He carried a box.', { word: 'carry', forms: [] })).toBeNull();
+    });
+
+    it('nhận biến thể có sẵn trong forms và cụm nhiều từ', () => {
+        expect(findKeywordUsage('He carried a box.', { word: 'carry', forms: ['carried'] })).toBe('carried');
+        expect(findKeywordUsage('She sits in  front of the desk.', { word: 'in front of', forms: [] })).toBe('in  front of');
     });
 });

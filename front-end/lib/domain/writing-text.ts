@@ -13,11 +13,16 @@ export function countSentences(text: string): number {
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-/** Trả về dạng từ khóa thí sinh đã dùng, hoặc `null` nếu chưa xuất hiện. */
+const toPattern = (phrase: string) => escapeRegExp(phrase).replace(/\s+/g, '\\s+');
+
+/**
+ * Dạng từ khóa thí sinh đã dùng, hoặc `null` nếu chưa thấy — chỉ để gợi ý trong phòng thi, điểm do AI chấm.
+ * shortcut: từ gốc chỉ khớp thêm hậu tố (desk → desks, carry → carrying); "carried", "making" chỉ khớp khi có trong `forms`.
+ */
 export function findKeywordUsage(text: string, keyword: RequiredKeyword): string | null {
-    for (const form of keyword.forms) {
-        const pattern = new RegExp(`\\b${escapeRegExp(form).replace(/\s+/g, '\\s+')}\\b`, 'i');
-        const match = text.match(pattern);
+    const patterns = [...keyword.forms.map((form) => `${toPattern(form)}\\b`), `${toPattern(keyword.word)}\\w*`];
+    for (const pattern of patterns) {
+        const match = text.match(new RegExp(`\\b${pattern}`, 'i'));
         if (match) return match[0];
     }
     return null;

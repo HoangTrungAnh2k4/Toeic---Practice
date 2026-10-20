@@ -30,7 +30,7 @@
 | E2 | Phòng thi Speaking thật (ghi âm, attempt) | P0 | In progress | 6/7 | S1, S2 |
 | E3 | Phòng thi Writing đủ 8 câu | P0 | Done | 4/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | In progress | 5/7 | S2 – S4 |
-| E5 | Quản trị đề (admin) | P1 | In progress | 8/11 | S1, S5 |
+| E5 | Quản trị đề (admin) | P1 | In progress | 9/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | In progress | 2/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 2/4 | S4, S6 |
 | E8 | Auth & bảo mật | P1 | In progress | 5/8 | S1, S5, S6 |
@@ -46,7 +46,7 @@
 | S2 | 02/11 – 13/11 | Làm bài đủ 2 kỹ năng, chốt PRD chấm điểm | ~6,5 ngày | Done |
 | S3 | 16/11 – 27/11 | Có điểm (STT + chấm rubric + hàng đợi) | ~9,5 ngày ⚠️ | Todo |
 | S4 | 30/11 – 11/12 | Trang kết quả + khép vòng học trên dữ liệu thật | ~6,5 ngày | In progress |
-| S5 | 14/12 – 25/12 | Quản trị đề đủ Speaking + Writing | ~6,5 ngày | Todo |
+| S5 | 14/12 – 25/12 | Quản trị đề đủ Speaking + Writing | ~6,5 ngày | In progress |
 | S6 | 28/12 – 08/01/2027 | Sinh lộ trình + ra mắt | ~8 ngày | Todo |
 
 > Tải tính theo S = ½ ngày, M = 1,5 ngày, L = 4 ngày; mỗi sprint ~10 ngày làm việc, chừa ~30% cho bug/review.
@@ -102,9 +102,9 @@ Mục tiêu: xem điểm ngay sau khi nộp; Lịch sử, Sổ lỗi, Lộ trìn
 
 ## Sprint 5 — Quản trị đề đủ (14/12 – 25/12)
 
-Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, không cần sửa DB tay. PRD: [`docs/prd/exam-builder.md`](prd/exam-builder.md)
+Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, không cần sửa DB tay. PRD: [`docs/prd/exam-builder.md`](prd/exam-builder.md), [`docs/prd/writing-exam-builder.md`](prd/writing-exam-builder.md)
 
-- [ ] **E5-7** (P1, L) Form tạo đề Writing (3 Part) — tái dùng `ExamBuilderForm`, `PartSection`, `examSchema`
+- [x] **E5-7** (P1, L) Form tạo đề Writing (3 Part) — tái dùng `ExamBuilderForm`, `PartSection`, `examSchema` — *ảnh Q1–5 nén phía trình duyệt rồi lên R2, email lưu text `questions.stimulus`, admin chỉ nhập 2 từ khoá gốc, AI tự đánh giá cách dùng*
 - [ ] **E5-8** (P1, M) Sửa đề + chuyển trạng thái `draft → review → published`
 - [ ] **E8-6** (P1, S) Quên mật khẩu / đặt lại mật khẩu (chưa có route nào)
 - [ ] **E9-10** (P2, S) supabase-js tự retry GET 3 lần nên báo lỗi hiện sau ~15 giây → giảm retry hoặc timeout cho trang đọc dữ liệu (nợ từ E1-6)

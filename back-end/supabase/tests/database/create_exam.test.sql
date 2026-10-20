@@ -1,5 +1,5 @@
 begin;
-select plan(7);
+select plan(10);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
@@ -71,6 +71,41 @@ select ok(
 
 update public.exams set code = 'SP-T' where title = 'Direct';
 select isnt((select code from public.exams where title = 'Direct'), 'SP-T', 'the code cannot be changed by an update');
+
+-- Writing: per-question e-mail and required keywords are stored.
+select lives_ok(
+  $$select public.create_exam(jsonb_build_object(
+    'skill', 'writing', 'title', 'Writing Test', 'edition', 2026, 'topic', 'office',
+    'parts', (
+      select jsonb_agg(jsonb_build_object(
+        'part_template_id', pt.id,
+        'questions', (
+          select jsonb_agg(jsonb_build_object(
+            'number', n, 'prompt', 'Question ' || n, 'stimulus', 'E-mail ' || n,
+            'keywords', jsonb_build_array(jsonb_build_object('word', 'desk', 'forms', '[]'::jsonb))
+          ))
+          from generate_series(pt.q_from::int, pt.q_to::int) n
+        )
+      ) order by pt.id)
+      from public.part_templates pt
+      where pt.skill = 'writing'
+    )
+  ))$$,
+  'admins can create a complete writing exam'
+);
+
+select results_eq(
+  $$select q.stimulus, q.keywords->0->>'word'
+    from public.exams e
+    join public.exam_parts ep on ep.exam_id = e.id
+    join public.questions q on q.exam_part_id = ep.id
+    where e.title = 'Writing Test' and q.number = 6$$,
+  $$values ('E-mail 6', 'desk')$$,
+  'stimulus and keywords are written for each question'
+);
+
+set local request.jwt.claims = '{"sub": "00000000-0000-0000-0000-000000000001", "role": "authenticated"}';
+select is_empty($$select 1 from public.exams where title = 'Writing Test'$$, 'students cannot see draft exams');
 
 select * from finish();
 rollback;

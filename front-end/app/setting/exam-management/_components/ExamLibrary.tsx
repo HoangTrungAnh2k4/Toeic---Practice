@@ -84,6 +84,12 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
                     >
                         Tạo đề Speaking
                     </Link>
+                    <Link
+                        href="/setting/exam-management/new?skill=writing"
+                        className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 self-start xl:self-auto shrink-0')}
+                    >
+                        Tạo đề Writing
+                    </Link>
                     <div className="flex items-center self-start sm:self-auto gap-3">
                         <span role="status" aria-live="polite" className="font-semibold text-main text-xs">
                             {notice}

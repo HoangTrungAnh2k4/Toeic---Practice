@@ -1,7 +1,7 @@
-import type { SpeakingExamValues } from './examSchema';
+import type { ExamValues } from './examSchema';
 
 /** File không đi qua JSON: mỗi ảnh thành một field `image-<n>`, JSON giữ tên field đó ở chỗ của ảnh. */
-export function toExamFormData(values: SpeakingExamValues): FormData {
+export function toExamFormData(values: ExamValues): FormData {
     const body = new FormData();
     let count = 0;
     const payload = JSON.stringify(values, (_key, value) => {
@@ -14,7 +14,7 @@ export function toExamFormData(values: SpeakingExamValues): FormData {
     return body;
 }
 
-/** Ngược lại `toExamFormData`; kết quả chưa tin được, phải parse lại bằng `speakingExamSchema`. */
+/** Ngược lại `toExamFormData`; kết quả chưa tin được, phải parse lại bằng `examSchema`. */
 export function fromExamFormData(body: FormData): unknown {
     const payload = body.get('payload');
     if (typeof payload !== 'string') return null;

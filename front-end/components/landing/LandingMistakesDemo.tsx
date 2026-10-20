@@ -63,21 +63,21 @@ export default function LandingMistakesDemo() {
                         <li
                             key={id}
                             className={cn(
-                                'relative flex flex-col items-start gap-1.5 bg-[repeating-linear-gradient(transparent_0_26px,#ccc_27px,transparent_28px)] bg-white shadow-[6px_6px_0_0_#F5B841] p-5 border rounded-sm',
+                                'relative flex flex-col items-start gap-1.5 bg-[repeating-linear-gradient(transparent_0_26px,#ccc_27px,transparent_28px)] bg-white shadow-[6px_6px_0_0_#F5B841] p-5 border rounded-sm font-hand',
                                 tilt,
                             )}
                         >
                             <span className={cn('px-1.5 py-0.5 border-2 border-black rounded-md font-semibold text-[0.6875rem] uppercase tracking-wider', levelTone)}>
                                 {level}
                             </span>
-                            <h3 className={cn('mt-1 font-semibold text-main text-lg', isFixed && 'line-through decoration-2')}>{title}</h3>
-                            <p className="font-medium text-subText text-sm">Lặp lại {repeats} lần</p>
-                            <p className="text-main [&_del]:text-subText text-sm">{example}</p>
+                            <h3 className={cn('mt-1 font-semibold text-main text-xl', isFixed && 'line-through decoration-2')}>{title}</h3>
+                            <p className="font-medium text-subText text-base">Lặp lại {repeats} lần</p>
+                            <p className="text-main [&_del]:text-subText text-base">{example}</p>
                             <button
                                 type="button"
                                 disabled={isFixed}
                                 onClick={() => setFixed((prev) => [...prev, id])}
-                                className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'bg-card mt-3')}
+                                className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'bg-card text-base mt-3')}
                             >
                                 {isFixed ? 'Đã luyện' : 'Luyện sửa'}
                             </button>

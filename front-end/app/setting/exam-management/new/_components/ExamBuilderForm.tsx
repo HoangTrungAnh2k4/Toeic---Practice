@@ -8,16 +8,12 @@ import { LuCircleAlert, LuSave } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getPartTemplates } from '@/lib/domain/parts';
+import type { Skill } from '@/lib/domain/types';
 import { TOPIC_OPTIONS } from '@/lib/exam-library/options';
 import { cn } from '@/lib/utils';
 import { toExamFormData } from '../../_lib/examFormData';
-import {
-    emptySpeakingExam,
-    SPEAKING_PART_TEMPLATES,
-    speakingExamSchema,
-    type SpeakingExamInput,
-    type SpeakingExamValues,
-} from '../../_lib/examSchema';
+import { emptyExam, type ExamInput, examSchema, type ExamValues } from '../../_lib/examSchema';
 import FormField from './FormField';
 import PartSection from './PartSection';
 
@@ -34,16 +30,16 @@ const LEVEL_ITEMS = [
 const SAVE_ERROR: Record<string, string> = {
     unauthorized: 'Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.',
     forbidden: 'Tài khoản của bạn không có quyền tạo đề.',
-    invalid_structure: 'Cấu trúc đề không khớp 5 Part chuẩn. Vui lòng tải lại trang và thử lại.',
+    invalid_structure: 'Cấu trúc đề không khớp khung Part chuẩn. Vui lòng tải lại trang và thử lại.',
     invalid_body: 'Dữ liệu đề không hợp lệ. Vui lòng kiểm tra lại các ô và ảnh.',
     upload_failed: 'Không tải được ảnh lên nên đề chưa được tạo. Vui lòng thử lại.',
 };
 
-export default function ExamBuilderForm() {
+export default function ExamBuilderForm({ skill }: { skill: Skill }) {
     const router = useRouter();
-    const form = useForm<SpeakingExamInput, unknown, SpeakingExamValues>({
-        resolver: zodResolver(speakingExamSchema),
-        defaultValues: emptySpeakingExam(),
+    const form = useForm<ExamInput, unknown, ExamValues>({
+        resolver: zodResolver(examSchema),
+        defaultValues: emptyExam(skill),
     });
     const { register, control, formState } = form;
 
@@ -134,8 +130,8 @@ export default function ExamBuilderForm() {
                     </div>
                 </section>
 
-                {SPEAKING_PART_TEMPLATES.map((template, index) => (
-                    <PartSection key={template.id} template={template} index={index} />
+                {getPartTemplates(skill).map((template, index) => (
+                    <PartSection key={template.id} skill={skill} template={template} index={index} />
                 ))}
 
                 {formState.errors.root?.message && (

@@ -13,7 +13,7 @@ export function LandingSchedule() {
                         <br />
                         Hôm nay bận? Dời sang mai.
                     </h2>
-                    <p className="max-w-xl font-medium text-subText leading-relaxed">
+                    <p className="max-w-xl font-hand font-medium text-subText text-lg leading-relaxed">
                         Chọn điểm mục tiêu, Toeco xếp bài vào đúng những ngày bạn rảnh và tự dời lịch khi bạn bận.
                     </p>
                 </div>
