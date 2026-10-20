@@ -4,13 +4,15 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE } from '../_lib/skillStyle';
 import { StudyDay } from '../types';
-import { formatMinutes, getTotalDuration } from '../utils';
+import { canCompleteTask, formatMinutes, getTotalDuration } from '../utils';
+import CompleteTaskButton from './CompleteTaskButton';
 
 interface TodayFocusProps {
     day?: StudyDay;
+    onTaskCompleted: () => void;
 }
 
-export default function TodayFocus({ day }: TodayFocusProps) {
+export default function TodayFocus({ day, onTaskCompleted }: TodayFocusProps) {
     if (!day || day.tasks.length === 0) {
         return (
             <section className="flex flex-col justify-center items-center gap-2 bg-white p-8 border h-full border-sub2/30 rounded-xl text-center">
@@ -89,10 +91,18 @@ export default function TodayFocus({ day }: TodayFocusProps) {
                     <strong className="font-semibold text-white">{formatMinutes(getTotalDuration(day.tasks))}</strong>
                 </span>
                 {nextTask ? (
-                    <Link href={nextTask.href} className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
-                        <LuPlay className="size-4" aria-hidden="true" />
-                        <span>{nextTask.actionLabel}</span>
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-3">
+                        {canCompleteTask(nextTask) && (
+                            <CompleteTaskButton taskId={nextTask.id} onCompleted={onTaskCompleted} />
+                        )}
+                        <Link
+                            href={nextTask.href}
+                            className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}
+                        >
+                            <LuPlay className="size-4" aria-hidden="true" />
+                            <span>{nextTask.actionLabel}</span>
+                        </Link>
+                    </div>
                 ) : (
                     <span className="font-semibold text-sub3 text-sm">Đã hoàn thành phiên học hôm nay</span>
                 )}

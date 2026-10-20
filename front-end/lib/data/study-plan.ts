@@ -15,7 +15,7 @@ function startOfWeek(date: Date) {
 }
 
 /** Tuần 1 là tuần (Thứ 2 – Chủ nhật) chứa ngày tạo lộ trình. */
-export function getPlanWeekNo(plan: StudyPlan, date: Date): number {
+export function getPlanWeekNo(plan: Pick<StudyPlan, 'created_at'>, date: Date): number {
     // round: tuần qua đổi giờ mùa hè dài/ngắn hơn 7 ngày một giờ
     return Math.round((startOfWeek(date).getTime() - startOfWeek(new Date(plan.created_at)).getTime()) / WEEK_MS) + 1;
 }

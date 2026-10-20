@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { LuCalendarPlus, LuUserPlus } from 'react-icons/lu';
+import { useEffect, useState } from 'react';
+import { LuCalendarPlus, LuTarget, LuUserPlus } from 'react-icons/lu';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
 import { LoadError } from '@/components/load-error';
-import { buttonVariants } from '@/components/ui/button';
+import Button, { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { combineAsync, useAsync } from '@/hooks/use-async';
 import { useUserStats } from '@/hooks/use-user-stats';
@@ -17,6 +17,8 @@ import { cn } from '@/lib/utils';
 import { buildExamGoal, buildSkillProgress, buildWeek } from '../utils';
 import AiRationale from './AiRationale';
 import FlexibilityPanel from './FlexibilityPanel';
+import PlanGoalDialog from './PlanGoalDialog';
+import RegeneratePlanDialog from './RegeneratePlanDialog';
 import ScheduleMilestones from './ScheduleMilestones';
 import SchedulePageHeader from './SchedulePageHeader';
 import TodayFocus from './TodayFocus';
@@ -39,7 +41,7 @@ async function loadPlanState(): Promise<PlanState> {
     return { profile, active, insight };
 }
 
-function NoPlanCard({ isGuest }: { isGuest: boolean }) {
+function NoPlanCard({ isGuest, onEditGoals }: { isGuest: boolean; onEditGoals: () => void }) {
     const Icon = isGuest ? LuUserPlus : LuCalendarPlus;
 
     return (
@@ -53,13 +55,18 @@ function NoPlanCard({ isGuest }: { isGuest: boolean }) {
             <p className="max-w-md text-subText text-sm">
                 {isGuest
                     ? 'Lộ trình được xếp theo ngày thi, mục tiêu điểm và sổ lỗi của tài khoản. Bài làm ở chế độ khách chỉ lưu trên trình duyệt này.'
-                    : 'Dùng “Tối ưu lộ trình (AI)” để tạo lịch học theo ngày thi và mục tiêu điểm của bạn.'}
+                    : 'Đặt điểm mục tiêu và ngày thi, hệ thống xếp lịch học ngay theo điểm và sổ lỗi của bạn.'}
             </p>
-            {isGuest && (
+            {isGuest ? (
                 <Link href="/register" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
                     <LuUserPlus className="size-4" aria-hidden="true" />
                     Đăng ký
                 </Link>
+            ) : (
+                <Button type="button" variant="primary" size="md" className="gap-2" onClick={onEditGoals}>
+                    <LuTarget className="size-4" aria-hidden="true" />
+                    Đặt mục tiêu
+                </Button>
             )}
         </section>
     );
@@ -71,6 +78,12 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
     const bookState = useMistakeBook(patterns, exams);
     const planState = useAsync(loadPlanState);
     const [weekNo, setWeekNo] = useState<number | null>(null);
+    const [dialog, setDialog] = useState<'goals' | 'regenerate' | null>(null);
+    // `/schedule#goals` (từ Profile) mở sẵn form mục tiêu; đọc ở frame sau vì điều hướng client gắn hash sau khi mount
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => window.location.hash === '#goals' && setDialog('goals'));
+        return () => cancelAnimationFrame(frame);
+    }, []);
     const { failed, retry } = combineAsync(statsState, bookState, planState);
     const { data: stats } = statsState;
     const { data: book } = bookState;
@@ -88,12 +101,46 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
     }
 
     const { profile, active, insight } = state;
-    const header = <SchedulePageHeader rationale={active?.plan.ai_rationale ?? null} showActions={!!profile} />;
+    const editGoals = () => setDialog('goals');
+    const onSaved = () => {
+        setWeekNo(null);
+        planState.retry();
+    };
+    const context = { stats, book, exams };
+    const header = (
+        <>
+            <SchedulePageHeader
+                rationale={active?.plan.ai_rationale ?? null}
+                onEditGoals={profile ? editGoals : undefined}
+                onRegenerate={profile && active ? () => setDialog('regenerate') : undefined}
+            />
+            {profile && (
+                <PlanGoalDialog
+                    open={dialog === 'goals'}
+                    onOpenChange={(open) => setDialog(open ? 'goals' : null)}
+                    profile={profile}
+                    plan={active?.plan ?? null}
+                    context={context}
+                    onSaved={onSaved}
+                />
+            )}
+            {profile && active && (
+                <RegeneratePlanDialog
+                    open={dialog === 'regenerate'}
+                    onOpenChange={(open) => setDialog(open ? 'regenerate' : null)}
+                    profile={profile}
+                    plan={active.plan}
+                    context={context}
+                    onSaved={onSaved}
+                />
+            )}
+        </>
+    );
     if (!profile || !active) {
         return (
             <>
                 {header}
-                <NoPlanCard isGuest={!profile} />
+                <NoPlanCard isGuest={!profile} onEditGoals={editGoals} />
             </>
         );
     }
@@ -117,7 +164,10 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
             {/* Hành động trước: việc cần làm hôm nay + điều chỉnh khi bận */}
             <div className="gap-4 grid grid-cols-1 xl:grid-cols-12">
                 <div className="xl:col-span-7">
-                    <TodayFocus day={currentWeek.days.find((day) => day.status === 'today')} />
+                    <TodayFocus
+                        day={currentWeek.days.find((day) => day.status === 'today')}
+                        onTaskCompleted={planState.retry}
+                    />
                 </div>
                 <div className="xl:col-span-5">
                     <FlexibilityPanel planId={active.plan.id} minutesPerDay={active.plan.minutes_per_day} />
@@ -126,7 +176,7 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
 
             <WeekSprint week={week} weekCount={weekCount} onWeekChange={setWeekNo} />
             <AiRationale insight={insight} />
-            <WeeklyTaskTable tasks={week.days.flatMap((day) => day.tasks)} />
+            <WeeklyTaskTable tasks={week.days.flatMap((day) => day.tasks)} onTaskCompleted={planState.retry} />
         </>
     );
 }

@@ -5,7 +5,6 @@ import type {
     LibraryEntry,
     LibraryQuery,
     LibraryTab,
-    TargetFilter,
     UserExamState,
 } from './types';
 
@@ -66,12 +65,6 @@ const TAB_MATCHERS: Record<LibraryTab, (entry: LibraryEntry) => boolean> = {
     bookmark: (entry) => entry.user.bookmarked,
 };
 
-const TARGET_MATCHERS: Record<Exclude<TargetFilter, 'all'>, (level: number) => boolean> = {
-    level_5: (level) => level <= 5,
-    level_6_7: (level) => level >= 6 && level <= 7,
-    level_8: (level) => level >= 8,
-};
-
 export function countTabs(entries: LibraryEntry[]): Record<LibraryTab, number> {
     return {
         all: entries.length,
@@ -80,14 +73,11 @@ export function countTabs(entries: LibraryEntry[]): Record<LibraryTab, number> {
     };
 }
 
-export function filterEntries(entries: LibraryEntry[], { tab, searchQuery, target, status, topic }: LibraryQuery) {
+export function filterEntries(entries: LibraryEntry[], { tab, searchQuery, status, topic }: LibraryQuery) {
     const keyword = searchQuery.trim().toLowerCase();
 
     return entries.filter(({ exam, user }) => {
         if (!TAB_MATCHERS[tab]({ exam, user })) return false;
-        if (target !== 'all' && (exam.target_level === null || !TARGET_MATCHERS[target](exam.target_level))) {
-            return false;
-        }
         if (status !== 'all' && user.progress !== status) return false;
         if (topic !== 'all' && exam.topic !== topic) return false;
         if (!keyword) return true;

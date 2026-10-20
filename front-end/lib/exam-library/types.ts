@@ -31,8 +31,6 @@ export interface LibraryEntry {
 
 export type LibraryTab = 'all' | 'retake' | 'bookmark';
 
-export type TargetFilter = 'all' | 'level_5' | 'level_6_7' | 'level_8';
-
 export type ProgressFilter = 'all' | ExamProgress;
 
 export type Topic = 'office' | 'customer' | 'retail' | 'travel' | 'tech' | 'logistics' | 'strategy';
@@ -43,7 +41,6 @@ export type TopicFilter = 'all' | Topic;
 export interface LibraryQuery {
     tab: LibraryTab;
     searchQuery: string;
-    target: TargetFilter;
     status: ProgressFilter;
     topic: TopicFilter;
     page: number;

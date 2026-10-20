@@ -20,11 +20,6 @@ import PartSection from './PartSection';
 const EXAM_MANAGEMENT_PATH = '/setting/exam-management';
 
 const TOPIC_ITEMS = TOPIC_OPTIONS.filter((option) => option.value !== 'all');
-const NO_LEVEL = 'none';
-const LEVEL_ITEMS = [
-    { value: NO_LEVEL, label: 'Chưa đặt' },
-    ...Array.from({ length: 9 }, (_, index) => ({ value: String(index + 1), label: `Level ${index + 1}` })),
-];
 
 /** Mã lỗi từ `POST /api/exams` → thông báo cho admin. */
 const SAVE_ERROR: Record<string, string> = {
@@ -84,7 +79,7 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
                         {(controlProps) => <Input {...controlProps} {...register('title')} />}
                     </FormField>
 
-                    <div className="gap-4 grid sm:grid-cols-3">
+                    <div className="gap-4 grid sm:grid-cols-2">
                         <Controller
                             name="topic"
                             control={control}
@@ -107,44 +102,6 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
                                 </FormField>
                             )}
                         />
-                        <Controller
-                            name="target_level"
-                            control={control}
-                            render={({ field, fieldState }) => (
-                                <FormField label="Level mục tiêu" error={fieldState.error?.message}>
-                                    {(controlProps) => (
-                                        <Select
-                                            items={LEVEL_ITEMS}
-                                            value={field.value === null ? NO_LEVEL : String(field.value)}
-                                            onValueChange={(value) =>
-                                                field.onChange(value === NO_LEVEL ? null : Number(value))
-                                            }
-                                        >
-                                            <SelectTrigger {...controlProps} ref={field.ref} onBlur={field.onBlur} className="w-full">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {LEVEL_ITEMS.map((item) => (
-                                                    <SelectItem key={item.value} value={item.value}>
-                                                        {item.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                </FormField>
-                            )}
-                        />
-                        <FormField label="Năm ấn bản" required error={formState.errors.edition?.message}>
-                            {(controlProps) => (
-                                <Input
-                                    {...controlProps}
-                                    type="number"
-                                    inputMode="numeric"
-                                    {...register('edition', { valueAsNumber: true })}
-                                />
-                            )}
-                        </FormField>
                     </div>
                 </section>
 

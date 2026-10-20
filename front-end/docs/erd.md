@@ -37,7 +37,7 @@ erDiagram
 ### Ngân hàng đề
 
 - [x] **part_templates** (dữ liệu tĩnh, seed theo format ETS — xem `lib/domain/parts.ts`) — `id` PK · `skill` · `part_no` · `q_from` · `q_to` · `task` · `context_sec?` · `prep_sec?` · `response_sec smallint[]?` (theo từng câu) · `section_sec?` (đồng hồ chung cả Part)
-- [x] **exams** — `id` PK · `skill` (speaking | writing) · `code` UK · `title` · `edition` (năm) · `source` (ets | internal) · `status` (draft | review | published) · `is_verified` · `topic` · `target_level?` · `description?` · `tags text[]` · `review_note?` · `created_by?` FK profiles · `published_at?` · `created_at` · `updated_at`
+- [x] **exams** — `id` PK · `skill` (speaking | writing) · `code` UK · `title` · `source` (ets | internal) · `status` (draft | review | published) · `is_verified` · `topic` · `description?` · `tags text[]` · `review_note?` · `created_by?` FK profiles · `published_at?` · `created_at` · `updated_at`
 - [x] **exam_parts** — `id` PK · `exam_id` FK · `part_template_id` FK · `description?` · `context?` · `context_media_path?` — UK (`exam_id`, `part_template_id`)
 - [x] **questions** — `id` PK · `exam_part_id` FK · `number` · `prompt` · `stimulus?` (ngữ liệu riêng của câu, vd email Q6-7) · `image_path?` · `image_alt?` · `audio_path?` · `keywords jsonb?` (Writing Q1-5) · `sample_answer?` · `hint?` — UK (`exam_part_id`, `number`)
 

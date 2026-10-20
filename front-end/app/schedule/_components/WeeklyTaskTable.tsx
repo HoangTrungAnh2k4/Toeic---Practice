@@ -6,11 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE } from '../_lib/skillStyle';
 import { TaskStatus, TaskView } from '../types';
-import { formatMinutes } from '../utils';
+import { canCompleteTask, formatMinutes } from '../utils';
+import CompleteTaskButton from './CompleteTaskButton';
 
 interface WeeklyTaskTableProps {
     /** Task của tuần đang xem. */
     tasks: TaskView[];
+    onTaskCompleted: () => void;
 }
 
 const COLUMNS = ['Kỹ năng', 'Chủ đề bài học', 'Mục tiêu đầu ra', 'Thời lượng', 'Trạng thái'];
@@ -22,7 +24,7 @@ const STATUS_STYLE: Record<TaskStatus, { Icon: IconType; className: string }> = 
     scheduled: { Icon: LuCalendarClock, className: 'bg-sub1/50 text-subText' },
 };
 
-export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
+export default function WeeklyTaskTable({ tasks, onTaskCompleted }: WeeklyTaskTableProps) {
     return (
         <section
             aria-labelledby="weekly-task-title"
@@ -33,9 +35,7 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                     <h2 id="weekly-task-title" className="font-bold text-main text-lg">
                         Danh mục bài tập trọng điểm trong tuần
                     </h2>
-                    <p className="font-medium text-subText text-xs">
-                        {tasks.length} bài trong tuần đang xem.
-                    </p>
+                    <p className="font-medium text-subText text-xs">{tasks.length} bài trong tuần đang xem.</p>
                 </div>
             </div>
 
@@ -65,9 +65,7 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                                         <LuInbox className="size-6" aria-hidden="true" />
                                     </span>
                                     <p className="font-semibold text-main text-sm">Chưa có bài tập cho tuần này</p>
-                                    <p className="text-subText text-xs">
-                                        Dùng “Tối ưu lộ trình (AI)” để hệ thống đề xuất bài phù hợp.
-                                    </p>
+                                    <p className="text-subText text-xs">Dùng “Tạo lại lộ trình” để xếp lịch học mới.</p>
                                 </div>
                             </TableCell>
                         </TableRow>
@@ -117,24 +115,29 @@ export default function WeeklyTaskTable({ tasks }: WeeklyTaskTableProps) {
                                         </span>
                                     </TableCell>
                                     <TableCell className="px-3 py-4 text-right">
-                                        {isToday ? (
-                                            <Link
-                                                href={task.href}
-                                                className={cn(
-                                                    buttonVariants({ variant: 'primary', size: 'sm' }),
-                                                    'text-xs',
-                                                )}
-                                            >
-                                                {task.actionLabel}
-                                            </Link>
-                                        ) : (
-                                            <Link
-                                                href={task.href}
-                                                className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-semibold text-main text-xs hover:underline underline-offset-4 whitespace-nowrap"
-                                            >
-                                                {task.actionLabel}
-                                            </Link>
-                                        )}
+                                        <span className="inline-flex flex-wrap justify-end items-center gap-3">
+                                            {canCompleteTask(task) && (
+                                                <CompleteTaskButton taskId={task.id} onCompleted={onTaskCompleted} />
+                                            )}
+                                            {isToday ? (
+                                                <Link
+                                                    href={task.href}
+                                                    className={cn(
+                                                        buttonVariants({ variant: 'primary', size: 'sm' }),
+                                                        'text-xs',
+                                                    )}
+                                                >
+                                                    {task.actionLabel}
+                                                </Link>
+                                            ) : (
+                                                <Link
+                                                    href={task.href}
+                                                    className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-semibold text-main text-xs hover:underline underline-offset-4 whitespace-nowrap"
+                                                >
+                                                    {task.actionLabel}
+                                                </Link>
+                                            )}
+                                        </span>
                                     </TableCell>
                                 </TableRow>
                             );

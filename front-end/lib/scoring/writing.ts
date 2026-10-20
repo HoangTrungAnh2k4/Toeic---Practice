@@ -7,7 +7,8 @@ import { writingMaxScore, type ScoreError } from './scale';
 /** Câu Writing cần chấm; text đề lấy từ DB, không tin client. */
 export interface WritingQuestion {
     number: number;
-    prompt: string;
+    /** `null` ở Q6–7: yêu cầu nằm trong email. */
+    prompt: string | null;
     /** Email đề (Q6-7) hoặc ngữ liệu chung của Part. */
     stimulus: string | null;
     /** Mô tả ảnh đề Q1-5: LLM không nhận ảnh. */
@@ -84,8 +85,8 @@ function buildPrompt(question: WritingQuestion, answer: string) {
     return [
         `You are an examiner scoring one answer from a TOEIC Writing practice test (question ${question.number}, scored 0-${max}).`,
         rubric(question.number),
-        `Directions/question: ${question.prompt}`,
-        question.stimulus && `E-mail or material shown to the test taker:\n${question.stimulus}`,
+        question.prompt && `Directions/question: ${question.prompt}`,
+        question.stimulus && `E-mail (with its directions) or material shown to the test taker:\n${question.stimulus}`,
         question.imageAlt &&
             `Description of the picture:\n${question.imageAlt}\n` +
                 'The description is not exhaustive: do not penalize details it does not mention, only details that clearly contradict it.',

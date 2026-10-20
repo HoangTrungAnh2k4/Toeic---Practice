@@ -6,22 +6,31 @@ import type { Topic } from '@/lib/exam-library/types';
 
 const TOPICS = ['office', 'customer', 'retail', 'travel', 'tech', 'logistics', 'strategy'] as const satisfies readonly Topic[];
 
-/** Ô nhập riêng theo Part: ảnh, ngữ liệu chung của Part, email riêng từng câu, từ khoá bắt buộc. */
+/** Ô nhập riêng theo Part: yêu cầu từng câu, ảnh, ngữ liệu chung của Part, email riêng từng câu, từ khoá bắt buộc. */
 export interface PartFields {
+    prompt: boolean;
     image: boolean;
     context: boolean;
     stimulus: boolean;
     keywords: boolean;
 }
 
-/** Speaking: Part 2 tả tranh, Part 3–4 có ngữ liệu chung. Writing: Part 1 tranh + từ khoá, Part 2 email riêng từng câu. */
+/** Speaking: Part 2 tả tranh, Part 3–4 có ngữ liệu chung. Writing: Part 1 tranh + từ khoá, Part 2 email (kèm directions) riêng từng câu. */
 const PART_FIELDS: Record<Skill, Record<number, Partial<PartFields>>> = {
     speaking: { 2: { image: true }, 3: { context: true }, 4: { context: true } },
-    writing: { 1: { image: true, keywords: true }, 2: { stimulus: true } },
+    writing: { 1: { image: true, keywords: true }, 2: { prompt: false, stimulus: true } },
 };
 
 export function getPartFields(skill: Skill, partNo: number): PartFields {
-    return { image: false, context: false, stimulus: false, keywords: false, ...PART_FIELDS[skill][partNo] };
+    return { prompt: true, image: false, context: false, stimulus: false, keywords: false, ...PART_FIELDS[skill][partNo] };
+}
+
+/** Yêu cầu chuẩn ETS của Writing Q1–5: cố định, admin không nhập. */
+const PICTURE_SENTENCE_PROMPT = 'Write ONE sentence based on the picture. Use the TWO words or phrases under the picture.';
+
+/** Yêu cầu cố định của Part; `null` khi admin tự nhập từng câu. */
+export function getFixedPrompt(skill: Skill, partNo: number): string | null {
+    return skill === 'writing' && partNo === 1 ? PICTURE_SENTENCE_PROMPT : null;
 }
 
 /** Số từ khoá bắt buộc mỗi câu Writing Q1–5. */
@@ -47,7 +56,8 @@ const optionalText = (max: number) =>
 
 const questionSchema = z.object({
     number: z.number().int(),
-    prompt: requiredText('Vui lòng nhập nội dung câu hỏi', 2000),
+    /** Bắt buộc theo `PartFields.prompt`; Writing Q6–7 lưu `null`. */
+    prompt: optionalText(2000),
     /** Email đề Writing Q6–7, lưu text vào `questions.stimulus`. */
     stimulus: optionalText(4000),
     /** Ảnh đã có trên R2 khi sửa đề; server chỉ chấp nhận đúng ảnh hiện tại của câu. */
@@ -75,13 +85,6 @@ const partSchema = z.object({
 export const examInfoSchema = z.object({
     title: requiredText('Vui lòng nhập tiêu đề', 150),
     topic: z.enum(TOPICS, 'Vui lòng chọn chủ đề'),
-    target_level: z
-        .number('Vui lòng chọn level mục tiêu')
-        .int()
-        .min(1, 'Level từ 1 đến 9')
-        .max(9, 'Level từ 1 đến 9')
-        .nullable(),
-    edition: z.number('Vui lòng nhập năm ấn bản').int().min(2000, 'Năm không hợp lệ').max(2100, 'Năm không hợp lệ'),
 });
 
 export const examSchema = examInfoSchema
@@ -124,6 +127,7 @@ export const examSchema = examInfoSchema
                 if (!fields.image && hasImage) issue([...at, 'image'], `Part ${template.part_no} không có ảnh`);
                 if (fields.image && !hasImage) issue([...at, 'image'], 'Vui lòng chọn hoặc dán ảnh');
                 if (fields.image && !question.image_alt) issue([...at, 'image_alt'], 'Vui lòng mô tả chi tiết ảnh');
+                if (fields.prompt && !question.prompt) issue([...at, 'prompt'], 'Vui lòng nhập nội dung câu hỏi');
                 if (fields.stimulus && !question.stimulus) issue([...at, 'stimulus'], 'Vui lòng nhập nội dung email');
 
                 const words = question.keywords.filter(Boolean);
@@ -140,6 +144,19 @@ export const examSchema = examInfoSchema
                 }
             });
         });
+    })
+    // Server cũng chạy schema này nên client không đổi được yêu cầu cố định, cũng không lưu được yêu cầu cho Part không có ô này
+    .transform((exam) => {
+        const templates = getPartTemplates(exam.skill);
+        return {
+            ...exam,
+            parts: exam.parts.map((part, index) => {
+                const partNo = templates[index].part_no;
+                const fixed = getFixedPrompt(exam.skill, partNo);
+                if (getPartFields(exam.skill, partNo).prompt && !fixed) return part;
+                return { ...part, questions: part.questions.map((question) => ({ ...question, prompt: fixed })) };
+            }),
+        };
     });
 
 /** Từ khoá form → cột `questions.keywords`: chỉ từ gốc, `forms` rỗng vì AI tự đánh giá dạng từ khi chấm. */
@@ -149,23 +166,18 @@ export type ExamInput = z.input<typeof examSchema>;
 export type ExamValues = z.output<typeof examSchema>;
 export type ExamInfoValues = z.output<typeof examInfoSchema>;
 
-/** Yêu cầu chung của Writing Q1–5 theo ETS; điền sẵn để admin khỏi gõ lại 5 lần. */
-const PICTURE_SENTENCE_PROMPT = 'Write ONE sentence based on the picture. Use the TWO words or phrases under the picture.';
-
 /** Khung đề rỗng đủ Part / số câu của kỹ năng cho giá trị mặc định của form. */
 export function emptyExam(skill: Skill): ExamInput {
     return {
         skill,
         title: '',
         topic: 'office',
-        target_level: null,
-        edition: new Date().getFullYear(),
         parts: getPartTemplates(skill).map((template) => ({
             part_template_id: template.id,
             context: '',
             questions: Array.from({ length: template.q_to - template.q_from + 1 }, (_, index) => ({
                 number: template.q_from + index,
-                prompt: skill === 'writing' && template.part_no === 1 ? PICTURE_SENTENCE_PROMPT : '',
+                prompt: getFixedPrompt(skill, template.part_no) ?? '',
                 stimulus: '',
                 image_path: null,
                 image: null,
@@ -184,8 +196,6 @@ export function examToFormValues({ exam, parts }: ExamRoom): ExamInput {
         ...empty,
         title: exam.title,
         topic: TOPICS.find((topic) => topic === exam.topic) ?? empty.topic,
-        target_level: exam.target_level,
-        edition: exam.edition,
         parts: empty.parts.map((part) => {
             const source = parts.find((item) => item.template.id === part.part_template_id);
             return {
@@ -197,7 +207,7 @@ export function examToFormValues({ exam, parts }: ExamRoom): ExamInput {
                     const words = (row.keywords ?? []).map((keyword) => keyword.word);
                     return {
                         ...question,
-                        prompt: row.prompt,
+                        prompt: question.prompt || (row.prompt ?? ''),
                         stimulus: row.stimulus ?? '',
                         image_path: row.image_path,
                         image_alt: row.image_alt ?? '',

@@ -6,8 +6,8 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
   ('00000000-0000-0000-0000-000000000002', 'other@test.local');
 
-insert into public.exams (id, skill, code, title, edition, topic, status) values
-  ('10000000-0000-0000-0000-000000000001', 'speaking', 'PUB', 'Published', 2026, 't', 'published');
+insert into public.exams (id, skill, code, title, topic, status) values
+  ('10000000-0000-0000-0000-000000000001', 'speaking', 'PUB', 'Published', 't', 'published');
 insert into public.exam_parts (id, exam_id, part_template_id) values
   ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 1);
 
@@ -32,7 +32,7 @@ set local request.jwt.claims = '{"role": "anon"}';
 select is_empty('select 1 from public.profiles', 'anon cannot read profiles');
 select is_empty('select 1 from public.attempts', 'anon cannot read attempts');
 select throws_ok(
-  $$insert into public.exams (skill, code, title, edition, topic) values ('speaking', 'X', 'x', 2026, 't')$$,
+  $$insert into public.exams (skill, code, title, topic) values ('speaking', 'X', 'x', 't')$$,
   '42501', null, 'anon cannot create exams'
 );
 select throws_ok(

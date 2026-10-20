@@ -7,7 +7,7 @@ interface SettingGroupSectionProps {
 }
 
 export default function SettingGroupSection({ group }: SettingGroupSectionProps) {
-    const { id, title, description, Icon, sections } = group;
+    const { id, title, Icon, sections } = group;
     const titleId = `setting-group-${id}-title`;
 
     return (

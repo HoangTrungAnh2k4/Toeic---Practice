@@ -7,8 +7,8 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000002', 'admin@test.local');
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-000000000002';
 
-insert into public.exams (id, skill, code, title, edition, topic, status) values
-  ('10000000-0000-0000-0000-000000000001', 'writing', '', 'Old title', 2025, 'office', 'draft');
+insert into public.exams (id, skill, code, title, topic, status) values
+  ('10000000-0000-0000-0000-000000000001', 'writing', '', 'Old title', 'office', 'draft');
 insert into public.exam_parts (id, exam_id, part_template_id)
 select gen_random_uuid(), '10000000-0000-0000-0000-000000000001', pt.id from public.part_templates pt where pt.skill = 'writing';
 insert into public.questions (id, exam_part_id, number, prompt)
@@ -25,7 +25,7 @@ where ep.exam_id = '10000000-0000-0000-0000-000000000001' and q.number = 8;
 -- Full payload rebuilt from the template skeleton; tests mutate copies of it.
 create temp table fixture as
 select jsonb_build_object(
-  'title', 'New title', 'edition', 2026, 'topic', 'travel', 'target_level', 5,
+  'title', 'New title', 'topic', 'travel',
   'parts', (
     select jsonb_agg(jsonb_build_object(
       'part_template_id', pt.id,

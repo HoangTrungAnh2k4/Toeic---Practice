@@ -1,5 +1,5 @@
 import type { AttemptMode, Skill } from '@/lib/domain/types';
-import { STATUS_OPTIONS, TAB_OPTIONS, TARGET_OPTIONS, TOPIC_OPTIONS } from './options';
+import { STATUS_OPTIONS, TAB_OPTIONS, TOPIC_OPTIONS } from './options';
 import type { LibraryQuery, Option } from './types';
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
@@ -10,7 +10,6 @@ export const LIBRARY_SECTION_ID = 'exam-library';
 export const DEFAULT_LIBRARY_QUERY: LibraryQuery = {
     tab: 'all',
     searchQuery: '',
-    target: 'all',
     status: 'all',
     topic: 'all',
     page: 1,
@@ -20,7 +19,6 @@ export const DEFAULT_LIBRARY_QUERY: LibraryQuery = {
 const PARAM_KEYS = {
     tab: 'tab',
     searchQuery: 'q',
-    target: 'target',
     status: 'status',
     topic: 'topic',
     page: 'page',
@@ -48,7 +46,6 @@ export function parseLibraryQuery(raw: RawSearchParams): LibraryQuery {
     return {
         tab: pickOption(get('tab'), TAB_OPTIONS, defaults.tab),
         searchQuery: get('searchQuery') ?? defaults.searchQuery,
-        target: pickOption(get('target'), TARGET_OPTIONS, defaults.target),
         status: pickOption(get('status'), STATUS_OPTIONS, defaults.status),
         topic: pickOption(get('topic'), TOPIC_OPTIONS, defaults.topic),
         page: toPositiveInt(get('page'), defaults.page),

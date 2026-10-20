@@ -5,7 +5,7 @@ import { LuCircleAlert } from 'react-icons/lu';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { PartTemplate, Skill } from '@/lib/domain/types';
-import { type ExamInput, type ExamValues, getPartFields } from '../../_lib/examSchema';
+import { type ExamInput, type ExamValues, getFixedPrompt, getPartFields } from '../../_lib/examSchema';
 import FormField from './FormField';
 import ImageUploadField from './ImageUploadField';
 
@@ -40,13 +40,13 @@ const PART_COPY: Record<Skill, Record<number, PartCopy>> = {
     5: { prompt: 'Câu hỏi nêu quan điểm' },
     },
     writing: {
-        1: { prompt: 'Yêu cầu', promptHint: 'Đã điền sẵn yêu cầu chuẩn ETS, thường giữ nguyên.' },
+        1: { prompt: 'Yêu cầu' },
         2: {
-            prompt: 'Yêu cầu (Directions)',
-            promptHint: 'Ví dụ: Respond to the e-mail as the office manager. Ask TWO questions and make ONE suggestion.',
+            prompt: 'Yêu cầu',
             stimulus: {
                 label: 'Email',
-                description: 'Dán nguyên email gồm From, To, Subject và nội dung. Xuống dòng được giữ nguyên trong phòng thi.',
+                description:
+                    'Dán nguyên Directions (ví dụ: Respond to the e-mail as the office manager. Ask TWO questions and make ONE suggestion.) và email gồm From, To, Subject, nội dung. Xuống dòng được giữ nguyên trong phòng thi.',
             },
         },
         3: {
@@ -80,6 +80,7 @@ export default function PartSection({ skill, template, index }: PartSectionProps
     const errorCount = countErrors(partErrors);
     const copy = PART_COPY[skill][template.part_no];
     const fields = getPartFields(skill, template.part_no);
+    const fixedPrompt = getFixedPrompt(skill, template.part_no);
     const questions = getValues(`parts.${index}.questions`);
     const errorOf = (name: Parameters<typeof getFieldState>[0]) => getFieldState(name, formState).error?.message;
     const titleId = `part-${template.part_no}-title`;
@@ -112,6 +113,12 @@ export default function PartSection({ skill, template, index }: PartSectionProps
                 </p>
             )}
 
+            {fixedPrompt && (
+                <p className="bg-sub1/40 px-3 py-2 rounded-lg font-medium text-main text-sm">
+                    <span className="font-semibold">{copy.prompt} (cố định cho mọi câu):</span> {fixedPrompt}
+                </p>
+            )}
+
             {fields.context && copy.context && (
                 <FormField
                     label={copy.context.label}
@@ -129,20 +136,22 @@ export default function PartSection({ skill, template, index }: PartSectionProps
                     <fieldset key={question.number} className="flex flex-col gap-4 pt-4 border-sub2/30 border-t">
                         <legend className="float-left mb-1 font-semibold text-main text-sm">Câu {question.number}</legend>
 
-                        <FormField
-                            label={copy.prompt}
-                            required
-                            description={copy.promptHint}
-                            error={errorOf(`${name}.prompt`)}
-                        >
-                            {(control) => (
-                                <Textarea
-                                    {...control}
-                                    rows={skill === 'speaking' && template.part_no === 1 ? 4 : 2}
-                                    {...register(`${name}.prompt`)}
-                                />
-                            )}
-                        </FormField>
+                        {fields.prompt && !fixedPrompt && (
+                            <FormField
+                                label={copy.prompt}
+                                required
+                                description={copy.promptHint}
+                                error={errorOf(`${name}.prompt`)}
+                            >
+                                {(control) => (
+                                    <Textarea
+                                        {...control}
+                                        rows={skill === 'speaking' && template.part_no === 1 ? 4 : 2}
+                                        {...register(`${name}.prompt`)}
+                                    />
+                                )}
+                            </FormField>
+                        )}
 
                         {fields.stimulus && copy.stimulus && (
                             <FormField

@@ -5,7 +5,6 @@ import {
     LuBookmarkCheck,
     LuCalendar,
     LuEye,
-    LuGauge,
     LuGraduationCap,
     LuPlay,
     LuRotateCcw,
@@ -51,7 +50,7 @@ function formatRemaining(endsAt: string): string | null {
 interface CardShellProps extends Pick<ExamCardProps, 'entry' | 'onToggleBookmark'> {
     badge: string;
     badgeTone: BadgeTone;
-    meta: ReactNode;
+    meta?: ReactNode;
     footer: ReactNode;
     className?: string;
     children?: ReactNode;
@@ -119,14 +118,6 @@ function NotStartedCard({ skill, entry, isRecommended, onToggleBookmark }: ExamC
             onToggleBookmark={onToggleBookmark}
             badge={exam.source === 'ets' ? 'Chuẩn ETS' : 'Toeco biên soạn'}
             badgeTone={exam.source === 'ets' ? 'neutral' : 'main'}
-            meta={
-                exam.target_level !== null && (
-                    <span className={META_CLASS}>
-                        <LuGauge className="size-4 text-sub2" aria-hidden="true" />
-                        Level {exam.target_level}
-                    </span>
-                )
-            }
             footer={
                 <>
                     <div className={SUMMARY_STRIP_CLASS}>

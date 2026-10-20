@@ -90,7 +90,7 @@ export default function WeekSprint({ week, weekCount, onWeekChange }: WeekSprint
             {/* Day strip: cuộn ngang trên màn nhỏ, lưới 7 cột trên màn rộng */}
             {week.totalTasks === 0 ? (
                 <p className="bg-sub1/40 p-6 rounded-lg font-medium text-subText text-xs text-center">
-                    Tuần này chưa có lịch học. Dùng “Tối ưu lộ trình (AI)” để tạo lịch mới.
+                    Tuần này chưa có lịch học. Dùng “Tạo lại lộ trình” để xếp lịch mới.
                 </p>
             ) : (
                 <ol className="flex 2xl:grid 2xl:grid-cols-7 gap-3 -mx-1 px-1 pt-1 pb-2 overflow-x-auto 2xl:overflow-visible snap-x snap-mandatory">

@@ -72,12 +72,10 @@ export interface Exam {
     skill: Skill;
     code: string;
     title: string;
-    edition: number;
     source: ExamSource;
     status: ExamStatus;
     is_verified: boolean;
     topic: string;
-    target_level: number | null;
     /** Ghi chú thẩm định cho admin: thiếu ảnh, cần kiểm tra audio... */
     review_note: string | null;
     created_by: string | null;
@@ -116,7 +114,8 @@ export interface Question {
     exam_part_id: string;
     number: number;
     /** Yêu cầu của câu: đoạn cần đọc, câu hỏi, đề bài. */
-    prompt: string;
+    /** `null` ở Writing Q6–7: yêu cầu nằm luôn trong email (`stimulus`). */
+    prompt: string | null;
     /** Ngữ liệu riêng của câu (email Writing Q6-7); ngữ liệu dùng chung cả cụm nằm ở `exam_parts.context`. */
     stimulus: string | null;
     image_path: string | null;

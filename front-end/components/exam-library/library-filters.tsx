@@ -3,7 +3,7 @@ import type { IconType } from 'react-icons';
 import { LuBookmark, LuRotateCcw } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import type { Skill } from '@/lib/domain/types';
-import { STATUS_OPTIONS, TAB_OPTIONS, TARGET_OPTIONS, TOPIC_OPTIONS } from '@/lib/exam-library/options';
+import { STATUS_OPTIONS, TAB_OPTIONS, TOPIC_OPTIONS } from '@/lib/exam-library/options';
 import { buildLibraryHref, DEFAULT_LIBRARY_QUERY } from '@/lib/exam-library/search-params';
 import type { LibraryQuery, LibraryTab } from '@/lib/exam-library/types';
 import { LibraryParamSelect } from './library-param-select';
@@ -28,7 +28,6 @@ const TAB_ICONS: Partial<Record<LibraryTab, IconType>> = {
 };
 
 const SELECT_FILTERS = [
-    { name: 'target', label: 'Lọc theo mục tiêu điểm', options: TARGET_OPTIONS },
     { name: 'status', label: 'Lọc theo trạng thái', options: STATUS_OPTIONS },
     { name: 'topic', label: 'Lọc theo chủ đề', options: TOPIC_OPTIONS },
 ] as const;
@@ -92,8 +91,8 @@ export function LibraryFilters({ skill, query, tabCounts, displayedCount }: Libr
             </div>
 
             {/* Search & dropdown filters */}
-            <div className="gap-3 grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-5">
-                <LibrarySearchInput skill={skill} query={query} className="sm:col-span-3 xl:col-span-2" />
+            <div className="gap-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+                <LibrarySearchInput skill={skill} query={query} className="sm:col-span-2" />
                 {SELECT_FILTERS.map((filter) => (
                     <LibraryParamSelect
                         key={filter.name}

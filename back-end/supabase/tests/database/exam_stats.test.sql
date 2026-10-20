@@ -7,8 +7,8 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000002', 'admin@test.local');
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-000000000002';
 
-insert into public.exams (id, skill, code, title, edition, topic, status) values
-  ('10000000-0000-0000-0000-000000000001', 'writing', 'PUB', 'Published', 2026, 't', 'published');
+insert into public.exams (id, skill, code, title, topic, status) values
+  ('10000000-0000-0000-0000-000000000001', 'writing', 'PUB', 'Published', 't', 'published');
 insert into public.attempts (user_id, exam_id, part_template_id, mode, status) values
   ('00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 6, 'timed', 'scored'),
   ('00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 7, 'timed', 'in_progress'),

@@ -10,15 +10,12 @@ import type {
     StudyPlan,
     StudyPlanWeek,
 } from '@/lib/domain/types';
-import {
-    SCORE_ERROR_MESSAGE,
-    summarizeSpeaking,
-    summarizeWriting,
-    type ScoredQuestion,
-} from '@/lib/scoring/scale';
+import { SCORE_ERROR_MESSAGE, summarizeSpeaking, summarizeWriting, type ScoredQuestion } from '@/lib/scoring/scale';
 import type { WritingOutcome } from '@/lib/scoring/writing';
 import { supabase } from '@/lib/supabase';
+import type { PlanDraft } from './generate-plan';
 import { readTable, writeTable } from './local-store';
+import { toDayKey } from './user-stats';
 
 /**
  * Dữ liệu cá nhân (bài làm, câu trả lời, đề đã lưu). Người đã đăng nhập đọc/ghi attempts, responses, annotations,
@@ -87,6 +84,51 @@ export async function updatePlanMinutes(planId: string, minutesPerDay: number): 
     if (error) throw error;
     // RLS chặn thì không báo lỗi, chỉ cập nhật 0 dòng
     if (data.length === 0) throw new Error('Plan not found');
+}
+
+export type PlanGoals = Pick<Profile, 'target_speaking' | 'target_writing' | 'exam_date'>;
+
+/** Lưu mục tiêu + thay lộ trình `active` bằng `draft` trong một transaction (RPC `create_study_plan`). */
+export async function createStudyPlan(goals: PlanGoals, draft: PlanDraft): Promise<void> {
+    const { error } = await supabase.rpc('create_study_plan', { payload: { ...goals, ...draft } });
+    if (error) throw error;
+}
+
+/** Đánh dấu xong task không cần bài làm (review, summary). */
+export async function completePlanTask(taskId: string): Promise<void> {
+    const { data, error } = await supabase
+        .from('plan_tasks')
+        .update({ completed_at: now() })
+        .eq('id', taskId)
+        .select('id');
+    if (error) throw error;
+    if (data.length === 0) throw new Error('Task not found');
+}
+
+/**
+ * Gắn lượt vừa nộp vào task chưa xong sớm nhất (tới hôm nay) của lộ trình `active`: ưu tiên task thi thử cùng đề, rồi
+ * task luyện cùng Part. Không có task khớp thì bỏ qua.
+ */
+export async function linkPlanTask(attempt: Pick<Attempt, 'id' | 'exam_id' | 'part_template_id'>): Promise<void> {
+    if (!(await isRemoteAttempt(attempt.id))) return;
+    const active = await getActivePlan();
+    if (!active) return;
+
+    const today = toDayKey(new Date());
+    const open = active.tasks.filter((item) => !item.attempt_id && !item.completed_at && item.scheduled_date <= today);
+    // shortcut: Writing lưu mỗi Part một lượt nên task thi thử Writing xong ngay ở Part đầu; cần cờ "cả đề" trên attempt để khớp chuẩn
+    const task =
+        open.find((item) => item.kind === 'mock' && item.exam_id === attempt.exam_id) ??
+        open.find((item) => attempt.part_template_id !== null && item.part_template_id === attempt.part_template_id);
+    if (!task) return;
+
+    // `attempt_id is null`: tab khác vừa gắn thì không ghi đè
+    const { error } = await supabase
+        .from('plan_tasks')
+        .update({ attempt_id: attempt.id })
+        .eq('id', task.id)
+        .is('attempt_id', null);
+    if (error) throw error;
 }
 
 /** shortcut: chưa có auth nên luôn trả `null`; đọc bản mới nhất của `ai_insights` khi nối Supabase. */
@@ -188,7 +230,8 @@ async function resumeOrStart(input: StartAttemptInput) {
     );
     if (!existing) return { attempt: await startAttempt(input), responses: [] as AttemptResponse[], isRestored: false };
 
-    const attempt = existing.status === 'interrupted' ? await updateAttempt(existing.id, { status: 'in_progress' }) : existing;
+    const attempt =
+        existing.status === 'interrupted' ? await updateAttempt(existing.id, { status: 'in_progress' }) : existing;
     return { attempt, responses: await listResponses(attempt.id), isRestored: true };
 }
 
@@ -283,7 +326,10 @@ function saveLocalResponse(attemptId: string, questionId: string, patch: Partial
 /** Nhà cung cấp hoặc hạn mức lượt chấm trong ngày đã hết (HTTP 429). */
 export class ScoringLimitError extends Error {}
 
-type AnswerScore = Pick<AttemptResponse, 'score' | 'max_score' | 'transcript' | 'metrics' | 'feedback' | 'scoring_model'>;
+type AnswerScore = Pick<
+    AttemptResponse,
+    'score' | 'max_score' | 'transcript' | 'metrics' | 'feedback' | 'scoring_model'
+>;
 
 /**
  * Gửi bài nói của một câu đi chấm (`/api/speaking/score`); audio không được lưu ở đâu.
@@ -406,7 +452,13 @@ export async function scoreWritingAttempt(attempt: Attempt, questions: ScoredQue
  */
 async function saveRemoteResponse(attemptId: string, questionId: string, patch: ResponsePatch) {
     const update = () =>
-        supabase.from('responses').update(patch).eq('attempt_id', attemptId).eq('question_id', questionId).select().maybeSingle();
+        supabase
+            .from('responses')
+            .update(patch)
+            .eq('attempt_id', attemptId)
+            .eq('question_id', questionId)
+            .select()
+            .maybeSingle();
 
     const updated = await update();
     if (updated.error) throw updated.error;

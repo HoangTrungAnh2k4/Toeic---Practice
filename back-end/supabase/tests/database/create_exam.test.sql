@@ -10,7 +10,7 @@ update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-00
 -- A complete speaking exam built from the part templates; tests mutate copies of it.
 create temp table fixture as
 select jsonb_build_object(
-  'skill', 'speaking', 'title', 'Test', 'edition', 2026, 'topic', 'office',
+  'skill', 'speaking', 'title', 'Test', 'topic', 'office',
   'parts', (
     select jsonb_agg(jsonb_build_object(
       'part_template_id', pt.id,
@@ -63,7 +63,7 @@ select results_eq(
 );
 
 -- Codes stay generated even when an admin writes the table directly.
-insert into public.exams (skill, code, title, edition, topic) values ('speaking', 'SP-T', 'Direct', 2026, 'office');
+insert into public.exams (skill, code, title, topic) values ('speaking', 'SP-T', 'Direct', 'office');
 select ok(
   (select code ~ '^SP-\d{4}$' and code <> (select code from public.exams where title = 'Test') from public.exams where title = 'Direct'),
   'a code sent on insert is replaced by a new generated one'
@@ -75,7 +75,7 @@ select isnt((select code from public.exams where title = 'Direct'), 'SP-T', 'the
 -- Writing: per-question e-mail and required keywords are stored.
 select lives_ok(
   $$select public.create_exam(jsonb_build_object(
-    'skill', 'writing', 'title', 'Writing Test', 'edition', 2026, 'topic', 'office',
+    'skill', 'writing', 'title', 'Writing Test', 'topic', 'office',
     'parts', (
       select jsonb_agg(jsonb_build_object(
         'part_template_id', pt.id,

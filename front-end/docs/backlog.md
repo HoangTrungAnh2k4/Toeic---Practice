@@ -31,7 +31,7 @@
 | E3 | Phòng thi Writing đủ 8 câu | P0 | Done | 4/4 | S2 |
 | E4 | Pipeline chấm điểm (AI) | P0 | In progress | 5/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 10/11 | S1, S5 |
-| E6 | Lộ trình học & AI insight | P1 | In progress | 2/4 | S4, S6 |
+| E6 | Lộ trình học & AI insight | P1 | In progress | 3/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 3/4 | S4, S6 |
 | E8 | Auth & bảo mật | P1 | In progress | 7/9 | S1, S5, S6 |
 | E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 4/12 | rải rác |
@@ -113,7 +113,7 @@ Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, kh�
 
 Mục tiêu: người dùng mới vào là có lộ trình; deploy production.
 
-- [ ] **E6-2** (P1, L) Sinh lộ trình từ mục tiêu điểm + ngày thi (AI hoặc rule-based)
+- [x] **E6-2** (P1, L) Sinh lộ trình từ mục tiêu điểm + ngày thi (AI hoặc rule-based) — *rule-based theo [`study-plan.md`](prd/study-plan.md): `generatePlan` (`lib/data/generate-plan.ts`, 7 test) xếp tối đa 12 tuần, chia ngày theo khoảng cách tới mục tiêu, ưu tiên Part yếu, thi thử lấy mốc ở tuần 1, ôn lỗi + tổng kết cuối tuần, tuần cuối chỉ thi thử/ôn lỗi; RPC `create_study_plan` lưu mục tiêu + archive lộ trình cũ trong một transaction (pgTAP 8 test); dialog "Mục tiêu & Lịch thi" (mở từ `/schedule` và Profile qua `/schedule#goals`), nút "Tạo lại lộ trình"; nộp bài tự gắn task (`linkPlanTask`), ôn lỗi/tổng kết có nút "Đánh dấu xong". Còn: task ôn lỗi chưa gắn `mistake_pattern_id` (chờ E7-3 seed uuid), task thi thử Writing xong ngay ở Part đầu*
 - [x] **E7-4** (P2, S) Kiểm tra Overview/Chart với dữ liệu thật, empty state cho user mới — *empty state đã đủ (thẻ mục tiêu, chart, hoạt động gần đây). Sửa lỗi: Writing lưu mỗi Part một lượt nên `fullTestScores` không bao giờ có điểm Writing → thẻ Writing ở Overview/Profile/Schedule luôn "Chưa có bài làm cả đề"; giờ lượt chấm làm đủ mọi Part sinh một điểm cả bài (`combineWritingScores`, gộp lượt gần nhất mỗi Part như trang xem bài) + test. Sửa icon Speaking/Writing bị đảo ở banner*
 - [x] **E8-7** (P1, S) Rà RLS toàn bộ bảng trước khi phát hành — *16/16 bảng bật RLS, không thấy lỗ hổng; thêm `launch_rls.test.sql` (20 test: anon, profiles, lộ trình, ai_insights, scoring_usage, bảng danh mục, tự chuyển `scored`). Còn lại xem E8-9*
 - [ ] **E9-2** (P2, S) Thay dữ liệu mock ở footer (`components/layout/footer/footer-data.ts`) — *đã thay "Nguồn đề thi" mock bằng "Kho đề" đếm đề `published` thật, link Kiểm tra micro/loa. Còn chờ: link GitHub/LinkedIn/email thật, đích cho "Hướng dẫn làm bài", "Báo lỗi đề thi", "Góp ý", 3 trang chính sách (chưa có route)*

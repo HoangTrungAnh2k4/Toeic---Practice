@@ -1,4 +1,4 @@
-import { LuArrowRight } from 'react-icons/lu';
+import { LuArrowRight, LuTarget } from 'react-icons/lu';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
@@ -162,13 +162,24 @@ export default function ProfileGoalCard({
                         'Làm thêm bài cả đề để thấy xu hướng điểm'
                     )}
                 </span>
-                <Link
-                    href="/schedule"
-                    className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-2 bg-white')}
-                >
-                    <span>Xem lộ trình</span>
-                    <LuArrowRight className="size-4" aria-hidden="true" />
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                    {!isGuest && (
+                        <Link
+                            href="/schedule#goals"
+                            className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-2 bg-white')}
+                        >
+                            <LuTarget className="size-4" aria-hidden="true" />
+                            <span>Mục tiêu & Lịch thi</span>
+                        </Link>
+                    )}
+                    <Link
+                        href="/schedule"
+                        className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-2 bg-white')}
+                    >
+                        <span>Xem lộ trình</span>
+                        <LuArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                </div>
             </CardFooter>
         </Card>
     );

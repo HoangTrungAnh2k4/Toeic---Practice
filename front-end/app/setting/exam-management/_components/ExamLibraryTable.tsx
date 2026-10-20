@@ -115,11 +115,7 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onChange
                                             </span>
                                             <div className="flex flex-col gap-0.5 min-w-0">
                                                 <span className="font-semibold text-main text-sm">{exam.title}</span>
-                                                <span className="text-subText">
-                                                    <span className="font-mono font-semibold text-sub2">{exam.code}</span>
-                                                    {' · '}
-                                                    Ấn bản {exam.edition}
-                                                </span>
+                                                <span className="font-mono font-semibold text-sub2">{exam.code}</span>
                                             </div>
                                         </div>
                                     </TableCell>

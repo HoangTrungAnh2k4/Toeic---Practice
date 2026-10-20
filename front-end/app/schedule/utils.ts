@@ -26,6 +26,11 @@ export function getProgressPercent(current: number, target: number): number {
     return Math.min(100, Math.round((current / target) * 100));
 }
 
+/** Ôn lỗi / tổng kết không có bài làm nên tự đánh dấu xong, chỉ từ ngày được xếp trở đi. */
+export function canCompleteTask(task: TaskView) {
+    return (task.kind === 'review' || task.kind === 'summary') && (task.status === 'today' || task.status === 'overdue');
+}
+
 export function getTotalDuration(tasks: TaskView[]): number {
     return tasks.reduce((sum, task) => sum + task.duration, 0);
 }

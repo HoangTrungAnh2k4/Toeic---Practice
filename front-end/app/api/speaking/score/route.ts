@@ -70,7 +70,7 @@ export async function POST(request: Request) {
                 number: question.number,
                 partNo: template.part_no,
                 task: template.task,
-                prompt: question.prompt,
+                prompt: question.prompt ?? '',
                 context: question.exam_parts.context,
                 imageAlt: question.image_alt,
             },

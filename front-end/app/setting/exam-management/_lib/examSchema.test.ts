@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fromExamFormData, toExamFormData } from './examFormData';
-import { emptyExam, examSchema, type ExamInput } from './examSchema';
+import { emptyExam, examSchema, type ExamInput, getFixedPrompt } from './examSchema';
 
 const image = (name: string) => new File(['image'], name, { type: 'image/jpeg' });
 
@@ -115,6 +115,19 @@ describe('examSchema — Writing', () => {
         ]);
         expect(result.data!.parts[0].questions[0].keywords).toEqual(['man', 'carry']);
         expect(result.data!.parts[1].questions[0].stimulus).toBe('From: ...\nSubject: ...');
+    });
+
+    it('Q1–5 luôn lưu yêu cầu chuẩn ETS dù client gửi khác', () => {
+        const exam = validWriting();
+        exam.parts[0].questions[0].prompt = 'Hacked';
+        const prompts = examSchema.parse(exam).parts[0].questions.map((question) => question.prompt);
+        expect(new Set(prompts)).toEqual(new Set([getFixedPrompt('writing', 1)]));
+    });
+
+    it('Q6–7 không lưu yêu cầu riêng: directions nằm trong email', () => {
+        const exam = validWriting();
+        exam.parts[1].questions[0].prompt = 'Ask TWO questions';
+        expect(examSchema.parse(exam).parts[1].questions.map((question) => question.prompt)).toEqual([null, null]);
     });
 
     it('bắt buộc ảnh, mô tả ảnh và đủ 2 từ khoá khác nhau ở Q1–5', () => {

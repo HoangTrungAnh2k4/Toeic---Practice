@@ -6,8 +6,8 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
   ('00000000-0000-0000-0000-000000000002', 'other@test.local');
 
-insert into public.exams (id, skill, code, title, edition, topic, status) values
-  ('10000000-0000-0000-0000-000000000001', 'writing', 'PUB', 'Published', 2026, 't', 'published');
+insert into public.exams (id, skill, code, title, topic, status) values
+  ('10000000-0000-0000-0000-000000000001', 'writing', 'PUB', 'Published', 't', 'published');
 insert into public.exam_parts (id, exam_id, part_template_id) values
   ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 6);
 insert into public.questions (id, exam_part_id, number, prompt) values

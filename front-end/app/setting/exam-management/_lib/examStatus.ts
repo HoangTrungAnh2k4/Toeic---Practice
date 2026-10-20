@@ -33,7 +33,7 @@ export function findPublishIssues(skill: Skill, parts: RoomPart[]): string[] {
 
         for (const question of room.questions) {
             const missing = [
-                !question.prompt.trim() && 'nội dung câu hỏi',
+                fields.prompt && !question.prompt?.trim() && 'nội dung câu hỏi',
                 fields.image && !question.image_path && 'ảnh',
                 fields.image && !question.image_alt?.trim() && 'mô tả ảnh',
                 fields.stimulus && !question.stimulus?.trim() && 'email',

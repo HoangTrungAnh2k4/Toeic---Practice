@@ -5,9 +5,9 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
   ('00000000-0000-0000-0000-000000000002', 'other@test.local');
 
-insert into public.exams (id, skill, code, title, edition, topic, status) values
-  ('10000000-0000-0000-0000-000000000001', 'speaking', 'PUB', 'Published', 2026, 't', 'published'),
-  ('10000000-0000-0000-0000-000000000002', 'speaking', 'DRAFT', 'Draft', 2026, 't', 'draft');
+insert into public.exams (id, skill, code, title, topic, status) values
+  ('10000000-0000-0000-0000-000000000001', 'speaking', 'PUB', 'Published', 't', 'published'),
+  ('10000000-0000-0000-0000-000000000002', 'speaking', 'DRAFT', 'Draft', 't', 'draft');
 
 insert into public.attempts (user_id, exam_id, mode) values
   ('00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', 'cbt');

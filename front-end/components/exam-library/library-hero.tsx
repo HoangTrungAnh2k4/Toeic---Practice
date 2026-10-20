@@ -38,7 +38,7 @@ export function LibraryHero({ skill, exams }: LibraryHeroProps) {
                                     Gợi ý tiếp theo
                                 </span>
                                 <span className="bg-white/10 px-2 py-0.5 rounded-md font-semibold text-[11px] text-sub1">
-                                    Phần thi {copy.verb} · Ấn bản {recommended.edition}
+                                    Phần thi {copy.verb}
                                 </span>
                                 <span className="inline-flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-md font-semibold text-[11px] text-sub1">
                                     <LuTimer className="size-3.5" aria-hidden="true" />

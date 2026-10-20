@@ -1,16 +1,16 @@
-import { LuCalendarClock, LuCalendarDays, LuChevronRight, LuSparkles } from 'react-icons/lu';
-import Button, { buttonVariants } from '@/components/ui/button';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { LuCalendarClock, LuCalendarDays, LuChevronRight, LuRefreshCw } from 'react-icons/lu';
+import Button from '@/components/ui/button';
 
 interface SchedulePageHeaderProps {
     /** `study_plans.ai_rationale`; `null` dùng mô tả chung. */
     rationale: string | null;
-    /** Khách không có lộ trình nên ẩn các nút chỉnh lộ trình. */
-    showActions: boolean;
+    /** Không truyền = khách, ẩn các nút chỉnh lộ trình. */
+    onEditGoals?: () => void;
+    /** Chỉ có khi đã có lộ trình. */
+    onRegenerate?: () => void;
 }
 
-export default function SchedulePageHeader({ rationale, showActions }: SchedulePageHeaderProps) {
+export default function SchedulePageHeader({ rationale, onEditGoals, onRegenerate }: SchedulePageHeaderProps) {
     return (
         <div className="flex xl:flex-row flex-col justify-between xl:items-end gap-4">
             {/* Title & Breadcrumb */}
@@ -23,7 +23,6 @@ export default function SchedulePageHeader({ rationale, showActions }: ScheduleP
                         aria-label="Breadcrumb"
                         className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
                     >
-                       
                         <LuChevronRight className="size-3.5" aria-hidden="true" />
                         <span className="text-main">Kế hoạch học thích ứng</span>
                     </nav>
@@ -37,20 +36,19 @@ export default function SchedulePageHeader({ rationale, showActions }: ScheduleP
             </div>
 
             {/* Header Actions */}
-            {showActions && (
-            <div className="flex flex-wrap items-center self-start xl:self-auto gap-3 shrink-0">
-                <Link
-                    href="/setting/profile"
-                    className={cn(buttonVariants({ variant: 'third', size: 'md' }), 'gap-2 bg-white')}
-                >
-                    <LuCalendarClock className="size-4" aria-hidden="true" />
-                    <span>Mục tiêu & Lịch thi</span>
-                </Link>
-                <Button type="button" size="md" variant="primary" className="gap-2">
-                    <LuSparkles className="size-4" aria-hidden="true" />
-                    <span>Tối ưu lộ trình (AI)</span>
-                </Button>
-            </div>
+            {onEditGoals && (
+                <div className="flex flex-wrap items-center self-start xl:self-auto gap-3 shrink-0">
+                    <Button type="button" size="md" variant="third" className="gap-2 bg-white" onClick={onEditGoals}>
+                        <LuCalendarClock className="size-4" aria-hidden="true" />
+                        <span>Mục tiêu & Lịch thi</span>
+                    </Button>
+                    {onRegenerate && (
+                        <Button type="button" size="md" variant="primary" className="gap-2" onClick={onRegenerate}>
+                            <LuRefreshCw className="size-4" aria-hidden="true" />
+                            <span>Tạo lại lộ trình</span>
+                        </Button>
+                    )}
+                </div>
             )}
         </div>
     );
