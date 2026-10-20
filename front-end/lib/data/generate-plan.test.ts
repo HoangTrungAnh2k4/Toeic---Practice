@@ -19,7 +19,7 @@ const input = (patch: Partial<PlanInput> = {}): PlanInput => ({
         [7, 0.2],
         [8, 0.9],
     ]),
-    topMistakes: { speaking: null, writing: { id: 'wri-email-missing-task', title: 'Bỏ sót nhiệm vụ' } },
+    topMistakes: { speaking: null, writing: { id: '00000000-0000-4000-8000-000000000002', title: 'Bỏ sót nhiệm vụ' } },
     exams: [
         exam('S1', 'speaking', 20),
         exam('W1', 'writing', 60),
@@ -86,11 +86,11 @@ describe('generatePlan', () => {
         ]);
     });
 
-    it('keeps the hard-coded mistake id out of the uuid column but names it in the title', () => {
+    it('links the review task to the top mistake pattern', () => {
         const review = generatePlan(input()).tasks.find((task) => task.kind === 'review');
 
         expect(review?.title).toBe('Bỏ sót nhiệm vụ');
-        expect(review?.mistake_pattern_id).toBeNull();
+        expect(review?.mistake_pattern_id).toBe('00000000-0000-4000-8000-000000000002');
     });
 
     it('is deterministic, caps at 12 weeks and handles an exam tomorrow', () => {

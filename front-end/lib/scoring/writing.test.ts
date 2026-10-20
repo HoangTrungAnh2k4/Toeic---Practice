@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { canRescore, SCORING_STALE_MS, summarizeWriting } from './scale';
-import { locateAnnotations, parseWritingGrade } from './writing';
+import { locateAnnotations, parseWritingGrade, writingPatternsFor } from './writing';
+import type { MistakePattern } from '@/lib/domain/types';
 
 const annotation = (quote: string) => ({
     quote,
@@ -8,27 +9,49 @@ const annotation = (quote: string) => ({
     explanation: 'Sai.',
     criterion: 'grammar' as const,
     severity: 'low' as const,
+    mistake_pattern_id: null,
 });
 
 describe('parseWritingGrade', () => {
     const json = (value: object) => '```json\n' + JSON.stringify(value) + '\n```';
 
     it('accepts a grade within the question scale and rounds half points', () => {
-        const grade = parseWritingGrade(json({ score: 2.5, feedback: 'Tốt.', annotations: [annotation('He go')] }), 3);
+        const grade = parseWritingGrade(json({ score: 2.5, feedback: 'Tốt.', annotations: [annotation('He go')] }), 3, []);
         expect(grade?.score).toBe(3);
         expect(grade?.annotations).toHaveLength(1);
     });
 
     it('defaults missing annotations to none', () => {
-        expect(parseWritingGrade(json({ score: 4, feedback: 'Tốt.' }), 4)?.annotations).toEqual([]);
+        expect(parseWritingGrade(json({ score: 4, feedback: 'Tốt.' }), 4, [])?.annotations).toEqual([]);
     });
 
     it('rejects scores above the scale, unknown criteria and broken JSON', () => {
-        expect(parseWritingGrade(json({ score: 4, feedback: 'Tốt.' }), 3)).toBeNull();
+        expect(parseWritingGrade(json({ score: 4, feedback: 'Tốt.' }), 3, [])).toBeNull();
         expect(
-            parseWritingGrade(json({ score: 1, feedback: 'Tốt.', annotations: [{ ...annotation('a'), criterion: 'pronunciation' }] }), 3),
+            parseWritingGrade(json({ score: 1, feedback: 'Tốt.', annotations: [{ ...annotation('a'), criterion: 'pronunciation' }] }), 3, []),
         ).toBeNull();
-        expect(parseWritingGrade('{"score": 1,', 3)).toBeNull();
+        expect(parseWritingGrade('{"score": 1,', 3, [])).toBeNull();
+    });
+
+    it('maps the pattern number to its uuid and keeps unmatched annotations without one', () => {
+        const patterns = [1, null, 3, 0, 1.5, '1', undefined].map((pattern) => ({ ...annotation('a'), pattern }));
+        const grade = parseWritingGrade(json({ score: 1, feedback: 'Tốt.', annotations: patterns }), 3, ['uuid-1', 'uuid-2']);
+        expect(grade?.annotations.map((a) => a.mistake_pattern_id)).toEqual(['uuid-1', null, null, null, null, null, null]);
+    });
+});
+
+describe('writingPatternsFor', () => {
+    const pattern = (id: string, skill: MistakePattern['skill'], part_template_id: number | null) =>
+        ({ id, skill, part_template_id }) as MistakePattern;
+
+    it('keeps only Writing patterns of the part plus shared Writing patterns', () => {
+        const patterns = [
+            pattern('part', 'writing', 7),
+            pattern('other-part', 'writing', 8),
+            pattern('shared', 'writing', null),
+            pattern('speaking', 'speaking', null),
+        ];
+        expect(writingPatternsFor(patterns, 7).map((p) => p.id)).toEqual(['part', 'shared']);
     });
 });
 

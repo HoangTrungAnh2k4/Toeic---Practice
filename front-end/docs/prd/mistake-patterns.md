@@ -1,6 +1,6 @@
 # PRD — Sổ lỗi từ annotations thật (E7-3)
 
-> Trạng thái: **Chờ duyệt** · 2026-10-19 · Nối tiếp [`writing-scoring.md`](writing-scoring.md).
+> Trạng thái: **Đã triển khai** · duyệt 2026-10-20 · Nối tiếp [`writing-scoring.md`](writing-scoring.md).
 
 ## Vấn đề
 
@@ -33,7 +33,7 @@ Gắn mẫu cho annotation đã có; annotations và mẫu lỗi cho Speaking; t
 ## Thiết kế kỹ thuật
 
 - **DB**: migration seed `mistake_patterns` (uuid cố định, `remedy` jsonb giữ cấu trúc hiện có). Không đổi schema.
-- **Danh mục**: `listMistakePatterns` trong `lib/data/content.ts` (nội dung dùng chung, đọc phía server như đề). Các trang đang nhận `patterns` từ server giữ nguyên luồng.
+- **Danh mục**: `listMistakePatterns` trong `lib/data/mistake-patterns.ts`, đọc DB với `'use cache'` (dự án bật Cache Components; `content.ts` còn được client import nên không đặt ở đó). Các trang đang nhận `patterns` từ server giữ nguyên luồng.
 - **Prompt chấm** (`lib/scoring/writing.ts`): thêm danh sách mẫu đánh số `1..N` (tiêu đề + tiêu chí) và trường `pattern` (số hoặc `null`) cho mỗi annotation. Server đổi số sang uuid; số ngoài danh sách thì coi là `null`, không bỏ annotation. Dùng số thay uuid để tiết kiệm token và tránh model chép sai id.
 - **Route** `POST /api/writing/score`: nạp mẫu lỗi Writing một lần cho mỗi request, truyền vào chấm từng câu, ghi `mistake_pattern_id` khi insert annotations. Khách nhận kèm trong `outcomes`.
 - **Sổ lỗi** (`app/mistakes/_lib/data.ts`): giữ logic hiện tại (cửa sổ 5 bài, chuỗi sạch, độ ưu tiên), vì logic này đã đọc `mistake_pattern_id`.

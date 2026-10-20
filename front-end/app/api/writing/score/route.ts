@@ -1,13 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import type { Database } from '@/lib/database.types';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
-import type { RequiredKeyword } from '@/lib/domain/types';
+import type { MistakePattern, RequiredKeyword } from '@/lib/domain/types';
 import { ProviderQuotaError } from '@/lib/scoring/errors';
 import { scoringQuota } from '@/lib/scoring/quota';
 import { SCORE_ERROR_MESSAGE, SCORING_STALE_MS, summarizeWriting, type ScoreError } from '@/lib/scoring/scale';
-import { scoreWriting, type WritingOutcome, type WritingQuestion } from '@/lib/scoring/writing';
+import { scoreWriting, writingPatternsFor, type WritingOutcome, type WritingQuestion } from '@/lib/scoring/writing';
 import { createAdminSupabase } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 
@@ -61,6 +62,7 @@ async function loadQuestions(supabase: SupabaseClient<Database>, examId: string,
 function scoreAll(
     questions: (WritingQuestion & { id: string })[],
     answers: Map<string, string>,
+    patterns: MistakePattern[],
     quota: ReturnType<typeof scoringQuota>,
 ): Promise<WritingOutcome[]> {
     return Promise.all(
@@ -68,7 +70,7 @@ function scoreAll(
             const answer = answers.get(question.id) ?? '';
             if (answer.trim() && !(await quota.consume())) return { questionId: question.id, error: 'daily_limit' };
             try {
-                return { questionId: question.id, result: await scoreWriting(question, answer) };
+                return { questionId: question.id, result: await scoreWriting(question, answer, patterns) };
             } catch (error) {
                 if (answer.trim()) await quota.refund();
                 if (error instanceof ProviderQuotaError) return { questionId: question.id, error: 'provider_limit' };
@@ -96,13 +98,17 @@ export async function POST(request: Request) {
         if (!body.success || !WRITING_PART_IDS.includes(body.data.partTemplateId)) return fail('invalid_body', 400);
         const { examId, partTemplateId, answers } = body.data;
 
-        const questions = await loadQuestions(supabase, examId, partTemplateId).catch(() => null);
-        if (!questions) return fail('server_error', 500);
+        const loaded = await Promise.all([
+            loadQuestions(supabase, examId, partTemplateId),
+            listMistakePatterns(),
+        ]).catch(() => null);
+        if (!loaded) return fail('server_error', 500);
+        const [questions, patterns] = loaded;
         const asked = questions.filter((question) => answers.some((answer) => answer.questionId === question.id));
         if (asked.length !== answers.length) return fail('question_not_found', 404);
 
         const texts = new Map(answers.map((answer) => [answer.questionId, answer.text]));
-        const outcomes = await scoreAll(asked, texts, quota).catch(() => null);
+        const outcomes = await scoreAll(asked, texts, writingPatternsFor(patterns, partTemplateId), quota).catch(() => null);
         if (!outcomes) return fail('server_error', 500);
         return NextResponse.json({ outcomes }, { status: statusOf(firstError(outcomes)) });
     }
@@ -130,9 +136,10 @@ export async function POST(request: Request) {
         admin.from('attempts').update({ status: 'submitted', scoring_error: scoringError }).eq('id', attemptId);
 
     try {
-        const [questions, responses] = await Promise.all([
+        const [questions, responses, patterns] = await Promise.all([
             loadQuestions(supabase, attempt.exam_id, attempt.part_template_id),
             admin.from('responses').select('question_id, text_answer, score, feedback').eq('attempt_id', attemptId),
+            listMistakePatterns(),
         ]);
         if (responses.error) throw responses.error;
         if (questions.length === 0) {
@@ -144,7 +151,7 @@ export async function POST(request: Request) {
         const scored = responses.data.filter((response) => response.score !== null);
         const pending = questions.filter((question) => !scored.some((response) => response.question_id === question.id));
         const answers = new Map(responses.data.map((response) => [response.question_id, response.text_answer ?? '']));
-        const outcomes = await scoreAll(pending, answers, quota);
+        const outcomes = await scoreAll(pending, answers, writingPatternsFor(patterns, attempt.part_template_id), quota);
         const results = outcomes.flatMap((outcome) => ('result' in outcome ? [outcome] : []));
 
         if (results.length > 0) {
@@ -177,13 +184,14 @@ export async function POST(request: Request) {
                 const responseId = saved.find((response) => response.question_id === questionId)?.id;
                 if (!responseId) return [];
                 return result.annotations.map(
-                    ({ quote, correction, explanation, criterion, severity, start_offset, end_offset }) => ({
+                    ({ quote, correction, explanation, criterion, severity, mistake_pattern_id, start_offset, end_offset }) => ({
                         response_id: responseId,
                         quote,
                         correction,
                         explanation,
                         criterion,
                         severity,
+                        mistake_pattern_id,
                         start_offset,
                         end_offset,
                     }),

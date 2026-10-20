@@ -422,7 +422,6 @@ export async function scoreWritingAttempt(attempt: Attempt, questions: ScoredQue
                     ...annotation,
                     id: crypto.randomUUID(),
                     response_id: saved.id,
-                    mistake_pattern_id: null,
                     at_sec: null,
                 }));
                 writeTable(ANNOTATIONS, [...kept, ...added]);

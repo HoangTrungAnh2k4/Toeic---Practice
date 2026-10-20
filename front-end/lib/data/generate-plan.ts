@@ -9,7 +9,6 @@ const SPRINT_DAYS = 7;
 const SUMMARY_MIN = 10;
 const SKILLS: Skill[] = ['speaking', 'writing'];
 const SKILL_LABEL: Record<Skill, string> = { speaking: 'Speaking', writing: 'Writing' };
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface PlanInput {
     today: Date;
@@ -152,8 +151,7 @@ export function generatePlan(input: PlanInput): PlanDraft {
         title: reviewMistake!.title,
         description: 'Ôn mẫu lỗi trong Sổ lỗi, làm theo các bước khắc phục.',
         goal: 'Tự kiểm tra theo checklist của mẫu lỗi',
-        // shortcut: mẫu lỗi còn hard-code id dạng chữ, cột là uuid FK; điền được khi E7-3 seed bảng `mistake_patterns`
-        mistake_pattern_id: UUID.test(reviewMistake!.id) ? reviewMistake!.id : null,
+        mistake_pattern_id: reviewMistake!.id,
     });
 
     const tasks: PlanTaskDraft[] = [];

@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { listMistakePatterns } from '@/lib/data/mistake-patterns';
+import type { MistakePattern } from '@/lib/domain/types';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
+import type { ExamSummary } from '@/lib/exam-library/types';
 import MistakeDetailSkeleton from './_components/MistakeDetailSkeleton';
 import MistakeDetailView from './_components/MistakeDetailView';
 
@@ -16,15 +18,24 @@ interface MistakeDetailPageProps {
 }
 
 export default async function MistakeDetailPage({ params }: MistakeDetailPageProps) {
-    const { id } = await params;
     const [patterns, exams] = await Promise.all([listMistakePatterns(), getExamSummaries()]);
-    if (!patterns.some((pattern) => pattern.id === id)) notFound();
 
     return (
         <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
+            {/* params là runtime data → stream trong Suspense */}
             <Suspense fallback={<MistakeDetailSkeleton />}>
-                <MistakeDetailView id={id} patterns={patterns} exams={exams} />
+                <MistakeDetail params={params} patterns={patterns} exams={exams} />
             </Suspense>
         </main>
     );
+}
+
+async function MistakeDetail({
+    params,
+    patterns,
+    exams,
+}: MistakeDetailPageProps & { patterns: MistakePattern[]; exams: ExamSummary[] }) {
+    const { id } = await params;
+    if (!patterns.some((pattern) => pattern.id === id)) notFound();
+    return <MistakeDetailView id={id} patterns={patterns} exams={exams} />;
 }

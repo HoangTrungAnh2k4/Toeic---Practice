@@ -41,7 +41,7 @@ describe('scoreWritingAttempt for a guest', () => {
         feedback: 'Ổn.',
         metrics: { words: 3 },
         scoring_model: 'm',
-        annotations: [{ quote: 'I goes', correction: 'I go', explanation: 'Sai.', criterion: 'grammar', severity: 'high', start_offset: 0, end_offset: 6 }],
+        annotations: [{ quote: 'I goes', correction: 'I go', explanation: 'Sai.', criterion: 'grammar', severity: 'high', mistake_pattern_id: 'p1', start_offset: 0, end_offset: 6 }],
     });
 
     beforeEach(() => {
@@ -72,7 +72,7 @@ describe('scoreWritingAttempt for a guest', () => {
         ]);
         const responses = await listResponses(attempt.id);
         expect(responses.map((row) => row.score)).toEqual([4, 0]);
-        expect(await listAnnotations(responses.map((row) => row.id))).toHaveLength(1);
+        expect(await listAnnotations(responses.map((row) => row.id))).toEqual([expect.objectContaining({ mistake_pattern_id: 'p1' })]);
         expect(await getAttempt(attempt.id)).toMatchObject({ status: 'scored', score: 100, scoring_error: null });
     });
 

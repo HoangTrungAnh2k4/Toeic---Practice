@@ -1,6 +1,6 @@
 -- Pre-launch RLS audit (E8-7): tables not covered by rls.test.sql / user_data_rls.test.sql.
 begin;
-select plan(20);
+select plan(21);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'student@test.local'),
@@ -31,6 +31,11 @@ set local request.jwt.claims = '{"role": "anon"}';
 
 select is_empty('select 1 from public.profiles', 'anon cannot read profiles');
 select is_empty('select 1 from public.attempts', 'anon cannot read attempts');
+select results_eq(
+  'select skill::text, count(*)::int from public.mistake_patterns group by skill order by skill',
+  $$values ('speaking', 4), ('writing', 11)$$,
+  'anon reads the seeded mistake pattern catalog'
+);
 select throws_ok(
   $$insert into public.exams (skill, code, title, topic) values ('speaking', 'X', 'x', 't')$$,
   '42501', null, 'anon cannot create exams'

@@ -32,7 +32,7 @@
 | E4 | Pipeline chấm điểm (AI) | P0 | In progress | 5/7 | S2 – S4 |
 | E5 | Quản trị đề (admin) | P1 | In progress | 10/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | In progress | 3/4 | S4, S6 |
-| E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 3/4 | S4, S6 |
+| E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | Done | 4/4 | S4, S6 |
 | E8 | Auth & bảo mật | P1 | In progress | 7/9 | S1, S5, S6 |
 | E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 4/12 | rải rác |
 | E10 | Phát hành | P1 | In progress | 2/5 | S1, S6 |
@@ -96,7 +96,7 @@ Mục tiêu: xem điểm ngay sau khi nộp; Lịch sử, Sổ lỗi, Lộ trìn
 - [x] **E4-6** (P1, S) Test logic quy đổi điểm (`lib/domain/score-levels.ts`)
 - [x] **E7-1** (P1, S) View `exam_stats` → số lượt làm mỗi đề (`lib/data/content.ts:42`) — *view chạy quyền owner để đếm lượt của mọi người, chỉ admin thấy dòng*
 - [x] **E7-2** (P1, S) Lịch sử: query một attempt thay vì tải hết (`app/setting/history/_lib/review.ts:14`) — *trang xem bài nạp attempt rồi chỉ các lượt cùng đề*
-- [ ] **E7-3** (P1, M) Sổ lỗi sinh pattern từ `annotations` thật (`lib/data/mistake-patterns.ts`) — *cần E4-3*
+- [x] **E7-3** (P1, M) Sổ lỗi sinh pattern từ `annotations` thật (`lib/data/mistake-patterns.ts`) — *theo [`mistake-patterns.md`](prd/mistake-patterns.md): migration seed 15 mẫu uuid cố định (11 Writing, 4 Speaking giữ cho sau), `listMistakePatterns` đọc DB (`'use cache'`); chấm Writing đưa danh sách mẫu đánh số của đúng Part + mẫu chung vào prompt, server đổi số → uuid, ghi `annotations.mistake_pattern_id` (khách lưu localStorage); task ôn lỗi của lộ trình gắn `mistake_pattern_id`. Thử local: bài luận Q8 có lỗi → 7/7 annotation gắn mẫu, Sổ lỗi hiện mẫu + bằng chứng. Còn: Speaking chưa gắn mẫu; mẫu "thiếu nhiệm vụ / thiếu quan điểm" có thể không có câu trích nên bị `locateAnnotations` bỏ*
 - [x] **E6-1** (P1, M) `getActivePlan` đọc `study_plans`, `study_plan_weeks`, `plan_tasks` (hiện luôn `null` — `lib/data/user-data.ts:52`)
 - [x] **E6-3** (P1, S) Ghi `minutes_per_day` khi đổi thời lượng (`SessionDurationSwitch.tsx:12`)
 
@@ -113,7 +113,7 @@ Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, kh�
 
 Mục tiêu: người dùng mới vào là có lộ trình; deploy production.
 
-- [x] **E6-2** (P1, L) Sinh lộ trình từ mục tiêu điểm + ngày thi (AI hoặc rule-based) — *rule-based theo [`study-plan.md`](prd/study-plan.md): `generatePlan` (`lib/data/generate-plan.ts`, 7 test) xếp tối đa 12 tuần, chia ngày theo khoảng cách tới mục tiêu, ưu tiên Part yếu, thi thử lấy mốc ở tuần 1, ôn lỗi + tổng kết cuối tuần, tuần cuối chỉ thi thử/ôn lỗi; RPC `create_study_plan` lưu mục tiêu + archive lộ trình cũ trong một transaction (pgTAP 8 test); dialog "Mục tiêu & Lịch thi" (mở từ `/schedule` và Profile qua `/schedule#goals`), nút "Tạo lại lộ trình"; nộp bài tự gắn task (`linkPlanTask`), ôn lỗi/tổng kết có nút "Đánh dấu xong". Còn: task ôn lỗi chưa gắn `mistake_pattern_id` (chờ E7-3 seed uuid), task thi thử Writing xong ngay ở Part đầu*
+- [x] **E6-2** (P1, L) Sinh lộ trình từ mục tiêu điểm + ngày thi (AI hoặc rule-based) — *rule-based theo [`study-plan.md`](prd/study-plan.md): `generatePlan` (`lib/data/generate-plan.ts`, 7 test) xếp tối đa 12 tuần, chia ngày theo khoảng cách tới mục tiêu, ưu tiên Part yếu, thi thử lấy mốc ở tuần 1, ôn lỗi + tổng kết cuối tuần, tuần cuối chỉ thi thử/ôn lỗi; RPC `create_study_plan` lưu mục tiêu + archive lộ trình cũ trong một transaction (pgTAP 8 test); dialog "Mục tiêu & Lịch thi" (mở từ `/schedule` và Profile qua `/schedule#goals`), nút "Tạo lại lộ trình"; nộp bài tự gắn task (`linkPlanTask`), ôn lỗi/tổng kết có nút "Đánh dấu xong". Còn: task thi thử Writing xong ngay ở Part đầu*
 - [x] **E7-4** (P2, S) Kiểm tra Overview/Chart với dữ liệu thật, empty state cho user mới — *empty state đã đủ (thẻ mục tiêu, chart, hoạt động gần đây). Sửa lỗi: Writing lưu mỗi Part một lượt nên `fullTestScores` không bao giờ có điểm Writing → thẻ Writing ở Overview/Profile/Schedule luôn "Chưa có bài làm cả đề"; giờ lượt chấm làm đủ mọi Part sinh một điểm cả bài (`combineWritingScores`, gộp lượt gần nhất mỗi Part như trang xem bài) + test. Sửa icon Speaking/Writing bị đảo ở banner*
 - [x] **E8-7** (P1, S) Rà RLS toàn bộ bảng trước khi phát hành — *16/16 bảng bật RLS, không thấy lỗ hổng; thêm `launch_rls.test.sql` (20 test: anon, profiles, lộ trình, ai_insights, scoring_usage, bảng danh mục, tự chuyển `scored`). Còn lại xem E8-9*
 - [ ] **E9-2** (P2, S) Thay dữ liệu mock ở footer (`components/layout/footer/footer-data.ts`) — *đã thay "Nguồn đề thi" mock bằng "Kho đề" đếm đề `published` thật, link Kiểm tra micro/loa. Còn chờ: link GitHub/LinkedIn/email thật, đích cho "Hướng dẫn làm bài", "Báo lỗi đề thi", "Góp ý", 3 trang chính sách (chưa có route)*
