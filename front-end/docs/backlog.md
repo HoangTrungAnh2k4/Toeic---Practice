@@ -1,6 +1,6 @@
 # Product Backlog — Toeco (TOEIC Speaking & Writing)
 
-> Cập nhật lần cuối: 2026-10-16 · Branch: `main` · Sprint 2 tuần, bắt đầu từ thứ Hai 2026-10-19
+> Cập nhật lần cuối: 2026-10-20 · Branch: `main` · Sprint 2 tuần, bắt đầu từ thứ Hai 2026-10-19
 >
 > **Cách dùng**
 > - Task nằm ở **đúng một chỗ**: trong sprint được xếp, hoặc ở mục *Backlog chưa xếp sprint*. Đổi `[ ]` → `[x]` khi xong.
@@ -33,8 +33,8 @@
 | E5 | Quản trị đề (admin) | P1 | In progress | 10/11 | S1, S5 |
 | E6 | Lộ trình học & AI insight | P1 | In progress | 2/4 | S4, S6 |
 | E7 | Thống kê, Lịch sử, Sổ lỗi trên dữ liệu thật | P1 | In progress | 2/4 | S4, S6 |
-| E8 | Auth & bảo mật | P1 | In progress | 5/8 | S1, S5, S6 |
-| E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 2/12 | rải rác |
+| E8 | Auth & bảo mật | P1 | In progress | 6/8 | S1, S5, S6 |
+| E9 | Chất lượng, nợ kỹ thuật, dọn dẹp | P2–P3 | In progress | 3/12 | rải rác |
 | E10 | Phát hành | P1 | In progress | 1/5 | S1, S6 |
 
 ## Lịch Sprint
@@ -46,7 +46,7 @@
 | S2 | 02/11 – 13/11 | Làm bài đủ 2 kỹ năng, chốt PRD chấm điểm | ~6,5 ngày | Done |
 | S3 | 16/11 – 27/11 | Có điểm (STT + chấm rubric + hàng đợi) | ~9,5 ngày ⚠️ | Todo |
 | S4 | 30/11 – 11/12 | Trang kết quả + khép vòng học trên dữ liệu thật | ~6,5 ngày | In progress |
-| S5 | 14/12 – 25/12 | Quản trị đề đủ Speaking + Writing | ~6,5 ngày | In progress |
+| S5 | 14/12 – 25/12 | Quản trị đề đủ Speaking + Writing | ~6,5 ngày | Done |
 | S6 | 28/12 – 08/01/2027 | Sinh lộ trình + ra mắt | ~8 ngày | Todo |
 
 > Tải tính theo S = ½ ngày, M = 1,5 ngày, L = 4 ngày; mỗi sprint ~10 ngày làm việc, chừa ~30% cho bug/review.
@@ -106,8 +106,8 @@ Mục tiêu: admin tự tạo, sửa, phát hành đề cả hai kỹ năng, kh�
 
 - [x] **E5-7** (P1, L) Form tạo đề Writing (3 Part) — tái dùng `ExamBuilderForm`, `PartSection`, `examSchema` — *ảnh Q1–5 nén phía trình duyệt rồi lên R2, email lưu text `questions.stimulus`, admin chỉ nhập 2 từ khoá gốc, AI tự đánh giá cách dùng*
 - [x] **E5-8** (P1, M) Sửa đề + chuyển trạng thái `draft → review → published` — *đề đã có lượt làm chỉ sửa thông tin chung; trả về nháp bắt buộc lý do; phát hành bị chặn khi thiếu dữ liệu; thay ảnh thì xoá ảnh cũ trên R2. Xoá đề cũng xoá ảnh R2*
-- [ ] **E8-6** (P1, S) Quên mật khẩu / đặt lại mật khẩu (chưa có route nào)
-- [ ] **E9-10** (P2, S) supabase-js tự retry GET 3 lần nên báo lỗi hiện sau ~15 giây → giảm retry hoặc timeout cho trang đọc dữ liệu (nợ từ E1-6)
+- [x] **E8-6** (P1, S) Quên mật khẩu / đặt lại mật khẩu — *mã OTP 6 số giống luồng xác thực đăng ký: `/forgot-password` gửi mã (`resetPasswordForEmail`, không lộ email nào có tài khoản) → `/reset-password` nhập mã + mật khẩu mới (`verifyOtp` type `recovery` rồi `updateUser`) → `/overview`. Template email `back-end/supabase/templates/recovery.html`; production phải dán template này vào Dashboard (Auth → Email Templates → Reset Password), nếu không email gửi link thay vì mã*
+- [x] **E9-10** (P2, S) supabase-js tự retry GET 3 lần nên báo lỗi hiện sau ~15 giây (nợ từ E1-6) — *tắt `db.retry` ở client trình duyệt (`lib/supabase.ts`) và server (`lib/supabase-server.ts`); lỗi hiện ngay, người dùng bấm "Thử lại". `lib/supabase-admin.ts` (chấm điểm) giữ retry*
 
 ## Sprint 6 — Sinh lộ trình + ra mắt (28/12 – 08/01/2027)
 

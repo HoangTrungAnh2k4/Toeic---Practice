@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 
-const AUTH_ROUTES = ['/login', '/register', '/verify-email'];
+const AUTH_ROUTES = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
 
 function useIsAuthRoute() {
     const pathname = usePathname();

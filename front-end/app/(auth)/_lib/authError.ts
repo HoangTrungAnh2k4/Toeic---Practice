@@ -5,6 +5,7 @@ const MESSAGES: Record<string, string> = {
     user_already_exists: 'Email này đã được đăng ký',
     email_exists: 'Email này đã được đăng ký',
     weak_password: 'Mật khẩu quá yếu, hãy dùng tối thiểu 8 ký tự gồm chữ và số',
+    same_password: 'Mật khẩu mới phải khác mật khẩu cũ',
     otp_expired: 'Mã xác thực sai hoặc đã hết hạn',
     over_email_send_rate_limit: 'Bạn gửi mã quá nhiều lần, hãy thử lại sau ít phút',
     over_request_rate_limit: 'Bạn thao tác quá nhanh, hãy thử lại sau ít phút',

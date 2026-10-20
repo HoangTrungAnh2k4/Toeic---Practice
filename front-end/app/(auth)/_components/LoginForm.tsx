@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -75,19 +76,27 @@ export default function LoginForm() {
                             />
                         )}
                     />
-                    <Controller
-                        name="remember"
-                        control={form.control}
-                        render={({ field }) => (
-                            <AuthCheckboxField
-                                ref={field.ref}
-                                name={field.name}
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                label="Ghi nhớ đăng nhập"
-                            />
-                        )}
-                    />
+                    <div className="flex justify-between items-center gap-4">
+                        <Controller
+                            name="remember"
+                            control={form.control}
+                            render={({ field }) => (
+                                <AuthCheckboxField
+                                    ref={field.ref}
+                                    name={field.name}
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    label="Ghi nhớ đăng nhập"
+                                />
+                            )}
+                        />
+                        <Link
+                            href="/forgot-password"
+                            className="rounded-sm focus-visible:outline-2 focus-visible:outline-main focus-visible:outline-offset-2 font-semibold text-main text-sm hover:underline underline-offset-4 whitespace-nowrap shrink-0"
+                        >
+                            Quên mật khẩu?
+                        </Link>
+                    </div>
 
                     <AuthFormError message={form.formState.errors.root?.message} />
                     <Button

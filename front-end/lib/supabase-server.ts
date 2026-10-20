@@ -15,6 +15,8 @@ export async function createServerSupabase() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            // Như lib/supabase.ts: không tự retry để trang lỗi hiện ngay thay vì chờ ~15s
+            db: { retry: false },
             cookies: {
                 getAll: () => cookieStore.getAll(),
                 setAll: (list) => {

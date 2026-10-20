@@ -15,17 +15,19 @@ export function setRememberSession(remember: boolean) {
 export const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    typeof window === 'undefined'
-        ? undefined
-        : {
-              cookies: {
-                  getAll: () => Object.entries(parse(document.cookie)).map(([name, value = '']) => ({ name, value })),
-                  setAll: (cookies) => {
-                      const remember = parse(document.cookie)[REMEMBER_COOKIE] !== '0';
-                      cookies.forEach(({ name, value, options }) => {
-                          document.cookie = serialize(name, value, sessionCookieOptions(remember, value, options));
-                      });
-                  },
-              },
-          },
+    {
+        // Tự retry 3 lần (chờ 1s, 2s, 4s) làm báo lỗi hiện sau ~15s; các trang đã có nút "Thử lại"
+        db: { retry: false },
+        ...(typeof window !== 'undefined' && {
+            cookies: {
+                getAll: () => Object.entries(parse(document.cookie)).map(([name, value = '']) => ({ name, value })),
+                setAll: (cookies) => {
+                    const remember = parse(document.cookie)[REMEMBER_COOKIE] !== '0';
+                    cookies.forEach(({ name, value, options }) => {
+                        document.cookie = serialize(name, value, sessionCookieOptions(remember, value, options));
+                    });
+                },
+            },
+        }),
+    },
 );
