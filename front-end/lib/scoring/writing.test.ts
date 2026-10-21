@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canRescore, SCORING_STALE_MS, summarizeWriting } from './scale';
+import { canRescore, summarizeWriting } from './scale';
 import { locateAnnotations, parseWritingGrade, writingPatternsFor } from './writing';
 import type { MistakePattern } from '@/lib/domain/types';
 
@@ -97,15 +97,18 @@ describe('canRescore', () => {
         ...patch,
     });
 
+    // Mốc stale theo spec là 2 phút, gõ tay thay vì import SCORING_STALE_MS
+    const STALE_MS = 120_000;
+
     it('waits while a fresh submission or scoring run is in flight', () => {
-        expect(canRescore(attempt({}), NOW)).toBe(false);
-        expect(canRescore(attempt({ status: 'scoring', scoring_started_at: ago(1000) }), NOW)).toBe(false);
+        expect(canRescore(attempt({ submitted_at: ago(STALE_MS - 1) }), NOW)).toBe(false);
+        expect(canRescore(attempt({ status: 'scoring', scoring_started_at: ago(STALE_MS - 1) }), NOW)).toBe(false);
     });
 
     it('allows rescoring after an error or once a run is stale', () => {
         expect(canRescore(attempt({ scoring_error: 'Lỗi' }), NOW)).toBe(true);
-        expect(canRescore(attempt({ submitted_at: ago(SCORING_STALE_MS + 1) }), NOW)).toBe(true);
-        expect(canRescore(attempt({ status: 'scoring', scoring_started_at: ago(SCORING_STALE_MS + 1) }), NOW)).toBe(true);
+        expect(canRescore(attempt({ submitted_at: ago(STALE_MS) }), NOW)).toBe(true);
+        expect(canRescore(attempt({ status: 'scoring', scoring_started_at: ago(STALE_MS) }), NOW)).toBe(true);
     });
 
     it('never rescores attempts that are scored or still open', () => {
