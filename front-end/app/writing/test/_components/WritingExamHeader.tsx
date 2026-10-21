@@ -198,12 +198,17 @@ export default function WritingExamHeader({
                             <span
                                 role="timer"
                                 aria-label={isUntimed ? 'Không giới hạn thời gian' : `Còn lại ${timeLabel}`}
+                                data-state={isWarning ? 'warning' : undefined}
                                 className={cn(
                                     'font-mono font-bold tabular-nums text-xl tracking-tight',
                                     isTimeUp ? 'text-main' : isWarning ? 'text-white' : 'text-sub3',
                                 )}
                             >
                                 {timeLabel}
+                            </span>
+                            {/* Cảnh báo không chỉ bằng màu: vùng status luôn có sẵn để trình đọc màn hình đọc khi chữ xuất hiện */}
+                            <span role="status" className="sr-only">
+                                {isWarning ? 'Sắp hết giờ' : ''}
                             </span>
                         </div>
                     </div>
