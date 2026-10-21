@@ -84,7 +84,7 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
     return (
         <section id={EXAM_LIBRARY_ID} aria-labelledby="exam-library-title" className="flex flex-col gap-4 scroll-mt-4">
             {/* Section header */}
-            <div className="flex sm:flex-row flex-col justify-between sm:items-end gap-3">
+            <div className="flex sm:flex-row flex-col justify-between sm:items-end gap-3 my-4">
                 <div className="flex flex-col gap-0.5">
                     <h2 id="exam-library-title" className="font-bold text-main text-lg">
                         Kho đề thi trong hệ thống

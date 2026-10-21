@@ -47,7 +47,7 @@ export function SegmentedTabs<T extends string>({
         observer.observe(group);
         group.querySelectorAll('button').forEach((button) => observer.observe(button));
         return () => observer.disconnect();
-    }, [value, options]);
+    }, [value, options.length]);
 
     return (
         <div
@@ -71,7 +71,7 @@ export function SegmentedTabs<T extends string>({
                         aria-pressed={isActive}
                         onClick={() => onChange(option.value)}
                         className={cn(
-                            'z-10 relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs transition-[color,background-color,scale] duration-200 cursor-pointer active:scale-95 motion-reduce:transition-none',
+                            'inline-flex z-10 relative items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs active:scale-95 transition-[color,background-color,scale] motion-reduce:transition-none duration-200 cursor-pointer',
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3',
                             isActive ? 'text-main' : 'text-white hover:bg-white/15',
                         )}
@@ -82,7 +82,7 @@ export function SegmentedTabs<T extends string>({
                                 // Đổi key khi số đếm đổi để badge chạy lại hiệu ứng "đóng dấu".
                                 key={count}
                                 className={cn(
-                                    'px-1.5 rounded-full font-semibold text-xs leading-4 tabular-nums transition-colors duration-200 animate-stamp motion-reduce:animate-none',
+                                    'px-1.5 rounded-full font-semibold tabular-nums text-xs leading-4 transition-colors animate-stamp motion-reduce:animate-none duration-200',
                                     isActive ? 'bg-main text-sub3' : 'bg-white text-main',
                                 )}
                             >

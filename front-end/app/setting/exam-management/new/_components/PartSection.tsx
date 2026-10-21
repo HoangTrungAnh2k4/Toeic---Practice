@@ -1,7 +1,7 @@
 'use client';
 
 import { Controller, type FieldErrors, useFormContext } from 'react-hook-form';
-import { LuCircleAlert } from 'react-icons/lu';
+import { LuCircleAlert, LuInfo } from 'react-icons/lu';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { PartTemplate, Skill } from '@/lib/domain/types';
@@ -24,20 +24,20 @@ interface PartCopy {
 /** Nhãn ô nhập riêng theo Part; ô nào hiện do `getPartFields` quyết định. */
 const PART_COPY: Record<Skill, Record<number, PartCopy>> = {
     speaking: {
-    1: { prompt: 'Đoạn văn cần đọc', promptHint: 'Thông báo, quảng cáo... khoảng 40–60 từ.' },
-    2: { prompt: 'Yêu cầu', promptHint: 'Ví dụ: Describe the picture in as much detail as you can.' },
-    3: {
-        prompt: 'Câu hỏi',
-        context: { label: 'Tình huống chung', description: 'Đoạn giới thiệu cuộc phỏng vấn, hiển thị trước câu 5–7.' },
-    },
-    4: {
-        prompt: 'Câu hỏi',
-        context: {
-            label: 'Bảng thông tin',
-            description: 'Lịch trình, agenda... thí sinh có 45 giây đọc trước câu 8–10. Mỗi dòng một mục.',
+        1: { prompt: 'Đoạn văn cần đọc', promptHint: 'Thông báo, quảng cáo... khoảng 40–60 từ.' },
+        2: { prompt: 'Yêu cầu', promptHint: 'Ví dụ: Describe the picture in as much detail as you can.' },
+        3: {
+            prompt: 'Câu hỏi',
+            context: { label: 'Tình huống chung', description: 'Đoạn giới thiệu cuộc phỏng vấn, hiển thị trước câu 5–7.' },
         },
-    },
-    5: { prompt: 'Câu hỏi nêu quan điểm' },
+        4: {
+            prompt: 'Câu hỏi',
+            context: {
+                label: 'Bảng thông tin',
+                description: 'Lịch trình, agenda... thí sinh có 45 giây đọc trước câu 8–10. Mỗi dòng một mục.',
+            },
+        },
+        5: { prompt: 'Câu hỏi nêu quan điểm' },
     },
     writing: {
         1: { prompt: 'Yêu cầu' },
@@ -58,7 +58,7 @@ const PART_COPY: Record<Skill, Record<number, PartCopy>> = {
 };
 
 /** Đếm lỗi lá trong một nhánh `errors` của react-hook-form. */
-function countErrors(errors: unknown): number {
+export function countErrors(errors: unknown): number {
     if (!errors || typeof errors !== 'object') return 0;
     if ('type' in errors && 'message' in errors) return 1;
     return Object.values(errors).reduce<number>((sum, value) => sum + countErrors(value), 0);
@@ -88,16 +88,29 @@ export default function PartSection({ skill, template, index }: PartSectionProps
     return (
         <section
             aria-labelledby={titleId}
-            className="relative flex flex-col gap-5 bg-card shadow-sm hover:shadow-md p-5 pl-7 border border-sub2/30 rounded-xl overflow-hidden transition-shadow"
+            className="relative flex flex-col gap-5 bg-card shadow-sm hover:shadow-md p-5 sm:p-6 pl-7 sm:pl-8 rounded-xl overflow-hidden transition-shadow"
         >
-            <span className="left-0 absolute inset-y-0 bg-main w-1.5" aria-hidden="true" />
 
-            <header className="flex flex-wrap justify-between items-start gap-2">
-                <div className="flex flex-col gap-0.5">
-                    <h2 id={titleId} className="font-semibold text-main text-base">
-                        Part {template.part_no} · {template.task}
-                    </h2>
 
+            <header className="flex flex-wrap justify-between items-start gap-3">
+                <div className="flex items-center gap-3">
+                    <span
+                        className="flex justify-center items-center bg-main rounded-lg size-11 font-bold tabular-nums text-sub3 text-lg shrink-0"
+                        aria-hidden="true"
+                    >
+                        {template.part_no}
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                        <h2 id={titleId} className="font-bold text-main text-lg tracking-tight">
+                            <span className="sr-only">Part {template.part_no} · </span>
+                            {template.task}
+                        </h2>
+                        <p className="font-medium text-subText text-sm">
+                            {template.q_from === template.q_to
+                                ? `Câu ${template.q_from}`
+                                : `Câu ${template.q_from}–${template.q_to} · ${questions.length} câu`}
+                        </p>
+                    </div>
                 </div>
                 {errorCount > 0 && (
                     <span className="inline-flex items-center gap-1 bg-destructive/10 px-2 py-0.5 rounded-md font-semibold text-[0.6875rem] text-destructive tracking-wider">
@@ -114,8 +127,11 @@ export default function PartSection({ skill, template, index }: PartSectionProps
             )}
 
             {fixedPrompt && (
-                <p className="bg-sub1/40 px-3 py-2 rounded-lg font-medium text-main text-sm">
-                    <span className="font-semibold">{copy.prompt} (cố định cho mọi câu):</span> {fixedPrompt}
+                <p className="flex items-start gap-2.5 bg-sub1/60 px-4 py-3 border border-sub2/30 rounded-lg font-medium text-main text-sm">
+                    <LuInfo className="mt-0.5 size-4 text-sub2 shrink-0" aria-hidden="true" />
+                    <span>
+                        <span className="font-semibold">{copy.prompt} (cố định cho mọi câu):</span> {fixedPrompt}
+                    </span>
                 </p>
             )}
 
@@ -133,8 +149,19 @@ export default function PartSection({ skill, template, index }: PartSectionProps
             {questions.map((question, questionIndex) => {
                 const name = `parts.${index}.questions.${questionIndex}` as const;
                 return (
-                    <fieldset key={question.number} className="flex flex-col gap-4 pt-4 border-sub2/30 border-t">
-                        <legend className="float-left mb-1 font-semibold text-main text-sm">Câu {question.number}</legend>
+                    <fieldset
+                        key={question.number}
+                        className="flex flex-col gap-4 bg-canvas/50 [&_input]:bg-white [&_textarea]:bg-white p-4 sm:p-5 border border-sub2/30 focus-within:border-sub2/60 rounded-xl transition-colors"
+                    >
+                        <legend className="float-left flex items-center gap-2 mb-1 w-full font-semibold text-main text-sm">
+                            <span
+                                className="flex justify-center items-center bg-sub3 rounded-full size-7 font-bold tabular-nums text-main text-xs"
+                                aria-hidden="true"
+                            >
+                                {question.number}
+                            </span>
+                            Câu {question.number}
+                        </legend>
 
                         {fields.prompt && !fixedPrompt && (
                             <FormField

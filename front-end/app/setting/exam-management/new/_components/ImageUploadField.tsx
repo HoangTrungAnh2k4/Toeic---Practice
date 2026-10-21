@@ -77,7 +77,7 @@ export default function ImageUploadField({
             tabIndex={0}
             onPaste={onPaste}
             aria-label="Vùng dán ảnh"
-            className="flex sm:flex-row flex-col sm:items-center gap-4 p-4 border-2 border-sub2/30 focus-visible:border-sub2 border-dashed rounded-lg focus-visible:outline-none"
+            className="flex sm:flex-row flex-col sm:items-center gap-4 bg-white p-4 border-2 border-sub2/30 focus-visible:border-sub2 border-dashed rounded-lg focus-visible:outline-none"
         >
             <div className="relative flex justify-center items-center bg-sub1 rounded-lg w-full sm:w-48 aspect-4/3 overflow-hidden shrink-0">
                 {value && previewUrl ? (

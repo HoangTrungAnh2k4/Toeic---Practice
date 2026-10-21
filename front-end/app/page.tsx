@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function LandingPage() {
     return (
         // Margin âm triệt padding ngang của khung root (app/layout.tsx); không dùng :has() vì cacheComponents giữ route ẩn trong DOM
-        <div className={`${patrickHand.variable} flex flex-col -mx-4 sm:-mx-8`}>
+        <div className={`${patrickHand.variable} flex flex-col -mb-5 -mx-4 sm:-mx-8`}>
             <LandingHeader />
             <main className="flex flex-col items-center">
                 <LandingHero />

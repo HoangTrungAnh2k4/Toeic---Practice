@@ -49,7 +49,7 @@ export default function RootLayout({
                 </Suspense>
                 <div className="flex flex-col flex-1 bg-canvas min-w-0">
                     {/* Không bọc children trong Suspense: fallback → nội dung thật sẽ remount trang và chạy lại animation */}
-                    <div className="flex-1 px-4 sm:px-8 pt-4 min-h-screen">{children}</div>
+                    <div className="flex-1 px-4 sm:px-8 py-4 min-h-screen">{children}</div>
                     <Suspense>
                         <HideOnAuth>
                             <HideOnExam>

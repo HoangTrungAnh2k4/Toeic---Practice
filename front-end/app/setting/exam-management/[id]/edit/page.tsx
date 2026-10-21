@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     return (
-        <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-4xl">
+        <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-6xl">
             <nav
                 aria-label="Breadcrumb"
                 className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"

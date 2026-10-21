@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import LandingHeroTimer from './LandingHeroTimer';
 import { Fix } from './LandingMistakesHero';
 import VoiceWave from './VoiceWave';
+import { FaMicrophoneAlt } from 'react-icons/fa';
 
 const CARD = 'absolute font-hand text-2xl bg-white border-2 border-black rounded-2xl shadow-[6px_6px_0_0_#000]';
 const PILL =
@@ -45,7 +46,7 @@ function HeroVisual() {
                     </p>
                     <div className="flex items-center gap-3.5">
                         <span className="before:absolute relative before:-inset-1.75 place-items-center grid bg-main border-2 border-black before:border-2 before:border-sub3 rounded-full before:rounded-full size-14.5 motion-safe:before:animate-pulse-ring shrink-0">
-                            <LuMic className="size-6 text-sub3" />
+                            <FaMicrophoneAlt className="size-6 text-sub3" />
                         </span>
                         <VoiceWave className="flex-1 gap-0.75 h-11" />
                     </div>
@@ -115,7 +116,7 @@ export default function LandingHero() {
                             <br />
                             Sai đâu sửa đó, điểm cao không khó.
                         </p>
-                        <div className="flex flex-col items-start gap-3.5">
+                        <div className="flex flex-col items-start gap-3.5 my-8">
                             <Link href="/speaking" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2')}>
                                 Vào phòng thi ngay
                             </Link>

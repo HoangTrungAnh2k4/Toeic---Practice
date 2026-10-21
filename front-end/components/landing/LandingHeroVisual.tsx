@@ -1,6 +1,7 @@
 import { LuBookCheck, LuClock, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import VoiceWave from './VoiceWave';
+import { FaPencilAlt } from 'react-icons/fa';
 
 const ESSAY_LINES = ['w-full', 'w-11/12', 'w-full', 'w-4/5', 'w-full', 'w-2/3'];
 
@@ -18,7 +19,7 @@ export default function LandingHeroVisual() {
             <div className={cn(CARD, 'top-6 left-5 p-4 w-3/4 -rotate-3 motion-safe:animate-rise')}>
                 <div className="flex justify-between items-center gap-3">
                     <span className="flex items-center gap-1.5 font-semibold text-main text-xs">
-                        <LuPenLine aria-hidden="true" className="size-3.5" />
+                        <FaPencilAlt aria-hidden="true" className="size-3.5" />
                         Writing, câu 8
                     </span>
                     <span className="flex items-center gap-1 font-bold text-subText text-xs">
