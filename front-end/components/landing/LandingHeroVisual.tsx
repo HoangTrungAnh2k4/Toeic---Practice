@@ -1,7 +1,7 @@
 import { LuBookCheck, LuClock, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import VoiceWave from './VoiceWave';
-import { FaPencilAlt } from 'react-icons/fa';
+import { FaBook, FaPencilAlt } from 'react-icons/fa';
 
 const ESSAY_LINES = ['w-full', 'w-11/12', 'w-full', 'w-4/5', 'w-full', 'w-2/3'];
 
@@ -19,16 +19,16 @@ export default function LandingHeroVisual() {
             {/* Bài Writing đang viết dở */}
             <div className={cn(CARD, 'top-6 left-5 p-4 w-3/4 -rotate-3 motion-safe:animate-rise')}>
                 <div className="flex justify-between items-center gap-3">
-                    <span className="flex items-center gap-1.5 font-semibold text-main text-xs">
+                    <span className="flex items-center gap-1.5 font-semibold text-main text-sm">
                         <FaPencilAlt aria-hidden="true" className="size-3.5" />
                         Writing, câu 8
                     </span>
-                    <span className="flex items-center gap-1 font-bold text-subText text-xs">
+                    <span className="flex items-center gap-1 font-bold text-subText text-sm">
                         <LuClock aria-hidden="true" className="size-3" />
                         42:10
                     </span>
                 </div>
-                <p className="mt-2 font-bold text-main text-sm">Opinion essay</p>
+                <p className="mt-2 font-bold text-main text-base">Opinion essay</p>
                 <div className="flex flex-col gap-1.5 mt-3">
                     {ESSAY_LINES.map((width, i) => (
                         <span key={i} className={cn('bg-sub1 rounded-full h-1.5', width)} />
@@ -50,7 +50,7 @@ export default function LandingHeroVisual() {
                         </span>
                         Đang ghi âm
                     </span>
-                    <span className="font-mono font-semibold text-main text-xs">00:27</span>
+                    <span className="font-mono font-semibold text-main text-sm">00:27</span>
                 </div>
                 <p className="mt-2 font-bold text-main text-sm">Speaking, câu 3: Describe a picture</p>
                 <VoiceWave className="mt-4" />
@@ -66,8 +66,8 @@ export default function LandingHeroVisual() {
                     'bottom-6 left-5 flex flex-col bg-sub3 px-4 py-3 -rotate-6 motion-safe:animate-stamp motion-safe:[animation-delay:900ms]',
                 )}
             >
-                <span className="font-semibold text-main text-xs">Điểm Speaking</span>
-                <span className="font-bold text-main text-4xl tracking-tight">
+                <span className="font-semibold text-main text-sm">Điểm Speaking</span>
+                <span className="font-bold text-main text-3xl tracking-tight">
                     170<span className="font-semibold text-main text-base">/200</span>
                 </span>
             </div>
@@ -76,15 +76,15 @@ export default function LandingHeroVisual() {
             <div
                 className={cn(
                     CARD,
-                    'right-5 bottom-8 flex items-start w-fit gap-2.5 p-3  rotate-2 motion-safe:animate-slide-left motion-safe:[animation-delay:1300ms]',
+                    'right-5 bottom-8 flex items-center w-fit gap-2.5 p-3  rotate-2 motion-safe:animate-slide-left motion-safe:[animation-delay:1300ms]',
                 )}
             >
-                <span className="place-items-center grid bg-success border-2 border-black rounded-lg size-8 shrink-0">
-                    <LuBookCheck aria-hidden="true" className="size-4" />
+                <span className="place-items-center grid bg-success border border-black rounded-lg size-8 shrink-0">
+                    <FaBook aria-hidden="true" className="size-4" />
                 </span>
                 <span className="flex flex-col gap-0.5">
-                    <span className="font-semibold text-[#333] text-xs">Thiếu -s số nhiều</span>
-                    <span className="font-medium text-subText text-xs">Lặp lại 3 lần, đã vào sổ lỗi</span>
+                    <span className="font-semibold text-[#333] text-sm">Thiếu -s số nhiều</span>
+                    <span className="font-medium text-subText text-sm">Lặp lại 3 lần, đã vào sổ lỗi</span>
                 </span>
             </div>
         </div>

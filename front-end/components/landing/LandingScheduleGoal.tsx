@@ -22,8 +22,7 @@ export default function LandingScheduleGoal() {
     return (
         <div className="flex flex-col gap-5 bg-card shadow-[6px_6px_0_0_#000] p-6 border-2 border-black rounded-2xl h-full">
             <div className="flex justify-between items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 font-semibold text-main text-sm">
-                    <LuTarget aria-hidden="true" className="size-4" />
+                <span className="inline-flex items-center gap-1.5 font-semibold text-main text-base">
                     Mục tiêu của bạn
                 </span>
                 <span className="bg-success px-2 py-0.5 border-2 border-black rounded-md font-semibold text-[0.6875rem] text-black uppercase tracking-wider">
@@ -32,9 +31,9 @@ export default function LandingScheduleGoal() {
             </div>
 
             <div>
-                <p className="font-bold text-main text-6xl tracking-tight">
+                <p className="font-bold text-main text-4xl">
                     {target}
-                    <span className="ml-1 font-medium text-subText text-base">/200</span>
+                    <span className="ml-1 text-subText text-base">/ 200</span>
                 </p>
                 <input
                     type="range"

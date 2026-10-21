@@ -40,24 +40,30 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="vi">
-            <body className={`${roboto.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col md:flex-row`}>
-                {/* usePathname cần Suspense trên các route có param động (cacheComponents) */}
-                <Suspense fallback={<SidebarFallback />}>
-                    <HideOnAuth>
-                        <Sidebar />
-                    </HideOnAuth>
-                </Suspense>
-                <div className="flex flex-col flex-1 bg-canvas min-w-0">
-                    {/* Không bọc children trong Suspense: fallback → nội dung thật sẽ remount trang và chạy lại animation */}
-                    <div className="flex-1 px-4 sm:px-8 py-4 min-h-screen">{children}</div>
-                    <Suspense>
+            <body className={`${roboto.variable} ${geistMono.variable} group/app antialiased min-h-screen flex flex-col`}>
+                {/* Footer nằm ngoài khối này để sidebar sticky dừng ở đáy nội dung, không trượt đè lên footer */}
+                <div className="flex flex-col md:flex-row flex-1 has-[.sidebar-root]:bg-main">
+                    {/* usePathname cần Suspense trên các route có param động (cacheComponents) */}
+                    <Suspense fallback={<SidebarFallback />}>
                         <HideOnAuth>
-                            <HideOnExam>
-                                <SiteFooter />
-                            </HideOnExam>
+                            <Sidebar />
                         </HideOnAuth>
                     </Suspense>
+                    {/* Không bọc children trong Suspense: fallback → nội dung thật sẽ remount trang và chạy lại animation */}
+                    <div className="flex-1 bg-canvas px-4 sm:px-8 py-4 md:group-has-[.sidebar-root]/app:rounded-bl-3xl min-w-0 min-h-screen">
+                        {children}
+                    </div>
                 </div>
+                <Suspense>
+                    <HideOnAuth>
+                        <HideOnExam>
+                            {/* Lề trái bằng độ rộng sidebar (w-64 / w-20 khi thu gọn) để nội dung footer thẳng hàng với nội dung trang */}
+                            <div className="bg-main md:group-has-[.sidebar-root[data-collapsed=false]]/app:pl-64 md:group-has-[.sidebar-root[data-collapsed=true]]/app:pl-20 motion-safe:transition-[padding] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)]">
+                                <SiteFooter />
+                            </div>
+                        </HideOnExam>
+                    </HideOnAuth>
+                </Suspense>
             </body>
         </html>
     );

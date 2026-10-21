@@ -5,6 +5,8 @@ import { LuBot, LuCalendarClock, LuCheck, LuFlame } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { DEFAULT_DAY_TASKS, WEEK_DAYS } from './schedule.data';
+import { FaCheck } from 'react-icons/fa';
+import { BsFire } from 'react-icons/bs';
 
 /** Lịch tuần + giải thích của AI: bấm "Hôm nay tôi bận" để dời bài trọng tâm sang ngày sau. */
 export default function LandingScheduleWeek() {
@@ -12,12 +14,12 @@ export default function LandingScheduleWeek() {
 
     return (
         <div className="flex flex-col gap-6 h-full">
-            <div className="flex flex-col flex-1 gap-4 bg-card shadow-[6px_6px_0_0_#000] p-6 border-2 border-black rounded-2xl">
+            <div className="flex flex-col flex-1 gap-4 bg-card shadow-[6px_6px_0_0_#000] px-6 py-4 border-2 border-black rounded-2xl">
                 <div className="flex flex-wrap justify-between items-center gap-3">
                     <div>
-                        <h3 className="font-semibold text-main">Lịch tuần 3</h3>
-                        <p className="inline-flex items-center gap-1 font-medium text-subText text-sm">
-                            <LuFlame aria-hidden="true" className="size-4 text-sub3" />
+                        <h3 className="mb-1 font-semibold text-main">Lịch tuần 3</h3>
+                        <p className="inline-flex items-center gap-1 font-semibold text-subText text-sm">
+                            <BsFire aria-hidden="true" className="size-4 text-sub3" />
                             Chuỗi 14 ngày · Nhắc học 20:00
                         </p>
                     </div>
@@ -45,10 +47,10 @@ export default function LandingScheduleWeek() {
                                     !done && !focus && 'bg-canvas',
                                 )}
                             >
-                                <span className="font-bold text-main text-xs">{day}</span>
-                                <span className="font-medium text-[0.6875rem] text-main leading-tight">
+                                <span className="font-bold text-[#333] text-sm">{day}</span>
+                                <span className="font-semibold text-main text-xs">
                                     {done ? (
-                                        <LuCheck aria-label="Đã xong" className="mx-auto size-4" />
+                                        <FaCheck aria-label="Đã xong" className="mx-auto size-6" />
                                     ) : focus ? (
                                         <>
                                             <b>Part 3</b>
@@ -67,15 +69,15 @@ export default function LandingScheduleWeek() {
 
             <p
                 aria-live="polite"
-                className="flex items-start gap-3 bg-sub1 shadow-[6px_6px_0_0_#000] p-4 border-2 border-black rounded-2xl text-main text-sm"
+                className="flex items-start gap-3 bg-sub1 shadow-[6px_6px_0_0_#000] p-4 border-2 border-black rounded-2xl font-semibold text-sm"
             >
                 <LuBot aria-hidden="true" className="size-5 shrink-0" />
-                <span>
-                    <b>AI giải thích: </b>
+                <div className="flex gap-2 text-subText">
+                    <p className='text-main'>AI giải thích: </p>
                     {focusDay === 1
                         ? 'Part 3 và lỗi thiếu mạo từ đang kéo điểm xuống nhiều nhất nên được xếp vào Thứ 3, ngày bạn rảnh 45 phút.'
                         : `Đã dời bài trọng tâm sang ${WEEK_DAYS[focusDay]}. Mục tiêu tuần và chuỗi ngày học vẫn giữ nguyên.`}
-                </span>
+                </div>
             </p>
         </div>
     );

@@ -4,6 +4,8 @@ import { REMEMBER_COOKIE, sessionCookieOptions } from '@/lib/supabase-cookies';
 
 /** Route cần đăng nhập. Quyền theo role (admin) kiểm tra tiếp ở layout của route. */
 const PROTECTED = ['/setting/exam-management'];
+/** Route chỉ dành cho khách: đã đăng nhập thì chuyển thẳng vào /overview. */
+const GUEST_ONLY = ['/login', '/register'];
 
 /** Làm mới phiên Supabase trong cookie ở mỗi request và chặn sớm khách vào route cần đăng nhập. */
 export async function proxy(request: NextRequest) {
@@ -33,6 +35,9 @@ export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     if (!data?.claims && PROTECTED.some((path) => pathname.startsWith(path))) {
         return NextResponse.redirect(new URL('/login', request.url));
+    }
+    if (data?.claims && GUEST_ONLY.includes(pathname)) {
+        return NextResponse.redirect(new URL('/overview', request.url));
     }
 
     return response;

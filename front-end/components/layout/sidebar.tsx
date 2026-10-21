@@ -43,6 +43,7 @@ export function Sidebar() {
         <>
             <MobileTopBar activeIndex={activeIndex} user={user} />
             <aside
+                data-collapsed={collapsed}
                 className={`sidebar-root sticky top-0 z-10 hidden md:flex h-dvh shrink-0 flex-col self-start bg-main to-main transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${collapsed ? 'w-20' : 'w-64'
                     }`}
             >

@@ -131,6 +131,73 @@
     /* Thanh thời gian chạy đầy trong 60s, dùng lại keyframes grow-x */
     --animate-countdown: grow-x 60s linear infinite;
 
+    /* Tiêu đề hero tự "được chấm": bút đỏ gạch "cho có" rồi dán nhãn "như thi thật" (theo mẫu HeroHeadline) */
+    --animate-draw: draw 750ms cubic-bezier(0.55, 0.1, 0.35, 1) 450ms both;
+    --animate-pen-run: pen-run 1350ms cubic-bezier(0.5, 0, 0.3, 1) 450ms both;
+    --animate-cross-out: cross-out 350ms ease 1350ms both;
+    --animate-slap: slap 500ms cubic-bezier(0.2, 1.6, 0.4, 1) 1650ms both;
+
+    /* Path dùng pathLength=1 nên dash 1 = cả nét */
+    @keyframes draw {
+        from {
+            stroke-dashoffset: 1;
+        }
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+    /* Đầu bút đi theo nét gạch: sang phải, quay về trái, sang phải rồi rơi khỏi chữ */
+    @keyframes pen-run {
+        0% {
+            opacity: 0;
+            left: -2%;
+            top: -10%;
+            transform: translate(0, -0.25em) rotate(-8deg);
+        }
+        10% {
+            opacity: 1;
+            left: -2%;
+            top: -10%;
+            transform: none;
+        }
+        30% {
+            left: 102%;
+            top: -26%;
+        }
+        45% {
+            left: 2%;
+            top: -6%;
+        }
+        62% {
+            opacity: 1;
+            left: 100%;
+            top: -14%;
+            transform: none;
+        }
+        100% {
+            opacity: 0;
+            left: 70%;
+            top: 70%;
+            transform: translate(0, 0.6em) rotate(18deg);
+        }
+    }
+    @keyframes cross-out {
+        from {
+            color: var(--color-sub2);
+        }
+    }
+    /* transform cộng dồn với class rotate sẵn có: bắt đầu nghiêng thêm 10deg và to 1.35 lần */
+    @keyframes slap {
+        0% {
+            opacity: 0;
+            transform: rotate(-10deg) scale(1.35);
+            box-shadow: 0 0 0 #000;
+        }
+        55% {
+            opacity: 1;
+        }
+    }
+
     @keyframes float {
         50% {
             translate: 0 -10px;

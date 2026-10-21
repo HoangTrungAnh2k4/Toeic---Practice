@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import { LuArrowRight, LuBookOpen, LuCornerDownRight, LuMic, LuSparkles, LuTimer } from 'react-icons/lu';
+import { LuArrowRight, LuBookOpen, LuCornerDownRight, LuMic, LuPencil, LuSparkles, LuTimer } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LandingHeroTimer from './LandingHeroTimer';
 import { Fix } from './LandingMistakesHero';
 import VoiceWave from './VoiceWave';
 import { FaMicrophoneAlt } from 'react-icons/fa';
+import { FaPencil } from 'react-icons/fa6';
 
 const CARD = 'absolute font-hand text-2xl bg-white border-2 border-black rounded-2xl shadow-[6px_6px_0_0_#000]';
 const PILL =
@@ -73,7 +74,7 @@ function HeroVisual() {
             <div className={cn(PILL, 'top-48 max-md:-right-10 -right-2 motion-safe:[animation-delay:-2s]')}>
                 <span className={PILL_NUM}>02</span>Chấm theo rubric ETS
             </div>
-            <div className={cn(PILL, 'bottom-20 left-1/3 bg-success motion-safe:[animation-delay:-4s]')}>
+            <div className={cn(PILL, 'bottom-20 left-1/3  bg-success motion-safe:[animation-delay:-4s]')}>
                 <span className={cn(PILL_NUM, 'bg-black')}>03</span>Đã thêm vào sổ lỗi
             </div>
         </div>
@@ -90,19 +91,36 @@ export default function LandingHero() {
                             id="landing-hero-title"
                             className="font-bold text-main text-5xl md:text-6xl xl:text-7xl leading-none tracking-wider"
                         >
-                            Luyện nói,
-                            <br />
-                            luyện viết
-                            <br />
-                            như{' '}
-                            <span className="whitespace-nowrap">
-                                <span className="inline-block bg-sub3 my-1 px-2.5 pb-1 border-2 border-black rounded-xl font-hand -rotate-2">
-                                    thi thật
+                            <div aria-hidden="true">
+                                <p className='mb-3'>Luyện nói</p>
+                                <p>luyện viết</p>
+                                <span className="block mt-2 pb-1.5 -rotate-1">
+                                    <span className="inline-block relative text-sub2 motion-safe:animate-cross-out">
+                                        cho có
+                                        {/* Nét gạch tay đi sang phải rồi quay về; vẽ dần bằng stroke-dashoffset */}
+                                        <svg
+                                            viewBox="0 0 300 27"
+                                            preserveAspectRatio="none"
+                                            className="top-[34%] -left-[5%] absolute w-[110%] h-[34%] overflow-visible pointer-events-none"
+                                        >
+                                            <path
+                                                pathLength={1}
+                                                d="M4 12 C 75 8, 186 14, 294 6 C 222 13, 120 18, 10 22"
+                                                className="fill-none stroke-destructive motion-safe:animate-draw [stroke-dasharray:1] [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:5.5]"
+                                            />
+                                        </svg>
+                                        <FaPencil className="motion-reduce:hidden absolute size-[0.62em] text-destructive origin-[8%_92%] motion-safe:animate-pen-run" />
+                                    </span>
                                 </span>
-                                <span className="text-success">.</span>
-                            </span>
+                                <span className="ml-12 whitespace-nowrap">
+                                    <span className="inline-block bg-sub3 shadow-[5px_5px_0_0_#000] px-2.5 pt-2.5 pb-2.5 border-2 border-black rounded-xl font-hand text-3xl -rotate-2 origin-[20%_60%] motion-safe:animate-slap">
+                                        như thi thật
+                                    </span>
+                                    <span className="text-success">.</span>
+                                </span>
+                            </div>
                         </h1>
-                        <p className="flex items-center gap-2 mt-5.5 font-hand text-subText text-2xl">
+                        <p className="flex items-center gap-2 mt-5.5 font-hand text-subText text-lg">
                             <LuCornerDownRight aria-hidden="true" className="size-6 shrink-0" />
                             đề chuẩn ETS, chấm xong trong vài giây
                         </p>
@@ -116,11 +134,11 @@ export default function LandingHero() {
                             <br />
                             Sai đâu sửa đó, điểm cao không khó.
                         </p>
-                        <div className="flex flex-col items-start gap-3.5 my-8">
-                            <Link href="/speaking" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2')}>
+                        <div className="flex flex-col items-start gap-3.5 my-8 font-hand">
+                            <Link href="/speaking" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 text-base')}>
                                 Vào phòng thi ngay
                             </Link>
-                            <Link href="#chuan-ets" className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'bg-white text-black')}>
+                            <Link href="#chuan-ets" className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'bg-white text-base text-black')}>
                                 Xem đề mẫu
                             </Link>
                         </div>

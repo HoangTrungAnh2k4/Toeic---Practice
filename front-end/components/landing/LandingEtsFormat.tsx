@@ -170,9 +170,7 @@ export default function LandingEtsFormat() {
                     ))}
                 </ul>
 
-                <p className="font-medium text-sub1 text-xs">
-                    TOEIC® là nhãn hiệu đã đăng ký của ETS. Toeco là nền tảng luyện thi độc lập, không liên kết với ETS.
-                </p>
+
             </div>
         </section>
     );
