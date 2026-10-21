@@ -1,0 +1,63 @@
+{
+  "_source": "Quy tắc nghiệp vụ của Toeco. Bản nháp lấy từ features.md, tức là từ CODE. Bạn phải xác nhận từng giá trị là ý đồ sản phẩm, rồi điền _verifiedBy.",
+  "_verifiedBy": "",
+  "_verifiedAt": "",
+  "password": {
+    "minLength": 8,
+    "requireLetter": true,
+    "requireDigit": true,
+    "valid": ["abcdefg1", "abcd1234", "Toeco2026"],
+    "invalid": ["abc1234", "abcdefgh", "12345678", ""]
+  },
+  "otp": { "digits": 6, "ttlMinutes": 10 },
+  "quota": {
+    "guestPerDay": 33,
+    "studentPerDay": 55,
+    "unit": "question",
+    "sharedAcrossSkills": true,
+    "resetTimezone": "Asia/Ho_Chi_Minh",
+    "refundOnScoringError": true
+  },
+  "library": {
+    "pageSize": 6,
+    "topics": [
+      "Workplace & Office",
+      "Customer Service",
+      "Retail & Sales",
+      "Travel & Hospitality",
+      "Technology & Media",
+      "Logistics & Supply",
+      "Business Strategy"
+    ]
+  },
+  "history": {
+    "pageSizes": [10, 25, 50],
+    "polling": { "intervalSec": 4, "maxMinutes": 2 }
+  },
+  "mistakes": { "windowSize": 5, "fixedAfterConsecutiveIndependent": 3 },
+  "schedule": {
+    "maxWeeks": 12,
+    "daysPerWeek": { "min": 3, "max": 7 },
+    "sessionMinutes": [30, 45, 60],
+    "targetScore": { "min": 0, "max": 200, "step": 10, "optional": true }
+  },
+  "upload": {
+    "maxInputBytes": 10485760,
+    "acceptedTypes": ["image/jpeg", "image/png", "image/webp"],
+    "outputType": "image/webp",
+    "maxLongEdgePx": 1600,
+    "maxOutputBytes": 1572864
+  },
+  "writing": {
+    "timerWarningSec": 60,
+    "wordHintQ1to5": [12, 25],
+    "minWordsQ8": 300,
+    "wordCountSamples": [
+      { "text": "Hello,  world!", "expected": "TODO" },
+      { "text": "e-mail", "expected": "TODO" },
+      { "text": "", "expected": "TODO" },
+      { "text": "   ", "expected": "TODO" }
+    ]
+  },
+  "scaledScore": { "min": 0, "max": 200, "step": 10 }
+}

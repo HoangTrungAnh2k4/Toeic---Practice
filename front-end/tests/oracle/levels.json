@@ -1,0 +1,26 @@
+{
+  "_source": "Bảng điểm → Proficiency Level theo ETS. Đối chiếu với tài liệu ETS chính thức trước khi duyệt. KHÔNG sao chép từ lib/domain/score-levels.ts.",
+  "_verifiedBy": "",
+  "_verifiedAt": "",
+  "speaking": [
+    { "level": 1, "min": 0, "max": 30 },
+    { "level": 2, "min": 40, "max": 50 },
+    { "level": 3, "min": 60, "max": 70 },
+    { "level": 4, "min": 80, "max": 100 },
+    { "level": 5, "min": 110, "max": 120 },
+    { "level": 6, "min": 130, "max": 150 },
+    { "level": 7, "min": 160, "max": 180 },
+    { "level": 8, "min": 190, "max": 200 }
+  ],
+  "writing": [
+    { "level": 1, "min": 0, "max": 30 },
+    { "level": 2, "min": 40, "max": 40 },
+    { "level": 3, "min": 50, "max": 60 },
+    { "level": 4, "min": 70, "max": 80 },
+    { "level": 5, "min": 90, "max": 100 },
+    { "level": 6, "min": 110, "max": 130 },
+    { "level": 7, "min": 140, "max": 160 },
+    { "level": 8, "min": 170, "max": 190 },
+    { "level": 9, "min": 200, "max": 200 }
+  ]
+}
