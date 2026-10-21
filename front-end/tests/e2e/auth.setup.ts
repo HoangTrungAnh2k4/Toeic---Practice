@@ -18,7 +18,8 @@ for (const acc of accounts) {
     }
     await page.goto('/login');
     await page.getByLabel('Email').fill(acc.email);
-    await page.getByLabel('Mật khẩu').fill(acc.password);
+    // exact: nút "Hiện mật khẩu" trong ô cũng có label chứa "mật khẩu"
+    await page.getByLabel('Mật khẩu', { exact: true }).fill(acc.password);
     await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click();
     await expect(page).not.toHaveURL(/\/login/);
     await page.context().storageState({ path: acc.file });

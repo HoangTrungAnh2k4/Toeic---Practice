@@ -53,7 +53,16 @@ Các mục dưới đây phát hiện khi đối chiếu `docs/prd/*` với code
 - `RegisterForm.tsx`: khi Supabase trả user không có identity (email đã tồn tại), form báo "Email này đã được đăng ký, hãy đăng nhập".
 - Quên mật khẩu (AU-S01) thì không lộ. Hai luồng không nhất quán về chống dò tài khoản. Xem câu hỏi AU-S05.
 
-## C. Dữ liệu seed
+## C. Hạ tầng DB
+
+### SB-09. service_role không insert được vào `exams`
+
+- Trigger `exams_set_code` gọi `private.set_exam_code()` với `security invoker`, dùng sequence `private.exam_code_seq`. Migration chỉ `grant usage on schema private to authenticated`.
+- **Hậu quả**: mọi insert `exams` bằng service_role lỗi `42501 permission denied for schema private`. Đã thấy khi chạy `pnpm seed:e2e` (2026-10-21); insert bằng phiên admin thì được, service_role xoá đề vẫn được.
+- App hiện tạo đề bằng phiên admin (RPC `create_exam`) nên chưa bị ảnh hưởng. Script hoặc route nào sau này ghi `exams` bằng service_role sẽ lỗi.
+- **Lựa chọn**: cấp `usage` trên schema `private` (và sequence) cho `service_role`, hoặc đổi trigger sang `security definer`. Hoặc giữ nguyên và ghi đề bằng phiên admin như bản vá seed.
+
+## D. Dữ liệu seed
 
 ### SB-08. Tài khoản admin trong `back-end/supabase/seed.sql` không khớp với comment
 
