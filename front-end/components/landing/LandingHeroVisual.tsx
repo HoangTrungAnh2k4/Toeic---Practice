@@ -11,6 +11,7 @@ const CARD = 'absolute bg-card border-2 border-black rounded-xl shadow-[5px_5px_
 export default function LandingHeroVisual() {
     return (
         <div
+            data-reveal
             role="img"
             aria-label="Minh hoạ: bài Writing đang làm, bài Speaking đang ghi âm, phiếu điểm và một lỗi trong sổ lỗi"
             className="hidden lg:block relative w-full h-128"

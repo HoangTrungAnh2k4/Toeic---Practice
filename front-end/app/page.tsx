@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Patrick_Hand } from 'next/font/google';
 import BackToTop from '../components/landing/BackToTop';
+import ScrollReveal from '../components/landing/ScrollReveal';
 import LandingEtsFormat from '../components/landing/LandingEtsFormat';
 import LandingFaq from '../components/landing/LandingFaq';
 import LandingHeader from '../components/landing/LandingHeader';
@@ -31,6 +32,7 @@ export default function LandingPage() {
             </main>
             <SiteFooter />
             <BackToTop />
+            <ScrollReveal />
         </div>
     );
 }

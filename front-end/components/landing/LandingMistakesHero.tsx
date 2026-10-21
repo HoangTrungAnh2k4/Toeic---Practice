@@ -11,7 +11,7 @@ export function Fix({ wrong, right, className }: { wrong: string; right: string;
             <del className="decoration-2 decoration-sub3">{wrong}</del>
             <ins
                 className={cn(
-                    '-top-7 left-1/2 absolute font-hand text-sub3 text-2xl no-underline whitespace-nowrap -rotate-3 -translate-x-1/2',
+                    '-top-7 left-1/2 absolute text-sub3 text-2xl no-underline whitespace-nowrap -rotate-3 -translate-x-1/2',
                     className,
                 )}
             >
@@ -33,7 +33,7 @@ export default function LandingMistakesHero() {
             aria-labelledby="hero-title"
             className="items-center gap-12 grid lg:grid-cols-2 mx-auto py-4 max-w-300"
         >
-            <div className="flex flex-col items-start gap-8 min-w-0">
+            <div data-reveal className="flex flex-col items-start gap-8 min-w-0">
                 <div className="flex flex-col gap-3">
                     <h1
                         id="hero-title"
@@ -69,7 +69,7 @@ export default function LandingMistakesHero() {
                     <Link href="/speaking" className={cn(buttonVariants({ variant: 'primary', size: 'lg' }), 'gap-2')}>
                         Vào phòng thi ngay
                     </Link>
-                    <p className="flex items-center gap-2 font-hand text-white text-xl">
+                    <p className="flex items-center gap-2 text-white text-xl">
                         <LuArrowLeft aria-hidden="true" className="size-5" />
                         không cần đăng ký
                     </p>

@@ -10,12 +10,12 @@ import { FAQS } from './schedule.data';
  */
 export default function LandingFaq() {
     return (
-        <section id="faq" aria-labelledby="faq-title" className="bg-grid-paper px-4 sm:px-8 pt-12 pb-18 w-full">
+        <section id="faq" aria-labelledby="faq-title" className="bg-grid-paper px-4 sm:px-8 pt-12 pb-18 w-full font-hand">
             <div className="items-start gap-10 lg:gap-16 grid lg:grid-cols-12 mx-auto max-w-300">
-                <div className="lg:top-8 relative flex flex-col items-start gap-5 lg:col-span-5">
+                <div data-reveal className="lg:top-8 relative flex flex-col items-start gap-5 lg:col-span-5">
                     <span
                         aria-hidden="true"
-                        className="-top-10 right-0 lg:right-6 absolute font-hand text-[12rem] text-main leading-none -rotate-12 pointer-events-none select-none"
+                        className="-top-10 right-0 lg:right-6 absolute text-[12rem] text-main leading-none -rotate-12 pointer-events-none select-none"
                     >
                         ?
                     </span>
@@ -28,7 +28,7 @@ export default function LandingFaq() {
                     <p className="relative max-w-sm font-medium text-[#333] leading-relaxed">
                         Những câu người học hỏi nhiều nhất trước khi vào phòng thi.
                     </p>
-                    <p className="flex items-center gap-2 font-hand text-[#555] text-xl">
+                    <p className="flex items-center gap-2 text-[#555] text-xl">
                         chưa thấy câu của bạn? cứ thử một đề
                         <LuArrowDownRight aria-hidden="true" className="size-5 shrink-0" />
                     </p>
@@ -41,6 +41,7 @@ export default function LandingFaq() {
                     {FAQS.map(({ q, a }, i) => (
                         <details
                             key={q}
+                            data-reveal
                             name="faq"
                             open={i === 0}
                             className="group bg-card open:shadow-[6px_6px_0_0_#000] border-2 border-black rounded-xl [&::details-content]:h-0 open:[&::details-content]:h-auto [&::details-content]:overflow-hidden transition-[translate,box-shadow] [&::details-content]:transition-[height,content-visibility] motion-reduce:[&::details-content]:transition-none open:-translate-y-0.5 duration-200 [&::details-content]:duration-300 [&::details-content]:ease-out [interpolate-size:allow-keywords] [&::details-content]:[transition-behavior:allow-discrete]"

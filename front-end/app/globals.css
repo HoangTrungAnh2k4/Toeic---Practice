@@ -172,6 +172,13 @@
     background-image: repeating-linear-gradient(-45deg, var(--sub2) 0 1.5px, transparent 1.5px 6px);
 }
 
+/* Patrick Hand có x-height 0.47 so với Roboto 0.53: phóng lên cho chữ tay to bằng chữ thường */
+@layer utilities {
+    .font-hand {
+        font-size-adjust: 0.53;
+    }
+}
+
 /* Nền chấm bi neo-brutalist (trang auth) */
 @utility bg-dots {
     background-image: radial-gradient(color-mix(in srgb, var(--main) 14%, transparent) 1.2px, transparent 1.2px);
@@ -260,5 +267,26 @@
     }
     body {
         @apply bg-background font-sans text-foreground;
+    }
+}
+
+/* Fade-up khi cuộn: ScrollReveal gắn data-revealed lúc [data-reveal] vào viewport. Không JS hoặc giảm chuyển động thì hiện sẵn.
+   Để ngoài @layer để thắng utilities: animation có sẵn bên trong (tem, phiếu trôi) cũng chờ đến lúc lộ ra mới chạy */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    [data-reveal]:not([data-revealed]) {
+        opacity: 0;
+    }
+    [data-reveal]:not([data-revealed]) * {
+        animation-play-state: paused;
+    }
+    /* backwards, không forwards: hết animation thì bỏ transform, tránh tạo stacking context đè z-index */
+    [data-revealed] {
+        animation: fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+}
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(2rem);
     }
 }

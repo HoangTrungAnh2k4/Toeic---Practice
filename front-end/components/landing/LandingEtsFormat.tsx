@@ -2,6 +2,8 @@ import { LuAward, LuLock, LuMic, LuTimer } from 'react-icons/lu';
 import { getPartDurationSec, getPartTemplates, TEST_DURATION_MIN } from '@/lib/domain/parts';
 import type { PartTemplate, Skill } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
+import { IoTimerOutline } from 'react-icons/io5';
+import { CiMicrophoneOn } from 'react-icons/ci';
 
 const SHEETS: { skill: Skill; title: string; answerVerb: string; fill: string; tilt: string }[] = [
     { skill: 'speaking', title: 'TOEIC Speaking Test', answerVerb: 'nói', fill: 'bg-main', tilt: '-rotate-1 self-end' },
@@ -9,10 +11,10 @@ const SHEETS: { skill: Skill; title: string; answerVerb: string; fill: string; t
 ];
 
 const FEATURES = [
-    { icon: LuTimer, label: 'Đếm ngược đúng từng giây' },
-    { icon: LuMic, label: 'Beep rồi tự ghi âm' },
-    { icon: LuLock, label: 'Hết giờ tự khóa bài' },
-    { icon: LuAward, label: 'Chấm theo rubric ETS, thang 0–200' },
+    'Đếm ngược đúng từng giây',
+    'Beep rồi tự ghi âm',
+    'Hết giờ tự khóa bài',
+    'Chấm theo rubric ETS, thang 0–200'
 ];
 
 const fmt = (sec: number) => (sec >= 60 ? `${sec / 60} phút` : `${sec}s`);
@@ -48,6 +50,7 @@ function ExamSheet({ skill, title, answerVerb, fill, tilt }: (typeof SHEETS)[num
 
     return (
         <article
+            data-reveal
             aria-label={`${title}: ${total} câu, ${TEST_DURATION_MIN[skill]} phút`}
             className={cn(
                 'bg-card shadow-[5px_5px_0_0_#000] border-2 border-black rounded-2xl w-full max-w-3xl overflow-hidden',
@@ -119,7 +122,8 @@ export default function LandingEtsFormat() {
     return (
         <section id="chuan-ets" aria-labelledby="ets-title" className="bg-dots-inverse bg-main px-4 sm:px-8 py-16 w-full overflow-hidden">
             <div className="flex flex-col gap-10 mx-auto max-w-300">
-                <div className="flex flex-wrap justify-between items-end gap-8">
+                {/* z-10: con dấu đè lên tờ đề kể cả lúc hàng này đang fade-up (transform tạo stacking context) */}
+                <div data-reveal className="z-10 relative flex flex-wrap justify-between items-end gap-8">
                     <div className="flex flex-col gap-3">
                         <p className="font-semibold text-white text-xs uppercase tracking-wider">Chuẩn ETS, Format</p>
                         <h2 id="ets-title" className="font-bold text-sub3 text-4xl sm:text-5xl leading-[1.1] tracking-tight">
@@ -155,12 +159,12 @@ export default function LandingEtsFormat() {
                 </div>
 
                 <ul className="flex flex-wrap gap-3">
-                    {FEATURES.map(({ icon: Icon, label }) => (
+                    {FEATURES.map((label) => (
                         <li
                             key={label}
+                            data-reveal
                             className="inline-flex items-center gap-2 bg-card shadow-[3px_3px_0_0_#000] px-3 py-2 border-2 border-black rounded-lg font-semibold text-main text-sm"
                         >
-                            <Icon aria-hidden="true" className="size-4 shrink-0" />
                             {label}
                         </li>
                     ))}

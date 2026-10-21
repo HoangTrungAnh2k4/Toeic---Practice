@@ -62,8 +62,9 @@ export default function LandingMistakesDemo() {
                     return (
                         <li
                             key={id}
+                            data-reveal
                             className={cn(
-                                'relative flex flex-col items-start gap-1.5 bg-[repeating-linear-gradient(transparent_0_26px,#ccc_27px,transparent_28px)] bg-white shadow-[6px_6px_0_0_#F5B841] p-5 border rounded-sm font-hand',
+                                'relative flex flex-col items-start gap-1.5 bg-[repeating-linear-gradient(transparent_0_26px,#ccc_27px,transparent_28px)] bg-white shadow-[6px_6px_0_0_#F5B841] p-5 border rounded-sm',
                                 tilt,
                             )}
                         >
@@ -93,10 +94,10 @@ export default function LandingMistakesDemo() {
                 })}
             </ul>
 
-            <p className="flex flex-wrap items-center gap-2 font-semibold text-white text-sm" aria-live="polite">
+            <p data-reveal className="flex flex-wrap items-center gap-2 font-semibold text-white text-sm" aria-live="polite">
                 Lỗi đang mở:
                 <span className="bg-main px-2 py-0.5 rounded-md text-sub3">{open}</span>
-                <span className="font-hand font-normal text-[#999] text-lg">
+                <span className="font-normal text-[#999] text-lg">
                     {open > 0 ? 'bấm "Luyện sửa" để đóng dấu' : 'sạch sổ! Đây là cách Toeco giúp bạn lên điểm'}
                 </span>
                 {open === 0 && (
