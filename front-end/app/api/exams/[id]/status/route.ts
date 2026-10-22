@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { canChangeStatus, findPublishIssues, MAX_NOTE_LENGTH, needsNote } from '@/app/setting/exam-management/_lib/examStatus';
 import { getExam } from '@/lib/data/content';
 import { getExamRoom } from '@/lib/exam-library/room';
-import { createServerSupabase } from '@/lib/supabase-server';
+import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
 const bodySchema = z.object({
     status: z.enum(['draft', 'review', 'published']),
@@ -23,6 +23,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const supabase = await createServerSupabase();
     const { data: auth } = await supabase.auth.getClaims();
     if (!auth?.claims.sub) return fail('unauthorized', 401);
+    if (!(await isAdmin(supabase, auth.claims.sub))) return fail('forbidden', 403);
 
     const body = bodySchema.safeParse(await request.json().catch(() => null));
     if (!body.success) return fail('invalid_body', 400);

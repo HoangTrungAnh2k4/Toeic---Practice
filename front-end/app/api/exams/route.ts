@@ -3,7 +3,7 @@ import { fromExamFormData } from '@/app/setting/exam-management/_lib/examFormDat
 import { examSchema, toKeywordRows } from '@/app/setting/exam-management/_lib/examSchema';
 import { newExamImage, r2PublicBase } from '@/lib/exam-images';
 import { deleteR2Object, putR2Object } from '@/lib/r2';
-import { createServerSupabase } from '@/lib/supabase-server';
+import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
 /** Lỗi Postgres từ `create_exam` → mã lỗi + HTTP status cho client. */
 const RPC_ERROR: Record<string, [string, number]> = {
@@ -21,6 +21,8 @@ export async function POST(request: Request) {
     const supabase = await createServerSupabase();
     const { data: auth } = await supabase.auth.getClaims();
     if (!auth?.claims.sub) return fail('unauthorized', 401);
+    // Kiểm vai trò trước khi đọc body hay gọi R2, không chỉ dựa vào RLS của `create_exam`
+    if (!(await isAdmin(supabase, auth.claims.sub))) return fail('forbidden', 403);
 
     const form = await request.formData().catch(() => null);
     const exam = examSchema.safeParse(form && fromExamFormData(form));

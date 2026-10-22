@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { connection } from 'next/server';
 import type { Database } from './database.types';
@@ -29,4 +30,11 @@ export async function createServerSupabase() {
             },
         },
     );
+}
+
+/** `userId` có vai trò admin không, đọc bằng phiên của chính người đó. Lỗi kết nối thì ném. */
+export async function isAdmin(supabase: SupabaseClient<Database>, userId: string) {
+    const { data, error } = await supabase.from('profiles').select('role').eq('id', userId).maybeSingle();
+    if (error) throw error;
+    return data?.role === 'admin';
 }

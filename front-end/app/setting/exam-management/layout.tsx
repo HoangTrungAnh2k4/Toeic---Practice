@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { LuArrowLeft, LuShieldAlert } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { createServerSupabase } from '@/lib/supabase-server';
+import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 import { cn } from '@/lib/utils';
 import { SETTING_BASE_PATH } from '../utils';
 
@@ -34,13 +34,7 @@ async function AdminGate({ children }: { children: ReactNode }) {
     if (!data?.claims) redirect('/login');
 
     // Lỗi kết nối ném lên error boundary (có nút thử lại)
-    const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.claims.sub)
-        .maybeSingle();
-    if (error) throw error;
-    if (profile?.role === 'admin') return children;
+    if (await isAdmin(supabase, data.claims.sub)) return children;
 
     return (
         <div

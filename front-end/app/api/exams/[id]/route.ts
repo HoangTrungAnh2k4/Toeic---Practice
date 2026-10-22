@@ -5,7 +5,7 @@ import { examInfoSchema, examSchema, toKeywordRows } from '@/app/setting/exam-ma
 import { getExam, listQuestions } from '@/lib/data/content';
 import { deleteUnusedExamImages, newExamImage, r2PublicBase } from '@/lib/exam-images';
 import { deleteR2Object, putR2Object } from '@/lib/r2';
-import { createServerSupabase } from '@/lib/supabase-server';
+import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -19,13 +19,14 @@ const RPC_ERROR: Record<string, [string, number]> = {
     '55006': ['has_attempts', 409],
 };
 
-/** Phiên người gọi + id đề hợp lệ; `Response` khi phải dừng sớm. */
+/** Phiên admin + id đề hợp lệ; `Response` khi phải dừng sớm. */
 async function open(params: Params['params']) {
     const id = z.uuid().safeParse((await params).id);
     if (!id.success) return fail('not_found', 404);
     const supabase = await createServerSupabase();
     const { data: auth } = await supabase.auth.getClaims();
     if (!auth?.claims.sub) return fail('unauthorized', 401);
+    if (!(await isAdmin(supabase, auth.claims.sub))) return fail('forbidden', 403);
     return { id: id.data, supabase };
 }
 
