@@ -1,12 +1,12 @@
 'use client';
 
-import { use, useCallback, useEffect } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 import { LuFileQuestion } from 'react-icons/lu';
 import { getMistakeIndex } from '@/app/mistakes/_lib/data';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
 import { LoadError } from '@/components/load-error';
 import { combineAsync, useAsync } from '@/hooks/use-async';
-import { scoreWritingAttempt } from '@/lib/data/user-data';
+import { getAttempt, scoreWritingAttempt } from '@/lib/data/user-data';
 import { canRescore } from '@/lib/scoring/scale';
 import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
@@ -43,13 +43,29 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
     const book = bookState.data;
     const attempt = reviewState.data?.review?.row.attempt;
     const reload = reviewState.retry;
+    // Mỗi lần hỏi lại mà lượt làm chưa đổi: render lại để `canRescore` xét theo giờ hiện tại và hẹn lần hỏi kế
+    const [pollCount, setPollCount] = useState(0);
 
     useEffect(() => {
         if (!attempt || STATUS_GROUP[attempt.status] !== 'pending' || canRescore(attempt)) return;
-        // Tải lại giữ dữ liệu cũ trên màn (không về skeleton) cho tới khi có kết quả mới
-        const timer = setTimeout(reload, SCORING_POLL_MS);
-        return () => clearTimeout(timer);
-    }, [attempt, reload]);
+        let cancelled = false;
+        // Chỉ đọc lại dòng lượt làm (nhẹ); đổi trạng thái/lỗi chấm thì mới tải lại cả bài, giữ dữ liệu cũ trên màn tới lúc đó
+        const timer = setTimeout(() => {
+            getAttempt(attempt.id).then(
+                (latest) => {
+                    if (cancelled) return;
+                    const unchanged = latest?.status === attempt.status && latest.scoring_error === attempt.scoring_error;
+                    if (unchanged) setPollCount((count) => count + 1);
+                    else reload();
+                },
+                () => !cancelled && reload(),
+            );
+        }, SCORING_POLL_MS);
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [attempt, reload, pollCount]);
 
     if (failed) return <LoadError message="Không tải được bài làm." onRetry={retry} />;
     if (!reviewState.data || !book) return <AttemptReviewSkeleton />;

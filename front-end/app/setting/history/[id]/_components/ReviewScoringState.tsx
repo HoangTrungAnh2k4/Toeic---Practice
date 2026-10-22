@@ -13,7 +13,9 @@ interface ReviewScoringStateProps {
 export default function ReviewScoringState({ row, onRescore }: ReviewScoringStateProps) {
     const { scoring_error: scoringError } = row.attempt;
     const [isRescoring, setIsRescoring] = useState(false);
-    const showRescore = onRescore && (isRescoring || canRescore(row.attempt));
+    // Quá hạn chờ hoặc chấm lỗi thì không còn "đang chấm" nữa
+    const stalled = canRescore(row.attempt);
+    const showRescore = onRescore && (isRescoring || stalled);
 
     const handleRescore = async () => {
         setIsRescoring(true);
@@ -36,7 +38,7 @@ export default function ReviewScoringState({ row, onRescore }: ReviewScoringStat
                 </span>
                 <div className="flex flex-col gap-1">
                     <h2 id="scoring-title" className="font-bold text-main text-lg tracking-tight">
-                        Bài đã nộp, đang chờ AI chấm
+                        {stalled ? 'Bài đã nộp nhưng chưa có điểm' : 'Đang chấm bài, vui lòng chờ'}
                     </h2>
                     <p className="font-medium text-subText text-sm">
                         Điểm, nhận xét và lỗi sẽ hiển thị tại đây khi chấm xong; bài này chưa được tính vào sổ lỗi.
