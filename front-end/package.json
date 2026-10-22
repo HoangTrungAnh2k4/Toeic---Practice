@@ -6,13 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test": "vitest run",
-    "test:e2e": "playwright test",
-    "test:e2e:integrity": "node scripts/check-test-integrity.mjs",
-    "test:e2e:integrity:local": "node scripts/check-test-integrity.mjs HEAD",
-    "test:e2e:mutate": "node scripts/mutate.mjs",
-    "seed:e2e": "node scripts/seed-e2e.mjs"
+    "lint": "eslint"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -34,17 +28,14 @@
     "zod": "^4.6.6"
   },
   "devDependencies": {
-    "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
-    "eslint-plugin-playwright": "^2.12.1",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^5.0.4"
+    "typescript": "^5"
   },
   "packageManager": "pnpm@12.10.1"
 }

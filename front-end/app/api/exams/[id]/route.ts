@@ -30,7 +30,7 @@ async function open(params: Params['params']) {
 }
 
 /**
- * Sửa đề (docs/prd/exam-edit.md). `scope=info`: chỉ thông tin chung (đề đã có lượt làm). Còn lại: cả nội dung, ảnh mới
+ * Sửa đề. `scope=info`: chỉ thông tin chung (đề đã có lượt làm). Còn lại: cả nội dung, ảnh mới
  * tải lên R2 trước rồi mới gọi `update_exam`; RPC lỗi thì xoá ảnh vừa tải, thành công thì dọn ảnh cũ đã bị thay.
  */
 export async function PUT(request: Request, { params }: Params) {

@@ -57,7 +57,7 @@ const studyWeekdays = (daysPerWeek: number) =>
     new Set(Array.from({ length: daysPerWeek }, (_, index) => Math.floor((index * 7) / daysPerWeek)));
 
 /**
- * Lộ trình rule-based (E6-2, `docs/prd/study-plan.md`): từ hôm nay tới hết ngày trước ngày thi, tối đa 12 tuần.
+ * Lộ trình rule-based: từ hôm nay tới hết ngày trước ngày thi, tối đa 12 tuần.
  * Hàm thuần, cùng đầu vào cho cùng kết quả.
  */
 export function generatePlan(input: PlanInput): PlanDraft {

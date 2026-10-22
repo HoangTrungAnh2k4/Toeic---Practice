@@ -1,5 +1,5 @@
 /**
- * Quy đổi điểm Speaking (docs/prd/scoring.md) và Writing (docs/prd/writing-scoring.md). Thuần, dùng chung cho route chấm
+ * Quy đổi điểm Speaking và Writing. Thuần, dùng chung cho route chấm
  * (server) và khách (client).
  */
 import type { Attempt } from '@/lib/domain/types';

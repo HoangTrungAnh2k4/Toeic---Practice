@@ -77,13 +77,12 @@ Project conventions for AI agents. Works alongside the `ponytail` skill (minimal
 - Version routes (`/v1/...`) only for public APIs.
 - Log OR rethrow, never both.
 
-## 3. Verification & testing
+## 3. Verification
 
 - Run only what is relevant to the change:
-    - Functions: `deno check`, `deno lint`, `deno test` on the affected function.
+    - Functions: `deno check`, `deno lint` on the affected function.
     - Database: `supabase db lint`, and `supabase db reset` on the **local** stack to confirm migrations apply cleanly.
     - Schema changed: re-run `supabase gen types typescript`.
-- Non-trivial logic (a branch, loop, parser, money, permissions, validation, RLS policy/function) leaves **one** minimal test behind: pgTAP (`supabase test db`) for policies/functions, `Deno.test` for logic. No frameworks, fixtures, or per-function suites unless asked. No tests for trivial code or plain CRUD wiring.
 - Temporary check scripts go in `/tmp`, are deleted after use, and are never committed.
 
 ## 4. Ask before

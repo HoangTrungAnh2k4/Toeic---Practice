@@ -82,7 +82,7 @@ function scoreAll(
 }
 
 /**
- * Chấm một Part Writing đã nộp (docs/prd/writing-scoring.md).
+ * Chấm một Part Writing đã nộp.
  * Người đăng nhập: chiếm attempt `submitted → scoring`, chấm các câu chưa có điểm, ghi `responses`, `annotations`,
  * `attempts` bằng service_role. Khách: chỉ trả kết quả từng câu, client lưu localStorage và tự tổng kết.
  */

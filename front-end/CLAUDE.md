@@ -28,8 +28,6 @@ Mandatory rules for every AI agent working in this frontend project.
 
 ## 3. Design tokens & identity (Toeco)
 
-Design system reference (local): `docs/design-system/README.md` and `docs/design-system/tokens.json`. Read them only when the table below is not enough. Tokens live in `app/globals.css`.
-
 ### Brand colors (via Tailwind classes, never hard-coded hex)
 
 | Token     | Hex       | Role                                                                            |
@@ -54,27 +52,3 @@ Design system reference (local): `docs/design-system/README.md` and `docs/design
 - Spacing on the Tailwind scale; page gutter `px-4 sm:px-8`.
 - Logos (`public/img/logo.png`, `sub_logo.png`) are white text: place only on `main` or dark backgrounds.
 - UI copy is Vietnamese, short and action-oriented; keep English for Speaking/Writing/Part/TOEIC.
-
----
-
-## 4. Feature planning (PRD)
-
-Trigger: the user asks to plan/spec a NEW feature, or says "PRD", "lên kế hoạch", "viết spec" before coding.
-Do NOT trigger for bug fixes or small tweaks (≤ 3 files). Just do them.
-
-### Process
-
-1. **Ask first.** Before writing anything, send ONE batch of at most 5 questions: user problem, who uses it, success metric, constraints (deadline/data/API), what is out of scope. Skip any question the codebase or this file already answers. If the user says "tùy bạn", pick a sensible default and record it under "Giả định".
-2. **Read minimally.** Only routes, components, types and hooks related to the feature (section 3 exception applies for finding reusable pieces).
-3. **Write the PRD** to `docs/prd/<feature-slug>.md` (Vietnamese, technical terms in English, max ~1 page, NO code), using this template:
-    - **Vấn đề**: 1-3 sentences.
-    - **Mục tiêu & chỉ số thành công**: measurable.
-    - **User stories**: max 5, "Là …, tôi muốn …, để …".
-    - **Trong phạm vi / Ngoài phạm vi**: keep the MVP tight; park nice-to-haves under "Ngoài phạm vi".
-    - **Thiết kế kỹ thuật**: routes, shadcn components to reuse or add, data/state, API. No code.
-    - **Trạng thái UI**: loading, empty, error.
-    - **Kiểm thử**: only critical logic (auth, payment, scoring...).
-    - **Các bước thực hiện**: ordered small tasks, each shippable on its own.
-    - **Giả định & câu hỏi mở**.
-4. **Stop and wait for approval.** Do not write implementation code until the user approves the PRD.
-5. **When implementing** a feature that has a PRD, read it first and follow its task order. If reality contradicts the PRD, say so briefly and update the PRD.

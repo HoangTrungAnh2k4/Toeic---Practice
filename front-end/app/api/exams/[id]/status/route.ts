@@ -13,7 +13,7 @@ const bodySchema = z.object({
 const fail = (error: string, status: number, extra?: object) => NextResponse.json({ error, ...extra }, { status });
 
 /**
- * Chuyển trạng thái đề theo `examStatus.ts` (docs/prd/exam-edit.md): trả về nháp phải có lý do, phát hành phải đủ
+ * Chuyển trạng thái đề theo `examStatus.ts`: trả về nháp phải có lý do, phát hành phải đủ
  * dữ liệu. Ghi bằng phiên admin: RLS chặn người khác (không đọc được đề nháp, cập nhật 0 dòng).
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {

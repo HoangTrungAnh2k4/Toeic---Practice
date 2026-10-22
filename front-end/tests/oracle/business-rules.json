@@ -12,6 +12,7 @@
         "invalid": ["abc1234", "abcd 1234", "mậtkhẩu1", ""]
     },
     "otp": { "digits": 6, "ttlMinutes": 10 },
+    "auth": { "rememberMeDays": 30, "nameMaxLength": 50 },
     "quota": {
         "guestPerDay": 33,
         "studentPerDay": 55,
