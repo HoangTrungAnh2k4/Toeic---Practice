@@ -19,6 +19,7 @@ export default function PictureStimulus({ imageUrl, imageAlt, questionRef, quest
                     alt={imageAlt ?? `Hình ảnh đề thi câu ${questionNumber}, cần miêu tả bằng tiếng Anh`}
                     fill
                     unoptimized
+                    loading="eager"
                     className="size-full object-cover pointer-events-none select-none"
                 />
                 <figcaption className="right-3 bottom-3 absolute bg-main/90 backdrop-blur-xs px-2.5 py-1 rounded-md font-medium tabular-nums text-sub1 text-xs">

@@ -92,7 +92,8 @@ export function Sidebar() {
                                 src="/img/logo.png"
                                 alt="Learnly Logo"
                                 fill
-                                sizes="10"
+                                loading="eager"
+                                sizes="256px"
                                 className="outline-none focus-visible:outline-none focus:outline-none object-contain group-hover:scale-102 transition-transform duration-300"
                             />
                         </span>
@@ -109,7 +110,8 @@ export function Sidebar() {
                                 src="/img/sub_logo.png"
                                 alt="Learnly Logo"
                                 fill
-                                sizes="10"
+                                loading="eager"
+                                sizes="80px"
                                 className="object-contain group-hover:rotate-6 group-hover:scale-110 transition-transform"
                             />
                         </span>
@@ -208,7 +210,8 @@ function MobileTopBar({ activeIndex, user }: MobileTopBarProps) {
     return (
         <header className="md:hidden top-0 z-20 sticky flex justify-between items-center bg-main px-4 h-14">
             <Link href="/overview" aria-label="Về trang Overview" className="relative w-28 h-9">
-                <Image src="/img/logo.png" alt="" fill sizes="112px" className="object-contain object-left" />
+                {/* eager như logo sidebar desktop: Next dò ảnh LCP theo src dự phòng, hai logo `fill` trùng src nên phải cùng kiểu tải */}
+                <Image src="/img/logo.png" alt="" fill loading="eager" sizes="112px" className="object-contain object-left" />
             </Link>
 
             <Sheet open={open} onOpenChange={setOpen}>

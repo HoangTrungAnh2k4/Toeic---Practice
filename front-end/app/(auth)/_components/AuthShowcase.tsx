@@ -55,6 +55,7 @@ export default function AuthShowcase() {
                         alt=""
                         width={20}
                         height={20}
+                        loading="eager"
                         className="size-10"
                         aria-hidden="true"
                     />

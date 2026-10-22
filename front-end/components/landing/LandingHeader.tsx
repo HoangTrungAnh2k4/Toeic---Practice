@@ -14,7 +14,7 @@ export default function LandingHeader() {
         <header className="flex flex-1 justify-between items-center gap-4 mx-auto pb-3 w-full max-w-300">
             <Link href="/" className="flex items-center gap-2.5">
                 <span className="place-items-center grid bg-main rounded-lg size-10">
-                    <Image src="/img/sub_logo.png" alt="" width={32} height={32} className="size-8" />
+                    <Image src="/img/sub_logo.png" alt="" width={32} height={32} loading="eager" className="size-8" />
                 </span>
                 <span className="font-bold text-main text-xl tracking-tight">TOECO</span>
             </Link>

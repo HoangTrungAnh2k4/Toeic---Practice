@@ -83,7 +83,7 @@ export default function ImageUploadField({
                 {value && previewUrl ? (
                     <Image src={previewUrl} alt={alt} fill unoptimized className="object-cover" />
                 ) : !value && existingUrl ? (
-                    <Image src={existingUrl} alt={alt} fill unoptimized className="object-cover" />
+                    <Image src={existingUrl} alt={alt} fill unoptimized loading="eager" className="object-cover" />
                 ) : (
                     <LuImageUp className="size-8 text-sub2" aria-hidden="true" />
                 )}
