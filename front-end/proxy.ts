@@ -6,6 +6,8 @@ import { REMEMBER_COOKIE, sessionCookieOptions } from '@/lib/supabase-cookies';
 const PROTECTED = ['/setting/exam-management'];
 /** Route chỉ dành cho khách: đã đăng nhập thì chuyển thẳng vào /overview. */
 const GUEST_ONLY = ['/login', '/register'];
+/** Phòng thi → kỹ năng của đề (`?id=`). */
+const EXAM_ROOMS: Record<string, 'speaking' | 'writing'> = { '/speaking/test': 'speaking', '/writing/test': 'writing' };
 
 /** Làm mới phiên Supabase trong cookie ở mỗi request và chặn sớm khách vào route cần đăng nhập. */
 export async function proxy(request: NextRequest) {
@@ -38,6 +40,26 @@ export async function proxy(request: NextRequest) {
     }
     if (data?.claims && GUEST_ONLY.includes(pathname)) {
         return NextResponse.redirect(new URL('/overview', request.url));
+    }
+
+    // Phòng thi stream từ <Suspense> nên notFound() trong page chỉ ra status 200; kiểm đề ở đây để trả 404 thật.
+    // RLS quyết định: khách/học viên chỉ đọc được đề published, admin đọc được cả nháp (xem trước).
+    const skill = EXAM_ROOMS[pathname];
+    const examId = request.nextUrl.searchParams.get('id');
+    if (skill && examId) {
+        const { data: exam, error } = await supabase
+            .from('exams')
+            .select('id')
+            .eq('id', examId)
+            .eq('skill', skill)
+            .maybeSingle();
+        // Có lỗi (id sai định dạng, mất kết nối) thì để page tự xử lý như trước
+        if (!error && !exam) {
+            // Đường dẫn không có route → Next render app/not-found.tsx với status 404, URL trên trình duyệt giữ nguyên
+            const notFound = NextResponse.rewrite(new URL('/_exam-not-found', request.url), { request });
+            response.cookies.getAll().forEach((cookie) => notFound.cookies.set(cookie));
+            return notFound;
+        }
     }
 
     return response;
