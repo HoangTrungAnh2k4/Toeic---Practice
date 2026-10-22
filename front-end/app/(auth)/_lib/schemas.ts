@@ -6,6 +6,8 @@ const email = z.string().trim().min(1, 'Vui lòng nhập email').pipe(z.email('E
 const newPassword = z
     .string()
     .min(8, 'Mật khẩu cần tối thiểu 8 ký tự')
+    // Chỉ ký tự ASCII in được: không khoảng trắng, không chữ có dấu
+    .regex(/^[\x21-\x7E]*$/, 'Mật khẩu không được có khoảng trắng hoặc chữ có dấu')
     .regex(/[A-Za-z]/, 'Mật khẩu cần có ít nhất 1 chữ cái')
     .regex(/\d/, 'Mật khẩu cần có ít nhất 1 chữ số');
 

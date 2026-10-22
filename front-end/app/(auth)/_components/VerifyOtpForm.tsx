@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LuKeyRound } from 'react-icons/lu';
 import Button from '@/components/ui/button';
@@ -22,6 +22,7 @@ export default function VerifyOtpForm() {
         resolver: zodResolver(otpSchema),
         defaultValues: { token: '' },
     });
+    const token = useWatch({ control: form.control, name: 'token' });
 
     const onSubmit = form.handleSubmit(async ({ token }) => {
         const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
@@ -61,6 +62,8 @@ export default function VerifyOtpForm() {
                     render={({ field, fieldState }) => (
                         <AuthTextField
                             {...field}
+                            // Chỉ nhận chữ số: gõ/dán chữ cái thì bỏ đi
+                            onChange={(event) => field.onChange(event.target.value.replace(/\D/g, ''))}
                             label="Mã xác thực"
                             icon={LuKeyRound}
                             inputMode="numeric"
@@ -73,7 +76,12 @@ export default function VerifyOtpForm() {
                 />
 
                 <AuthFormError message={form.formState.errors.root?.message} />
-                <Button type="submit" variant="primary" size={'lg'} disabled={form.formState.isSubmitting}>
+                <Button
+                    type="submit"
+                    variant="primary"
+                    size={'lg'}
+                    disabled={form.formState.isSubmitting || token.length !== 6}
+                >
                     {form.formState.isSubmitting ? 'Đang xác thực...' : 'Xác thực'}
                 </Button>
                 <Button
