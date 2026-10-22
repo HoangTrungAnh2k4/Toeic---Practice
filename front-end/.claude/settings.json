@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(./tests/**)",
+      "Write(./tests/**)",
+      "Edit(./playwright.config.ts)",
+      "Write(./playwright.config.ts)",
+      "Edit(./docs/test-cases.csv)",
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.production)"
+    ]
+  }
+}
