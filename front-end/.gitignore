@@ -36,3 +36,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright e2e
+/test-results/
+/playwright-report/
+/tests/e2e/.cache/
+/.e2e-supabase/
+!.env.test.example
