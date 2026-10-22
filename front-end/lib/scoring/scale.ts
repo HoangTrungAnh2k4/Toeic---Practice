@@ -141,9 +141,20 @@ export interface ScoredResponse {
     feedback: string | null;
 }
 
-/** Tổng kết lượt thi Speaking: câu chưa có điểm (không ghi âm/chấm lỗi) tính 0. */
-export const summarizeSpeaking = (questions: ScoredQuestion[], responses: ScoredResponse[]) =>
-    summarize(questions, responses, speakingMaxScore, 'không ghi âm được hoặc chấm lỗi');
+/** Câu bị bỏ vì API chấm trả 429. */
+export type ScoreLimit = Exclude<ScoreError, 'scoring_failed'>;
+
+const LIMIT_REASON: Record<ScoreLimit, string> = {
+    daily_limit: 'hết lượt chấm hôm nay',
+    provider_limit: 'hết lượt chấm miễn phí',
+};
+
+/** Tổng kết lượt thi Speaking: câu chưa có điểm (không ghi âm/chấm lỗi/hết lượt chấm `limit`) tính 0. */
+export const summarizeSpeaking = (
+    questions: ScoredQuestion[],
+    responses: ScoredResponse[],
+    limit: ScoreLimit | null = null,
+) => summarize(questions, responses, speakingMaxScore, limit ? LIMIT_REASON[limit] : 'không ghi âm được hoặc chấm lỗi');
 
 /**
  * Tổng kết Writing trên các câu được truyền vào: một Part → điểm ước lượng 0–200 của Part; câu của cả 3 Part (lần nộp

@@ -35,6 +35,8 @@ function toSteps(parts: RoomPart[]) {
             question,
             template,
             context: part.context,
+            // Part 4: câu đầu có thêm thời gian đọc thông tin trước phần chuẩn bị
+            readSec: index === 0 ? (template.context_sec ?? 0) : 0,
             prepSec: template.prep_sec ?? 0,
             speakSec: template.response_sec?.[index] ?? 30,
         })),
@@ -43,9 +45,15 @@ function toSteps(parts: RoomPart[]) {
 
 type Step = ReturnType<typeof toSteps>[number];
 
-/** Giai đoạn đầu của câu và số giây của giai đoạn đó; Part không có thời gian chuẩn bị thì vào nói luôn. */
-function startOf(step: Step): { phase: SpeakingPhase; seconds: number } {
-    return step.prepSec > 0 ? { phase: 'prep', seconds: step.prepSec } : { phase: 'speak', seconds: step.speakSec };
+/**
+ * Giai đoạn đầu của câu và số giây của giai đoạn đó: đọc thông tin (tính là chuẩn bị, chưa ghi âm) → chuẩn bị;
+ * Part không có thời gian chuẩn bị thì vào nói luôn.
+ */
+function startOf(step: Step): { phase: SpeakingPhase; seconds: number; isReading: boolean } {
+    if (step.readSec > 0) return { phase: 'prep', seconds: step.readSec, isReading: true };
+    return step.prepSec > 0
+        ? { phase: 'prep', seconds: step.prepSec, isReading: false }
+        : { phase: 'speak', seconds: step.speakSec, isReading: false };
 }
 
 /** Mở lượt làm (tiếp tục lượt dở hoặc tạo mới) rồi vào phòng thi từ câu đầu tiên chưa được chấm. */
@@ -121,6 +129,7 @@ function SpeakingExamSession({ exam, steps, mode, attemptId, startIndex, isFinis
     const step = steps[currentIndex];
     const [phase, setPhase] = useState<SpeakingPhase>(() => (isFinished ? 'done' : startOf(step).phase));
     const [secondsRemaining, setSecondsRemaining] = useState(() => (isFinished ? 0 : startOf(step).seconds));
+    const [isReading, setIsReading] = useState(() => !isFinished && startOf(step).isReading);
     const [isExitModalOpen, setIsExitModalOpen] = useState(false);
     const mic = useMicrophone();
     const { start: startRecording, stop: stopRecording } = useAnswerRecorder(mic.stream);
@@ -135,13 +144,17 @@ function SpeakingExamSession({ exam, steps, mode, attemptId, startIndex, isFinis
     };
 
     const startSpeaking = () => {
+        setIsReading(false);
         setPhase('speak');
         setSecondsRemaining(step.speakSec);
     };
 
     const tick = useEffectEvent(() => {
         if (secondsRemaining > 1) setSecondsRemaining(secondsRemaining - 1);
-        else if (phase === 'prep') startSpeaking();
+        else if (isReading && step.prepSec > 0) {
+            setIsReading(false);
+            setSecondsRemaining(step.prepSec);
+        } else if (phase === 'prep') startSpeaking();
         else {
             setSecondsRemaining(0);
             setPhase('done');
@@ -161,7 +174,7 @@ function SpeakingExamSession({ exam, steps, mode, attemptId, startIndex, isFinis
         if (!isMicReady || phase === 'done') return;
         const timer = setTimeout(tick, 1000);
         return () => clearTimeout(timer);
-    }, [isMicReady, phase, secondsRemaining]);
+    }, [isMicReady, phase, secondsRemaining, isReading]);
 
     const isGuided = mode === 'guided';
     const isLast = currentIndex === steps.length - 1;
@@ -186,6 +199,7 @@ function SpeakingExamSession({ exam, steps, mode, attemptId, startIndex, isFinis
         setCurrentIndex(currentIndex + 1);
         setPhase(next.phase);
         setSecondsRemaining(next.seconds);
+        setIsReading(next.isReading);
     };
 
     return (
@@ -242,7 +256,9 @@ function SpeakingExamSession({ exam, steps, mode, attemptId, startIndex, isFinis
                             <AudioCaptureHud
                                 phase={phase}
                                 secondsRemaining={secondsRemaining}
-                                totalSeconds={phase === 'prep' ? step.prepSec : step.speakSec}
+                                totalSeconds={
+                                    isReading ? step.readSec : phase === 'prep' ? step.prepSec : step.speakSec
+                                }
                                 analyser={mic.analyser}
                                 isGuided={isGuided}
                                 onSkipPrep={startSpeaking}

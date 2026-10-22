@@ -4,7 +4,8 @@ import { summarizeSpeaking } from '@/lib/scoring/scale';
 import { createAdminSupabase } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 
-const bodySchema = z.object({ attemptId: z.uuid() });
+/** `limit`: client báo có câu bị bỏ vì API chấm trả 429, chỉ để ghi lý do vào `scoring_error`. */
+const bodySchema = z.object({ attemptId: z.uuid(), limit: z.enum(['daily_limit', 'provider_limit']).nullish() });
 
 const fail = (error: string, status: number) => NextResponse.json({ error }, { status });
 
@@ -12,7 +13,7 @@ const fail = (error: string, status: number) => NextResponse.json({ error }, { s
 export async function POST(request: Request) {
     const body = bodySchema.safeParse(await request.json().catch(() => null));
     if (!body.success) return fail('invalid_body', 400);
-    const { attemptId } = body.data;
+    const { attemptId, limit = null } = body.data;
 
     const supabase = await createServerSupabase();
     const { data: auth } = await supabase.auth.getClaims();
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     ]);
     if (questions.error || responses.error) return fail('server_error', 500);
 
-    const summary = summarizeSpeaking(questions.data, responses.data);
+    const summary = summarizeSpeaking(questions.data, responses.data, limit);
     const now = new Date().toISOString();
     const { error } = await createAdminSupabase()
         .from('attempts')

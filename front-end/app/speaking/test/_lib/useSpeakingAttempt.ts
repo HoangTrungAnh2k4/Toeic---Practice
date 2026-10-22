@@ -11,7 +11,7 @@ import {
     updateAttempt,
 } from '@/lib/data/user-data';
 import type { Attempt, AttemptMode } from '@/lib/domain/types';
-import type { ScoredQuestion } from '@/lib/scoring/scale';
+import type { ScoredQuestion, ScoreLimit } from '@/lib/scoring/scale';
 
 interface PendingAnswer {
     audio: Blob;
@@ -35,7 +35,7 @@ export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions:
     /** Câu chưa chấm xong; giữ audio để nộp bài thử lại khi lỗi mạng. */
     const pendingRef = useRef(new Map<string, PendingAnswer>());
     const tasksRef = useRef(new Map<string, Promise<void>>());
-    const limitedRef = useRef(false);
+    const limitedRef = useRef<ScoreLimit | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -71,7 +71,7 @@ export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions:
                     (error: unknown) => {
                         // Hết lượt thì thử lại cũng vô ích: bỏ câu này, nộp bài vẫn tính các câu đã chấm
                         if (!(error instanceof ScoringLimitError)) return;
-                        limitedRef.current = true;
+                        limitedRef.current = error.limit;
                         pendingRef.current.delete(questionId);
                     },
                 );
@@ -88,7 +88,7 @@ export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions:
         if (pendingRef.current.size > 0) return 'error';
 
         try {
-            await finalizeSpeakingAttempt(attempt.id, questions);
+            await finalizeSpeakingAttempt(attempt.id, questions, limitedRef.current);
             // Lỗi gắn task lộ trình không chặn việc nộp
             linkPlanTask(attempt).catch(() => undefined);
             return limitedRef.current ? 'limit' : 'ok';

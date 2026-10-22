@@ -18,7 +18,7 @@ const LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider
 
 export default function ReviewScoreSummary({ row, questions, mistakeIndex, writingTotal }: ReviewScoreSummaryProps) {
     const { attempt, exam, scoreDelta } = row;
-    const { score, feedback_summary: feedbackSummary } = attempt;
+    const { score, feedback_summary: feedbackSummary, scoring_error: scoringError } = attempt;
     const annotations = questions.flatMap((q) => q.annotations);
     const recurringIds = [
         ...new Set(annotations.flatMap((a) => (a.mistake_pattern_id ? [a.mistake_pattern_id] : []))),
@@ -64,6 +64,7 @@ export default function ReviewScoreSummary({ row, questions, mistakeIndex, writi
                             <span className="font-normal text-sub1/80">(lượt chấm gần nhất của mỗi Part)</span>
                         </strong>
                     )}
+                    {scoringError && <strong className="font-semibold text-sub1">{scoringError}</strong>}
                     {feedbackSummary && <span>{feedbackSummary}</span>}
                     {scoreDelta !== null && (
                         <strong className="font-semibold text-sub3">

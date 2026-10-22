@@ -10,7 +10,13 @@ import type {
     StudyPlan,
     StudyPlanWeek,
 } from '@/lib/domain/types';
-import { SCORE_ERROR_MESSAGE, summarizeSpeaking, summarizeWriting, type ScoredQuestion } from '@/lib/scoring/scale';
+import {
+    SCORE_ERROR_MESSAGE,
+    summarizeSpeaking,
+    summarizeWriting,
+    type ScoredQuestion,
+    type ScoreLimit,
+} from '@/lib/scoring/scale';
 import type { WritingOutcome } from '@/lib/scoring/writing';
 import { supabase } from '@/lib/supabase';
 import type { PlanDraft } from './generate-plan';
@@ -324,7 +330,11 @@ function saveLocalResponse(attemptId: string, questionId: string, patch: Partial
 }
 
 /** Nhà cung cấp hoặc hạn mức lượt chấm trong ngày đã hết (HTTP 429). */
-export class ScoringLimitError extends Error {}
+export class ScoringLimitError extends Error {
+    constructor(readonly limit: ScoreLimit) {
+        super(limit);
+    }
+}
 
 type AnswerScore = Pick<
     AttemptResponse,
@@ -341,7 +351,10 @@ export async function scoreSpeakingAnswer(attemptId: string, questionId: string,
     form.append('attemptId', attemptId);
     form.append('questionId', questionId);
     const response = await fetch('/api/speaking/score', { method: 'POST', body: form });
-    if (response.status === 429) throw new ScoringLimitError();
+    if (response.status === 429) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new ScoringLimitError(body?.error === 'provider_limit' ? 'provider_limit' : 'daily_limit');
+    }
     if (!response.ok) throw new Error(`Scoring failed: ${response.status}`);
 
     const result = (await response.json()) as AnswerScore;
@@ -349,19 +362,23 @@ export async function scoreSpeakingAnswer(attemptId: string, questionId: string,
     return result;
 }
 
-/** Nộp bài Speaking: tính tổng 0–200 từ điểm từng câu và đóng attempt (`scored`). */
-export async function finalizeSpeakingAttempt(attemptId: string, questions: ScoredQuestion[]) {
+/** Nộp bài Speaking: tính tổng 0–200 từ điểm từng câu và đóng attempt (`scored`); `limit`: có câu bị bỏ vì hết lượt chấm. */
+export async function finalizeSpeakingAttempt(
+    attemptId: string,
+    questions: ScoredQuestion[],
+    limit: ScoreLimit | null,
+) {
     if (await isRemoteAttempt(attemptId)) {
         const response = await fetch('/api/speaking/finalize', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ attemptId }),
+            body: JSON.stringify({ attemptId, limit }),
         });
         if (!response.ok) throw new Error(`Finalize failed: ${response.status}`);
         return;
     }
 
-    const summary = summarizeSpeaking(questions, await listResponses(attemptId));
+    const summary = summarizeSpeaking(questions, await listResponses(attemptId), limit);
     patchLocalAttempt(attemptId, {
         status: 'scored',
         submitted_at: now(),
