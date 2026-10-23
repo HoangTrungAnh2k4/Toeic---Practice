@@ -4,6 +4,7 @@ import { fromExamFormData } from '@/app/setting/exam-management/_lib/examFormDat
 import { examInfoSchema, examSchema, toKeywordRows } from '@/app/setting/exam-management/_lib/examSchema';
 import { getExam, listQuestions } from '@/lib/data/content';
 import { deleteUnusedExamImages, newExamImage, r2PublicBase } from '@/lib/exam-images';
+import { expireExamSummaries } from '@/lib/exam-library/summaries';
 import { deleteR2Object, putR2Object } from '@/lib/r2';
 import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
@@ -49,7 +50,10 @@ export async function PUT(request: Request, { params }: Params) {
         const info = examInfoSchema.safeParse(raw);
         if (!info.success) return fail('invalid_body', 400);
         const { error } = await supabase.rpc('update_exam', { target_exam_id: id, payload: info.data });
-        if (!error) return NextResponse.json({ id });
+        if (!error) {
+            expireExamSummaries();
+            return NextResponse.json({ id });
+        }
         const [code, status] = RPC_ERROR[error.code] ?? ['server_error', 500];
         return fail(code, status);
     }
@@ -96,6 +100,7 @@ export async function PUT(request: Request, { params }: Params) {
         const [code, status] = RPC_ERROR[error.code] ?? ['server_error', 500];
         return fail(code, status);
     }
+    expireExamSummaries();
 
     const kept = new Set(payload.parts.flatMap((part) => part.questions.map((question) => question.image_path)));
     await deleteUnusedExamImages(
@@ -124,6 +129,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (error) return fail('server_error', 500);
     // RLS chặn thì Supabase không báo lỗi, chỉ xoá 0 dòng
     if (deleted.length === 0) return fail('not_found', 404);
+    expireExamSummaries();
 
     await deleteUnusedExamImages(
         supabase,

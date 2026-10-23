@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { canChangeStatus, findPublishIssues, MAX_NOTE_LENGTH, needsNote } from '@/app/setting/exam-management/_lib/examStatus';
 import { getExam } from '@/lib/data/content';
 import { getExamRoom } from '@/lib/exam-library/room';
+import { expireExamSummaries } from '@/lib/exam-library/summaries';
 import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
 const bodySchema = z.object({
@@ -49,5 +50,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         .select('id');
     if (error) return fail('server_error', 500);
     if (data.length === 0) return fail('not_found', 404);
+    expireExamSummaries();
     return NextResponse.json({ status });
 }
