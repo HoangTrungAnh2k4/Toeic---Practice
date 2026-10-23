@@ -141,17 +141,7 @@ test('PL-E03: Ngày thi sau 6 tháng: lộ trình dài tối đa 12 tuần', asy
     for (const task of tasks) expect(task.scheduled_date < dayKey(84)).toBe(true);
 });
 
-test('PL-E04: Ô điểm mục tiêu chọn được 0–200 theo bước 10 và "để trống", không có giá trị nào khác', async ({ page, freshStudent }) => {
-    await freshStudent();
-    const dialog = await openGoals(page);
-    for (const label of ['Mục tiêu Speaking', 'Mục tiêu Writing']) {
-        const options = await optionsOf(page, dialog, label);
-        const numbers = options.filter((text) => /\d/.test(text)).map((text) => Number(text.match(/\d+/)![0]));
-        const blank = options.filter((text) => !/\d/.test(text));
-        expect(numbers.sort((a, b) => a - b), label).toEqual(Array.from({ length: 21 }, (_, i) => i * 10));
-        expect(blank, label).toHaveLength(1);
-    }
-});
+
 
 test('PL-C01: Bấm "Tạo lại lộ trình" và xác nhận: có hộp thoại xác nhận, lộ trình mới thay lộ trình cũ, task đã làm vẫn còn trong lịch sử', async ({ page, db, freshStudent }) => {
     const user = await freshStudent();

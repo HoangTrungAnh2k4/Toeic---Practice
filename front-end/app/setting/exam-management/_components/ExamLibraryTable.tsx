@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LuBadgeCheck, LuClock3, LuEllipsisVertical, LuEye, LuInbox, LuPencil, LuSearchX, LuTrash2 } from 'react-icons/lu';
+import { LuBadgeCheck, LuClock3, LuEllipsisVertical, LuEye, LuInbox, LuPencil, LuSearchX, LuTrash2, LuTriangleAlert } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -116,6 +116,14 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onChange
                                             <div className="flex flex-col gap-0.5 min-w-0">
                                                 <span className="font-semibold text-main text-sm">{exam.title}</span>
                                                 <span className="font-mono font-semibold text-sub2">{exam.code}</span>
+                                                {exam.review_note && (
+                                                    <p className="flex items-start gap-1.5 mt-1 font-medium text-subText text-xs">
+                                                        <LuTriangleAlert className="mt-0.5 size-3.5 text-destructive shrink-0" aria-hidden="true" />
+                                                        <span>
+                                                            <span className="font-semibold text-main">Lý do trả về:</span> {exam.review_note}
+                                                        </span>
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     </TableCell>
@@ -144,7 +152,7 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onChange
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="font-semibold text-main">{SOURCE_LABEL[exam.source]}</span>
                                                 <span className="text-subText">
-                                                    {exam.review_note ?? (exam.is_verified ? 'Đã thẩm định' : 'Chưa thẩm định')}
+                                                    {exam.is_verified ? 'Đã thẩm định' : 'Chưa thẩm định'}
                                                 </span>
                                             </div>
                                         </div>

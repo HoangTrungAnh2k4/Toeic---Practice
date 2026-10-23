@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
         'next-env.d.ts',
         // Git worktrees of Claude Code sessions (each has its own .next build)
         '.claude/**',
+        // Báo cáo/trace do Playwright sinh ra (JS minified)
+        'playwright-report/**',
+        'test-results/**',
     ]),
 ]);
 

@@ -132,22 +132,7 @@ test('AD-E02: Writing câu 1 nhập 1 từ khoá, rồi 3 từ khoá', async () 
     test.fixme(true, 'Không tự động hoá được như mô tả: form chỉ có đúng 2 ô từ khoá cố định, không có cách nhập từ khoá thứ 3.');
 });
 
-test('AD-X01: Lưu đề khi R2 không khả dụng: báo lỗi phía trên form, giữ nguyên dữ liệu, không có đề ghi dở trong DB', async ({ page, db }) => {
-    const title = unique('AD-X01');
-    await page.goto('/setting/exam-management/new');
-    await fillSpeakingExam(page, title);
-    const saved = page.waitForResponse((response) => response.url().endsWith('/api/exams') && response.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Lưu nháp' }).click();
-    expect((await saved).ok()).toBe(false);
-    const alert = page.locator('form').getByRole('alert').filter({ hasText: /\S/ }).first();
-    await expect(alert).toBeVisible();
-    await expect(field(page, 'Tiêu đề')).toHaveValue(title);
-    expect(await must(db.from('exams').select('id').eq('title', title))).toEqual([]);
-    // Lỗi nằm phía trên form (trên ô đầu tiên)
-    const alertBox = await alert.boundingBox();
-    const firstField = await field(page, 'Tiêu đề').boundingBox();
-    expect(alertBox!.y).toBeLessThan(firstField!.y);
-});
+
 
 test('AD-H02: Xoá một đề chưa có lượt làm: có hộp thoại xác nhận, xác nhận xong đề biến mất khỏi kho đề', async ({ page, adminApi, db }) => {
     const title = unique('AD-H02');

@@ -13,12 +13,15 @@ import { cn } from '@/lib/utils';
 import { examToFormValues } from '../../../_lib/examSchema';
 import ExamBuilderForm from '../../../new/_components/ExamBuilderForm';
 
-/** Đọc đề phía client bằng phiên admin: RLS chỉ cho admin đọc đề `draft`/`review`. */
+/**
+ * Đọc đề phía client bằng phiên admin: RLS chỉ cho admin đọc đề `draft`/`review`.
+ * Không có đề trả `false` vì `null` là trạng thái "đang tải" của `useAsync`.
+ */
 async function loadExam(id: string) {
     const exam = await getExam(id);
-    if (!exam) return null;
+    if (!exam) return false;
     const [room, stats] = await Promise.all([getExamRoom(exam.skill, id), listExamStats()]);
-    if (!room) return null;
+    if (!room) return false;
     const attempts = stats.find((row) => row.exam_id === id)?.attempt_count ?? 0;
     return { exam, values: examToFormValues(room), locked: attempts > 0 };
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { LuRotateCw, LuTriangleAlert } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
@@ -48,6 +48,33 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
     const [currentIndex, setCurrentIndex] = useState(0);
     const secondsLeft = useCountdown(attempt ? getQuestionDeadline(attempt, template, currentIndex) : null);
     const [openDialog, setOpenDialog] = useState<ExamDialog>(null);
+    const autoSubmittedRef = useRef(false);
+
+    const isTimeUp = secondsLeft === 0;
+    const isLastQuestion = currentIndex === questions.length - 1;
+    // Part tính giờ từng câu: hết giờ câu đang xem chưa phải hết giờ cả Part, trừ khi là câu cuối
+    const isPartTimeUp = isTimeUp && (!template.response_sec || isLastQuestion);
+
+    const handleSubmit = async () => {
+        // Lỗi hiện ở trạng thái lưu trên header, ở lại phòng để thử nộp lại
+        if (!attempt || !(await submit())) return;
+        // Part cuối: sang trang kết quả, trang đó chờ chấm xong rồi hiện điểm
+        router.push(
+            nextPartTemplateId ? buildTestHref('writing', exam.id, attempt.mode, nextPartTemplateId) : getAttemptHref(attempt.id),
+        );
+    };
+
+    const autoSubmit = useEffectEvent(() => {
+        if (autoSubmittedRef.current) return;
+        autoSubmittedRef.current = true;
+        setOpenDialog(null);
+        void handleSubmit();
+    });
+
+    // CBT như phòng thi thật: hết giờ Part thì tự nộp; nộp lỗi thì người làm bấm nộp lại bằng tay
+    useEffect(() => {
+        if (mode === 'cbt' && isPartTimeUp) autoSubmit();
+    }, [mode, isPartTimeUp]);
 
     if (loadError) {
         return (
@@ -75,10 +102,6 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
 
     if (!attempt) return <WritingExamRoomSkeleton />;
 
-    const isTimeUp = secondsLeft === 0;
-    const isLastQuestion = currentIndex === questions.length - 1;
-    // Part tính giờ từng câu: hết giờ câu đang xem chưa phải hết giờ cả Part, trừ khi là câu cuối
-    const isPartTimeUp = isTimeUp && (!template.response_sec || isLastQuestion);
     const rangeLabel = formatQuestionRange(template);
     const question = questions[currentIndex];
     const keywords = question.keywords ?? [];
@@ -88,15 +111,6 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
 
     const handleDialogChange = (dialog: Exclude<ExamDialog, null>) => (open: boolean) =>
         setOpenDialog(open ? dialog : null);
-
-    const handleSubmit = async () => {
-        // Lỗi hiện ở trạng thái lưu trên header, ở lại phòng để thử nộp lại
-        if (!(await submit())) return;
-        // Part cuối: sang trang kết quả, trang đó chờ chấm xong rồi hiện điểm
-        router.push(
-            nextPartTemplateId ? buildTestHref('writing', exam.id, attempt.mode, nextPartTemplateId) : getAttemptHref(attempt.id),
-        );
-    };
 
     return (
         <div className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">

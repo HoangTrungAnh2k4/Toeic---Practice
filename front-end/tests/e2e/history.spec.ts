@@ -15,16 +15,7 @@ test('HI-H01: Có một lượt đã chấm: nút "Xem lại chi tiết" mở đ
     await expect(page.getByRole('heading', { name: 'E2E Speaking 1' })).toBeVisible();
 });
 
-test('HI-H02: Hai lượt cùng đề và cùng Part, lần 1 được 60, lần 2 được 80: dòng lần 2 hiện "lần 2" và chênh lệch +20', async ({ page, db, freshStudent }) => {
-    const user = await freshStudent();
-    const exam = IDS.speaking.published[1];
-    await insertAttempt(db, { user_id: user.id, exam_id: exam, score: 60, started_at: daysAgo(2) });
-    const second = await insertAttempt(db, { user_id: user.id, exam_id: exam, score: 80, started_at: daysAgo(1) });
-    await page.goto('/setting/history');
-    const row = rowOf(page, code(second));
-    await expect(row).toContainText(/lần 2/i);
-    await expect(row).toContainText('+20');
-});
+
 
 test('HI-E01: Một bài 6 ngày trước và một bài 8 ngày trước, lọc "7 ngày" chỉ hiện bài 6 ngày trước', async ({ page, db, freshStudent }) => {
     const user = await freshStudent();

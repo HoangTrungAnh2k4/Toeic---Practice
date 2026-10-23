@@ -7,10 +7,28 @@ import { buttonVariants } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils';
 
+const DISMISSED_KEY = 'toeco:guest-notice-dismissed';
+
 /** Nhắc khách rằng bài làm chỉ nằm trên trình duyệt này và không được chuyển sang tài khoản khi đăng ký. */
 export function GuestDataNotice() {
     const user = useCurrentUser();
-    const [dismissed, setDismissed] = useState(false);
+    // Server/storage bị chặn → coi như chưa đóng; banner chỉ render sau khi đọc xong phiên nên không lệch hydrate
+    const [dismissed, setDismissed] = useState(() => {
+        try {
+            return localStorage.getItem(DISMISSED_KEY) === '1';
+        } catch {
+            return false;
+        }
+    });
+
+    const dismiss = () => {
+        setDismissed(true);
+        try {
+            localStorage.setItem(DISMISSED_KEY, '1');
+        } catch {
+            // Không ghi được thì chỉ ẩn trong phiên này
+        }
+    };
 
     // chờ đọc xong phiên để người đã đăng nhập không thấy banner nháy lên
     if (user !== null || dismissed) return null;
@@ -40,7 +58,7 @@ export function GuestDataNotice() {
                 <button
                     type="button"
                     aria-label="Đóng thông báo"
-                    onClick={() => setDismissed(true)}
+                    onClick={dismiss}
                     className={cn(
                         'flex justify-center items-center rounded-lg size-8 text-main transition-colors',
                         'hover:bg-sub2/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',

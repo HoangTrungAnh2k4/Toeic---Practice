@@ -38,7 +38,7 @@ function SaveIndicator({ saveStatus, savedAt, isRestored }: Pick<WritingExamHead
         return (
             <>
                 <LuCloudAlert className="size-4 text-destructive" aria-hidden="true" />
-                <span>Không thể lưu nháp trên trình duyệt này</span>
+                <span>Chưa lưu lên máy chủ, bản nháp vẫn giữ trên trình duyệt này</span>
             </>
         );
     }
