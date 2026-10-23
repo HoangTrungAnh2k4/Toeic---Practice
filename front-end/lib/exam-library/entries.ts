@@ -87,7 +87,8 @@ export function filterEntries(entries: LibraryEntry[], { tab, searchQuery, statu
 
 export function paginate<T>(items: T[], page: number) {
     const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
-    const current = Math.min(page, totalPages);
+    // Trang vượt quá số trang là giá trị lạ trên URL → về mặc định (trang 1), không kẹp về trang cuối
+    const current = page <= totalPages ? page : 1;
     const start = (current - 1) * PAGE_SIZE;
     return { items: items.slice(start, start + PAGE_SIZE), total: items.length, page: current, totalPages };
 }
