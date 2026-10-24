@@ -39,7 +39,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="vi">
+        <html lang="vi" data-scroll-behavior="smooth">
             <body className={`${roboto.variable} ${geistMono.variable} group/app antialiased min-h-screen flex flex-col`}>
                 {/* Footer nằm ngoài khối này để sidebar sticky dừng ở đáy nội dung, không trượt đè lên footer */}
                 <div className="flex flex-col md:flex-row flex-1 has-[.sidebar-root]:bg-main">

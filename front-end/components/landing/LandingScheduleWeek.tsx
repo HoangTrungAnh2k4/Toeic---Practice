@@ -67,18 +67,18 @@ export default function LandingScheduleWeek() {
                 </ol>
             </div>
 
-            <p
+            <div
                 aria-live="polite"
                 className="flex items-start gap-3 bg-sub1 shadow-[6px_6px_0_0_#000] p-4 border-2 border-black rounded-2xl font-semibold text-sm"
             >
                 <LuBot aria-hidden="true" className="size-5 shrink-0" />
-                <div className="flex gap-2 text-subText">
-                    <p className='text-main'>AI giải thích: </p>
+                <p className="flex gap-2 text-subText">
+                    <span className='text-main'>AI giải thích: </span>
                     {focusDay === 1
                         ? 'Part 3 và lỗi thiếu mạo từ đang kéo điểm xuống nhiều nhất nên được xếp vào Thứ 3, ngày bạn rảnh 45 phút.'
                         : `Đã dời bài trọng tâm sang ${WEEK_DAYS[focusDay]}. Mục tiêu tuần và chuỗi ngày học vẫn giữ nguyên.`}
-                </div>
-            </p>
+                </p>
+            </div>
         </div>
     );
 }

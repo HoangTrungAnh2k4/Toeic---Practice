@@ -210,8 +210,7 @@ function MobileTopBar({ activeIndex, user }: MobileTopBarProps) {
     return (
         <header className="md:hidden top-0 z-20 sticky flex justify-between items-center bg-main px-4 h-14">
             <Link href="/overview" aria-label="Về trang Overview" className="relative w-28 h-9">
-                {/* eager như logo sidebar desktop: Next dò ảnh LCP theo src dự phòng, hai logo `fill` trùng src nên phải cùng kiểu tải */}
-                <Image src="/img/logo.png" alt="" fill loading="eager" sizes="112px" className="object-contain object-left" />
+                <Image src="/img/logo.png" alt="" fill sizes="112px" className="object-contain object-left" />
             </Link>
 
             <Sheet open={open} onOpenChange={setOpen}>
