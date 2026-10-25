@@ -52,7 +52,7 @@ function EmptyRow({ isLibraryEmpty, onResetFilters }: { isLibraryEmpty: boolean;
                     </p>
                     {isLibraryEmpty ? (
                         <Link
-                            href="/setting/exam-management/new"
+                            href="/exam-management/new"
                             className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 mt-2 text-xs')}
                         >
                             Tạo đề
@@ -210,7 +210,7 @@ export default function ExamLibraryTable({
                                                 <DropdownMenuContent align="end" className="w-48">
                                                     <DropdownMenuGroup>
                                                         <DropdownMenuItem
-                                                            render={<Link href={`/setting/exam-management/${exam.id}/edit`} />}
+                                                            render={<Link href={`/exam-management/${exam.id}/edit`} />}
                                                         >
                                                             <LuPencil aria-hidden="true" />
                                                             Sửa đề

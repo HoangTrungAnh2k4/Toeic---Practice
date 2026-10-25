@@ -43,9 +43,7 @@ export default function ExamLibraryLoader() {
     if (state.status === 'loading') {
         return (
             <div className="flex flex-col gap-4" aria-busy="true" aria-label="Đang tải kho đề">
-                <Skeleton className="w-64 h-8" />
-                <Skeleton className="rounded-xl w-full h-14" />
-                <Skeleton className="rounded-xl w-full h-96" />
+
             </div>
         );
     }

@@ -5,7 +5,7 @@ import {
     findPublishIssues,
     MAX_NOTE_LENGTH,
     needsNote,
-} from '@/app/setting/exam-management/_lib/examStatus';
+} from '@/app/exam-management/_lib/examStatus';
 import { getExam } from '@/lib/data/content';
 import { getExamRoom } from '@/lib/exam-library/room';
 import { expireExamSummaries } from '@/lib/exam-library/summaries';

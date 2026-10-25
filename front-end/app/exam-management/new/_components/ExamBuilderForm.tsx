@@ -17,7 +17,7 @@ import { emptyExam, examInfoSchema, type ExamInput, examSchema, type ExamValues 
 import FormField from './FormField';
 import PartSection, { countErrors } from './PartSection';
 
-const EXAM_MANAGEMENT_PATH = '/setting/exam-management';
+const EXAM_MANAGEMENT_PATH = '/exam-management';
 
 /** Mã lỗi từ `POST /api/exams` → thông báo cho admin. */
 const SAVE_ERROR: Record<string, string> = {

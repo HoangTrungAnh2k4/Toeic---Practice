@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { fromExamFormData } from '@/app/setting/exam-management/_lib/examFormData';
-import { examSchema, toKeywordRows } from '@/app/setting/exam-management/_lib/examSchema';
+import { fromExamFormData } from '@/app/exam-management/_lib/examFormData';
+import { examSchema, toKeywordRows } from '@/app/exam-management/_lib/examSchema';
 import { newExamImage, r2PublicBase } from '@/lib/exam-images';
 import { logger, serverError } from '@/lib/logger';
 import { deleteR2Object, putR2Object } from '@/lib/r2';

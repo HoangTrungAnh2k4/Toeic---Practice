@@ -71,7 +71,7 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
         setNotice(`Đang nhân bản đề ${code}…`);
         const result = await duplicateExam(id);
         if ('error' in result) return setNotice(result.error);
-        router.push(`/setting/exam-management/${result.id}/edit`);
+        router.push(`/exam-management/${result.id}/edit`);
     };
 
     const handleRequestStatus =(exam: ExamLibraryItem, to: ExamStatus) => {
@@ -104,13 +104,13 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
                 </div>
                 <div className='flex gap-3'>
                     <Link
-                        href="/setting/exam-management/new"
+                        href="/exam-management/new"
                         className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 self-start xl:self-auto shrink-0')}
                     >
                         Tạo đề Speaking
                     </Link>
                     <Link
-                        href="/setting/exam-management/new?skill=writing"
+                        href="/exam-management/new?skill=writing"
                         className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 self-start xl:self-auto shrink-0')}
                     >
                         Tạo đề Writing

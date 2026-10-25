@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LuMenu, LuX } from 'react-icons/lu';
+import { LuFileCog, LuMenu, LuX } from 'react-icons/lu';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -14,6 +14,7 @@ import { UserMenu } from '@/components/user/user-menu';
 import { GuestMenu } from '@/components/user/guest-menu';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { MdEditDocument } from 'react-icons/md';
 
 /**
  * Chiều cao mỗi mục. PHẢI khớp với class `h-16` (64px) bên dưới,
@@ -32,16 +33,20 @@ const items: NavItem[] = [
     { label: 'Setting', href: '/setting', icon: IoSettings },
 ];
 
+const adminItems: NavItem[] = [{ label: 'Quản trị đề', href: '/exam-management', icon: MdEditDocument }];
+
 export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
     const user = useCurrentUser();
+    // Lúc đang đọc phiên vẫn hiện nav học viên để khách/học viên không bị trống nav
+    const navItems = user?.isAdmin ? adminItems : items;
 
-    const activeIndex = items.findIndex((item) => pathname === item.href || pathname.startsWith(item.href + '/'));
+    const activeIndex = navItems.findIndex((item) => pathname === item.href || pathname.startsWith(item.href + '/'));
 
     return (
         <>
-            <MobileTopBar activeIndex={activeIndex} user={user} />
+            <MobileTopBar items={navItems} activeIndex={activeIndex} user={user} />
             <aside
                 data-collapsed={collapsed}
                 className={`sidebar-root sticky top-0 z-10 hidden md:flex h-dvh shrink-0 flex-col self-start bg-main to-main transition-[width] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${collapsed ? 'w-20' : 'w-64'
@@ -118,13 +123,13 @@ export function Sidebar() {
                     </button>
                 </div>
 
-                <SidebarNav activeIndex={activeIndex} collapsed={collapsed} />
+                <SidebarNav items={navItems} activeIndex={activeIndex} collapsed={collapsed} />
 
                 {/* Tài khoản: ghim đáy sidebar, xuất hiện ngay sau mục nav cuối */}
                 <div
                     className="mt-auto p-3"
                     style={{
-                        animation: `sidebar-in 600ms ${150 + items.length * 90}ms cubic-bezier(0.22,1,0.36,1) both`,
+                        animation: `sidebar-in 600ms ${150 + navItems.length * 90}ms cubic-bezier(0.22,1,0.36,1) both`,
                     }}
                 >
                     {user === undefined ? null : user ? (
@@ -139,13 +144,14 @@ export function Sidebar() {
 }
 
 interface SidebarNavProps {
+    items: NavItem[];
     activeIndex: number;
     collapsed: boolean;
     /** Gọi khi chọn một mục (đóng drawer trên mobile). */
     onNavigate?: () => void;
 }
 
-function SidebarNav({ activeIndex, collapsed, onNavigate }: SidebarNavProps) {
+function SidebarNav({ items, activeIndex, collapsed, onNavigate }: SidebarNavProps) {
     return (
         <nav className="relative mt-4">
             {/* Thanh trượt: pill sáng + 2 góc bo ngược (trên & dưới) nối liền với nội dung */}
@@ -198,18 +204,19 @@ function SidebarNav({ activeIndex, collapsed, onNavigate }: SidebarNavProps) {
 }
 
 interface MobileTopBarProps {
+    items: NavItem[];
     activeIndex: number;
     user: ReturnType<typeof useCurrentUser>;
 }
 
 /** Dưới `md`: thanh trên cùng với logo + nút mở drawer chứa nav và khối tài khoản. */
-function MobileTopBar({ activeIndex, user }: MobileTopBarProps) {
+function MobileTopBar({ items, activeIndex, user }: MobileTopBarProps) {
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false);
 
     return (
         <header className="md:hidden top-0 z-20 sticky flex justify-between items-center bg-main px-4 h-14">
-            <Link href="/overview" aria-label="Về trang Overview" className="relative w-28 h-9">
+            <Link href={items[0].href} aria-label={`Về trang ${items[0].label}`} className="relative w-28 h-9">
                 <Image src="/img/logo.png" alt="" fill sizes="112px" className="object-contain object-left" />
             </Link>
 
@@ -239,7 +246,7 @@ function MobileTopBar({ activeIndex, user }: MobileTopBarProps) {
                             <LuX aria-hidden="true" className="size-5" />
                         </SheetClose>
                     </div>
-                    <SidebarNav activeIndex={activeIndex} collapsed={false} onNavigate={close} />
+                    <SidebarNav items={items} activeIndex={activeIndex} collapsed={false} onNavigate={close} />
                     <div className="mt-auto p-3">
                         {user === undefined ? null : user ? (
                             <UserMenu collapsed={false} user={user} />

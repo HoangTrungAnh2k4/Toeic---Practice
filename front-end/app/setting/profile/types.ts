@@ -7,6 +7,7 @@ export interface CurrentUser {
     email: string;
     avatarUrl?: string;
     role: string;
+    isAdmin: boolean;
     joinedAt: string;
 }
 

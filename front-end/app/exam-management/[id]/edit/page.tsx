@@ -16,7 +16,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
                 className="flex flex-wrap items-center gap-1.5 font-semibold text-sub2 text-xs uppercase tracking-wider"
             >
                 <Link
-                    href="/setting/exam-management"
+                    href="/exam-management"
                     className="hover:text-main rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
                 >
                     Quản trị đề thi

@@ -6,7 +6,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 import { cn } from '@/lib/utils';
-import { SETTING_BASE_PATH } from '../utils';
+import { SETTING_BASE_PATH } from '@/app/setting/utils';
 
 /** Chỉ admin vào được khu quản trị đề. proxy.ts đã đẩy khách về /login; RLS vẫn là lớp bảo vệ dữ liệu cuối cùng. */
 export default function ExamManagementLayout({ children }: { children: ReactNode }) {
@@ -18,8 +18,8 @@ export default function ExamManagementLayout({ children }: { children: ReactNode
                     aria-busy="true"
                     aria-label="Đang kiểm tra quyền truy cập"
                 >
-                    <Skeleton className="w-72 h-12" />
-                    <Skeleton className="rounded-xl w-full h-96" />
+                    {/* <Skeleton className="w-72 h-12" />
+                    <Skeleton className="rounded-xl w-full h-96" /> */}
                 </div>
             }
         >

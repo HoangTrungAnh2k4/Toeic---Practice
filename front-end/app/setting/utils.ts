@@ -57,7 +57,7 @@ export const SETTING_GROUPS: SettingGroup[] = [
                 id: 'exam-management',
                 title: 'Quản trị đề thi',
                 description: 'Quản lý kho đề Speaking & Writing, trạng thái thẩm định và xem trước phòng thi.',
-                href: `${SETTING_BASE_PATH}/exam-management`,
+                href: '/exam-management',
                 actionLabel: 'Mở trình quản trị',
                 Icon: LuFileCog,
             },

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { LuCircleAlert, LuSave } from 'react-icons/lu';
-import FormField from '@/app/setting/exam-management/new/_components/FormField';
+import FormField from '@/app/exam-management/new/_components/FormField';
 import Button from '@/components/ui/button';
 import {
     Dialog,

@@ -46,7 +46,7 @@ export default function ExamEditLoader({ id }: { id: string }) {
                 <LuFileX className="size-6 text-sub2" aria-hidden="true" />
                 <h1 className="font-semibold text-main text-base">Không tìm thấy đề thi</h1>
                 <p className="text-subText text-sm">Đề có thể đã bị xoá hoặc đường dẫn không đúng.</p>
-                <Link href="/setting/exam-management" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }))}>
+                <Link href="/exam-management" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }))}>
                     Về kho đề
                 </Link>
             </section>

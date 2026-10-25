@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { REMEMBER_COOKIE, sessionCookieOptions } from '@/lib/supabase-cookies';
 
 /** Route cần đăng nhập. Quyền theo role (admin) kiểm tra tiếp ở layout của route. */
-const PROTECTED = ['/setting/exam-management'];
+const PROTECTED = ['/exam-management'];
 /** Route chỉ dành cho khách: đã đăng nhập thì chuyển thẳng vào /overview. */
 const GUEST_ONLY = ['/login', '/register'];
 /** Phòng thi → kỹ năng của đề (`?id=`). */

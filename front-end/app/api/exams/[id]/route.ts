@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { fromExamFormData } from '@/app/setting/exam-management/_lib/examFormData';
-import { examInfoSchema, examSchema, toKeywordRows } from '@/app/setting/exam-management/_lib/examSchema';
+import { fromExamFormData } from '@/app/exam-management/_lib/examFormData';
+import { examInfoSchema, examSchema, toKeywordRows } from '@/app/exam-management/_lib/examSchema';
 import { getExam, listQuestions } from '@/lib/data/content';
 import { deleteUnusedExamImages, newExamImage, r2PublicBase } from '@/lib/exam-images';
 import { expireExamSummaries } from '@/lib/exam-library/summaries';
