@@ -1,4 +1,4 @@
-import type { LibraryTab, Option, ProgressFilter, TopicFilter } from './types';
+import type { LibraryTab, Option, ProgressFilter } from './types';
 
 export const PAGE_SIZE = 6;
 
@@ -13,15 +13,4 @@ export const STATUS_OPTIONS: Option<ProgressFilter>[] = [
     { value: 'not_started', label: 'Chưa làm' },
     { value: 'in_progress', label: 'Đang làm dở' },
     { value: 'completed', label: 'Đã hoàn thành' },
-];
-
-export const TOPIC_OPTIONS: Option<TopicFilter>[] = [
-    { value: 'all', label: 'Chủ đề: Tất cả lĩnh vực' },
-    { value: 'office', label: 'Workplace & Office' },
-    { value: 'customer', label: 'Customer Service' },
-    { value: 'retail', label: 'Retail & Sales' },
-    { value: 'travel', label: 'Travel & Hospitality' },
-    { value: 'tech', label: 'Technology & Media' },
-    { value: 'logistics', label: 'Logistics & Supply' },
-    { value: 'strategy', label: 'Business Strategy' },
 ];

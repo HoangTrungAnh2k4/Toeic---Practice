@@ -5,6 +5,7 @@ import { examInfoSchema, examSchema, toKeywordRows } from '@/app/setting/exam-ma
 import { getExam, listQuestions } from '@/lib/data/content';
 import { deleteUnusedExamImages, newExamImage, r2PublicBase } from '@/lib/exam-images';
 import { expireExamSummaries } from '@/lib/exam-library/summaries';
+import { logger, serverError } from '@/lib/logger';
 import { deleteR2Object, putR2Object } from '@/lib/r2';
 import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
@@ -42,8 +43,10 @@ export async function PUT(request: Request, { params }: Params) {
 
     const form = await request.formData().catch(() => null);
     const raw = form && fromExamFormData(form);
-    const exam = await getExam(id, supabase).catch(() => undefined);
-    if (exam === undefined) return fail('server_error', 500);
+    const exam = await getExam(id, supabase).catch((error: unknown) =>
+        serverError('update exam: load exam failed', error, { examId: id }),
+    );
+    if (exam instanceof Response) return exam;
     if (!exam) return fail('not_found', 404);
 
     if (form?.get('scope') === 'info') {
@@ -54,6 +57,7 @@ export async function PUT(request: Request, { params }: Params) {
             expireExamSummaries();
             return NextResponse.json({ id });
         }
+        if (!RPC_ERROR[error.code]) logger.error('update exam info: rpc failed', { error, examId: id });
         const [code, status] = RPC_ERROR[error.code] ?? ['server_error', 500];
         return fail(code, status);
     }
@@ -61,9 +65,11 @@ export async function PUT(request: Request, { params }: Params) {
     const parsed = examSchema.safeParse(raw);
     if (!parsed.success || parsed.data.skill !== exam.skill) return fail('invalid_body', 400);
     const base = r2PublicBase();
-    if (!base) return fail('server_error', 500);
-    const current = await listQuestions(id, supabase).catch(() => null);
-    if (!current) return fail('server_error', 500);
+    if (!base) return serverError('update exam: R2_PUBLIC_URL is not set', null);
+    const current = await listQuestions(id, supabase).catch((error: unknown) =>
+        serverError('update exam: load questions failed', error, { examId: id }),
+    );
+    if (current instanceof Response) return current;
     const currentPath = new Map(current.map((question) => [question.number, question.image_path]));
 
     const uploads: { key: string; file: File }[] = [];
@@ -80,7 +86,8 @@ export async function PUT(request: Request, { params }: Params) {
                     return { ...question, image_path: path };
                 }
                 // Client chỉ được giữ ảnh hiện tại của chính câu đó, không trỏ sang ảnh tuỳ ý
-                if (question.image_path && question.image_path !== currentPath.get(question.number)) foreignImage = true;
+                if (question.image_path && question.image_path !== currentPath.get(question.number))
+                    foreignImage = true;
                 return question;
             }),
         })),
@@ -90,6 +97,10 @@ export async function PUT(request: Request, { params }: Params) {
     const removeUploads = () => Promise.allSettled(uploads.map(({ key }) => deleteR2Object(key)));
     const results = await Promise.allSettled(uploads.map(({ key, file }) => putR2Object(key, file)));
     if (results.some((result) => result.status === 'rejected')) {
+        logger.error('update exam: image upload failed', {
+            examId: id,
+            upload: results.flatMap((result) => (result.status === 'rejected' ? [String(result.reason)] : [])),
+        });
         await removeUploads();
         return fail('upload_failed', 502);
     }
@@ -97,6 +108,7 @@ export async function PUT(request: Request, { params }: Params) {
     const { error } = await supabase.rpc('update_exam', { target_exam_id: id, payload });
     if (error) {
         await removeUploads();
+        if (!RPC_ERROR[error.code]) logger.error('update exam: rpc failed', { error, examId: id });
         const [code, status] = RPC_ERROR[error.code] ?? ['server_error', 500];
         return fail(code, status);
     }
@@ -120,13 +132,15 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (opened instanceof Response) return opened;
     const { id, supabase } = opened;
 
-    const questions = await listQuestions(id, supabase).catch(() => null);
-    if (!questions) return fail('server_error', 500);
+    const questions = await listQuestions(id, supabase).catch((error: unknown) =>
+        serverError('delete exam: load questions failed', error, { examId: id }),
+    );
+    if (questions instanceof Response) return questions;
 
     const { data: deleted, error } = await supabase.from('exams').delete().eq('id', id).select('id');
     // 23503: `attempts.exam_id` là `on delete restrict` để giữ lịch sử làm bài
     if (error?.code === '23503') return fail('has_attempts', 409);
-    if (error) return fail('server_error', 500);
+    if (error) return serverError('delete exam failed', error, { examId: id });
     // RLS chặn thì Supabase không báo lỗi, chỉ xoá 0 dòng
     if (deleted.length === 0) return fail('not_found', 404);
     expireExamSummaries();

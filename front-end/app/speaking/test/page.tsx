@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { getExamRoom, parseRoomParams } from '@/lib/exam-library/room';
+import { ArchivedExamNotice } from '@/components/exam-library/archived-exam-notice';
+import { getExamRoom, isRoomClosed, parseRoomParams } from '@/lib/exam-library/room';
 import { RawSearchParams } from '@/lib/exam-library/search-params';
 import { createServerSupabase } from '@/lib/supabase-server';
 import SpeakingExamRoom from './_components/SpeakingExamRoom';
@@ -18,8 +19,10 @@ async function SpeakingExamRoomContent({ searchParams }: SpeakingTestPageProps) 
     const { examId, mode } = parseRoomParams(await searchParams);
     if (!examId) redirect('/speaking');
 
-    const room = await getExamRoom('speaking', examId, await createServerSupabase());
+    const db = await createServerSupabase();
+    const room = await getExamRoom('speaking', examId, db);
     if (!room || room.parts.every((part) => part.questions.length === 0)) notFound();
+    if (await isRoomClosed(room.exam, null, db)) return <ArchivedExamNotice skill="speaking" />;
 
     return <SpeakingExamRoom exam={room.exam} parts={room.parts} mode={mode} />;
 }

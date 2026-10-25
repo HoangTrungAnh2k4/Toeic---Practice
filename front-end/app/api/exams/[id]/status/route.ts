@@ -1,13 +1,19 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { canChangeStatus, findPublishIssues, MAX_NOTE_LENGTH, needsNote } from '@/app/setting/exam-management/_lib/examStatus';
+import {
+    canChangeStatus,
+    findPublishIssues,
+    MAX_NOTE_LENGTH,
+    needsNote,
+} from '@/app/setting/exam-management/_lib/examStatus';
 import { getExam } from '@/lib/data/content';
 import { getExamRoom } from '@/lib/exam-library/room';
 import { expireExamSummaries } from '@/lib/exam-library/summaries';
+import { serverError } from '@/lib/logger';
 import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
 const bodySchema = z.object({
-    status: z.enum(['draft', 'review', 'published']),
+    status: z.enum(['draft', 'review', 'published', 'archived']),
     note: z.string().trim().max(MAX_NOTE_LENGTH).optional(),
 });
 
@@ -30,15 +36,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (!body.success) return fail('invalid_body', 400);
     const { status, note } = body.data;
 
-    const exam = await getExam(id.data, supabase).catch(() => undefined);
-    if (exam === undefined) return fail('server_error', 500);
+    const exam = await getExam(id.data, supabase).catch((error: unknown) =>
+        serverError('exam status: load exam failed', error, { examId: id.data }),
+    );
+    if (exam instanceof Response) return exam;
     if (!exam) return fail('not_found', 404);
-    if (!canChangeStatus(exam.status, status)) return fail('invalid_transition', 409);
+    // `exam_stats` chỉ trả dòng cho admin; không có dòng = chưa ai làm
+    const { data: stats, error: statsError } = await supabase
+        .from('exam_stats')
+        .select('attempt_count')
+        .eq('exam_id', exam.id)
+        .maybeSingle();
+    if (statsError) return serverError('exam status: load stats failed', statsError, { examId: exam.id });
+    if (!canChangeStatus(exam.status, status, stats?.attempt_count ?? 0)) return fail('invalid_transition', 409);
     if (needsNote(status) && !note) return fail('note_required', 400);
 
     if (status === 'published') {
-        const room = await getExamRoom(exam.skill, exam.id, supabase).catch(() => null);
-        if (!room) return fail('server_error', 500);
+        const room = await getExamRoom(exam.skill, exam.id, supabase).catch((error: unknown) =>
+            serverError('exam status: load exam room failed', error, { examId: exam.id }),
+        );
+        if (room instanceof Response) return room;
+        if (!room) return serverError('exam status: exam room not found', null, { examId: exam.id });
         const issues = findPublishIssues(exam.skill, room.parts);
         if (issues.length > 0) return fail('incomplete', 422, { issues });
     }
@@ -48,7 +66,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         .update({ status, review_note: needsNote(status) ? note : null })
         .eq('id', exam.id)
         .select('id');
-    if (error) return fail('server_error', 500);
+    if (error) return serverError('exam status: update failed', error, { examId: exam.id, status });
     if (data.length === 0) return fail('not_found', 404);
     expireExamSummaries();
     return NextResponse.json({ status });

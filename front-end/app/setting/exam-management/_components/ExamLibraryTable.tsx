@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LuBadgeCheck, LuClock3, LuEllipsisVertical, LuEye, LuInbox, LuPencil, LuSearchX, LuTrash2, LuTriangleAlert } from 'react-icons/lu';
+import { LuBadgeCheck, LuClock3, LuCopy, LuEllipsisVertical, LuEye, LuInbox, LuPencil, LuSearchX, LuTrash2, LuTriangleAlert } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -22,6 +22,7 @@ interface ExamLibraryTableProps {
     exams: ExamLibraryItem[];
     totalCount: number;
     onDelete: (exam: ExamLibraryItem) => void;
+    onDuplicate: (exam: ExamLibraryItem) => void;
     onChangeStatus: (exam: ExamLibraryItem, status: ExamStatus) => void;
     onResetFilters: () => void;
 }
@@ -73,7 +74,14 @@ function EmptyRow({ isLibraryEmpty, onResetFilters }: { isLibraryEmpty: boolean;
     );
 }
 
-export default function ExamLibraryTable({ exams, totalCount, onDelete, onChangeStatus, onResetFilters }: ExamLibraryTableProps) {
+export default function ExamLibraryTable({
+    exams,
+    totalCount,
+    onDelete,
+    onDuplicate,
+    onChangeStatus,
+    onResetFilters,
+}: ExamLibraryTableProps) {
     return (
         <div className="flex flex-col bg-white shadow-sm border border-sub2/30 rounded-xl overflow-hidden">
             <Table>
@@ -100,6 +108,7 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onChange
                         exams.map((exam) => {
                             const skill = SKILL_STYLE[exam.skill];
                             const status = STATUS_STYLE[exam.status];
+                            const attempts = exam.stats?.attempt_count ?? 0;
 
                             return (
                                 <TableRow key={exam.id} className="hover:bg-sub1/50 border-sub2/20 transition-colors">
@@ -160,7 +169,7 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onChange
                                     <TableCell className="px-3 py-4">
                                         <div className="flex flex-col gap-0.5">
                                             <span className="font-semibold tabular-nums text-main">
-                                                {formatCount(exam.stats?.attempt_count ?? 0)} lượt
+                                                {formatCount(attempts)} lượt
                                             </span>
                                             <span className="tabular-nums text-subText">
                                                 {exam.stats
@@ -206,10 +215,14 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onChange
                                                             <LuPencil aria-hidden="true" />
                                                             Sửa đề
                                                         </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => onDuplicate(exam)}>
+                                                            <LuCopy aria-hidden="true" />
+                                                            Nhân bản đề
+                                                        </DropdownMenuItem>
                                                     </DropdownMenuGroup>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuGroup>
-                                                        {getNextStatuses(exam.status).map((next) => {
+                                                        {getNextStatuses(exam.status, attempts).map((next) => {
                                                             const action = STATUS_ACTION[next];
                                                             return (
                                                                 <DropdownMenuItem key={next} onClick={() => onChangeStatus(exam, next)}>
@@ -224,11 +237,17 @@ export default function ExamLibraryTable({ exams, totalCount, onDelete, onChange
                                             <button
                                                 type="button"
                                                 onClick={() => onDelete(exam)}
+                                                disabled={attempts > 0}
                                                 aria-label={`Xóa ${exam.title}`}
-                                                title="Xóa đề thi"
+                                                title={
+                                                    attempts > 0
+                                                        ? 'Đề đã có lượt thi nên không xóa được. Dùng Lưu trữ để gỡ đề khỏi Thư viện.'
+                                                        : 'Xóa đề thi'
+                                                }
                                                 className={cn(
                                                     ICON_ACTION_CLASS,
                                                     'border-destructive/30 text-destructive hover:bg-destructive hover:text-white',
+                                                    'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-destructive',
                                                 )}
                                             >
                                                 <LuTrash2 className="size-4" aria-hidden="true" />

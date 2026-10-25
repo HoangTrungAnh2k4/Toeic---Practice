@@ -73,13 +73,12 @@ export function countTabs(entries: LibraryEntry[]): Record<LibraryTab, number> {
     };
 }
 
-export function filterEntries(entries: LibraryEntry[], { tab, searchQuery, status, topic }: LibraryQuery) {
+export function filterEntries(entries: LibraryEntry[], { tab, searchQuery, status }: LibraryQuery) {
     const keyword = searchQuery.trim().toLowerCase();
 
     return entries.filter(({ exam, user }) => {
         if (!TAB_MATCHERS[tab]({ exam, user })) return false;
         if (status !== 'all' && user.progress !== status) return false;
-        if (topic !== 'all' && exam.topic !== topic) return false;
         if (!keyword) return true;
         return [exam.code, exam.title].some((field) => field.toLowerCase().includes(keyword));
     });

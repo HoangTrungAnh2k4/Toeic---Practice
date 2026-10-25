@@ -155,14 +155,14 @@ isOneToOne: false
                   ]
                 },"exams": {
                   Row: {
-                    "code": string,"created_at": string,"created_by": string | null,"id": string,"is_verified": boolean,"published_at": string | null,"review_note": string | null,"skill": Database["public"]['Enums']["skill"],"source": Database["public"]['Enums']["exam_source"],"status": Database["public"]['Enums']["exam_status"],"title": string,"topic": string,"updated_at": string
+                    "code": string,"created_at": string,"created_by": string | null,"id": string,"is_verified": boolean,"published_at": string | null,"review_note": string | null,"skill": Database["public"]['Enums']["skill"],"source": Database["public"]['Enums']["exam_source"],"status": Database["public"]['Enums']["exam_status"],"title": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "code": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill": Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"title": string,"topic": string,"updated_at"?: string
+                    "code": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill": Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"title": string,"updated_at"?: string
                   }
                   Update: {
-                    "code"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill"?: Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"title"?: string,"topic"?: string,"updated_at"?: string
+                    "code"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_verified"?: boolean,"published_at"?: string | null,"review_note"?: string | null,"skill"?: Database["public"]['Enums']["skill"],"source"?: Database["public"]['Enums']["exam_source"],"status"?: Database["public"]['Enums']["exam_status"],"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -408,6 +408,9 @@ isOneToOne: false
 "create_study_plan":
 { Args: { "payload": Json }; Returns: string
                            },
+"duplicate_exam":
+{ Args: { "source_exam_id": string }; Returns: string
+                           },
 "refund_scoring_quota":
 { Args: { "p_subject": string }; Returns: undefined
                            },
@@ -416,7 +419,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support"|"fluency"|"task_response","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published","plan_status": "active"|"archived","plan_task_kind": "speaking"|"writing"|"review"|"mock"|"summary","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
+            "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support"|"fluency"|"task_response","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published"|"archived","plan_status": "active"|"archived","plan_task_kind": "speaking"|"writing"|"review"|"mock"|"summary","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -536,7 +539,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "attempt_mode": ["cbt", "timed", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support", "fluency", "task_response"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published"],"plan_status": ["active", "archived"],"plan_task_kind": ["speaking", "writing", "review", "mock", "summary"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
+            "attempt_mode": ["cbt", "timed", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support", "fluency", "task_response"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published", "archived"],"plan_status": ["active", "archived"],"plan_task_kind": ["speaking", "writing", "review", "mock", "summary"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
           }
         }
 } as const

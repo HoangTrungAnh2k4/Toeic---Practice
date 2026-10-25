@@ -34,10 +34,11 @@ function describe(exam: ExamLibraryItem, target: ExamStatus) {
     if (target === 'published') {
         return 'Hệ thống kiểm tra đề đủ dữ liệu rồi mở đề trong Thư viện cho mọi người học.';
     }
-    const attempts = exam.stats?.attempt_count ?? 0;
-    return exam.status === 'published' && attempts > 0
-        ? `Đề bị gỡ khỏi Thư viện. ${formatCount(attempts)} lượt làm của đề này cũng sẽ ẩn khỏi Lịch sử của người học cho tới khi phát hành lại.`
-        : 'Đề quay về Bản nháp để sửa. Ghi rõ lý do để người sửa biết cần sửa gì.';
+    if (target === 'archived') {
+        const attempts = formatCount(exam.stats?.attempt_count ?? 0);
+        return `Đề bị gỡ khỏi Thư viện, không ai bắt đầu lượt mới được. ${attempts} lượt làm vẫn giữ trong Lịch sử của người học, lượt đang làm dở vẫn làm nốt được.`;
+    }
+    return 'Đề quay về Bản nháp để sửa. Ghi rõ lý do để người sửa biết cần sửa gì.';
 }
 
 /** Xác nhận chuyển trạng thái; giữ dialog mở khi lỗi để hiện danh sách câu còn thiếu. */

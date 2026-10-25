@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
+import { logger } from '@/lib/logger';
 import { deleteR2Object } from '@/lib/r2';
 
 /** Ảnh đề trên R2 (chỉ dùng phía server): tải lên khi tạo/sửa đề, dọn khi xoá hoặc thay ảnh. */
@@ -24,13 +25,15 @@ export function newExamImage(base: string, file: File) {
 export async function deleteUnusedExamImages(db: SupabaseClient<Database>, paths: (string | null)[], examId: string) {
     const base = r2PublicBase();
     if (!base) return;
-    const candidates = [...new Set(paths.filter((path): path is string => Boolean(path?.startsWith(`${base}/${EXAM_IMAGE_DIR}/`))))];
+    const candidates = [
+        ...new Set(paths.filter((path): path is string => Boolean(path?.startsWith(`${base}/${EXAM_IMAGE_DIR}/`)))),
+    ];
     if (candidates.length === 0) return;
 
     // Không xoá ảnh câu khác còn dùng (vd. đề nhập tay trỏ chung URL); không kiểm tra được thì không xoá
     const { data: shared, error } = await db.from('questions').select('image_path').in('image_path', candidates);
     if (error) {
-        console.error('exam images left behind on R2', { examId, paths: candidates });
+        logger.error('exam images left behind on R2', { error, examId, paths: candidates });
         return;
     }
     const keys = candidates
@@ -38,5 +41,5 @@ export async function deleteUnusedExamImages(db: SupabaseClient<Database>, paths
         .map((path) => path.slice(base.length + 1));
     const results = await Promise.allSettled(keys.map((key) => deleteR2Object(key)));
     const failed = keys.filter((_, index) => results[index].status === 'rejected');
-    if (failed.length > 0) console.error('exam images left behind on R2', { examId, keys: failed });
+    if (failed.length > 0) logger.error('exam images left behind on R2', { examId, keys: failed });
 }

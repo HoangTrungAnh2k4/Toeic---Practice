@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { fromExamFormData } from '@/app/setting/exam-management/_lib/examFormData';
 import { examSchema, toKeywordRows } from '@/app/setting/exam-management/_lib/examSchema';
 import { newExamImage, r2PublicBase } from '@/lib/exam-images';
+import { logger, serverError } from '@/lib/logger';
 import { deleteR2Object, putR2Object } from '@/lib/r2';
 import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     if (!exam.success) return fail('invalid_body', 400);
 
     const publicBase = r2PublicBase();
-    if (!publicBase) return fail('server_error', 500);
+    if (!publicBase) return serverError('create exam: R2_PUBLIC_URL is not set', null);
 
     const uploads: { key: string; file: File }[] = [];
     const payload = {
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
 
     const { data: examId, error } = await supabase.rpc('create_exam', { payload });
     if (error) {
+        if (!RPC_ERROR[error.code]) logger.error('create exam: rpc failed', { error });
         const [code, status] = RPC_ERROR[error.code] ?? ['server_error', 500];
         return fail(code, status);
     }
@@ -58,7 +60,7 @@ export async function POST(request: Request) {
     // Hoàn tác: xoá cả key chưa lên (R2 trả 204), rồi xoá đề; part/câu hỏi xoá theo cascade
     const cleanup = await Promise.allSettled(uploads.map(({ key }) => deleteR2Object(key)));
     const { error: deleteError } = await supabase.from('exams').delete().eq('id', examId);
-    console.error('create exam: image upload failed, rolled back', {
+    logger.error('create exam: image upload failed, rolled back', {
         examId,
         upload: results.flatMap((result) => (result.status === 'rejected' ? [String(result.reason)] : [])),
         cleanup: cleanup.flatMap((result) => (result.status === 'rejected' ? [String(result.reason)] : [])),

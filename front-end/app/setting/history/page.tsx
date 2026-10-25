@@ -15,8 +15,8 @@ interface HistoryPageProps {
 }
 
 export default async function HistoryPage({ searchParams }: HistoryPageProps) {
-    // Chỉ đề published (RLS): lượt làm của đề bị trả về nháp tạm ẩn, phát hành lại thì hiện lại.
-    // Đề đã có lượt làm bị khoá nội dung (RPC update_exam) nên lượt cũ vẫn khớp đề khi hiện lại.
+    // Đề published và archived (RLS): lượt làm của đề nháp tạm ẩn (đề có lượt làm không trả về nháp được nữa,
+    // chỉ còn dữ liệu cũ). Đề có lượt làm bị khoá nội dung (RPC update_exam) nên lượt cũ luôn khớp đề.
     const exams = await getExamSummaries();
 
     return (

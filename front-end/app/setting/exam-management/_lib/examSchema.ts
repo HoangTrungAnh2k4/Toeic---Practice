@@ -2,9 +2,6 @@ import { z } from 'zod';
 import { getPartTemplates } from '@/lib/domain/parts';
 import type { Skill } from '@/lib/domain/types';
 import type { ExamRoom } from '@/lib/exam-library/room';
-import type { Topic } from '@/lib/exam-library/types';
-
-const TOPICS = ['office', 'customer', 'retail', 'travel', 'tech', 'logistics', 'strategy'] as const satisfies readonly Topic[];
 
 /** Ô nhập riêng theo Part: yêu cầu từng câu, ảnh, ngữ liệu chung của Part, email riêng từng câu, từ khoá bắt buộc. */
 export interface PartFields {
@@ -84,7 +81,6 @@ const partSchema = z.object({
 /** Thông tin chung: đề đã có lượt làm chỉ sửa được phần này. */
 export const examInfoSchema = z.object({
     title: requiredText('Vui lòng nhập tiêu đề', 150),
-    topic: z.enum(TOPICS, 'Vui lòng chọn chủ đề'),
 });
 
 export const examSchema = examInfoSchema
@@ -171,7 +167,6 @@ export function emptyExam(skill: Skill): ExamInput {
     return {
         skill,
         title: '',
-        topic: 'office',
         parts: getPartTemplates(skill).map((template) => ({
             part_template_id: template.id,
             context: '',
@@ -195,7 +190,6 @@ export function examToFormValues({ exam, parts }: ExamRoom): ExamInput {
     return {
         ...empty,
         title: exam.title,
-        topic: TOPICS.find((topic) => topic === exam.topic) ?? empty.topic,
         parts: empty.parts.map((part) => {
             const source = parts.find((item) => item.template.id === part.part_template_id);
             return {

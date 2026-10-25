@@ -13,6 +13,7 @@ export const STATUS_FILTER_OPTIONS: Option<StatusFilter>[] = [
     { value: 'published', label: 'Đang khả dụng' },
     { value: 'review', label: 'Chờ thẩm định' },
     { value: 'draft', label: 'Bản nháp' },
+    { value: 'archived', label: 'Đã lưu trữ' },
 ];
 
 export const SOURCE_FILTER_OPTIONS: Option<SourceFilter>[] = [

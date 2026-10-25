@@ -10,7 +10,7 @@ export type UserRole = 'student' | 'admin';
 
 export type ExamSource = 'ets' | 'internal';
 
-export type ExamStatus = 'draft' | 'review' | 'published';
+export type ExamStatus = 'draft' | 'review' | 'published' | 'archived';
 
 export type AttemptMode = 'cbt' | 'timed' | 'guided';
 
@@ -75,7 +75,6 @@ export interface Exam {
     source: ExamSource;
     status: ExamStatus;
     is_verified: boolean;
-    topic: string;
     /** Ghi chú thẩm định cho admin: thiếu ảnh, cần kiểm tra audio... */
     review_note: string | null;
     created_by: string | null;

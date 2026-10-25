@@ -14,7 +14,7 @@ export async function getExamLibrary(): Promise<ExamLibraryItem[]> {
 
 /** Mã lỗi từ `DELETE /api/exams/[id]` → thông báo cho admin. */
 const DELETE_ERROR: Record<string, string> = {
-    has_attempts: 'Đề đã có lượt thi nên không thể xóa. Hãy chuyển về nháp để ẩn đề.',
+    has_attempts: 'Đề đã có lượt thi nên không thể xóa. Hãy lưu trữ để gỡ đề khỏi Thư viện.',
     not_found: 'Không xóa được đề: đề không còn tồn tại hoặc bạn không có quyền.',
     unauthorized: 'Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.',
 };
@@ -29,14 +29,29 @@ export async function deleteExam(id: string): Promise<string | null> {
 
 /** Mã lỗi từ `POST /api/exams/[id]/status` → thông báo cho admin. */
 const STATUS_ERROR: Record<string, string> = {
-    invalid_transition: 'Trạng thái đề đã thay đổi. Vui lòng tải lại trang.',
+    invalid_transition: 'Trạng thái hoặc lượt thi của đề đã thay đổi. Vui lòng tải lại trang.',
     note_required: 'Vui lòng ghi lý do trả về nháp.',
     incomplete: 'Đề còn thiếu dữ liệu nên chưa phát hành được:',
     not_found: 'Không tìm thấy đề hoặc bạn không có quyền.',
     unauthorized: 'Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.',
 };
 
-export type StatusChangeResult = { ok: true } | { ok: false; message: string; issues: string[] };
+/** Mã lỗi từ `POST /api/exams/[id]/duplicate` → thông báo cho admin. */
+const DUPLICATE_ERROR: Record<string, string> = {
+    not_found: 'Không nhân bản được: đề không còn tồn tại hoặc bạn không có quyền.',
+    forbidden: 'Tài khoản của bạn không có quyền nhân bản đề.',
+    unauthorized: 'Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.',
+};
+
+/** Nhân bản đề thành bản nháp mới; trả về id bản nháp, hoặc thông báo lỗi. */
+export async function duplicateExam(id: string): Promise<{ id: string } | { error: string }> {
+    const response = await fetch(`/api/exams/${id}/duplicate`, { method: 'POST' }).catch(() => null);
+    const body = await response?.json().catch(() => null);
+    if (response?.ok && typeof body?.id === 'string') return { id: body.id };
+    return { error: DUPLICATE_ERROR[body?.error] ?? 'Không nhân bản được đề. Vui lòng thử lại.' };
+}
+
+export type StatusChangeResult ={ ok: true } | { ok: false; message: string; issues: string[] };
 
 /** Chuyển trạng thái đề; phát hành bị chặn thì `issues` liệt kê câu còn thiếu. */
 export async function changeExamStatus(id: string, status: ExamStatus, note?: string): Promise<StatusChangeResult> {

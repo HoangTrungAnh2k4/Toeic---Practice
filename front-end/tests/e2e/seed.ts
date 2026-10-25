@@ -31,9 +31,6 @@ export const IDS = {
     },
 };
 
-/** Chủ đề của 6 đề Speaking published, theo thứ tự IDS.speaking.published. */
-export const SPEAKING_TOPICS = ['office', 'customer', 'retail', 'travel', 'tech', 'logistics'] as const;
-
 export function env(name: string): string {
     const value = process.env[name];
     if (!value) throw new Error(`Thiếu ${name} trong .env.test`);
@@ -89,7 +86,14 @@ export async function createUser(
         email = `u-${crypto.randomUUID().slice(0, 12)}@${E2E_DOMAIN}`,
         password = `E2e-${crypto.randomUUID().slice(0, 10)}1`,
         confirmed = true,
-    }: { id?: string; role?: 'student' | 'admin'; name?: string; email?: string; password?: string; confirmed?: boolean } = {},
+    }: {
+        id?: string;
+        role?: 'student' | 'admin';
+        name?: string;
+        email?: string;
+        password?: string;
+        confirmed?: boolean;
+    } = {},
 ): Promise<TestUser> {
     const { data, error } = await db.auth.admin.createUser({
         ...(id && { id }),
@@ -107,20 +111,37 @@ const SPEAKING_PARTS = [
     {
         template: 1,
         questions: [
-            { number: 1, prompt: 'Thank you for calling Greenfield Bank. Our offices are open from nine to five, Monday through Friday.' },
-            { number: 2, prompt: 'Welcome to the city museum. Today we will visit the history hall, the art gallery, and the garden.' },
+            {
+                number: 1,
+                prompt: 'Thank you for calling Greenfield Bank. Our offices are open from nine to five, Monday through Friday.',
+            },
+            {
+                number: 2,
+                prompt: 'Welcome to the city museum. Today we will visit the history hall, the art gallery, and the garden.',
+            },
         ],
     },
     {
         template: 2,
         questions: [
-            { number: 3, prompt: 'Describe the picture in as much detail as you can.', image_path: '/img/banner.png', image_alt: 'Four people are talking in a meeting room.' },
-            { number: 4, prompt: 'Describe the picture in as much detail as you can.', image_path: '/img/banner.png', image_alt: 'A woman is working on a laptop at her desk.' },
+            {
+                number: 3,
+                prompt: 'Describe the picture in as much detail as you can.',
+                image_path: '/img/banner.png',
+                image_alt: 'Four people are talking in a meeting room.',
+            },
+            {
+                number: 4,
+                prompt: 'Describe the picture in as much detail as you can.',
+                image_path: '/img/banner.png',
+                image_alt: 'A woman is working on a laptop at her desk.',
+            },
         ],
     },
     {
         template: 3,
-        context: 'Imagine that a marketing firm is doing research in your country. You have agreed to a telephone interview about coffee shops.',
+        context:
+            'Imagine that a marketing firm is doing research in your country. You have agreed to a telephone interview about coffee shops.',
         questions: [
             { number: 5, prompt: 'How often do you go to a coffee shop?' },
             { number: 6, prompt: 'What do you usually order?' },
@@ -129,7 +150,8 @@ const SPEAKING_PARTS = [
     },
     {
         template: 4,
-        context: 'Annual Sales Conference, Grand Hotel\n9:00 Welcome speech\n10:00 Market trends\n12:00 Lunch\n14:00 Workshop: Online sales',
+        context:
+            'Annual Sales Conference, Grand Hotel\n9:00 Welcome speech\n10:00 Market trends\n12:00 Lunch\n14:00 Workshop: Online sales',
         questions: [
             { number: 8, prompt: 'What time does the conference start, and where is it held?' },
             { number: 9, prompt: 'I heard there is a workshop in the morning. Is that right?' },
@@ -138,7 +160,12 @@ const SPEAKING_PARTS = [
     },
     {
         template: 5,
-        questions: [{ number: 11, prompt: 'Do you agree that employees should be allowed to work from home? Give reasons and examples.' }],
+        questions: [
+            {
+                number: 11,
+                prompt: 'Do you agree that employees should be allowed to work from home? Give reasons and examples.',
+            },
+        ],
     },
 ];
 
@@ -174,7 +201,12 @@ const WRITING_PARTS = [
     },
     {
         template: 8,
-        questions: [{ number: 8, prompt: 'Do you agree or disagree: it is better to work for a large company than a small one? Give reasons or examples.' }],
+        questions: [
+            {
+                number: 8,
+                prompt: 'Do you agree or disagree: it is better to work for a large company than a small one? Give reasons or examples.',
+            },
+        ],
     },
 ];
 
@@ -197,7 +229,6 @@ export async function createExam(
         skill,
         status,
         title,
-        topic = 'office',
         createdBy = IDS.admin,
         omit,
     }: {
@@ -205,7 +236,6 @@ export async function createExam(
         skill: Skill;
         status: ExamStatus;
         title: string;
-        topic?: string;
         createdBy?: string;
         omit?: { number: number; field: 'image_path' | 'image_alt' | 'prompt' };
     },
@@ -218,7 +248,6 @@ export async function createExam(
                 skill,
                 code: 'E2E',
                 title,
-                topic,
                 status,
                 created_by: createdBy,
                 published_at: status === 'published' ? new Date().toISOString() : null,
@@ -230,7 +259,11 @@ export async function createExam(
         const [row] = await must(
             db
                 .from('exam_parts')
-                .insert({ exam_id: exam.id, part_template_id: part.template, context: (part as { context?: string }).context ?? null })
+                .insert({
+                    exam_id: exam.id,
+                    part_template_id: part.template,
+                    context: (part as { context?: string }).context ?? null,
+                })
                 .select('id'),
         );
         const rows = part.questions.map((question) => {
@@ -271,15 +304,36 @@ async function wipe(db: Db) {
 
 export async function seed(db = adminDb()) {
     await wipe(db);
-    await createUser(db, { id: IDS.student, email: env('E2E_STUDENT_EMAIL'), password: env('E2E_STUDENT_PASSWORD'), name: 'Học Viên E2E' });
-    await createUser(db, { id: IDS.admin, role: 'admin', email: env('E2E_ADMIN_EMAIL'), password: env('E2E_ADMIN_PASSWORD'), name: 'Quản Trị E2E' });
+    await createUser(db, {
+        id: IDS.student,
+        email: env('E2E_STUDENT_EMAIL'),
+        password: env('E2E_STUDENT_PASSWORD'),
+        name: 'Học Viên E2E',
+    });
+    await createUser(db, {
+        id: IDS.admin,
+        role: 'admin',
+        email: env('E2E_ADMIN_EMAIL'),
+        password: env('E2E_ADMIN_PASSWORD'),
+        name: 'Quản Trị E2E',
+    });
     const admin = await adminSessionDb();
 
     for (const [index, id] of IDS.speaking.published.entries()) {
-        await createExam(admin, { id, skill: 'speaking', status: 'published', title: `E2E Speaking ${index + 1}`, topic: SPEAKING_TOPICS[index] });
+        await createExam(admin, {
+            id,
+            skill: 'speaking',
+            status: 'published',
+            title: `E2E Speaking ${index + 1}`,
+        });
     }
     await createExam(admin, { id: IDS.speaking.draft, skill: 'speaking', status: 'draft', title: 'E2E Speaking Nháp' });
-    await createExam(admin, { id: IDS.speaking.review, skill: 'speaking', status: 'review', title: 'E2E Speaking Chờ duyệt' });
+    await createExam(admin, {
+        id: IDS.speaking.review,
+        skill: 'speaking',
+        status: 'review',
+        title: 'E2E Speaking Chờ duyệt',
+    });
     for (const [index, id] of IDS.writing.published.entries()) {
         await createExam(admin, { id, skill: 'writing', status: 'published', title: `E2E Writing ${index + 1}` });
     }

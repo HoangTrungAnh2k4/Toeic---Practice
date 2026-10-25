@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import type { Database } from '@/lib/database.types';
+import { logger, serverError } from '@/lib/logger';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
 import type { MistakePattern, RequiredKeyword } from '@/lib/domain/types';
 import { ProviderQuotaError } from '@/lib/scoring/errors';
@@ -43,7 +44,9 @@ const statusOf = (error: ScoreError | null) => (error === null ? 200 : error ===
 async function loadQuestions(supabase: SupabaseClient<Database>, examId: string, partTemplateId: number) {
     const { data, error } = await supabase
         .from('questions')
-        .select('id, number, prompt, stimulus, image_alt, keywords, exam_parts!inner(exam_id, part_template_id, context)')
+        .select(
+            'id, number, prompt, stimulus, image_alt, keywords, exam_parts!inner(exam_id, part_template_id, context)',
+        )
         .eq('exam_parts.exam_id', examId)
         .eq('exam_parts.part_template_id', partTemplateId)
         .order('number');
@@ -74,7 +77,7 @@ function scoreAll(
             } catch (error) {
                 if (answer.trim()) await quota.refund();
                 if (error instanceof ProviderQuotaError) return { questionId: question.id, error: 'provider_limit' };
-                console.error('Writing scoring failed', error);
+                logger.error('writing score: question failed', { error, questionId: question.id });
                 return { questionId: question.id, error: 'scoring_failed' };
             }
         }),
@@ -101,15 +104,17 @@ export async function POST(request: Request) {
         const loaded = await Promise.all([
             loadQuestions(supabase, examId, partTemplateId),
             listMistakePatterns(),
-        ]).catch(() => null);
-        if (!loaded) return fail('server_error', 500);
+        ]).catch((error: unknown) => serverError('writing score: load questions failed', error, { examId }));
+        if (loaded instanceof Response) return loaded;
         const [questions, patterns] = loaded;
         const asked = questions.filter((question) => answers.some((answer) => answer.questionId === question.id));
         if (asked.length !== answers.length) return fail('question_not_found', 404);
 
         const texts = new Map(answers.map((answer) => [answer.questionId, answer.text]));
-        const outcomes = await scoreAll(asked, texts, writingPatternsFor(patterns, partTemplateId), quota).catch(() => null);
-        if (!outcomes) return fail('server_error', 500);
+        const outcomes = await scoreAll(asked, texts, writingPatternsFor(patterns, partTemplateId), quota).catch(
+            (error: unknown) => serverError('writing score: guest scoring failed', error, { examId }),
+        );
+        if (outcomes instanceof Response) return outcomes;
         return NextResponse.json({ outcomes }, { status: statusOf(firstError(outcomes)) });
     }
 
@@ -129,7 +134,7 @@ export async function POST(request: Request) {
         .or(`status.eq.submitted,and(status.eq.scoring,scoring_started_at.lt.${staleBefore})`)
         .select('exam_id, part_template_id')
         .maybeSingle();
-    if (claimError) return fail('server_error', 500);
+    if (claimError) return serverError('writing score: claim attempt failed', claimError, { attemptId });
     if (!attempt?.part_template_id) return fail('attempt_not_scorable', 409);
 
     const release = (scoringError: string) =>
@@ -149,9 +154,16 @@ export async function POST(request: Request) {
 
         // Chấm lại chỉ chấm câu chưa có điểm
         const scored = responses.data.filter((response) => response.score !== null);
-        const pending = questions.filter((question) => !scored.some((response) => response.question_id === question.id));
+        const pending = questions.filter(
+            (question) => !scored.some((response) => response.question_id === question.id),
+        );
         const answers = new Map(responses.data.map((response) => [response.question_id, response.text_answer ?? '']));
-        const outcomes = await scoreAll(pending, answers, writingPatternsFor(patterns, attempt.part_template_id), quota);
+        const outcomes = await scoreAll(
+            pending,
+            answers,
+            writingPatternsFor(patterns, attempt.part_template_id),
+            quota,
+        );
         const results = outcomes.flatMap((outcome) => ('result' in outcome ? [outcome] : []));
 
         if (results.length > 0) {
@@ -184,7 +196,16 @@ export async function POST(request: Request) {
                 const responseId = saved.find((response) => response.question_id === questionId)?.id;
                 if (!responseId) return [];
                 return result.annotations.map(
-                    ({ quote, correction, explanation, criterion, severity, mistake_pattern_id, start_offset, end_offset }) => ({
+                    ({
+                        quote,
+                        correction,
+                        explanation,
+                        criterion,
+                        severity,
+                        mistake_pattern_id,
+                        start_offset,
+                        end_offset,
+                    }) => ({
                         response_id: responseId,
                         quote,
                         correction,
@@ -229,7 +250,7 @@ export async function POST(request: Request) {
         if (updateError) throw updateError;
         return NextResponse.json({ status: 'scored', score: summary.score });
     } catch (error) {
-        console.error('Writing scoring failed', error);
+        logger.error('writing score: attempt failed', { error, attemptId });
         await release(SCORE_ERROR_MESSAGE.scoring_failed);
         return fail('server_error', 500);
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
+import { logger, serverError } from '@/lib/logger';
 import { ProviderQuotaError } from '@/lib/scoring/errors';
 import { scoringQuota } from '@/lib/scoring/quota';
 import { InvalidAudioError, scoreAnswer } from '@/lib/scoring/score';
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
         .select('number, prompt, image_alt, exam_parts!inner(exam_id, context, part_template_id)')
         .eq('id', questionId)
         .maybeSingle();
-    if (questionError) return fail('server_error', 500);
+    if (questionError) return serverError('speaking score: load question failed', questionError, { questionId });
     const template = PART_TEMPLATES.find((item) => item.id === question?.exam_parts.part_template_id);
     if (!question || template?.skill !== 'speaking') return fail('question_not_found', 404);
 
@@ -50,13 +51,15 @@ export async function POST(request: Request) {
             .eq('exam_id', question.exam_parts.exam_id)
             .eq('status', 'in_progress')
             .maybeSingle();
-        if (error) return fail('server_error', 500);
+        if (error) return serverError('speaking score: load attempt failed', error, { attemptId });
         if (!attempt) return fail('attempt_not_found', 404);
     }
 
     const quota = scoringQuota(request, userId);
-    const allowed = await quota.consume().catch(() => null);
-    if (allowed === null) return fail('server_error', 500);
+    const allowed = await quota
+        .consume()
+        .catch((error: unknown) => serverError('speaking score: consume quota failed', error));
+    if (allowed instanceof Response) return allowed;
     if (!allowed) return fail('daily_limit', 429);
     const refund = async (error: string, status: number) => {
         await quota.refund();
@@ -79,15 +82,21 @@ export async function POST(request: Request) {
     } catch (error) {
         if (error instanceof InvalidAudioError) return refund('invalid_audio', 400);
         if (error instanceof ProviderQuotaError) return refund('provider_limit', 429);
-        console.error('Speaking scoring failed', error);
+        logger.error('speaking score: scoring failed', { error, questionId });
         return refund('scoring_failed', 502);
     }
 
     if (userId) {
         const { error } = await createAdminSupabase()
             .from('responses')
-            .upsert({ attempt_id: attemptId, question_id: questionId, ...result }, { onConflict: 'attempt_id,question_id' });
-        if (error) return refund('server_error', 500);
+            .upsert(
+                { attempt_id: attemptId, question_id: questionId, ...result },
+                { onConflict: 'attempt_id,question_id' },
+            );
+        if (error) {
+            logger.error('speaking score: save response failed', { error, attemptId, questionId });
+            return refund('server_error', 500);
+        }
     }
     return NextResponse.json(result);
 }

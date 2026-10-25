@@ -1,9 +1,10 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { LuDownload, LuPlus } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
-import { deleteExam } from '../_lib/data';
+import { deleteExam, duplicateExam } from '../_lib/data';
 import { downloadJson } from '../_lib/downloadJson';
 import { ExamLibraryItem } from '../types';
 import {
@@ -28,6 +29,7 @@ interface ExamLibraryProps {
 }
 
 export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLibraryProps) {
+    const router = useRouter();
     const [exams, setExams] = useState(initialExams);
     const [filters, setFilters] = useState<ExamFilters>(DEFAULT_EXAM_FILTERS);
     // Giữ đề đang chọn khi đóng dialog để nội dung không biến mất trong lúc chạy animation
@@ -65,7 +67,14 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
         setNotice(`Đã xóa đề ${code} khỏi kho.`);
     };
 
-    const handleRequestStatus = (exam: ExamLibraryItem, to: ExamStatus) => {
+    const handleDuplicate = async ({ id, code }: ExamLibraryItem) => {
+        setNotice(`Đang nhân bản đề ${code}…`);
+        const result = await duplicateExam(id);
+        if ('error' in result) return setNotice(result.error);
+        router.push(`/setting/exam-management/${result.id}/edit`);
+    };
+
+    const handleRequestStatus =(exam: ExamLibraryItem, to: ExamStatus) => {
         setStatusChange({ exam, to });
         setIsStatusOpen(true);
     };
@@ -138,6 +147,7 @@ export default function ExamLibrary({ initialExams, initialNotice = '' }: ExamLi
                 exams={filteredExams}
                 totalCount={exams.length}
                 onDelete={handleRequestDelete}
+                onDuplicate={handleDuplicate}
                 onChangeStatus={handleRequestStatus}
                 onResetFilters={handleResetFilters}
             />

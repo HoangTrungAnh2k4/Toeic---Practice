@@ -3,15 +3,22 @@ import type { ExamStatus, Skill } from '@/lib/domain/types';
 import type { RoomPart } from '@/lib/exam-library/room';
 import { getPartFields, KEYWORD_COUNT } from './examSchema';
 
-/** Tuần tự Nháp → Chờ thẩm định → Đang khả dụng; trả về nháp từ hai trạng thái sau. */
+/** Tuần tự Nháp → Chờ thẩm định → Đang khả dụng ⇄ Đã lưu trữ; trả về nháp từ Chờ thẩm định hoặc Đang khả dụng. */
 const NEXT_STATUSES: Record<ExamStatus, ExamStatus[]> = {
     draft: ['review'],
     review: ['published', 'draft'],
-    published: ['draft'],
+    published: ['archived', 'draft'],
+    archived: ['published'],
 };
 
-export const getNextStatuses = (from: ExamStatus) => NEXT_STATUSES[from];
-export const canChangeStatus = (from: ExamStatus, to: ExamStatus) => NEXT_STATUSES[from].includes(to);
+/**
+ * Đề đã có lượt làm không trả về nháp được: nháp ẩn đề khỏi lịch sử của người học, còn nội dung thì vẫn bị khoá.
+ * Gỡ đề thì lưu trữ, sửa nội dung thì nhân bản.
+ */
+export const getNextStatuses = (from: ExamStatus, attempts: number) =>
+    NEXT_STATUSES[from].filter((to) => to !== 'draft' || attempts === 0);
+export const canChangeStatus = (from: ExamStatus, to: ExamStatus, attempts: number) =>
+    getNextStatuses(from, attempts).includes(to);
 /** Trả về nháp phải ghi lý do để người sửa biết cần sửa gì. */
 export const needsNote = (to: ExamStatus) => to === 'draft';
 export const MAX_NOTE_LENGTH = 500;

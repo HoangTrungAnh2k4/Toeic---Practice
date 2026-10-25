@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { serverError } from '@/lib/logger';
 import { summarizeSpeaking } from '@/lib/scoring/scale';
 import { createAdminSupabase } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
@@ -27,14 +28,19 @@ export async function POST(request: Request) {
         .eq('user_id', userId)
         .eq('status', 'in_progress')
         .maybeSingle();
-    if (attemptError) return fail('server_error', 500);
+    if (attemptError) return serverError('speaking finalize: load attempt failed', attemptError, { attemptId });
     if (!attempt) return fail('attempt_not_found', 404);
 
     const [questions, responses] = await Promise.all([
-        supabase.from('questions').select('id, number, exam_parts!inner(exam_id)').eq('exam_parts.exam_id', attempt.exam_id),
+        supabase
+            .from('questions')
+            .select('id, number, exam_parts!inner(exam_id)')
+            .eq('exam_parts.exam_id', attempt.exam_id),
         supabase.from('responses').select('question_id, score, feedback').eq('attempt_id', attemptId),
     ]);
-    if (questions.error || responses.error) return fail('server_error', 500);
+    if (questions.error || responses.error) {
+        return serverError('speaking finalize: load answers failed', questions.error ?? responses.error, { attemptId });
+    }
 
     const summary = summarizeSpeaking(questions.data, responses.data, limit);
     const now = new Date().toISOString();
@@ -49,7 +55,7 @@ export async function POST(request: Request) {
             scoring_error: summary.scoringError,
         })
         .eq('id', attemptId);
-    if (error) return fail('server_error', 500);
+    if (error) return serverError('speaking finalize: close attempt failed', error, { attemptId });
 
     return NextResponse.json({ score: summary.score });
 }

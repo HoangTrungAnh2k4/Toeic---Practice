@@ -33,16 +33,11 @@ export type LibraryTab = 'all' | 'retake' | 'bookmark';
 
 export type ProgressFilter = 'all' | ExamProgress;
 
-export type Topic = 'office' | 'customer' | 'retail' | 'travel' | 'tech' | 'logistics' | 'strategy';
-
-export type TopicFilter = 'all' | Topic;
-
 /** Toàn bộ trạng thái lọc & phân trang của thư viện đề, đồng bộ với URL search params. */
 export interface LibraryQuery {
     tab: LibraryTab;
     searchQuery: string;
     status: ProgressFilter;
-    topic: TopicFilter;
     page: number;
 }
 

@@ -1,4 +1,4 @@
-import { LuMic, LuPenLine, LuRocket, LuSend, LuUndo2 } from 'react-icons/lu';
+import { LuArchive, LuMic, LuPenLine, LuRocket, LuSend, LuUndo2 } from 'react-icons/lu';
 import type { IconType } from 'react-icons';
 import { ExamSkill, ExamSource, ExamStatus } from '../types';
 
@@ -11,6 +11,7 @@ export const STATUS_STYLE: Record<ExamStatus, { label: string; className: string
     published: { label: 'Đang khả dụng', className: 'bg-success/15 text-main', dotClassName: 'bg-success' },
     review: { label: 'Chờ thẩm định', className: 'bg-sub3/20 text-main', dotClassName: 'bg-sub3' },
     draft: { label: 'Bản nháp', className: 'bg-sub1 text-subText', dotClassName: 'bg-sub2' },
+    archived: { label: 'Đã lưu trữ', className: 'bg-canvas text-subText', dotClassName: 'bg-subText' },
 };
 
 /** Thao tác chuyển sang trạng thái đích (xem `examStatus.ts`). */
@@ -18,6 +19,7 @@ export const STATUS_ACTION: Record<ExamStatus, { Icon: IconType; label: string }
     review: { Icon: LuSend, label: 'Gửi thẩm định' },
     published: { Icon: LuRocket, label: 'Phát hành' },
     draft: { Icon: LuUndo2, label: 'Trả về nháp' },
+    archived: { Icon: LuArchive, label: 'Lưu trữ' },
 };
 
 export const SOURCE_LABEL: Record<ExamSource, string> = {

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { getExamRoom, parseRoomParams } from '@/lib/exam-library/room';
+import { ArchivedExamNotice } from '@/components/exam-library/archived-exam-notice';
+import { getExamRoom, isRoomClosed, parseRoomParams } from '@/lib/exam-library/room';
 import { RawSearchParams } from '@/lib/exam-library/search-params';
 import { createServerSupabase } from '@/lib/supabase-server';
 import WritingExamRoomLoader from './_components/WritingExamRoomLoader';
@@ -19,11 +20,13 @@ async function WritingExamRoomContent({ searchParams }: WritingTestPageProps) {
     const { examId, mode, partTemplateId } = parseRoomParams(await searchParams);
     if (!examId) redirect('/writing');
 
-    const room = await getExamRoom('writing', examId, await createServerSupabase());
+    const db = await createServerSupabase();
+    const room = await getExamRoom('writing', examId, db);
     const parts = room?.parts ?? [];
     const index = partTemplateId === null ? 0 : parts.findIndex((item) => item.template.id === partTemplateId);
     const part = parts[index];
     if (!room || !part) notFound();
+    if (await isRoomClosed(room.exam, part.template.id, db)) return <ArchivedExamNotice skill="writing" />;
 
     return (
         <WritingExamRoomLoader

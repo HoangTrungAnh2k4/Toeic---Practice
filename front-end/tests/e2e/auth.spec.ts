@@ -17,7 +17,10 @@ async function fillPassword(input: Locator, value: string) {
     await input.blur();
 }
 
-async function fillRegister(page: Page, { name = 'Nguyễn Văn E2E', email = uniqueEmail(), password = 'abcd1234', terms = true }) {
+async function fillRegister(
+    page: Page,
+    { name = 'Nguyễn Văn E2E', email = uniqueEmail(), password = 'abcd1234', terms = true },
+) {
     await page.waitForLoadState('networkidle');
     await page.getByLabel('Họ và tên').fill(name);
     await page.getByLabel('Email').fill(email);
@@ -66,7 +69,10 @@ test('AU-E01: Đăng ký với mật khẩu 7 ký tự báo lỗi ngay dưới �
 });
 
 test('AU-E02: Mật khẩu 8 ký tự toàn chữ, rồi toàn số', async () => {
-    test.fixme(true, 'Mơ hồ: "Cả hai đúng" không rõ là cả hai mật khẩu được chấp nhận hay hệ thống xử lý đúng (từ chối) cả hai.');
+    test.fixme(
+        true,
+        'Mơ hồ: "Cả hai đúng" không rõ là cả hai mật khẩu được chấp nhận hay hệ thống xử lý đúng (từ chối) cả hai.',
+    );
 });
 
 test('AU-E03: Mật khẩu đúng 8 ký tự có cả chữ và số abcdefg1 là hợp lệ (biên dưới)', async ({ page }) => {
@@ -94,7 +100,9 @@ test('AU-H02: Đăng nhập đúng email và mật khẩu', async () => {
     test.fixme(true, 'Mơ hồ: kết quả mong đợi ghi "Vào trang (/overview?)" — chưa chốt trang đích sau đăng nhập.');
 });
 
-test('AU-X01: Đăng nhập sai mật khẩu hiện thông báo tiếng Việt, ở lại /login, không lộ thông báo gốc của Supabase', async ({ page }) => {
+test('AU-X01: Đăng nhập sai mật khẩu hiện thông báo tiếng Việt, ở lại /login, không lộ thông báo gốc của Supabase', async ({
+    page,
+}) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
     await page.getByLabel('Email').fill(STUDENT.email);
@@ -129,7 +137,10 @@ test('AU-C02: Đăng nhập với "Ghi nhớ đăng nhập" BẬT tạo cookie p
     }
 });
 
-test('AU-S01: Quên mật khẩu với email không tồn tại và email có tồn tại hiển thị giống hệt nhau', async ({ page, db }) => {
+test('AU-S01: Quên mật khẩu với email không tồn tại và email có tồn tại hiển thị giống hệt nhau', async ({
+    page,
+    db,
+}) => {
     const existing = await createUser(db);
     const missing = uniqueEmail();
     const snapshot = async (email: string) => {
@@ -177,7 +188,10 @@ test('AU-E06: Ô OTP không nhận chữ cái và nút xác nhận bị khoá t�
     await expect(submit).toBeEnabled();
 });
 
-test('AU-H03: Đăng xuất từ menu sidebar thì sidebar hiện nút Đăng nhập/Đăng ký thay cho menu tài khoản', async ({ page, freshStudent }) => {
+test('AU-H03: Đăng xuất từ menu sidebar thì sidebar hiện nút Đăng nhập/Đăng ký thay cho menu tài khoản', async ({
+    page,
+    freshStudent,
+}) => {
     const user = await freshStudent();
     await page.goto('/overview');
     const account = page.getByRole('button', { name: new RegExp(user.name) });
@@ -188,7 +202,9 @@ test('AU-H03: Đăng xuất từ menu sidebar thì sidebar hiện nút Đăng nh
     await expect(page.getByRole('button', { name: new RegExp(user.name) })).toHaveCount(0);
 });
 
-test('AU-S02: Khách mở thẳng /setting/exam-management bị chuyển về /login, không thấy danh sách đề', async ({ page }) => {
+test('AU-S02: Khách mở thẳng /setting/exam-management bị chuyển về /login, không thấy danh sách đề', async ({
+    page,
+}) => {
     const seen: string[] = [];
     page.on('response', async (response) => {
         if (response.url().includes('/setting/exam-management')) seen.push(await response.text().catch(() => ''));
@@ -199,7 +215,10 @@ test('AU-S02: Khách mở thẳng /setting/exam-management bị chuyển về /l
     expect(seen.join('')).not.toContain('E2E Speaking Nháp');
 });
 
-test('AU-S03: Học viên mở /setting/exam-management thấy trang 403, không lộ danh sách đề', async ({ page, loginAs }) => {
+test('AU-S03: Học viên mở /setting/exam-management thấy trang 403, không lộ danh sách đề', async ({
+    page,
+    loginAs,
+}) => {
     await loginAs(STUDENT);
     await page.goto('/setting/exam-management');
     await expect(page.getByText(/không có quyền truy cập/i)).toBeVisible();
@@ -226,14 +245,16 @@ function validSpeakingExamForm(title: string) {
     });
     const payload = {
         title,
-        topic: 'office',
         skill: 'speaking',
         parts: [
             { part_template_id: 1, context: null, questions: [q(1), q(2)] },
             {
                 part_template_id: 2,
                 context: null,
-                questions: [q(3, { image: 'image-0', image_alt: 'A meeting room' }), q(4, { image: 'image-1', image_alt: 'A desk' })],
+                questions: [
+                    q(3, { image: 'image-0', image_alt: 'A meeting room' }),
+                    q(4, { image: 'image-1', image_alt: 'A desk' }),
+                ],
             },
             { part_template_id: 3, context: 'Interview about coffee', questions: [q(5), q(6), q(7)] },
             { part_template_id: 4, context: 'Conference agenda', questions: [q(8), q(9), q(10)] },
@@ -244,7 +265,11 @@ function validSpeakingExamForm(title: string) {
     return { payload: JSON.stringify(payload), 'image-0': image, 'image-1': { ...image, name: 'b.png' } };
 }
 
-test('AU-S04: Học viên gọi thẳng POST /api/exams với body hợp lệ nhận 403 và không có đề mới trong DB', async ({ page, loginAs, db }) => {
+test('AU-S04: Học viên gọi thẳng POST /api/exams với body hợp lệ nhận 403 và không có đề mới trong DB', async ({
+    page,
+    loginAs,
+    db,
+}) => {
     await loginAs(STUDENT);
     await page.goto('/overview');
     const title = `E2E AU-S04 ${crypto.randomUUID().slice(0, 8)}`;
@@ -284,9 +309,14 @@ test('AU-E08: Đăng ký không tích đồng ý điều khoản thì không g�
     expect(signups).toHaveLength(0);
 });
 
-test('AU-X02: Đăng nhập bằng tài khoản chưa nhập OTP thì gửi lại mã và chuyển sang /verify-email', async ({ page, db }) => {
+test('AU-X02: Đăng nhập bằng tài khoản chưa nhập OTP thì gửi lại mã và chuyển sang /verify-email', async ({
+    page,
+    db,
+}) => {
     const user = await createUser(db, { confirmed: false });
-    const resend = page.waitForResponse((response) => response.url().includes('/auth/v1/resend') && response.request().method() === 'POST');
+    const resend = page.waitForResponse(
+        (response) => response.url().includes('/auth/v1/resend') && response.request().method() === 'POST',
+    );
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
     await page.getByLabel('Email').fill(user.email);
@@ -316,7 +346,10 @@ test('AU-E09: Đặt lại mật khẩu bằng chính mật khẩu cũ báo lỗ
     expect(check.error).toBeNull();
 });
 
-test('AU-S06: Học viên mở trang sửa đề và trang tạo đề thấy trang 403, không lộ nội dung đề hay form', async ({ page, loginAs }) => {
+test('AU-S06: Học viên mở trang sửa đề và trang tạo đề thấy trang 403, không lộ nội dung đề hay form', async ({
+    page,
+    loginAs,
+}) => {
     await loginAs(STUDENT);
     for (const url of [`/setting/exam-management/${IDS.speaking.draft}/edit`, '/setting/exam-management/new']) {
         await page.goto(url);
@@ -327,8 +360,17 @@ test('AU-S06: Học viên mở trang sửa đề và trang tạo đề thấy tr
     }
 });
 
-test('AU-S07: Học viên gọi thẳng API đổi trạng thái và xoá đề đều nhận 403, đề trong DB không đổi', async ({ page, loginAs, db, adminApi }) => {
-    const exam = await createExam(adminApi, { skill: 'writing', status: 'draft', title: `E2E AU-S07 ${crypto.randomUUID().slice(0, 8)}` });
+test('AU-S07: Học viên gọi thẳng API đổi trạng thái và xoá đề đều nhận 403, đề trong DB không đổi', async ({
+    page,
+    loginAs,
+    db,
+    adminApi,
+}) => {
+    const exam = await createExam(adminApi, {
+        skill: 'writing',
+        status: 'draft',
+        title: `E2E AU-S07 ${crypto.randomUUID().slice(0, 8)}`,
+    });
     await loginAs(STUDENT);
     await page.goto('/overview');
     const status = await page.request.post(`/api/exams/${exam.id}/status`, { data: { status: 'review' } });

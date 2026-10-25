@@ -81,7 +81,10 @@ function getTaskAction(task: PlanTask, exam: ExamSummary | undefined, isToday: b
         };
     }
     if (task.kind === 'summary') return { actionLabel: 'Xem hồ sơ học', href: '/setting/profile' };
-    if (!exam) return { actionLabel: 'Chọn đề', href: task.kind === 'writing' ? '/writing' : '/speaking' };
+    // Đề đã lưu trữ không mở lượt mới nên cũng cho chọn đề khác
+    if (exam?.status !== 'published') {
+        return { actionLabel: 'Chọn đề', href: task.kind === 'writing' ? '/writing' : '/speaking' };
+    }
     return { actionLabel: isToday ? 'Vào học' : 'Bắt đầu', href: buildTestHref(exam.skill, exam.id) };
 }
 

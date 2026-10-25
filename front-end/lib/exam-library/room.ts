@@ -41,6 +41,25 @@ export function parseRoomParams(raw: RawSearchParams): {
 }
 
 /**
+ * Đề lưu trữ không mở lượt mới, chỉ cho làm nốt lượt dở của đúng Part (`null` = cả đề Speaking). `db` mang phiên
+ * người dùng nên RLS chỉ trả lượt của chính họ. Khách lưu lượt trong localStorage, server không thấy nên luôn bị chặn.
+ */
+export async function isRoomClosed(exam: Exam, partTemplateId: number | null, db: SupabaseClient<Database>) {
+    if (exam.status !== 'archived') return false;
+    const query = db
+        .from('attempts')
+        .select('id')
+        .eq('exam_id', exam.id)
+        .in('status', ['in_progress', 'interrupted'])
+        .limit(1);
+    const { data, error } = await (partTemplateId === null
+        ? query.is('part_template_id', null)
+        : query.eq('part_template_id', partTemplateId));
+    if (error) throw error;
+    return data.length === 0;
+}
+
+/**
  * Nội dung phòng thi của một đề: các Part theo thứ tự kèm câu hỏi.
  * `null` khi không có đề, đề không thuộc kỹ năng của phòng thi, hoặc đề chưa phát hành mà `db` không mang phiên admin
  * (RLS chỉ cho admin đọc đề `draft`/`review`, nhờ vậy admin xem trước được bằng chính phòng thi).

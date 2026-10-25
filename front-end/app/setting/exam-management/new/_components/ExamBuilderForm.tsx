@@ -3,16 +3,14 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { Controller, type FieldErrors, FormProvider, type Resolver, useForm } from 'react-hook-form';
+import { type FieldErrors, FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LuCircleAlert, LuCircleCheck, LuLock, LuSave } from 'react-icons/lu';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import Button, { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getPartTemplates } from '@/lib/domain/parts';
 import type { Skill } from '@/lib/domain/types';
-import { TOPIC_OPTIONS } from '@/lib/exam-library/options';
 import { cn } from '@/lib/utils';
 import { toExamFormData } from '../../_lib/examFormData';
 import { emptyExam, examInfoSchema, type ExamInput, examSchema, type ExamValues } from '../../_lib/examSchema';
@@ -20,8 +18,6 @@ import FormField from './FormField';
 import PartSection, { countErrors } from './PartSection';
 
 const EXAM_MANAGEMENT_PATH = '/setting/exam-management';
-
-const TOPIC_ITEMS = TOPIC_OPTIONS.filter((option) => option.value !== 'all');
 
 /** Mã lỗi từ `POST /api/exams` → thông báo cho admin. */
 const SAVE_ERROR: Record<string, string> = {
@@ -53,7 +49,7 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
         >,
         defaultValues: exam?.values ?? emptyExam(skill),
     });
-    const { register, control, formState } = form;
+    const { register, formState } = form;
     const templates = getPartTemplates(skill);
     const [activeIndex, setActiveIndex] = useState(0);
     const tabsRef = useRef<HTMLDivElement>(null);
@@ -86,7 +82,7 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
         },
         (errors) => {
             // Thông tin chung luôn hiện nên react-hook-form tự focus được; lỗi chỉ ở Part thì mở Part đó để nó focus vào
-            if (errors.title || errors.topic) return;
+            if (errors.title) return;
             const parts = errors.parts as FieldErrors<ExamInput['parts']> | undefined;
             const firstInvalid = templates.findIndex((_, index) => countErrors(parts?.[index]) > 0);
             if (firstInvalid >= 0) setActiveIndex(firstInvalid);
@@ -109,34 +105,6 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
                             <FormField label="Tiêu đề" required error={formState.errors.title?.message}>
                                 {(controlProps) => <Input {...controlProps} {...register('title')} />}
                             </FormField>
-
-                            <Controller
-                                name="topic"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <FormField label="Chủ đề" required error={fieldState.error?.message}>
-                                        {(controlProps) => (
-                                            <Select items={TOPIC_ITEMS} value={field.value} onValueChange={field.onChange}>
-                                                <SelectTrigger
-                                                    {...controlProps}
-                                                    ref={field.ref}
-                                                    onBlur={field.onBlur}
-                                                    className="w-full"
-                                                >
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {TOPIC_ITEMS.map((item) => (
-                                                        <SelectItem key={item.value} value={item.value}>
-                                                            {item.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    </FormField>
-                                )}
-                            />
                         </section>
 
                         {/* Mục lục Part: trên mobile đã có thanh tab nên ẩn cho gọn */}

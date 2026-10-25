@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { logger } from '@/lib/logger';
 import { createAdminSupabase } from '@/lib/supabase-admin';
 
 /** Số câu được chấm mỗi ngày, dùng chung Speaking và Writing: khách 3 bài, người đăng nhập 5 bài Speaking (11 câu/bài). */
@@ -25,7 +26,7 @@ export function scoringQuota(request: Request, userId: string | null) {
         /** Chấm/lưu lỗi thì trả lại lượt, để thử lại không bị trừ thêm. */
         async refund() {
             const { error } = await admin.rpc('refund_scoring_quota', { p_subject: subject });
-            if (error) console.error('Scoring quota refund failed', error);
+            if (error) logger.error('scoring quota refund failed', { error });
         },
     };
 }
