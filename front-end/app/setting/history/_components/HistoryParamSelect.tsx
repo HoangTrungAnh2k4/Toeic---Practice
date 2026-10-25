@@ -1,5 +1,6 @@
 'use client';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useHistoryParam } from '../_lib/useHistoryParam';
 import { HistoryQuery, Option } from '../types';
@@ -12,7 +13,7 @@ interface HistoryParamSelectProps<K extends keyof HistoryQuery> {
     className?: string;
 }
 
-/** Native select gắn với một field trên URL — client island duy nhất cho các bộ lọc dạng dropdown. */
+/** shadcn Select gắn với một field trên URL — client island duy nhất cho các bộ lọc dạng dropdown. */
 export default function HistoryParamSelect<K extends keyof HistoryQuery>({
     query,
     name,
@@ -22,22 +23,31 @@ export default function HistoryParamSelect<K extends keyof HistoryQuery>({
 }: HistoryParamSelectProps<K>) {
     const { value, setValue, isPending } = useHistoryParam(query, name);
 
+    const items = options.map((option) => ({ value: String(option.value), label: option.label }));
+
     return (
-        <select
+        <Select
+            items={items}
             value={String(value)}
-            onChange={(e) => {
-                const option = options.find((item) => String(item.value) === e.target.value);
+            onValueChange={(next) => {
+                const option = options.find((item) => String(item.value) === next);
                 if (option) setValue(option.value);
             }}
-            aria-label={label}
-            data-pending={isPending ? '' : undefined}
-            className={cn('cursor-pointer focus:outline-none focus:ring-2 focus:ring-sub3/60', className)}
         >
-            {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                    {option.label}
-                </option>
-            ))}
-        </select>
+            <SelectTrigger
+                aria-label={label}
+                data-pending={isPending ? '' : undefined}
+                className={cn('cursor-pointer focus-visible:ring-2 focus-visible:ring-sub3/60', className)}
+            >
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                {items.map((item) => (
+                    <SelectItem key={item.value} value={item.value} className="text-xs">
+                        {item.label}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     );
 }

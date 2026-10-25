@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import type { IconType } from 'react-icons';
+import type { ReactNode } from 'react';
 import { LuMic, LuPenLine, LuRotateCcw } from 'react-icons/lu';
+import { SegmentedTabs } from '@/components/segmented-tabs';
 import { cn } from '@/lib/utils';
 import { buildHistoryHref, DEFAULT_HISTORY_QUERY } from '../_lib/searchParams';
 import { HistoryQuery, SkillType } from '../types';
@@ -15,13 +16,13 @@ interface HistoryFiltersProps {
 }
 
 const SELECT_CLASS =
-    'bg-white px-3 border border-sub2/40 focus:border-main rounded-lg w-full h-10 font-medium text-main text-xs transition-colors';
+    'bg-white px-3 border-sub2/40 focus-visible:border-main rounded-lg w-full data-[size=default]:h-10 font-medium text-main text-xs';
 
 const FOCUS_RING_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
 
-const SKILL_ICONS: Partial<Record<SkillType, IconType>> = {
-    speaking: LuMic,
-    writing: LuPenLine,
+const SKILL_ICONS: Partial<Record<SkillType, ReactNode>> = {
+    speaking: <LuMic aria-hidden="true" />,
+    writing: <LuPenLine aria-hidden="true" />,
 };
 
 const SELECT_FILTERS = [
@@ -40,36 +41,17 @@ export default function HistoryFilters({ query, skillCounts, displayedCount }: H
         >
             {/* Skill tabs & reset */}
             <div className="flex flex-wrap justify-between items-center gap-3 pb-4 border-sub2/20 border-b">
-                <nav aria-label="Lọc theo kỹ năng" className="flex flex-wrap gap-1 bg-main p-1 rounded-lg">
-                    {SKILL_OPTIONS.map(({ value, label }) => {
-                        const Icon = SKILL_ICONS[value];
-                        const isActive = query.skill === value;
-                        return (
-                            <Link
-                                key={value}
-                                href={buildHistoryHref(query, { skill: value })}
-                                scroll={false}
-                                aria-current={isActive ? 'true' : undefined}
-                                className={cn(
-                                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs transition-colors duration-200',
-                                    FOCUS_RING_CLASS,
-                                    isActive ? 'bg-sub3 text-main' : 'text-white hover:bg-white/15',
-                                )}
-                            >
-                                {Icon && <Icon className="size-3.5" aria-hidden="true" />}
-                                <span>{label}</span>
-                                <span
-                                    className={cn(
-                                        'px-1.5 rounded-full font-semibold text-[11px] leading-4',
-                                        isActive ? 'bg-main text-sub3' : 'bg-white text-main',
-                                    )}
-                                >
-                                    {skillCounts[value]}
-                                </span>
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <SegmentedTabs
+                    options={SKILL_OPTIONS.map(({ value, label }) => ({
+                        value,
+                        label,
+                        icon: SKILL_ICONS[value],
+                        href: buildHistoryHref(query, { skill: value }),
+                    }))}
+                    value={query.skill}
+                    counts={skillCounts}
+                    ariaLabel="Lọc theo kỹ năng"
+                />
 
                 <div className="flex items-center gap-3 ml-auto">
                     <span className="font-medium text-subText text-xs" aria-live="polite">

@@ -95,6 +95,6 @@ test('HI-E04: Mở /setting/history?size=7 thì bỏ qua giá trị lạ, dùng 
         await insertAttempt(db, { user_id: user.id, exam_id: IDS.speaking.published[i % 6], score: 100, started_at: daysAgo(i + 1) });
     }
     await page.goto('/setting/history?size=7');
-    await expect(page.getByLabel('Số dòng mỗi trang')).toHaveValue('10');
+    await expect(page.getByLabel('Số dòng mỗi trang')).toHaveText('10 dòng');
     await expect(rows(page)).toHaveCount(10);
 });

@@ -1,4 +1,4 @@
-import { LuFileCog, LuHeadset, LuHistory, LuMic, LuShieldCheck, LuUserRound } from 'react-icons/lu';
+import { LuHeadset, LuHistory, LuMic, LuUserRound } from 'react-icons/lu';
 import { SettingGroup } from './types';
 
 export const SETTING_BASE_PATH = '/setting';
@@ -44,22 +44,6 @@ export const SETTING_GROUPS: SettingGroup[] = [
                 href: `${SETTING_BASE_PATH}/device-check`,
                 actionLabel: 'Bắt đầu kiểm tra',
                 Icon: LuHeadset,
-            },
-        ],
-    },
-    {
-        id: 'admin',
-        title: 'Quản trị',
-        description: 'Công cụ quản lý nội dung dành cho quản trị viên.',
-        Icon: LuShieldCheck,
-        sections: [
-            {
-                id: 'exam-management',
-                title: 'Quản trị đề thi',
-                description: 'Quản lý kho đề Speaking & Writing, trạng thái thẩm định và xem trước phòng thi.',
-                href: '/exam-management',
-                actionLabel: 'Mở trình quản trị',
-                Icon: LuFileCog,
             },
         ],
     },

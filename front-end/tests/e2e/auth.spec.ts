@@ -202,25 +202,20 @@ test('AU-H03: Đăng xuất từ menu sidebar thì sidebar hiện nút Đăng nh
     await expect(page.getByRole('button', { name: new RegExp(user.name) })).toHaveCount(0);
 });
 
-test('AU-S02: Khách mở thẳng /setting/exam-management bị chuyển về /login, không thấy danh sách đề', async ({
-    page,
-}) => {
+test('AU-S02: Khách mở thẳng /exam-management bị chuyển về /login, không thấy danh sách đề', async ({ page }) => {
     const seen: string[] = [];
     page.on('response', async (response) => {
-        if (response.url().includes('/setting/exam-management')) seen.push(await response.text().catch(() => ''));
+        if (response.url().includes('/exam-management')) seen.push(await response.text().catch(() => ''));
     });
-    await page.goto('/setting/exam-management');
+    await page.goto('/exam-management');
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByText('E2E Speaking Nháp')).toHaveCount(0);
     expect(seen.join('')).not.toContain('E2E Speaking Nháp');
 });
 
-test('AU-S03: Học viên mở /setting/exam-management thấy trang 403, không lộ danh sách đề', async ({
-    page,
-    loginAs,
-}) => {
+test('AU-S03: Học viên mở /exam-management thấy trang 403, không lộ danh sách đề', async ({ page, loginAs }) => {
     await loginAs(STUDENT);
-    await page.goto('/setting/exam-management');
+    await page.goto('/exam-management');
     await expect(page.getByText(/không có quyền truy cập/i)).toBeVisible();
     await expect(page.getByText('E2E Speaking Nháp')).toHaveCount(0);
     await expect(page.getByRole('table')).toHaveCount(0);
@@ -351,7 +346,7 @@ test('AU-S06: Học viên mở trang sửa đề và trang tạo đề thấy tr
     loginAs,
 }) => {
     await loginAs(STUDENT);
-    for (const url of [`/setting/exam-management/${IDS.speaking.draft}/edit`, '/setting/exam-management/new']) {
+    for (const url of [`/exam-management/${IDS.speaking.draft}/edit`, '/exam-management/new']) {
         await page.goto(url);
         await expect(page.getByText(/không có quyền truy cập/i), url).toBeVisible();
         await expect(page.getByText('E2E Speaking Nháp'), url).toHaveCount(0);

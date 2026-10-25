@@ -1,7 +1,8 @@
 'use client';
 
 import { useId } from 'react';
-import { LuChevronDown, LuMic } from 'react-icons/lu';
+import { LuMic } from 'react-icons/lu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AudioInputDevice, CheckStatus, MicStatus } from '../types';
 import { SPEAKING_SAMPLE } from '../utils';
 import CheckNotice from './CheckNotice';
@@ -38,6 +39,10 @@ export default function MicrophoneCheckPanel({
     }
 
     const selectedId = devices.some((device) => device.id === deviceId) ? deviceId : (devices[0]?.id ?? '');
+    const items =
+        devices.length === 0
+            ? [{ value: '', label: 'Micro mặc định của hệ thống' }]
+            : devices.map((device) => ({ value: device.id, label: device.label }));
 
     return (
         <div className="flex flex-col gap-5">
@@ -45,33 +50,27 @@ export default function MicrophoneCheckPanel({
                 <label htmlFor={selectId} className="font-semibold text-subText text-xs uppercase tracking-wider">
                     Thiết bị thu âm
                 </label>
-                <div className="relative">
-                    <LuMic
-                        className="top-1/2 left-3 absolute size-4 text-sub2 -translate-y-1/2 pointer-events-none"
-                        aria-hidden="true"
-                    />
-                    <select
+                <Select
+                    items={items}
+                    value={selectedId}
+                    onValueChange={(next) => onSelectDevice(next as string)}
+                    disabled={devices.length === 0}
+                >
+                    <SelectTrigger
                         id={selectId}
-                        value={selectedId}
-                        onChange={(event) => onSelectDevice(event.target.value)}
-                        disabled={devices.length === 0}
-                        className="bg-white disabled:opacity-100 pr-10 pl-9 border border-sub2/40 focus:border-main rounded-lg w-full h-10 font-medium text-main text-sm truncate transition-colors appearance-none cursor-pointer disabled:cursor-default focus:outline-none focus:ring-2 focus:ring-sub3/60"
+                        className="bg-white disabled:opacity-100 px-3 border-sub2/40 focus-visible:border-main focus-visible:ring-2 focus-visible:ring-sub3/60 w-full data-[size=default]:h-10 font-medium text-main text-sm cursor-pointer disabled:cursor-default"
                     >
-                        {devices.length === 0 ? (
-                            <option value="">Micro mặc định của hệ thống</option>
-                        ) : (
-                            devices.map((device) => (
-                                <option key={device.id} value={device.id}>
-                                    {device.label}
-                                </option>
-                            ))
-                        )}
-                    </select>
-                    <LuChevronDown
-                        className="top-1/2 right-3 absolute size-4 text-sub2 -translate-y-1/2 pointer-events-none"
-                        aria-hidden="true"
-                    />
-                </div>
+                        <LuMic className="size-4 text-sub2" aria-hidden="true" />
+                        <SelectValue className="truncate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {items.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <p className="text-subText text-xs">
                     Nên dùng tai nghe có micro (headset) để giọng nói rõ và ít lẫn tạp âm.
                 </p>

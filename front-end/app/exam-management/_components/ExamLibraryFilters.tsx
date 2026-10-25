@@ -3,6 +3,7 @@
 import { LuRotateCcw, LuSearch } from 'react-icons/lu';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { LibraryTab, SourceFilter, StatusFilter } from '../types';
 import { ExamFilters, LIBRARY_TABS, SOURCE_FILTER_OPTIONS, STATUS_FILTER_OPTIONS } from '../utils';
@@ -16,8 +17,8 @@ interface ExamLibraryFiltersProps {
     onReset: () => void;
 }
 
-const SELECT_CLASS =
-    'bg-white px-3 border border-sub2/40 focus:border-main rounded-lg w-full h-10 font-medium text-main text-xs transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-sub3/60';
+const SELECT_TRIGGER_CLASS =
+    'bg-white px-3 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 w-full data-[size=default]:h-10 font-medium text-main text-xs cursor-pointer';
 
 const FOCUS_RING_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
 
@@ -77,30 +78,38 @@ export default function ExamLibraryFilters({
                         className="bg-sub1/50 focus-visible:bg-white pl-9 border-sub2/40 focus-visible:border-main focus-visible:ring-sub3/60 h-10 text-main md:text-xs placeholder:text-sub2"
                     />
                 </div>
-                <select
+                <Select
+                    items={STATUS_FILTER_OPTIONS}
                     value={filters.status}
-                    onChange={(event) => onChange({ status: event.target.value as StatusFilter })}
-                    aria-label="Lọc theo trạng thái"
-                    className={SELECT_CLASS}
+                    onValueChange={(status) => onChange({ status: status as StatusFilter })}
                 >
-                    {STATUS_FILTER_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-                <select
+                    <SelectTrigger aria-label="Lọc theo trạng thái" className={SELECT_TRIGGER_CLASS}>
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {STATUS_FILTER_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value} className="text-xs">
+                                {option.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select
+                    items={SOURCE_FILTER_OPTIONS}
                     value={filters.source}
-                    onChange={(event) => onChange({ source: event.target.value as SourceFilter })}
-                    aria-label="Lọc theo nguồn dữ liệu"
-                    className={SELECT_CLASS}
+                    onValueChange={(source) => onChange({ source: source as SourceFilter })}
                 >
-                    {SOURCE_FILTER_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
+                    <SelectTrigger aria-label="Lọc theo nguồn dữ liệu" className={SELECT_TRIGGER_CLASS}>
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {SOURCE_FILTER_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value} className="text-xs">
+                                {option.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
         </div>
     );

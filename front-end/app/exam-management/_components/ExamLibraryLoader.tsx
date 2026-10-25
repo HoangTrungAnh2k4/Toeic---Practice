@@ -43,7 +43,17 @@ export default function ExamLibraryLoader() {
     if (state.status === 'loading') {
         return (
             <div className="flex flex-col gap-4" aria-busy="true" aria-label="Đang tải kho đề">
-
+                <style>{`
+                @keyframes dot-pulse {
+                    0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
+                    40%           { transform: scale(1);   opacity: 1; }
+                }
+            `}</style>
+                <div className="flex justify-center items-center gap-2 py-16">
+                    <span className="bg-main rounded-full w-3 h-3 animate-[dot-pulse_1.2s_ease-in-out_infinite] [animation-delay:-0.32s]" />
+                    <span className="bg-main rounded-full w-3 h-3 animate-[dot-pulse_1.2s_ease-in-out_infinite] [animation-delay:-0.16s]" />
+                    <span className="bg-main rounded-full w-3 h-3 animate-[dot-pulse_1.2s_ease-in-out_infinite]" />
+                </div>
             </div>
         );
     }

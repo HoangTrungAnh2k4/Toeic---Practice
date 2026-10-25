@@ -29,7 +29,7 @@ export function getPlanWeekDays(plan: StudyPlan, weekNo: number): Date[] {
     );
 }
 
-/** Số tuần của lộ trình: tuần có chủ đề hoặc có task, lấy tuần muộn nhất. */
+/** Số tuần của lộ trình: tuần  có task, lấy tuần muộn nhất. */
 export function getPlanWeekCount({ plan, weeks, tasks }: ActivePlan): number {
     return Math.max(
         1,

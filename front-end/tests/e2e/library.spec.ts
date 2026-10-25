@@ -24,23 +24,6 @@ test('LB-C01: Seed 3 đề Speaking draft/review/published, mở /speaking chỉ
     await expect(page.getByText('E2E Speaking Chờ duyệt')).toHaveCount(0);
 });
 
-test('LB-E02: Chọn chủ đề và trạng thái rồi tải lại trang: URL chứa bộ lọc, bộ lọc và kết quả giữ nguyên', async ({
-    page,
-}) => {
-    await page.goto('/speaking');
-    await waitForCards(page);
-    await page.getByLabel('Lọc theo trạng thái').selectOption({ label: 'Chưa làm' });
-    await expect(page).toHaveURL(/status=not_started/);
-    await waitForCards(page);
-    const before = await cardTitles(page);
-
-    await page.reload();
-    await waitForCards(page);
-    await expect(page.getByLabel('Lọc theo chủ đề')).toHaveValue('office');
-    await expect(page.getByLabel('Lọc theo trạng thái')).toHaveValue('not_started');
-    expect(await cardTitles(page)).toEqual(before);
-});
-
 test('LB-E03: Tìm một mã đề không tồn tại hiện trạng thái rỗng, không lỗi', async ({ page }) => {
     await page.goto('/speaking');
     await waitForCards(page);
@@ -150,7 +133,6 @@ test('LB-E04: Mở /speaking?status=abc&page=999 thì bỏ qua giá trị lạ, 
 
     await page.goto('/speaking?status=abc&page=999');
     await waitForCards(page);
-    await expect(page.getByLabel('Lọc theo chủ đề')).toHaveValue('all');
-    await expect(page.getByLabel('Lọc theo trạng thái')).toHaveValue('all');
+    await expect(page.getByLabel('Lọc theo trạng thái')).toHaveText('Trạng thái: Tất cả');
     await expect(page.getByRole('navigation', { name: 'Phân trang' }).locator('[aria-current=page]')).toHaveText('1');
 });

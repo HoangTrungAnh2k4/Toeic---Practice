@@ -15,7 +15,7 @@ interface WeeklyTaskTableProps {
     onTaskCompleted: () => void;
 }
 
-const COLUMNS = ['Kỹ năng', 'Chủ đề bài học', 'Mục tiêu đầu ra', 'Thời lượng', 'Trạng thái'];
+const COLUMNS = ['Kỹ năng', 'Mục tiêu đầu ra', 'Thời lượng', 'Trạng thái'];
 
 const STATUS_STYLE: Record<TaskStatus, { Icon: IconType; className: string }> = {
     done: { Icon: LuCircleCheck, className: 'bg-sub1 text-main' },
@@ -79,7 +79,7 @@ export default function WeeklyTaskTable({ tasks, onTaskCompleted }: WeeklyTaskTa
                                 <TableRow
                                     key={task.id}
                                     className={cn(
-                                        'border-sub2/20 hover:bg-sub1/50 transition-colors',
+                                        'hover:bg-sub1/50 border-sub2/20 transition-colors',
                                         isToday && 'bg-sub3/10 hover:bg-sub3/15',
                                     )}
                                 >

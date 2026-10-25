@@ -1,5 +1,6 @@
 'use client';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useMistakesParam } from '../_lib/useMistakesParam';
 import { MistakeQuery, Option } from '../types';
@@ -14,7 +15,7 @@ interface MistakesParamSelectProps<K extends SelectableKey> {
     className?: string;
 }
 
-/** Native select gắn với một field trên URL — client island cho các bộ lọc dạng dropdown. */
+/** shadcn Select gắn với một field trên URL — client island cho các bộ lọc dạng dropdown. */
 export default function MistakesParamSelect<K extends SelectableKey>({
     query,
     name,
@@ -24,22 +25,31 @@ export default function MistakesParamSelect<K extends SelectableKey>({
 }: MistakesParamSelectProps<K>) {
     const { value, setValue, isPending } = useMistakesParam(query, name);
 
+    const items = options.map((option) => ({ value: String(option.value), label: option.label }));
+
     return (
-        <select
+        <Select
+            items={items}
             value={value}
-            onChange={(e) => {
-                const option = options.find((item) => item.value === e.target.value);
+            onValueChange={(next) => {
+                const option = options.find((item) => String(item.value) === next);
                 if (option) setValue(option.value);
             }}
-            aria-label={label}
-            data-pending={isPending ? '' : undefined}
-            className={cn('cursor-pointer focus:outline-none focus:ring-2 focus:ring-sub3/60', className)}
         >
-            {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                    {option.label}
-                </option>
-            ))}
-        </select>
+            <SelectTrigger
+                aria-label={label}
+                data-pending={isPending ? '' : undefined}
+                className={cn('cursor-pointer focus-visible:ring-2 focus-visible:ring-sub3/60', className)}
+            >
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                {items.map((item) => (
+                    <SelectItem key={item.value} value={item.value} className="text-xs">
+                        {item.label}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     );
 }

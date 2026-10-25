@@ -55,7 +55,7 @@ export default function HistoryPagination({ query, page, totalPages, totalRecord
                         name="pageSize"
                         options={PAGE_SIZE_OPTIONS}
                         label="Số dòng mỗi trang"
-                        className="bg-white px-2 py-1 border border-sub2/40 focus:border-main rounded-md font-semibold text-main text-xs"
+                        className="bg-white px-2 border-sub2/40 focus-visible:border-main rounded-md data-[size=default]:h-7 font-semibold text-main text-xs"
                     />
                 </div>
                 <span className="hidden sm:block bg-sub2/40 w-px h-4" aria-hidden="true" />
