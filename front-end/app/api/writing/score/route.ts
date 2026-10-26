@@ -13,7 +13,7 @@ import { scoreWriting, writingPatternsFor, type WritingOutcome, type WritingQues
 import { createAdminSupabase } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 
-// Chấm song song cả Part; mỗi lượt gọi LLM tối đa 20s/model
+// Chấm song song mọi câu (cả đề tối đa 8 câu); mỗi lượt gọi LLM tối đa 20s/model
 export const maxDuration = 60;
 
 /** Bài luận Q8 ~300–500 từ; chặn bài dài bất thường để khỏi tốn token. */
@@ -21,14 +21,14 @@ const MAX_ANSWER_CHARS = 8000;
 const WRITING_PART_IDS = PART_TEMPLATES.filter((part) => part.skill === 'writing').map((part) => part.id);
 
 const userBody = z.object({ attemptId: z.uuid() });
-/** Khách không có attempt trên DB: gửi kèm bài viết các câu cần chấm. */
+/** Khách không có attempt trên DB: gửi kèm bài viết các câu cần chấm; `partTemplateId = null` là lượt cả đề. */
 const guestBody = z.object({
     examId: z.uuid(),
-    partTemplateId: z.number().int(),
+    partTemplateId: z.number().int().nullable(),
     answers: z
         .array(z.object({ questionId: z.uuid(), text: z.string().max(MAX_ANSWER_CHARS) }))
         .min(1)
-        .max(5),
+        .max(8),
 });
 
 const fail = (error: string, status: number) => NextResponse.json({ error }, { status });
@@ -40,19 +40,25 @@ const firstError = (outcomes: WritingOutcome[]) =>
     ) ?? null;
 const statusOf = (error: ScoreError | null) => (error === null ? 200 : error === 'scoring_failed' ? 502 : 429);
 
-/** Câu của một Part kèm text đề. Client mang phiên: RLS chỉ trả đề đã phát hành (hoặc đề nháp với admin). */
-async function loadQuestions(supabase: SupabaseClient<Database>, examId: string, partTemplateId: number) {
-    const { data, error } = await supabase
+/**
+ * Câu của một Part (hoặc mọi Part Writing khi `partTemplateId = null`) kèm text đề.
+ * Client mang phiên: RLS chỉ trả đề đã phát hành (hoặc đề nháp với admin).
+ */
+async function loadQuestions(supabase: SupabaseClient<Database>, examId: string, partTemplateId: number | null) {
+    const query = supabase
         .from('questions')
         .select(
             'id, number, prompt, stimulus, image_alt, keywords, exam_parts!inner(exam_id, part_template_id, context)',
         )
-        .eq('exam_parts.exam_id', examId)
-        .eq('exam_parts.part_template_id', partTemplateId)
-        .order('number');
+        .eq('exam_parts.exam_id', examId);
+    const { data, error } = await (partTemplateId === null
+        ? query.in('exam_parts.part_template_id', WRITING_PART_IDS)
+        : query.eq('exam_parts.part_template_id', partTemplateId)
+    ).order('number');
     if (error) throw error;
     return data.map((question) => ({
         id: question.id,
+        partTemplateId: question.exam_parts.part_template_id,
         number: question.number,
         prompt: question.prompt,
         stimulus: question.stimulus ?? question.exam_parts.context,
@@ -61,9 +67,9 @@ async function loadQuestions(supabase: SupabaseClient<Database>, examId: string,
     }));
 }
 
-/** Chấm song song; câu bỏ trống không gọi LLM nên không trừ lượt, chấm lỗi thì hoàn lượt. */
+/** Chấm song song, mẫu lỗi theo Part của từng câu; câu bỏ trống không gọi LLM nên không trừ lượt, chấm lỗi thì hoàn lượt. */
 function scoreAll(
-    questions: (WritingQuestion & { id: string })[],
+    questions: (WritingQuestion & { id: string; partTemplateId: number })[],
     answers: Map<string, string>,
     patterns: MistakePattern[],
     quota: ReturnType<typeof scoringQuota>,
@@ -73,7 +79,8 @@ function scoreAll(
             const answer = answers.get(question.id) ?? '';
             if (answer.trim() && !(await quota.consume())) return { questionId: question.id, error: 'daily_limit' };
             try {
-                return { questionId: question.id, result: await scoreWriting(question, answer, patterns) };
+                const partPatterns = writingPatternsFor(patterns, question.partTemplateId);
+                return { questionId: question.id, result: await scoreWriting(question, answer, partPatterns) };
             } catch (error) {
                 if (answer.trim()) await quota.refund();
                 if (error instanceof ProviderQuotaError) return { questionId: question.id, error: 'provider_limit' };
@@ -85,7 +92,7 @@ function scoreAll(
 }
 
 /**
- * Chấm một Part Writing đã nộp.
+ * Chấm một lượt Writing đã nộp (cả đề hoặc một Part).
  * Người đăng nhập: chiếm attempt `submitted → scoring`, chấm các câu chưa có điểm, ghi `responses`, `annotations`,
  * `attempts` bằng service_role. Khách: chỉ trả kết quả từng câu, client lưu localStorage và tự tổng kết.
  */
@@ -98,8 +105,9 @@ export async function POST(request: Request) {
 
     if (!userId) {
         const body = guestBody.safeParse(json);
-        if (!body.success || !WRITING_PART_IDS.includes(body.data.partTemplateId)) return fail('invalid_body', 400);
+        if (!body.success) return fail('invalid_body', 400);
         const { examId, partTemplateId, answers } = body.data;
+        if (partTemplateId !== null && !WRITING_PART_IDS.includes(partTemplateId)) return fail('invalid_body', 400);
 
         const loaded = await Promise.all([
             loadQuestions(supabase, examId, partTemplateId),
@@ -111,7 +119,7 @@ export async function POST(request: Request) {
         if (asked.length !== answers.length) return fail('question_not_found', 404);
 
         const texts = new Map(answers.map((answer) => [answer.questionId, answer.text]));
-        const outcomes = await scoreAll(asked, texts, writingPatternsFor(patterns, partTemplateId), quota).catch(
+        const outcomes = await scoreAll(asked, texts, patterns, quota).catch(
             (error: unknown) => serverError('writing score: guest scoring failed', error, { examId }),
         );
         if (outcomes instanceof Response) return outcomes;
@@ -123,6 +131,19 @@ export async function POST(request: Request) {
     const { attemptId } = body.data;
     const admin = createAdminSupabase();
 
+    // Lượt cả đề có `part_template_id = null` như Speaking → phân biệt kỹ năng qua đề
+    const { data: owned, error: ownedError } = await admin
+        .from('attempts')
+        .select('part_template_id, exams!inner(skill)')
+        .eq('id', attemptId)
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (ownedError) return serverError('writing score: load attempt failed', ownedError, { attemptId });
+    const isWriting =
+        owned?.exams.skill === 'writing' &&
+        (owned.part_template_id === null || WRITING_PART_IDS.includes(owned.part_template_id));
+    if (!isWriting) return fail('attempt_not_scorable', 409);
+
     // Chiếm lượt chấm có điều kiện trên status: hai request cùng lúc thì chỉ một request chấm
     const staleBefore = new Date(Date.now() - SCORING_STALE_MS).toISOString();
     const { data: attempt, error: claimError } = await admin
@@ -130,12 +151,11 @@ export async function POST(request: Request) {
         .update({ status: 'scoring', scoring_started_at: new Date().toISOString() })
         .eq('id', attemptId)
         .eq('user_id', userId)
-        .in('part_template_id', WRITING_PART_IDS)
         .or(`status.eq.submitted,and(status.eq.scoring,scoring_started_at.lt.${staleBefore})`)
         .select('exam_id, part_template_id')
         .maybeSingle();
     if (claimError) return serverError('writing score: claim attempt failed', claimError, { attemptId });
-    if (!attempt?.part_template_id) return fail('attempt_not_scorable', 409);
+    if (!attempt) return fail('attempt_not_scorable', 409);
 
     const release = (scoringError: string) =>
         admin.from('attempts').update({ status: 'submitted', scoring_error: scoringError }).eq('id', attemptId);
@@ -158,12 +178,7 @@ export async function POST(request: Request) {
             (question) => !scored.some((response) => response.question_id === question.id),
         );
         const answers = new Map(responses.data.map((response) => [response.question_id, response.text_answer ?? '']));
-        const outcomes = await scoreAll(
-            pending,
-            answers,
-            writingPatternsFor(patterns, attempt.part_template_id),
-            quota,
-        );
+        const outcomes = await scoreAll(pending, answers, patterns, quota);
         const results = outcomes.flatMap((outcome) => ('result' in outcome ? [outcome] : []));
 
         if (results.length > 0) {

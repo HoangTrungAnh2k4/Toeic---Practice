@@ -1,6 +1,7 @@
 import {
     answerAllGuided,
     answerPart,
+    completeWritingExam,
     expect,
     IDS,
     insertAttempt,
@@ -155,24 +156,27 @@ test('SC-C04: Làm đủ 11 câu Speaking, tổng thô 21/35: tổng 120/200 và
     await expect(reviewLevel(page)).toHaveText('Level 5');
 });
 
-test('SC-C05: Writing Part 1 tổng thô 15/15 được 200/200; Part 2 tổng thô 4/8 được 100/200', async ({ page, db }) => {
+test('SC-C05: Luyện lẻ Writing Part 1 tổng thô 15/15 được 200/200; Part 2 tổng thô 4/8 được 100/200', async ({ page, db }) => {
+    const numberOf = await questionNumbers(db, W2);
+    await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, (number) => (number <= 5 ? 3 : 2)));
+    await openWritingRoom(page, W2, { part: 6 });
+    await answerPart(page, Array(5).fill('A woman is carrying a box to the office.'));
+    await submitPart(page);
+    await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}/);
+    await expect(reviewScore(page)).toHaveText('200');
+
+    await openWritingRoom(page, W2, { part: 7 });
+    await answerPart(page, ['Could you tell me when the items will arrive?', 'I suggest sending them next week.']);
+    await submitPart(page);
+    await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}/);
+    await expect(reviewScore(page)).toHaveText('100');
+});
+
+test('SC-C06: Writing cả đề tổng thô 21/28 (Q1–5 được 3, Q6–8 được 2) được 150/200 trên một lượt làm', async ({ page, db }) => {
     const numberOf = await questionNumbers(db, W2);
     await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, (number) => (number <= 5 ? 3 : 2)));
     await openWritingRoom(page, W2);
-    await answerPart(page, Array(5).fill('A woman is carrying a box to the office.'));
-    await submitPart(page);
-    await expect(page).toHaveURL(/[?&]part=7(&|$)/);
-    await answerPart(page, ['Could you tell me when the items will arrive?', 'I suggest sending them next week.']);
-    await submitPart(page);
-    await expect(page).toHaveURL(/[?&]part=8(&|$)/);
-
-    type Local = { id: string; part_template_id: number; status: string };
-    const scored = async (part: number) => (await localTable<Local>(page, 'attempts')).find((a) => a.part_template_id === part && a.status === 'scored');
-    await expect.poll(async () => Boolean((await scored(6)) && (await scored(7)))).toBe(true);
-    const [part1, part2] = [(await scored(6))!, (await scored(7))!];
-
-    await page.goto(`/setting/history/${part1.id}`);
-    await expect(reviewScore(page)).toHaveText('200');
-    await page.goto(`/setting/history/${part2.id}`);
-    await expect(reviewScore(page)).toHaveText('100');
+    await completeWritingExam(page, 'A woman is carrying a box to the office.');
+    await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}/);
+    await expect(reviewScore(page)).toHaveText('150');
 });

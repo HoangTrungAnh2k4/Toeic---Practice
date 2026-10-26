@@ -14,11 +14,20 @@ const AUTOSAVE_DELAY_MS = 600;
 
 interface UseWritingAttemptOptions {
     examId: string;
-    partTemplateId: number;
+    /** `null` = thi cả đề trong một lượt làm; có id = luyện lẻ Part đó. */
+    partTemplateId: number | null;
     mode: AttemptMode;
-    /** Thời lượng của Part; chế độ có hướng dẫn không giới hạn giờ. */
+    /** Thời lượng luyện lẻ một Part (khách); cả đề và chế độ có hướng dẫn truyền `null`, khớp `ends_at` của DB. */
     durationSec: number | null;
+    /** Mọi câu trong phạm vi lượt làm, theo thứ tự Part; `answers` đánh index theo mảng này. */
     questions: Question[];
+    partCount: number;
+}
+
+/** Part đang làm của lượt cả đề và lúc bắt đầu Part đó (ms): đồng hồ từng Part tính từ đây. */
+interface PartProgress {
+    partIndex: number;
+    startedAt: number;
 }
 
 interface Draft {
@@ -28,6 +37,27 @@ interface Draft {
 }
 
 const DRAFTS = 'writing-drafts';
+/**
+ * shortcut: tiến độ Part của lượt cả đề chỉ lưu localStorage; đổi máy/xoá storage giữa bài thì quay về Part 1 (Part hết
+ * giờ tự nộp để đi tiếp). Cần cột trên `attempts` nếu muốn tiếp tục đúng Part trên máy khác.
+ */
+const PROGRESS = 'writing-progress';
+
+interface ProgressRow {
+    attempt_id: string;
+    part_index: number;
+    started_at: number;
+}
+
+function saveProgress(attemptId: string, progress: PartProgress | null) {
+    const rows = readTable<ProgressRow>(PROGRESS).filter((row) => row.attempt_id !== attemptId);
+    const next = progress ? [...rows, { attempt_id: attemptId, part_index: progress.partIndex, started_at: progress.startedAt }] : rows;
+    try {
+        writeTable(PROGRESS, next);
+    } catch {
+        // Mất tiến độ chỉ làm lần vào sau bắt đầu lại từ Part 1; câu trả lời vẫn nằm trên server/nháp
+    }
+}
 
 function writeDrafts(rows: Draft[]) {
     try {
@@ -59,14 +89,19 @@ function clearDrafts(attemptId: string, saved?: Omit<Draft, 'attempt_id'>) {
     if (remaining.length !== rows.length) writeDrafts(remaining);
 }
 
-/** Lượt làm dở của đúng đề & Part (hoặc lượt mới) kèm câu trả lời đã lưu; nháp chưa kịp lưu được ưu tiên. */
-async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questions }: UseWritingAttemptOptions) {
+/** Lượt làm dở của đúng đề & phạm vi (hoặc lượt mới) kèm câu trả lời đã lưu; nháp chưa kịp lưu được ưu tiên. */
+async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questions, partCount }: UseWritingAttemptOptions) {
     const { attempt, responses, isRestored } = await resumeOrStartAttempt({
         exam_id: examId,
         part_template_id: partTemplateId,
         mode,
         duration_sec: mode === 'guided' ? null : durationSec,
     });
+    const saved = readTable<ProgressRow>(PROGRESS).find((row) => row.attempt_id === attempt.id);
+    const progress: PartProgress =
+        saved && saved.part_index < partCount
+            ? { partIndex: saved.part_index, startedAt: saved.started_at }
+            : { partIndex: 0, startedAt: Date.parse(attempt.started_at) };
     const drafts = readTable<Draft>(DRAFTS).filter((row) => row.attempt_id === attempt.id);
     // Nháp còn lại nghĩa là lần trước chưa kịp lưu lên server → dùng nháp và đưa vào hàng chờ lưu
     const unsaved = new Map<number, string>();
@@ -75,12 +110,12 @@ async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questi
         if (draft) unsaved.set(index, draft.text);
         return draft?.text ?? responses.find((response) => response.question_id === question.id)?.text_answer ?? '';
     });
-    return { attempt, answers, unsaved, isRestored };
+    return { attempt, answers, unsaved, isRestored, progress };
 }
 
 /**
- * Lượt làm Writing: tạo hoặc tiếp tục attempt, tự lưu từng câu vào `responses`.
- * Đồng hồ chạy theo `attempt.ends_at` nên tải lại trang không reset thời gian.
+ * Lượt làm Writing (cả đề hoặc một Part): tạo hoặc tiếp tục attempt, tự lưu từng câu vào `responses`.
+ * Đồng hồ chạy theo mốc bắt đầu Part (`partStartedAt`) đã lưu nên tải lại trang không reset thời gian.
  */
 export function useWritingAttempt(options: UseWritingAttemptOptions) {
     const { questions } = options;
@@ -91,6 +126,7 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
     const [loadCount, setLoadCount] = useState(0);
     const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
     const [savedAt, setSavedAt] = useState<number | null>(null);
+    const [progress, setProgress] = useState<PartProgress>({ partIndex: 0, startedAt: 0 });
     const optionsRef = useRef(options);
     /** Câu chưa kịp lưu (đang chờ debounce), theo index câu. */
     const pendingRef = useRef(new Map<number, string>());
@@ -107,6 +143,7 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
                 setAnswers(result.answers);
                 pendingRef.current = new Map(result.unsaved);
                 setIsRestored(result.isRestored);
+                setProgress(result.progress);
             })
             .catch(() => !cancelled && setLoadError(true));
         return () => {
@@ -173,26 +210,45 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
     };
 
     /**
-     * Nộp bài: lưu nốt phần đang chờ, đóng lượt làm rồi gửi chấm chạy nền (không chờ, phòng thi chuyển Part ngay).
-     * Trả `false` (trạng thái `error`) khi chưa lưu/nộp được.
+     * Nộp Part đang làm sau khi lưu nốt phần đang chờ. Còn Part kế (lượt cả đề) → `'next'`, đồng hồ Part kế tính từ lúc
+     * này. Part cuối → đóng lượt làm rồi gửi chấm chạy nền (không chờ) → `'done'`. `false` khi chưa lưu/nộp được.
      */
-    const submit = async () => {
+    const finishPart = async (): Promise<'next' | 'done' | false> => {
         if (!attempt) return false;
         // Câu lưu lỗi đã quay lại hàng chờ → còn câu chờ nghĩa là chưa lưu đủ
         if (!(await flush()) || pendingRef.current.size > 0) return false;
+        if (progress.partIndex < options.partCount - 1) {
+            const next = { partIndex: progress.partIndex + 1, startedAt: Date.now() };
+            saveProgress(attempt.id, next);
+            setProgress(next);
+            return 'next';
+        }
         try {
             await updateAttempt(attempt.id, { status: 'submitted', submitted_at: new Date().toISOString() });
             clearDrafts(attempt.id);
+            saveProgress(attempt.id, null);
             // Chấm lỗi/mất mạng: attempt giữ `submitted`, trang xem bài cho chấm lại
             scoreWritingAttempt(attempt, questions).catch(() => undefined);
             // Lỗi gắn task lộ trình không chặn việc nộp
             linkPlanTask(attempt).catch(() => undefined);
-            return true;
+            return 'done';
         } catch {
             setSaveStatus('error');
             return false;
         }
     };
 
-    return { attempt, answers, isRestored, loadError, retryLoad, saveStatus, savedAt, updateAnswer, submit };
+    return {
+        attempt,
+        answers,
+        partIndex: progress.partIndex,
+        partStartedAt: progress.startedAt,
+        isRestored,
+        loadError,
+        retryLoad,
+        saveStatus,
+        savedAt,
+        updateAnswer,
+        finishPart,
+    };
 }

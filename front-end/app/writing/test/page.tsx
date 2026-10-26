@@ -22,19 +22,18 @@ async function WritingExamRoomContent({ searchParams }: WritingTestPageProps) {
 
     const db = await createServerSupabase();
     const room = await getExamRoom('writing', examId, db);
-    const parts = room?.parts ?? [];
-    const index = partTemplateId === null ? 0 : parts.findIndex((item) => item.template.id === partTemplateId);
-    const part = parts[index];
-    if (!room || !part) notFound();
-    if (await isRoomClosed(room.exam, part.template.id, db)) return <ArchivedExamNotice skill="writing" />;
+    // Không có `part` = thi cả đề trong một lượt làm; có `part` = luyện lẻ Part đó
+    const parts = (room?.parts ?? []).filter((item) => partTemplateId === null || item.template.id === partTemplateId);
+    if (!room || parts.length === 0) notFound();
+    if (await isRoomClosed(room.exam, partTemplateId, db)) return <ArchivedExamNotice skill="writing" />;
 
     return (
         <WritingExamRoomLoader
-            // Mỗi Part một lượt làm: sang Part mới phải mount lại phòng thi để tạo/khôi phục attempt của Part đó
-            key={part.template.id}
+            // Đổi phạm vi (cả đề ↔ một Part) phải mount lại phòng thi để tạo/khôi phục đúng lượt làm
+            key={partTemplateId ?? 'full'}
             exam={room.exam}
-            part={part}
-            nextPartTemplateId={parts[index + 1]?.template.id ?? null}
+            parts={parts}
+            partTemplateId={partTemplateId}
             mode={mode}
         />
     );

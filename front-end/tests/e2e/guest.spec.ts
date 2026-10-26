@@ -21,15 +21,15 @@ import {
 const WRITING = IDS.writing.published[0];
 const PART1_ANSWERS = Array(5).fill('The man goes to the office early.');
 
-test('GU-H01: Khách làm xong Part 1 Writing, mở /setting/history thấy lượt làm và không có request ghi lên Supabase', async ({ page, db }) => {
+test('GU-H01: Khách luyện xong Part 1 Writing, mở /setting/history thấy lượt làm và không có request ghi lên Supabase', async ({ page, db }) => {
     const numberOf = await questionNumbers(db, WRITING);
     await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, () => 2));
     const writes = supabaseWrites(page);
 
-    await openWritingRoom(page, WRITING);
+    await openWritingRoom(page, WRITING, { part: 6 });
     await answerPart(page, PART1_ANSWERS);
     await submitPart(page);
-    await expect(page).toHaveURL(/part=7/);
+    await expect(page).toHaveURL(/\/setting\/history\//);
 
     await page.goto('/setting/history');
     await expect(page.getByRole('row').filter({ hasText: 'E2E Writing 1' }).filter({ hasText: 'Part 1' })).toBeVisible();
@@ -39,10 +39,10 @@ test('GU-H01: Khách làm xong Part 1 Writing, mở /setting/history thấy lư�
 test('GU-C01: Khách làm bài rồi đăng nhập: lịch sử tài khoản không có lượt làm khách, dữ liệu khách trên trình duyệt còn nguyên', async ({ page, db }) => {
     const numberOf = await questionNumbers(db, WRITING);
     await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, () => 2));
-    await openWritingRoom(page, WRITING);
+    await openWritingRoom(page, WRITING, { part: 6 });
     await answerPart(page, PART1_ANSWERS);
     await submitPart(page);
-    await expect(page).toHaveURL(/part=7/);
+    await expect(page).toHaveURL(/\/setting\/history\//);
     const guestAttempts = await localTable<{ id: string }>(page, 'attempts');
     expect(guestAttempts.length).toBeGreaterThan(0);
 

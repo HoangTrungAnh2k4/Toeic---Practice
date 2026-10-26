@@ -3,6 +3,7 @@ import { createExam, must } from './seed';
 import {
     ADMIN,
     answerPart,
+    completeWritingExam,
     daysAgo,
     editor,
     expect,
@@ -14,6 +15,7 @@ import {
     questionIds,
     questionNumbers,
     STUDENT,
+    submitButton,
     submitPart,
     test,
     writingOutcomes,
@@ -27,36 +29,57 @@ interface LocalAttempt {
     id: string;
     exam_id: string;
     part_template_id: number | null;
-    ends_at: string | null;
+    started_at: string;
     scoring_error: string | null;
 }
 
-/** Tua đồng hồ giả (đã dừng) tới đúng `msBeforeEnd` trước hạn của lượt làm khách vừa mở. */
+/** Part 1 Writing dùng chung đồng hồ 8 phút. */
+const PART_1_MS = 8 * 60_000;
+
+/** Tua đồng hồ giả (đã dừng) tới đúng `msBeforeEnd` trước hạn Part 1 của lượt làm khách vừa mở (cả đề). */
 async function forwardToBeforeEnd(page: Page, examId: string, msBeforeEnd: number) {
     const attempt = (await localTable<LocalAttempt>(page, 'attempts')).find((a) => a.exam_id === examId);
-    if (!attempt?.ends_at) throw new Error('Lượt làm không có ends_at');
+    if (!attempt) throw new Error('Chưa có lượt làm');
     const now = await page.evaluate(() => Date.now());
     await page.clock.pauseAt(now + 200);
-    await page.clock.fastForward(Date.parse(attempt.ends_at) - msBeforeEnd - (now + 200));
+    await page.clock.fastForward(Date.parse(attempt.started_at) + PART_1_MS - msBeforeEnd - (now + 200));
     await page.clock.runFor(600);
 }
 
-test('WR-H01: Nộp lần lượt Part 1, Part 2, Part 3: Part 1 → ?part=2; Part 2 → ?part=3; Part 3 → trang kết quả', async ({ page, db }) => {
+test('WR-H01: Làm cả đề: Part 1 → Part 2 → Part 3 trong cùng phòng thi, một lượt làm; nộp Part 3 → trang kết quả', async ({ page, db }) => {
     const numberOf = await questionNumbers(db, W2);
-    await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, () => 2));
+    const requests = await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, () => 2));
     await openWritingRoom(page, W2);
+    const roomUrl = page.url();
     await answerPart(page, Array(5).fill('People are working at the office.'));
     await submitPart(page);
-    // `part` trên URL là id Part template: 7 = Part 2, 8 = Part 3
-    await expect(page).toHaveURL(/[?&]part=7(&|$)/);
+    await expect(submitButton(page, 'Câu 6–7')).toBeVisible();
+    expect(page.url()).toBe(roomUrl);
 
     await answerPart(page, ['Dear Sir, could you tell me when the items arrive?', 'Dear Sir, I suggest sending them next week.']);
     await submitPart(page);
-    await expect(page).toHaveURL(/[?&]part=8(&|$)/);
+    await expect(submitButton(page, 'Câu 8')).toBeVisible();
+    // Chưa nộp Part cuối thì chưa chấm
+    expect(requests).toHaveLength(0);
 
     await answerPart(page, ['I agree that working for a large company is better because it offers more training.']);
     await submitPart(page);
     await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}$/);
+    const attempts = (await localTable<LocalAttempt>(page, 'attempts')).filter((a) => a.exam_id === W2);
+    expect(attempts.map((a) => a.part_template_id)).toEqual([null]);
+    await expect.poll(() => requests.length).toBe(1);
+    expect((requests[0] as { answers: unknown[] }).answers).toHaveLength(8);
+});
+
+test('WR-H04: Luyện lẻ ?part=7: nộp xong về thẳng trang kết quả, không sang Part 3', async ({ page, db }) => {
+    const numberOf = await questionNumbers(db, W2);
+    await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, () => 2));
+    await openWritingRoom(page, W2, { part: 7 });
+    await answerPart(page, ['Dear Sir, could you tell me when the items arrive?', 'Dear Sir, I suggest sending them next week.']);
+    await submitPart(page);
+    await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}$/);
+    const attempts = (await localTable<LocalAttempt>(page, 'attempts')).filter((a) => a.exam_id === W2);
+    expect(attempts.map((a) => a.part_template_id)).toEqual([7]);
 });
 
 test('WR-C01: Gõ bài Part 3 rồi tải lại trang ngay, trước khi hết debounce: nội dung được khôi phục đầy đủ', async ({ page, freshStudent }) => {
@@ -95,15 +118,14 @@ test('WR-C02: CBT tua tới lúc còn 60s: đồng hồ có data-state="warning"
     await expect(status).toHaveText(/\S/);
 });
 
-test('WR-C03: CBT Part 1 hết 8 phút thì tự nộp Part 1 và chuyển sang ?part=2', async ({ page, db }) => {
-    const numberOf = await questionNumbers(db, W1);
-    await mockWritingScore(page, (body) => writingOutcomes(body, numberOf, () => 2));
+test('WR-C03: CBT Part 1 hết 8 phút thì tự nộp Part 1 và chuyển sang Part 2 với đồng hồ 10 phút', async ({ page }) => {
     await page.clock.install();
     await openWritingRoom(page, W1);
     await editor(page).fill('A man goes to the office.');
     await forwardToBeforeEnd(page, W1, -1000);
     await page.clock.resume();
-    await expect(page).toHaveURL(/[?&]part=7(&|$)/);
+    await expect(submitButton(page, 'Câu 6–7')).toBeVisible();
+    await expect(timer(page)).toHaveText(/^(10:00|09:5\d)$/);
 });
 
 test('WR-H02: mode=guided không có giới hạn thời gian', async ({ page }) => {
@@ -168,7 +190,7 @@ test('WR-E04: Câu 8 với 299 từ và với 300 từ', async () => {
     );
 });
 
-test('WR-X02: Chấm Part 1 có câu 5 lỗi: trang xem bài báo lỗi và có nút "Chấm lại"; request chấm lại chỉ gửi câu 5', async ({ page, db }) => {
+test('WR-X02: Chấm cả đề có câu 5 lỗi: trang xem bài báo lỗi và có nút "Chấm lại"; request chấm lại chỉ gửi câu 5', async ({ page, db }) => {
     const numberOf = await questionNumbers(db, W1);
     const q5 = (await questionIds(db, W1))[5];
     let round = 0;
@@ -177,13 +199,11 @@ test('WR-X02: Chấm Part 1 có câu 5 lỗi: trang xem bài báo lỗi và có 
         return writingOutcomes(body, numberOf, (number) => (round === 1 && number === 5 ? 'error' : 2));
     });
     await openWritingRoom(page, W1);
-    await answerPart(page, Array(5).fill('The woman carries a box to the office.'));
-    await submitPart(page);
-    await expect(page).toHaveURL(/[?&]part=7(&|$)/);
+    await completeWritingExam(page, 'The woman carries a box to the office.');
     await expect
-        .poll(async () => (await localTable<LocalAttempt>(page, 'attempts')).find((a) => a.part_template_id === 6)?.scoring_error)
+        .poll(async () => (await localTable<LocalAttempt>(page, 'attempts')).find((a) => a.exam_id === W1)?.scoring_error)
         .toBeTruthy();
-    const attempt = (await localTable<LocalAttempt>(page, 'attempts')).find((a) => a.part_template_id === 6)!;
+    const attempt = (await localTable<LocalAttempt>(page, 'attempts')).find((a) => a.exam_id === W1)!;
 
     await page.goto(`/setting/history/${attempt.id}`);
     await expect(page.getByText(/Lỗi khi chấm/)).toBeVisible();
@@ -203,15 +223,14 @@ test('WR-C04: Admin xem trước một đề Writing draft không tạo lượt 
     expect(await must(db.from('attempts').select('id').eq('exam_id', exam.id))).toEqual([]);
 });
 
-test('WR-H03: Nộp Part 1 trong lúc API chấm còn đang xử lý thì chuyển ngay sang ?part=2', async ({ page }) => {
+test('WR-H03: Nộp Part cuối trong lúc API chấm còn đang xử lý thì chuyển ngay sang trang kết quả', async ({ page }) => {
     let release!: () => void;
     const pending = new Promise<void>((resolve) => (release = resolve));
     let answered = false;
     await mockWritingScore(page, () => ({ status: 200, body: { outcomes: [] }, delay: pending.then(() => void (answered = true)) }));
     await openWritingRoom(page, W2);
-    await answerPart(page, Array(5).fill('A man waits for the bus.'));
-    await submitPart(page);
-    await expect(page).toHaveURL(/[?&]part=7(&|$)/);
+    await completeWritingExam(page, 'A man waits for the bus.');
+    await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}$/);
     expect(answered, 'API chấm vẫn chưa trả về').toBe(false);
     release();
 });

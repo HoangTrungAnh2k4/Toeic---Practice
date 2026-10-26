@@ -30,17 +30,22 @@ export function formatQuestionRange({ q_from, q_to }: PartTemplate): string {
 }
 
 /**
- * Mốc hết giờ (ms) của câu thứ `index` trong Part, `null` khi không giới hạn giờ.
- * Part dùng chung đồng hồ (Q1-5) hết cùng `ends_at`; Part tính giờ từng câu (Q6-7) hết lần lượt sau `response_sec`
- * cộng dồn từ lúc bắt đầu, không quá `ends_at` do DB đặt.
+ * Mốc hết giờ (ms) của câu thứ `index` trong Part bắt đầu lúc `partStartedAt`, `null` khi không giới hạn giờ.
+ * Part dùng chung đồng hồ (Q1-5) hết sau `section_sec`; Part tính giờ từng câu (Q6-7) hết lần lượt sau `response_sec`
+ * cộng dồn. Luyện lẻ một Part còn bị chặn bởi `ends_at` do DB đặt; lượt cả đề có `ends_at = null`.
  * shortcut: chuyển câu sớm thì câu sau được dùng cả phần giờ còn lại của câu trước (ETS thì mất phần giờ đó);
  * cần lưu mốc bắt đầu từng câu nếu muốn khớp ETS.
  */
-export function getQuestionDeadline(attempt: Attempt, template: PartTemplate, index: number): number | null {
-    if (!attempt.ends_at) return null;
-    const endsAt = Date.parse(attempt.ends_at);
-    if (!template.response_sec) return endsAt;
-    const elapsedSec = template.response_sec.slice(0, index + 1).reduce((sum, sec) => sum + sec, 0);
-    return Math.min(endsAt, Date.parse(attempt.started_at) + elapsedSec * 1000);
+export function getQuestionDeadline(
+    attempt: Attempt,
+    template: PartTemplate,
+    index: number,
+    partStartedAt: number,
+): number | null {
+    if (attempt.mode === 'guided') return null;
+    const sec = template.response_sec?.slice(0, index + 1).reduce((sum, item) => sum + item, 0) ?? template.section_sec;
+    if (sec === null) return null;
+    const deadline = partStartedAt + sec * 1000;
+    return attempt.ends_at ? Math.min(Date.parse(attempt.ends_at), deadline) : deadline;
 }
 

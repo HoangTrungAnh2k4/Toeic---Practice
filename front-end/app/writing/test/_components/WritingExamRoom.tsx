@@ -8,7 +8,6 @@ import Button, { buttonVariants } from '@/components/ui/button';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
 import { getPartDurationSec } from '@/lib/domain/parts';
 import type { RoomPart } from '@/lib/exam-library/room';
-import { buildTestHref } from '@/lib/exam-library/search-params';
 import { getAttemptHref } from '@/app/setting/history/utils';
 import { useCountdown } from '../_lib/useCountdown';
 import { useWritingAttempt } from '../_lib/useWritingAttempt';
@@ -29,24 +28,47 @@ type ExamDialog = 'exit' | 'submit' | null;
 
 export interface WritingExamRoomProps {
     exam: Exam;
-    /** Mỗi Part là một lượt làm riêng; nộp xong chuyển sang `nextPartTemplateId` (nếu có). */
-    part: RoomPart;
-    nextPartTemplateId: number | null;
+    /** Các Part của lượt làm: cả đề (`partTemplateId = null`, một lượt làm, nộp Part cuối mới đóng) hoặc một Part. */
+    parts: RoomPart[];
+    partTemplateId: number | null;
     mode: AttemptMode;
 }
 
-export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }: WritingExamRoomProps) {
+export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: WritingExamRoomProps) {
     const router = useRouter();
-    const { template, questions } = part;
-    const { attempt, answers, isRestored, loadError, retryLoad, saveStatus, savedAt, updateAnswer, submit } = useWritingAttempt({
+    const {
+        attempt,
+        answers: allAnswers,
+        partIndex,
+        partStartedAt,
+        isRestored,
+        loadError,
+        retryLoad,
+        saveStatus,
+        savedAt,
+        updateAnswer,
+        finishPart,
+    } = useWritingAttempt({
         examId: exam.id,
-        partTemplateId: template.id,
+        partTemplateId,
         mode,
-        durationSec: getPartDurationSec(template),
-        questions,
+        durationSec: partTemplateId === null ? null : getPartDurationSec(parts[0].template),
+        questions: parts.flatMap((item) => item.questions),
+        partCount: parts.length,
     });
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const secondsLeft = useCountdown(attempt ? getQuestionDeadline(attempt, template, currentIndex) : null);
+    const part = parts[partIndex];
+    const { template, questions } = part;
+    // `answers` của hook đánh index theo câu của mọi Part; Part đang làm là một lát cắt
+    const offset = parts.slice(0, partIndex).reduce((sum, item) => sum + item.questions.length, 0);
+    const answers = allAnswers.slice(offset, offset + questions.length);
+    const hasNextPart = partIndex < parts.length - 1;
+    const [cursor, setCursor] = useState({ partIndex: 0, index: 0 });
+    // Câu đang xem gắn với Part: vừa sang Part mới (Part 2 chỉ 2 câu) thì về câu đầu, không trỏ quá số câu
+    const currentIndex = cursor.partIndex === partIndex ? cursor.index : 0;
+    const setCurrentIndex = (index: number) => setCursor({ partIndex, index });
+    const secondsLeft = useCountdown(
+        attempt ? getQuestionDeadline(attempt, template, currentIndex, partStartedAt) : null,
+    );
     const [openDialog, setOpenDialog] = useState<ExamDialog>(null);
     const autoSubmittedRef = useRef(false);
 
@@ -56,12 +78,17 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
     const isPartTimeUp = isTimeUp && (!template.response_sec || isLastQuestion);
 
     const handleSubmit = async () => {
+        if (!attempt) return;
         // Lỗi hiện ở trạng thái lưu trên header, ở lại phòng để thử nộp lại
-        if (!attempt || !(await submit())) return;
+        const result = await finishPart();
+        if (result === 'next') {
+            setOpenDialog(null);
+            // Part kế có đồng hồ riêng: hết giờ lại được tự nộp
+            autoSubmittedRef.current = false;
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
         // Part cuối: sang trang kết quả, trang đó chờ chấm xong rồi hiện điểm
-        router.push(
-            nextPartTemplateId ? buildTestHref('writing', exam.id, attempt.mode, nextPartTemplateId) : getAttemptHref(attempt.id),
-        );
+        if (result === 'done') router.push(getAttemptHref(attempt.id));
     };
 
     const autoSubmit = useEffectEvent(() => {
@@ -159,7 +186,7 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
                         partNo={template.part_no}
                         questionNumber={question.number}
                         value={answer}
-                        onChange={(value) => updateAnswer(currentIndex, value)}
+                        onChange={(value) => updateAnswer(offset + currentIndex, value)}
                         keywords={keywords}
                         keywordUsages={keywordUsages}
                         isLocked={isTimeUp}
@@ -171,8 +198,8 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
                         currentIndex={currentIndex}
                         totalQuestions={questions.length}
                         isTimeUp={isTimeUp}
-                        onPrev={() => setCurrentIndex((index) => Math.max(0, index - 1))}
-                        onNext={() => setCurrentIndex((index) => Math.min(questions.length - 1, index + 1))}
+                        onPrev={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+                        onNext={() => setCurrentIndex(Math.min(questions.length - 1, currentIndex + 1))}
                         onFinish={() => setOpenDialog('submit')}
                     />
                 </div>
@@ -184,7 +211,7 @@ export default function WritingExamRoom({ exam, part, nextPartTemplateId, mode }
                 answers={answers}
                 firstNumber={template.q_from}
                 rangeLabel={rangeLabel}
-                hasNextPart={nextPartTemplateId !== null}
+                hasNextPart={hasNextPart}
                 isTimeUp={isPartTimeUp}
                 onConfirm={handleSubmit}
             />

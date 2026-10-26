@@ -85,7 +85,9 @@ function getTaskAction(task: PlanTask, exam: ExamSummary | undefined, isToday: b
     if (exam?.status !== 'published') {
         return { actionLabel: 'Chọn đề', href: task.kind === 'writing' ? '/writing' : '/speaking' };
     }
-    return { actionLabel: isToday ? 'Vào học' : 'Bắt đầu', href: buildTestHref(exam.skill, exam.id) };
+    // Task luyện một Part Writing mở đúng Part đó; phòng Speaking chưa có chế độ luyện lẻ nên luôn mở cả đề
+    const part = task.kind === 'writing' ? task.part_template_id : null;
+    return { actionLabel: isToday ? 'Vào học' : 'Bắt đầu', href: buildTestHref(exam.skill, exam.id, undefined, part) };
 }
 
 export function buildTaskView(task: PlanTask, today: string, examById: Map<string, ExamSummary>): TaskView {

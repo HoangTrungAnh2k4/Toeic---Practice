@@ -14,6 +14,7 @@ import {
     openWritingRoom,
     questionNumbers,
     speakingResult,
+    submitButton,
     submitPart,
     test,
 } from './fixtures';
@@ -165,7 +166,6 @@ test('PL-C01: Bấm "Tạo lại lộ trình" và xác nhận: có hộp thoại
 });
 
 test('PL-C02: Có task thi thử Writing, nộp xong Part 1: task chưa xong; chỉ xong khi nộp đủ 3 Part', async ({ page, db, freshStudent }) => {
-    test.fail(true, 'BUG-04: task thi thử Writing được đánh dấu xong ngay khi nộp Part 1');
     const user = await freshStudent();
     const exam = IDS.writing.published[0];
     const plan = await seedPlan(db, user.id, [{ kind: 'mock', title: 'Thi thử: E2E Writing 1', exam_id: exam }]);
@@ -175,13 +175,13 @@ test('PL-C02: Có task thi thử Writing, nộp xong Part 1: task chưa xong; ch
     await openWritingRoom(page, exam);
     await answerPart(page, Array(5).fill('People are waiting for the bus.'));
     await submitPart(page);
-    await expect(page).toHaveURL(/[?&]part=7(&|$)/);
+    await expect(submitButton(page, 'Câu 6–7')).toBeVisible();
     await page.waitForTimeout(2500);
     expect(await task(), 'sau Part 1').toEqual({ attempt_id: null, completed_at: null });
 
     await answerPart(page, ['Could you send the items next week?', 'I suggest a discount.']);
     await submitPart(page);
-    await expect(page).toHaveURL(/[?&]part=8(&|$)/);
+    await expect(submitButton(page, 'Câu 8')).toBeVisible();
     await answerPart(page, ['Large companies offer better training.']);
     await submitPart(page);
     await expect(page).toHaveURL(/\/setting\/history\//);

@@ -34,15 +34,22 @@ export function GuestDataNotice() {
     if (user !== null || dismissed) return null;
 
     return (
+        // Toast nổi góc dưới phải, không tự tắt: chỉ đóng bằng nút X
         <aside
             aria-labelledby="guest-data-notice-title"
-            className="flex sm:flex-row flex-col sm:items-center gap-3 bg-sub1 p-4 border border-sub2/30 rounded-xl"
+            className={cn(
+                'right-4 sm:right-6 bottom-4 sm:bottom-6 left-4 sm:left-auto z-50 fixed sm:w-90',
+                'flex items-start gap-3 bg-card p-4 pl-5 border border-sub2/30 rounded-lg overflow-hidden shadow-lg',
+                'animate-in fade-in slide-in-from-right-8 duration-300',
+            )}
         >
-            <div className="flex flex-1 items-start gap-3 min-w-0">
-                <span className="flex justify-center items-center bg-main rounded-lg size-9 text-sub3 shrink-0">
-                    <LuHardDrive className="size-5" aria-hidden="true" />
-                </span>
-                <div className="flex flex-col gap-0.5 min-w-0">
+            {/* Thanh nhấn trái giống toastify */}
+            <span className="inset-y-0 left-0 absolute bg-sub3 w-1.5" aria-hidden="true" />
+            <span className="flex justify-center items-center bg-main rounded-lg size-9 text-sub3 shrink-0">
+                <LuHardDrive className="size-5" aria-hidden="true" />
+            </span>
+            <div className="flex flex-col flex-1 items-start gap-2 min-w-0">
+                <div className="flex flex-col gap-0.5">
                     <p id="guest-data-notice-title" className="font-semibold text-main text-sm">
                         Bạn đang làm bài ở chế độ khách
                     </p>
@@ -50,23 +57,21 @@ export function GuestDataNotice() {
                         Bài làm chỉ lưu trên trình duyệt này và sẽ không được chuyển sang khi bạn đăng ký tài khoản.
                     </p>
                 </div>
-            </div>
-            <div className="flex items-center self-end sm:self-auto gap-2 shrink-0">
                 <Link href="/register" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
                     Đăng ký
                 </Link>
-                <button
-                    type="button"
-                    aria-label="Đóng thông báo"
-                    onClick={dismiss}
-                    className={cn(
-                        'flex justify-center items-center rounded-lg size-8 text-main transition-colors',
-                        'hover:bg-sub2/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    )}
-                >
-                    <LuX className="size-4" aria-hidden="true" />
-                </button>
             </div>
+            <button
+                type="button"
+                aria-label="Đóng thông báo"
+                onClick={dismiss}
+                className={cn(
+                    '-mt-1 -mr-1 flex justify-center items-center rounded-lg size-7 text-subText transition-colors shrink-0',
+                    'hover:bg-sub2/20 hover:text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+            >
+                <LuX className="size-4" aria-hidden="true" />
+            </button>
         </aside>
     );
 }

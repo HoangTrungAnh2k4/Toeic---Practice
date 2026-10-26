@@ -125,7 +125,6 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
                 row={row}
                 questions={questions}
                 mistakeIndex={mistakeIndex}
-                writingTotal={review.writingTotal}
             />
 
             {questions.length === 0 ? (

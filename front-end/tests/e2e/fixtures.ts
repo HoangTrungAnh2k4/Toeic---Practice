@@ -370,6 +370,26 @@ export async function submitPart(page: Page) {
     await page.getByRole('button', { name: 'Đồng ý nộp bài' }).click();
 }
 
+/** Nút nộp của Part đang mở, vd `submitButton(page, 'Câu 6–7')`: đổi nhãn nghĩa là đã sang Part đó. */
+export const submitButton = (page: Page, range: string) => page.getByRole('button', { name: `Nộp bài ${range}` });
+
+/** Làm cả đề Writing (một lượt làm): trả lời đủ 3 Part, chuyển Part trong cùng phòng thi rồi nộp Part cuối. */
+export async function completeWritingExam(
+    page: Page,
+    part1: string,
+    part2 = ['Dear Sir, could you tell me when the items arrive?', 'Dear Sir, I suggest sending them next week.'],
+    part3 = 'I agree that working for a large company is better because it offers more training.',
+) {
+    await answerPart(page, Array(5).fill(part1));
+    await submitPart(page);
+    await expect(submitButton(page, 'Câu 6–7')).toBeVisible();
+    await answerPart(page, part2);
+    await submitPart(page);
+    await expect(submitButton(page, 'Câu 8')).toBeVisible();
+    await answerPart(page, [part3]);
+    await submitPart(page);
+}
+
 /** `outcomes` cho khách theo số câu: số = điểm, 'error' = lỗi chấm của câu đó. */
 export function writingOutcomes(
     body: { answers?: { questionId: string }[] },

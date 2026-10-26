@@ -122,7 +122,6 @@ export async function linkPlanTask(attempt: Pick<Attempt, 'id' | 'exam_id' | 'pa
 
     const today = toDayKey(new Date());
     const open = active.tasks.filter((item) => !item.attempt_id && !item.completed_at && item.scheduled_date <= today);
-    // shortcut: Writing lưu mỗi Part một lượt nên task thi thử Writing xong ngay ở Part đầu; cần cờ "cả đề" trên attempt để khớp chuẩn
     const task =
         open.find((item) => item.kind === 'mock' && item.exam_id === attempt.exam_id) ??
         open.find((item) => attempt.part_template_id !== null && item.part_template_id === attempt.part_template_id);

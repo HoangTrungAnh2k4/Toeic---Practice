@@ -62,7 +62,7 @@ export default function ExamNavigation({
                         variant="third"
                         onClick={onPrev}
                         disabled={isFirst}
-                        className="flex-1 sm:flex-initial gap-1.5 bg-white"
+                        className="sm:flex-initial flex-1 gap-1.5 bg-white"
                     >
                         <LuChevronLeft className="size-4" aria-hidden="true" />
                         <span>Câu trước</span>
@@ -73,7 +73,7 @@ export default function ExamNavigation({
                         variant="secondary"
                         onClick={onNext}
                         disabled={isLast}
-                        className="flex-1 sm:flex-initial gap-1.5"
+                        className="sm:flex-initial flex-1 gap-1.5"
                     >
                         <span>
                             Câu tiếp theo ({Math.min(currentIndex + 2, totalQuestions)}/{totalQuestions})
@@ -88,15 +88,7 @@ export default function ExamNavigation({
                 </Button>
             </div>
 
-            <aside className="flex items-start gap-3 bg-sub1 p-4 border border-sub2/30 rounded-xl">
-                <span className="flex justify-center items-center bg-sub3 rounded-lg size-8 text-main shrink-0">
-                    <LuLightbulb className="size-4" aria-hidden="true" />
-                </span>
-                <div className="flex flex-col gap-1 text-xs leading-relaxed">
-                    <span className="font-semibold text-main text-sm">Lời khuyên giám khảo</span>
-                    <span className="text-subText">{TIPS[partNo]}</span>
-                </div>
-            </aside>
+
         </div>
     );
 }

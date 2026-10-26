@@ -52,7 +52,7 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
     const { register, formState } = form;
     const templates = getPartTemplates(skill);
     const [activeIndex, setActiveIndex] = useState(0);
-    const tabsRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const errorCounts = templates.map((_, index) =>
         countErrors((formState.errors.parts as FieldErrors<ExamInput['parts']> | undefined)?.[index]),
@@ -63,10 +63,13 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
         templates.map((template) => [String(template.part_no), template.q_to - template.q_from + 1]),
     );
 
-    /** Bấm nút ở cuối Part thì cuộn lên thanh tab để bắt đầu từ câu đầu của Part mới. */
-    const goToPart = (index: number, scroll = false) => {
+    /** Đang cuộn sâu trong Part dài mà đổi Part thì cuộn lên đầu cột nội dung, không thì rơi giữa/cuối Part mới. */
+    const goToPart = (index: number) => {
         setActiveIndex(index);
-        if (scroll) tabsRef.current?.scrollIntoView({ block: 'start' });
+        // 'instant': Part mới ngắn hơn làm trang co lại, trình duyệt huỷ smooth scroll (html đang để smooth) giữa chừng
+        if ((contentRef.current?.getBoundingClientRect().top ?? 0) < 0) {
+            contentRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+        }
     };
 
     const onSubmit = form.handleSubmit(
@@ -161,7 +164,7 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
                         </nav>
                     </aside>
 
-                    <div className="flex flex-col gap-4 min-w-0">
+                    <div ref={contentRef} className="flex flex-col gap-4 min-w-0 scroll-mt-20 md:scroll-mt-6">
                         {locked && (
                             <p
                                 role="note"
@@ -173,7 +176,7 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
                             </p>
                         )}
 
-                        <div ref={tabsRef} className="sm:hidden top-20 sticky flex flex-wrap justify-between items-center gap-3 scroll-mt-6">
+                        <div className="sm:hidden top-20 sticky flex flex-wrap justify-between items-center gap-3">
                             <SegmentedTabs
                                 options={partTabs}
                                 value={partTabs[activeIndex].value}
@@ -195,8 +198,6 @@ export default function ExamBuilderForm({ skill, exam }: ExamBuilderFormProps) {
                                 </div>
                             ))}
                         </fieldset>
-
-
                     </div>
                 </div>
 
