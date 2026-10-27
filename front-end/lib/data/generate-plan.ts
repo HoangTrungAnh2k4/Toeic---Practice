@@ -20,8 +20,6 @@ export interface PlanInput {
     currentScores: Record<Skill, number | null>;
     /** Điểm trung bình theo Part (0-1), key `part_template_id`; thiếu hoặc `null` = chưa có điểm. */
     partRatios: Map<number, number | null>;
-    /** Mẫu lỗi đang mắc nặng nhất của từng kỹ năng. */
-    topMistakes: Record<Skill, { id: string; title: string } | null>;
     exams: ExamSummary[];
     /** Lượt làm gần nhất của mỗi đề (ISO), để ưu tiên đề chưa làm / làm lâu nhất. */
     lastAttemptAt: Map<string, string>;
@@ -106,15 +104,12 @@ export function generatePlan(input: PlanInput): PlanDraft {
     const partPicks = new Map<number, number>();
     const partWeight = (id: number) => 1.2 - (input.partRatios.get(id) ?? 0);
 
-    const reviewMistake = skillsByGap.map((skill) => input.topMistakes[skill]).find((item) => item !== null) ?? null;
-
     const base = (key: string, sortOrder: number, minutes: number) => ({
         scheduled_date: key,
         sort_order: sortOrder,
         duration_min: minutes,
         exam_id: null,
         part_template_id: null,
-        mistake_pattern_id: null,
     });
     const mock = (key: string, skill: Skill): PlanTaskDraft => {
         const exam = nextExam(skill);
@@ -145,14 +140,6 @@ export function generatePlan(input: PlanInput): PlanDraft {
             part_template_id: part.id,
         };
     };
-    const review = (key: string, minutes: number): PlanTaskDraft => ({
-        ...base(key, 0, minutes),
-        kind: 'review',
-        title: reviewMistake!.title,
-        description: 'Ôn mẫu lỗi trong Sổ lỗi, làm theo các bước khắc phục.',
-        goal: 'Tự kiểm tra theo checklist của mẫu lỗi',
-        mistake_pattern_id: reviewMistake!.id,
-    });
 
     const tasks: PlanTaskDraft[] = [];
     const needsMock = skills.filter((skill) => input.currentScores[skill] === null);
@@ -171,21 +158,14 @@ export function generatePlan(input: PlanInput): PlanDraft {
             sprintWeek ||= sprint;
 
             if (sprint) {
-                // Nước rút: xen kẽ thi thử và ôn lỗi, không xếp Part mới
-                const sprintIndex = days.filter((day) => day >= sprintFrom).indexOf(key);
-                tasks.push(
-                    sprintIndex % 2 === 1 && reviewMistake
-                        ? review(key, input.minutesPerDay)
-                        : mock(key, pickWeighted(skillsByGap, gap, sprintPicks)),
-                );
+                // Nước rút: chỉ thi thử, không xếp Part mới
+                tasks.push(mock(key, pickWeighted(skillsByGap, gap, sprintPicks)));
                 return;
             }
 
             const mainMinutes = isLast ? input.minutesPerDay - SUMMARY_MIN : input.minutesPerDay;
             if (weekNo === weekNos[0] && index < needsMock.length) {
                 tasks.push(mock(key, needsMock[index]));
-            } else if (isLast && reviewMistake) {
-                tasks.push(review(key, mainMinutes));
             } else {
                 tasks.push(practice(key, pickWeighted(skillsByGap, gap, skillPicks), mainMinutes));
             }
@@ -203,7 +183,7 @@ export function generatePlan(input: PlanInput): PlanDraft {
         themes.set(
             weekNo,
             sprintWeek
-                ? 'Nước rút: thi thử & ôn lỗi'
+                ? 'Nước rút: thi thử'
                 : weekNo === weekNos[0] && needsMock.length > 0
                   ? 'Chẩn đoán & làm quen đề'
                   : 'Củng cố Part yếu',

@@ -1,15 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import type { Database } from '@/lib/database.types';
 import { logger, serverError } from '@/lib/logger';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
-import type { MistakePattern, RequiredKeyword } from '@/lib/domain/types';
+import type { RequiredKeyword } from '@/lib/domain/types';
 import { ProviderQuotaError } from '@/lib/scoring/errors';
 import { scoringQuota } from '@/lib/scoring/quota';
 import { SCORE_ERROR_MESSAGE, SCORING_STALE_MS, summarizeWriting, type ScoreError } from '@/lib/scoring/scale';
-import { scoreWriting, writingPatternsFor, type WritingOutcome, type WritingQuestion } from '@/lib/scoring/writing';
+import { scoreWriting, type WritingOutcome, type WritingQuestion } from '@/lib/scoring/writing';
 import { createAdminSupabase } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 
@@ -67,11 +66,10 @@ async function loadQuestions(supabase: SupabaseClient<Database>, examId: string,
     }));
 }
 
-/** Chấm song song, mẫu lỗi theo Part của từng câu; câu bỏ trống không gọi LLM nên không trừ lượt, chấm lỗi thì hoàn lượt. */
+/** Chấm song song; câu bỏ trống không gọi LLM nên không trừ lượt, chấm lỗi thì hoàn lượt. */
 function scoreAll(
     questions: (WritingQuestion & { id: string; partTemplateId: number })[],
     answers: Map<string, string>,
-    patterns: MistakePattern[],
     quota: ReturnType<typeof scoringQuota>,
 ): Promise<WritingOutcome[]> {
     return Promise.all(
@@ -79,8 +77,7 @@ function scoreAll(
             const answer = answers.get(question.id) ?? '';
             if (answer.trim() && !(await quota.consume())) return { questionId: question.id, error: 'daily_limit' };
             try {
-                const partPatterns = writingPatternsFor(patterns, question.partTemplateId);
-                return { questionId: question.id, result: await scoreWriting(question, answer, partPatterns) };
+                return { questionId: question.id, result: await scoreWriting(question, answer) };
             } catch (error) {
                 if (answer.trim()) await quota.refund();
                 if (error instanceof ProviderQuotaError) return { questionId: question.id, error: 'provider_limit' };
@@ -109,17 +106,13 @@ export async function POST(request: Request) {
         const { examId, partTemplateId, answers } = body.data;
         if (partTemplateId !== null && !WRITING_PART_IDS.includes(partTemplateId)) return fail('invalid_body', 400);
 
-        const loaded = await Promise.all([
-            loadQuestions(supabase, examId, partTemplateId),
-            listMistakePatterns(),
-        ]).catch((error: unknown) => serverError('writing score: load questions failed', error, { examId }));
-        if (loaded instanceof Response) return loaded;
-        const [questions, patterns] = loaded;
+        const questions = await loadQuestions(supabase, examId, partTemplateId).catch((error: unknown) => serverError('writing score: load questions failed', error, { examId }));
+        if (questions instanceof Response) return questions;
         const asked = questions.filter((question) => answers.some((answer) => answer.questionId === question.id));
         if (asked.length !== answers.length) return fail('question_not_found', 404);
 
         const texts = new Map(answers.map((answer) => [answer.questionId, answer.text]));
-        const outcomes = await scoreAll(asked, texts, patterns, quota).catch(
+        const outcomes = await scoreAll(asked, texts, quota).catch(
             (error: unknown) => serverError('writing score: guest scoring failed', error, { examId }),
         );
         if (outcomes instanceof Response) return outcomes;
@@ -161,10 +154,9 @@ export async function POST(request: Request) {
         admin.from('attempts').update({ status: 'submitted', scoring_error: scoringError }).eq('id', attemptId);
 
     try {
-        const [questions, responses, patterns] = await Promise.all([
+        const [questions, responses] = await Promise.all([
             loadQuestions(supabase, attempt.exam_id, attempt.part_template_id),
             admin.from('responses').select('question_id, text_answer, score, feedback').eq('attempt_id', attemptId),
-            listMistakePatterns(),
         ]);
         if (responses.error) throw responses.error;
         if (questions.length === 0) {
@@ -178,7 +170,7 @@ export async function POST(request: Request) {
             (question) => !scored.some((response) => response.question_id === question.id),
         );
         const answers = new Map(responses.data.map((response) => [response.question_id, response.text_answer ?? '']));
-        const outcomes = await scoreAll(pending, answers, patterns, quota);
+        const outcomes = await scoreAll(pending, answers, quota);
         const results = outcomes.flatMap((outcome) => ('result' in outcome ? [outcome] : []));
 
         if (results.length > 0) {
@@ -217,7 +209,6 @@ export async function POST(request: Request) {
                         explanation,
                         criterion,
                         severity,
-                        mistake_pattern_id,
                         start_offset,
                         end_offset,
                     }) => ({
@@ -227,7 +218,6 @@ export async function POST(request: Request) {
                         explanation,
                         criterion,
                         severity,
-                        mistake_pattern_id,
                         start_offset,
                         end_offset,
                     }),

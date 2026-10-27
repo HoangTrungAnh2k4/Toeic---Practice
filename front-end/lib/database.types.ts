@@ -45,23 +45,17 @@ isOneToOne: false
                   ]
                 },"annotations": {
                   Row: {
-                    "at_sec": number | null,"correction": string,"criterion": Database["public"]['Enums']["criterion"],"end_offset": number,"explanation": string,"id": string,"mistake_pattern_id": string | null,"quote": string,"response_id": string,"severity": Database["public"]['Enums']["severity"],"start_offset": number
+                    "at_sec": number | null,"correction": string,"criterion": Database["public"]['Enums']["criterion"],"end_offset": number,"explanation": string,"id": string,"quote": string,"response_id": string,"severity": Database["public"]['Enums']["severity"],"start_offset": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "at_sec"?: number | null,"correction": string,"criterion": Database["public"]['Enums']["criterion"],"end_offset": number,"explanation": string,"id"?: string,"mistake_pattern_id"?: string | null,"quote": string,"response_id": string,"severity": Database["public"]['Enums']["severity"],"start_offset": number
+                    "at_sec"?: number | null,"correction": string,"criterion": Database["public"]['Enums']["criterion"],"end_offset": number,"explanation": string,"id"?: string,"quote": string,"response_id": string,"severity": Database["public"]['Enums']["severity"],"start_offset": number
                   }
                   Update: {
-                    "at_sec"?: number | null,"correction"?: string,"criterion"?: Database["public"]['Enums']["criterion"],"end_offset"?: number,"explanation"?: string,"id"?: string,"mistake_pattern_id"?: string | null,"quote"?: string,"response_id"?: string,"severity"?: Database["public"]['Enums']["severity"],"start_offset"?: number
+                    "at_sec"?: number | null,"correction"?: string,"criterion"?: Database["public"]['Enums']["criterion"],"end_offset"?: number,"explanation"?: string,"id"?: string,"quote"?: string,"response_id"?: string,"severity"?: Database["public"]['Enums']["severity"],"start_offset"?: number
                   }
                   Relationships: [
                     {
-      foreignKeyName: "annotations_mistake_pattern_id_fkey"
-      columns: ["mistake_pattern_id"]
-isOneToOne: false
-      referencedRelation: "mistake_patterns"
-      referencedColumns: ["id"]
-    },{
       foreignKeyName: "annotations_response_id_fkey"
       columns: ["response_id"]
 isOneToOne: false
@@ -173,26 +167,6 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"mistake_patterns": {
-                  Row: {
-                    "criteria": (Database["public"]['Enums']["criterion"])[],"id": string,"impact": string,"part_template_id": number | null,"remedy": NonNullable<Json>,"severity": Database["public"]['Enums']["severity"],"skill": Database["public"]['Enums']["skill"],"summary": string,"title": string,"why": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "criteria"?: (Database["public"]['Enums']["criterion"])[],"id"?: string,"impact": string,"part_template_id"?: number | null,"remedy": NonNullable<Json>,"severity": Database["public"]['Enums']["severity"],"skill": Database["public"]['Enums']["skill"],"summary": string,"title": string,"why": string
-                  }
-                  Update: {
-                    "criteria"?: (Database["public"]['Enums']["criterion"])[],"id"?: string,"impact"?: string,"part_template_id"?: number | null,"remedy"?: NonNullable<Json>,"severity"?: Database["public"]['Enums']["severity"],"skill"?: Database["public"]['Enums']["skill"],"summary"?: string,"title"?: string,"why"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "mistake_patterns_part_template_id_fkey"
-      columns: ["part_template_id"]
-isOneToOne: false
-      referencedRelation: "part_templates"
-      referencedColumns: ["id"]
-    }
-                  ]
                 },"part_templates": {
                   Row: {
                     "context_sec": number | null,"id": number,"part_no": number,"prep_sec": number | null,"q_from": number,"q_to": number,"response_sec": (number)[] | null,"section_sec": number | null,"skill": Database["public"]['Enums']["skill"],"task": string
@@ -209,14 +183,14 @@ isOneToOne: false
                   ]
                 },"plan_tasks": {
                   Row: {
-                    "attempt_id": string | null,"completed_at": string | null,"description": string | null,"duration_min": number,"exam_id": string | null,"goal": string | null,"id": string,"kind": Database["public"]['Enums']["plan_task_kind"],"mistake_pattern_id": string | null,"part_template_id": number | null,"plan_id": string,"scheduled_date": string,"sort_order": number,"title": string
+                    "attempt_id": string | null,"completed_at": string | null,"description": string | null,"duration_min": number,"exam_id": string | null,"goal": string | null,"id": string,"kind": Database["public"]['Enums']["plan_task_kind"],"part_template_id": number | null,"plan_id": string,"scheduled_date": string,"sort_order": number,"title": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempt_id"?: string | null,"completed_at"?: string | null,"description"?: string | null,"duration_min": number,"exam_id"?: string | null,"goal"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["plan_task_kind"],"mistake_pattern_id"?: string | null,"part_template_id"?: number | null,"plan_id": string,"scheduled_date": string,"sort_order"?: number,"title": string
+                    "attempt_id"?: string | null,"completed_at"?: string | null,"description"?: string | null,"duration_min": number,"exam_id"?: string | null,"goal"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["plan_task_kind"],"part_template_id"?: number | null,"plan_id": string,"scheduled_date": string,"sort_order"?: number,"title": string
                   }
                   Update: {
-                    "attempt_id"?: string | null,"completed_at"?: string | null,"description"?: string | null,"duration_min"?: number,"exam_id"?: string | null,"goal"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["plan_task_kind"],"mistake_pattern_id"?: string | null,"part_template_id"?: number | null,"plan_id"?: string,"scheduled_date"?: string,"sort_order"?: number,"title"?: string
+                    "attempt_id"?: string | null,"completed_at"?: string | null,"description"?: string | null,"duration_min"?: number,"exam_id"?: string | null,"goal"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["plan_task_kind"],"part_template_id"?: number | null,"plan_id"?: string,"scheduled_date"?: string,"sort_order"?: number,"title"?: string
                   }
                   Relationships: [
                     {
@@ -230,12 +204,6 @@ isOneToOne: true
       columns: ["exam_id"]
 isOneToOne: false
       referencedRelation: "exams"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "plan_tasks_mistake_pattern_id_fkey"
-      columns: ["mistake_pattern_id"]
-isOneToOne: false
-      referencedRelation: "mistake_patterns"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "plan_tasks_part_template_id_fkey"

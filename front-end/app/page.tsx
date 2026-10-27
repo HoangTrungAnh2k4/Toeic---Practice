@@ -6,10 +6,8 @@ import LandingEtsFormat from '../components/landing/LandingEtsFormat';
 import LandingFaq from '../components/landing/LandingFaq';
 import LandingHeader from '../components/landing/LandingHeader';
 import LandingHero from '../components/landing/LandingHero';
-import LandingMistakes from '../components/landing/LandingMistakes';
 import { LandingSchedule } from '../components/landing/LandingSchedule';
 import { SiteFooter } from '@/components/layout/footer/site-footer';
-import { MISTAKES_ENABLED } from '@/app/mistakes/utils';
 
 // Font viết tay chỉ dùng ở landing (chú thích, chữ sửa lỗi)
 const patrickHand = Patrick_Hand({ weight: '400', variable: '--font-patrick-hand', subsets: ['latin', 'vietnamese'] });
@@ -26,7 +24,6 @@ export default function LandingPage() {
             <LandingHeader />
             <main className="flex flex-col items-center">
                 <LandingHero />
-                {MISTAKES_ENABLED && <LandingMistakes />}
                 <LandingSchedule />
                 <LandingEtsFormat />
                 <LandingFaq />

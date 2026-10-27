@@ -41,7 +41,7 @@ export default function ReviewScoringState({ row, onRescore }: ReviewScoringStat
                         {stalled ? 'Bài đã nộp nhưng chưa có điểm' : 'Đang chấm bài, vui lòng chờ'}
                     </h2>
                     <p className="font-medium text-subText text-sm">
-                        Điểm, nhận xét và lỗi sẽ hiển thị tại đây khi chấm xong; bài này chưa được tính vào sổ lỗi.
+                        Điểm, nhận xét và lỗi sẽ hiển thị tại đây khi chấm xong.
                     </p>
                     {scoringError && <p className="font-semibold text-main text-sm">Lỗi khi chấm: {scoringError}</p>}
                 </div>

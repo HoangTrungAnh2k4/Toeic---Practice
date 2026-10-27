@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
 import ProfileView from './_components/ProfileView';
 
@@ -8,11 +7,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-    const [patterns, exams] = await Promise.all([listMistakePatterns(), getExamSummaries()]);
+    const exams = await getExamSummaries();
 
     return (
         <main className="flex flex-col gap-6 mx-auto w-full min-w-0 max-w-360">
-            <ProfileView exams={exams} patterns={patterns} />
+            <ProfileView exams={exams} />
         </main>
     );
 }

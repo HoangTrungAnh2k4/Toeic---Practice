@@ -1,5 +1,5 @@
 import type { IconType } from 'react-icons';
-import { LuBookCheck, LuMic, LuPenLine } from 'react-icons/lu';
+import { LuCalendarCheck, LuMic, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -29,9 +29,9 @@ const HIGHLIGHTS: Highlight[] = [
         tilt: 'sm:rotate-1 sm:translate-y-2.5',
     },
     {
-        icon: LuBookCheck,
-        title: 'Sổ lỗi cá nhân',
-        detail: 'Chỉ rõ lỗi lặp lại và cách khắc phục',
+        icon: LuCalendarCheck,
+        title: 'Lộ trình cá nhân',
+        detail: 'Xếp lịch học theo mục tiêu điểm và ngày thi',
         tone: 'bg-success text-black',
         tilt: 'sm:-rotate-1',
     },

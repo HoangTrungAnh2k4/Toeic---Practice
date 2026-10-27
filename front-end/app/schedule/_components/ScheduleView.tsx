@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { LuCalendarPlus, LuTarget, LuUserPlus } from 'react-icons/lu';
-import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
 import { LoadError } from '@/components/load-error';
 import Button, { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,7 +10,7 @@ import { combineAsync, useAsync } from '@/hooks/use-async';
 import { useUserStats } from '@/hooks/use-user-stats';
 import { getMonthTaskProgress, getPlanWeekCount, getPlanWeekNo } from '@/lib/data/study-plan';
 import { type ActivePlan, getActivePlan, getLatestInsight, getProfile } from '@/lib/data/user-data';
-import type { AiInsight, MistakePattern, Profile } from '@/lib/domain/types';
+import type { AiInsight, Profile } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { cn } from '@/lib/utils';
 import { buildExamGoal, buildSkillProgress, buildWeek } from '../utils';
@@ -27,7 +26,6 @@ import WeeklyTaskTable from './WeeklyTaskTable';
 
 interface ScheduleViewProps {
     exams: ExamSummary[];
-    patterns: MistakePattern[];
 }
 
 interface PlanState {
@@ -54,8 +52,8 @@ function NoPlanCard({ isGuest, onEditGoals }: { isGuest: boolean; onEditGoals: (
             </h2>
             <p className="max-w-md text-subText text-sm">
                 {isGuest
-                    ? 'Lộ trình được xếp theo ngày thi, mục tiêu điểm và sổ lỗi của tài khoản. Bài làm ở chế độ khách chỉ lưu trên trình duyệt này.'
-                    : 'Đặt điểm mục tiêu và ngày thi, hệ thống xếp lịch học ngay theo điểm và sổ lỗi của bạn.'}
+                    ? 'Lộ trình được xếp theo ngày thi, mục tiêu điểm và điểm hiện tại của tài khoản. Bài làm ở chế độ khách chỉ lưu trên trình duyệt này.'
+                    : 'Đặt điểm mục tiêu và ngày thi, hệ thống xếp lịch học ngay theo điểm hiện tại của bạn.'}
             </p>
             {isGuest ? (
                 <Link href="/register" className={cn(buttonVariants({ variant: 'primary', size: 'md' }), 'gap-2')}>
@@ -73,9 +71,8 @@ function NoPlanCard({ isGuest, onEditGoals }: { isGuest: boolean; onEditGoals: (
 }
 
 /** Lịch học chỉ có ở tài khoản; render sau khi mount vì thống kê đọc bài làm trong localStorage. */
-export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
+export default function ScheduleView({ exams }: ScheduleViewProps) {
     const statsState = useUserStats(exams);
-    const bookState = useMistakeBook(patterns, exams);
     const planState = useAsync(loadPlanState);
     const [weekNo, setWeekNo] = useState<number | null>(null);
     const [dialog, setDialog] = useState<'goals' | 'regenerate' | null>(null);
@@ -84,13 +81,12 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
         const frame = requestAnimationFrame(() => window.location.hash === '#goals' && setDialog('goals'));
         return () => cancelAnimationFrame(frame);
     }, []);
-    const { failed, retry } = combineAsync(statsState, bookState, planState);
+    const { failed, retry } = combineAsync(statsState, planState);
     const { data: stats } = statsState;
-    const { data: book } = bookState;
     const { data: state } = planState;
 
     if (failed) return <LoadError message="Không tải được lộ trình học." onRetry={retry} />;
-    if (!stats || !book || !state) {
+    if (!stats || !state) {
         return (
             <div className="flex flex-col gap-6" aria-busy="true" aria-label="Đang tải lộ trình">
                 <Skeleton className="rounded-xl h-24" />
@@ -106,7 +102,7 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
         setWeekNo(null);
         planState.retry();
     };
-    const context = { stats, book, exams };
+    const context = { stats, exams };
     const header = (
         <>
             <SchedulePageHeader
@@ -157,7 +153,7 @@ export default function ScheduleView({ exams, patterns }: ScheduleViewProps) {
             {header}
             <ScheduleMilestones
                 goal={buildExamGoal(profile, active.plan, stats.study.streak_days)}
-                skills={buildSkillProgress(stats, profile, book)}
+                skills={buildSkillProgress(stats, profile)}
                 monthly={getMonthTaskProgress(active.tasks, now)}
             />
 

@@ -1,14 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import { LuArrowRight, LuBrain, LuChartBar, LuLibrary } from 'react-icons/lu';
+import { LuChartBar, LuLibrary } from 'react-icons/lu';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Skill } from '@/lib/domain/types';
 import { toEntries } from '@/lib/exam-library/entries';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { useUserExamStates } from '@/lib/exam-library/use-user-exam-states';
-import { cn } from '@/lib/utils';
-import { MISTAKES_ENABLED } from '@/app/mistakes/utils';
 import { SKILL_COPY } from './skill-copy';
 
 interface LibraryKpiCardsProps {
@@ -37,7 +34,7 @@ export function LibraryKpiCards({ skill, exams }: LibraryKpiCardsProps) {
 
     return (
         <div
-            className={cn('gap-4 grid grid-cols-1', MISTAKES_ENABLED ? 'md:grid-cols-3' : 'md:grid-cols-2')}
+            className="gap-4 grid grid-cols-1 md:grid-cols-2"
             aria-busy={!states && !loadFailed}
         >
             {/* Library progress */}
@@ -105,30 +102,6 @@ export function LibraryKpiCards({ skill, exams }: LibraryKpiCardsProps) {
                         : `Chưa có bài ${copy.label} nào được chấm điểm.`}
                 </p>
             </div>
-
-            {/* Mistake focus */}
-            {MISTAKES_ENABLED && (
-                <div className="flex flex-col justify-between gap-4 bg-sub3/10 shadow-sm p-5 border border-sub3/50 rounded-xl">
-                    <div className="flex flex-col gap-3">
-                        <div className="flex justify-between items-start gap-3">
-                            <span className={LABEL_CLASS}>Trọng tâm cần cải thiện</span>
-                            <div className="flex justify-center items-center bg-sub3 rounded-lg size-10 text-main shrink-0">
-                                <LuBrain className="size-5" aria-hidden="true" />
-                            </div>
-                        </div>
-                        <p className="text-subText text-xs leading-relaxed">
-                            Sổ lỗi tổng hợp các lỗi lặp lại sau khi bài làm được chấm và chỉ ra phần nên ưu tiên sửa.
-                        </p>
-                    </div>
-                    <Link
-                        href={`/mistakes?skill=${skill}`}
-                        className="inline-flex items-center gap-1 self-end px-1 rounded-md font-semibold text-main text-xs hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"
-                    >
-                        Mở sổ lỗi {copy.label}
-                        <LuArrowRight className="size-3.5" aria-hidden="true" />
-                    </Link>
-                </div>
-            )}
         </div>
     );
 }

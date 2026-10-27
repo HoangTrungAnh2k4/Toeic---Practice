@@ -1,5 +1,4 @@
-import { LuCircleCheck, LuClock, LuKeyRound, LuSparkles } from 'react-icons/lu';
-import { MistakeItem } from '@/app/mistakes/types';
+import { LuCircleCheck, LuClock, LuKeyRound, LuMessageSquareText, LuSparkles } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import { placeAnnotations } from '../../_lib/annotate';
 import { ReviewQuestion } from '../../types';
@@ -9,16 +8,15 @@ import AnnotationList from './AnnotationList';
 interface ReviewQuestionCardProps {
     item: ReviewQuestion;
     isSpeaking: boolean;
-    mistakeIndex: Record<string, MistakeItem>;
     /** Bài đang chấm: chỉ hiện câu trả lời đã nộp, chưa có nhận xét. */
     isPending?: boolean;
 }
 
 const BLOCK_LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider';
 
-export default function ReviewQuestionCard({ item, isSpeaking, mistakeIndex, isPending }: ReviewQuestionCardProps) {
+export default function ReviewQuestionCard({ item, isSpeaking, isPending }: ReviewQuestionCardProps) {
     const { question, template, context, response, annotations } = item;
-    const { number, prompt, keywords } = question;
+    const { number, prompt, keywords, sample_answer: sampleAnswer } = question;
     const stimulus = question.stimulus ?? context;
     const answer = (isSpeaking ? response?.transcript : response?.text_answer) ?? '';
     const responseTime = isSpeaking ? template.response_sec?.[number - template.q_from] : undefined;
@@ -99,17 +97,30 @@ export default function ReviewQuestionCard({ item, isSpeaking, mistakeIndex, isP
             </div>
 
             {/* Feedback */}
-            {!isPending &&
-                (placed.length > 0 ? (
-                    <AnnotationList placed={placed} mistakeIndex={mistakeIndex} />
-                ) : (
-                    answer.trim() && (
-                        <p className="flex items-center gap-2 bg-success/15 p-3 border border-success/60 rounded-lg font-medium text-main text-sm">
-                            <LuCircleCheck className="size-4 shrink-0" aria-hidden="true" />
-                            Không phát hiện lỗi đáng kể ở câu này.
-                        </p>
-                    )
-                ))}
+            {!isPending && answer.trim() && (
+                <>
+                    {/* Lỗi cả bài (thiếu từ khoá, lạc đề...) không trích được đoạn nào nên chỉ nằm trong feedback */}
+                    {response?.feedback && (
+                        <div className="flex flex-col gap-2">
+                            <span className={BLOCK_LABEL_CLASS}>Nhận xét</span>
+                            <p className="flex items-start gap-2 bg-sub1/50 p-3 rounded-lg font-medium text-main text-sm leading-relaxed">
+                                <LuMessageSquareText className="mt-0.5 size-4 text-sub2 shrink-0" aria-hidden="true" />
+                                {response.feedback}
+                            </p>
+                        </div>
+                    )}
+                    {placed.length > 0 ? (
+                        <AnnotationList placed={placed} />
+                    ) : (
+                        isPerfect && (
+                            <p className="flex items-center gap-2 bg-success/15 p-3 border border-success/60 rounded-lg font-medium text-main text-sm">
+                                <LuCircleCheck className="size-4 shrink-0" aria-hidden="true" />
+                                Không phát hiện lỗi đáng kể ở câu này.
+                            </p>
+                        )
+                    )}
+                </>
+            )}
 
             {!isPending && strengths.length > 0 && (
                 <div className="flex flex-col gap-2 pt-4 border-sub2/20 border-t">
@@ -122,6 +133,15 @@ export default function ReviewQuestionCard({ item, isSpeaking, mistakeIndex, isP
                             </li>
                         ))}
                     </ul>
+                </div>
+            )}
+
+            {!isPending && sampleAnswer && (
+                <div className="flex flex-col gap-2 pt-4 border-sub2/20 border-t">
+                    <span className={BLOCK_LABEL_CLASS}>Bài mẫu</span>
+                    <p className="bg-card p-4 border border-sub2/30 rounded-xl font-medium text-main text-sm leading-relaxed whitespace-pre-line">
+                        {sampleAnswer}
+                    </p>
                 </div>
             )}
         </section>

@@ -3,10 +3,26 @@ import { LuArrowRight, LuBookOpen, LuCornerDownRight, LuMic, LuPencil, LuSparkle
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LandingHeroTimer from './LandingHeroTimer';
-import { Fix } from './LandingMistakesHero';
 import VoiceWave from './VoiceWave';
 import { FaMicrophoneAlt } from 'react-icons/fa';
 import { FaPencil } from 'react-icons/fa6';
+
+/** Một từ sai bị gạch, chữ sửa viết tay nổi phía trên. */
+function Fix({ wrong, right, className }: { wrong: string; right: string; className?: string }) {
+    return (
+        <span className="inline-block relative">
+            <del className="decoration-2 decoration-sub3">{wrong}</del>
+            <ins
+                className={cn(
+                    '-top-7 left-1/2 absolute text-sub3 text-xl no-underline whitespace-nowrap -rotate-3 -translate-x-1/2',
+                    className,
+                )}
+            >
+                {right}
+            </ins>
+        </span>
+    );
+}
 
 const CARD = 'absolute font-hand text-2xl bg-white border-2 border-black rounded-2xl shadow-[6px_6px_0_0_#000]';
 const PILL =
@@ -75,7 +91,7 @@ function HeroVisual() {
                 <span className={PILL_NUM}>02</span>Chấm theo rubric ETS
             </div>
             <div className={cn(PILL, 'bottom-20 left-1/3  bg-success motion-safe:[animation-delay:-4s]')}>
-                <span className={cn(PILL_NUM, 'bg-black')}>03</span>Đã thêm vào sổ lỗi
+                <span className={cn(PILL_NUM, 'bg-black')}>03</span>Chỉ rõ lỗi & cách sửa
             </div>
         </div>
     );

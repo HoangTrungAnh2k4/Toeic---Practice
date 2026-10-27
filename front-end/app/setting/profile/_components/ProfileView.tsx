@@ -1,31 +1,23 @@
 'use client';
 
 import { LuAlarmClock, LuCalendarCheck, LuFlame, LuSunMoon, LuTrophy } from 'react-icons/lu';
-import { getMistakes } from '@/app/mistakes/_lib/data';
-import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
-import { MISTAKES_ENABLED } from '@/app/mistakes/utils';
 import { LoadError } from '@/components/load-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { combineAsync, useAsync } from '@/hooks/use-async';
 import { useUserStats } from '@/hooks/use-user-stats';
 import { getMonthTaskProgress, getPlanWeekNo } from '@/lib/data/study-plan';
 import { getActivePlan, getProfile } from '@/lib/data/user-data';
-import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { ProfileField } from '../types';
 import { formatDuration, getAverageGain, getRecentStudyDays, getScoreTrend } from '../utils';
 import PartScoreCard from './PartScoreCard';
 import ProfileGoalCard from './ProfileGoalCard';
 import ProfileIdentityCard from './ProfileIdentityCard';
-import ProfileMistakesCard from './ProfileMistakesCard';
 import StudyHabitCard from './StudyHabitCard';
 
 interface ProfileViewProps {
     exams: ExamSummary[];
-    patterns: MistakePattern[];
 }
-
-const MISTAKE_LIMIT = 3;
 
 async function loadUser() {
     const [profile, active] = await Promise.all([getProfile(), getActivePlan()]);
@@ -40,26 +32,21 @@ function ProfileSkeleton() {
                 <Skeleton className="xl:col-span-2 rounded-xl h-96" />
                 <Skeleton className="rounded-xl h-96" />
             </div>
-            <div className="gap-6 grid grid-cols-1 xl:grid-cols-3">
-                <Skeleton className="xl:col-span-2 rounded-xl h-72" />
-                <Skeleton className="rounded-xl h-72" />
-            </div>
+            <Skeleton className="rounded-xl h-72" />
         </div>
     );
 }
 
 /** Hồ sơ đọc bài làm trong localStorage → render sau khi mount. Khách không có mục tiêu, ngày thi, giờ học. */
-export default function ProfileView({ exams, patterns }: ProfileViewProps) {
+export default function ProfileView({ exams }: ProfileViewProps) {
     const statsState = useUserStats(exams);
-    const bookState = useMistakeBook(patterns, exams);
     const userState = useAsync(loadUser);
-    const { failed, retry } = combineAsync(statsState, bookState, userState);
+    const { failed, retry } = combineAsync(statsState, userState);
     const { data: stats } = statsState;
-    const { data: book } = bookState;
     const { data: user } = userState;
 
     if (failed) return <LoadError message="Không tải được hồ sơ học tập." onRetry={retry} />;
-    if (!stats || !book || !user) return <ProfileSkeleton />;
+    if (!stats || !user) return <ProfileSkeleton />;
 
     const { profile, active } = user;
     const now = new Date();
@@ -105,21 +92,7 @@ export default function ProfileView({ exams, patterns }: ProfileViewProps) {
                 />
             </div>
 
-            <div className="items-stretch gap-6 grid grid-cols-1 xl:grid-cols-3">
-                <PartScoreCard parts={stats.parts} className={MISTAKES_ENABLED ? 'xl:col-span-2' : 'xl:col-span-3'} />
-                {MISTAKES_ENABLED && (
-                    <ProfileMistakesCard
-                        limit={MISTAKE_LIMIT}
-                        mistakes={getMistakes(book, {
-                            skill: 'all',
-                            status: 'all',
-                            criterion: 'all',
-                            sort: 'frequency',
-                            searchQuery: '',
-                        }).slice(0, MISTAKE_LIMIT)}
-                    />
-                )}
-            </div>
+            <PartScoreCard parts={stats.parts} />
         </>
     );
 }

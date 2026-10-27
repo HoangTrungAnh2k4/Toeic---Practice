@@ -12,7 +12,8 @@ export default function ReviewQuestionNav({ questions }: ReviewQuestionNavProps)
             className="flex flex-col gap-3 bg-card shadow-sm p-4 border border-sub2/30 rounded-xl lg:top-4 lg:sticky"
         >
             <span className="font-semibold text-subText text-xs uppercase tracking-wider">Đi tới câu</span>
-            <ol className="flex lg:flex-col flex-wrap gap-2">
+            {/* lg:flex-nowrap: cột nhiều dòng (wrap) cho item rộng theo min-content → tràn khung, không truncate */}
+            <ol className="flex lg:flex-col flex-wrap lg:flex-nowrap gap-2">
                 {questions.map(({ question: { id, number }, template, response, annotations }) => {
                     const score = response?.score ?? null;
                     const maxScore = response?.max_score ?? null;
@@ -30,9 +31,11 @@ export default function ReviewQuestionNav({ questions }: ReviewQuestionNavProps)
                                     <span className="text-[0.6875rem] text-subText">
                                         {annotations.length
                                             ? `${annotations.length} nhận xét`
-                                            : (response?.text_answer ?? response?.transcript)?.trim()
-                                              ? 'Không có lỗi'
-                                              : 'Chưa trả lời'}
+                                            : !(response?.text_answer ?? response?.transcript)?.trim()
+                                              ? 'Chưa trả lời'
+                                              : score !== null && score === maxScore
+                                                ? 'Không có lỗi'
+                                                : 'Xem nhận xét'}
                                     </span>
                                 </span>
                                 {score !== null && maxScore !== null && (

@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import type { IconType } from 'react-icons';
-import { LuLightbulb, LuMic, LuPenLine } from 'react-icons/lu';
-import { getMistakeHref, MISTAKES_ENABLED } from '@/app/mistakes/utils';
-import type { MistakeItem } from '@/app/mistakes/types';
+import { LuMic, LuPenLine } from 'react-icons/lu';
 import type { UserStats } from '@/lib/data/user-stats';
 import type { Skill } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
@@ -15,11 +13,9 @@ interface SkillGoalsProps {
     /** Mục tiêu từ `profiles`; `null` khi chưa đặt hoặc là khách. */
     targets: Record<Skill, number | null>;
     isGuest: boolean;
-    /** Lỗi cần ưu tiên khắc phục của từng kỹ năng. */
-    focus: Record<Skill, MistakeItem | null>;
 }
 
-const SKILL_STYLE: Record<Skill, { label: string; Icon: IconType;iconColor:string ; tile: string; track: string; bar: string; tip: string }> = {
+const SKILL_STYLE: Record<Skill, { label: string; Icon: IconType;iconColor:string ; tile: string; track: string; bar: string}> = {
     writing: {
         label: 'Writing',
         Icon: FaPenNib,
@@ -27,7 +23,6 @@ const SKILL_STYLE: Record<Skill, { label: string; Icon: IconType;iconColor:strin
         tile: 'bg-sub3/15 text-main',
         track: 'bg-sub3/15',
         bar: 'bg-sub3',
-        tip: 'bg-sub3/15',
     },
     speaking: {
         label: 'Speaking',
@@ -36,7 +31,6 @@ const SKILL_STYLE: Record<Skill, { label: string; Icon: IconType;iconColor:strin
         tile: 'bg-sub1 text-main',
         track: 'bg-sub1',
         bar: 'bg-main',
-        tip: 'bg-sub1',
     },
 };
 
@@ -45,10 +39,9 @@ interface SkillGoalCardProps {
     stats: UserStats;
     target: number | null;
     isGuest: boolean;
-    focus: MistakeItem | null;
 }
 
-function SkillGoalCard({ skill, stats, target, isGuest, focus }: SkillGoalCardProps) {
+function SkillGoalCard({ skill, stats, target, isGuest }: SkillGoalCardProps) {
     const style = SKILL_STYLE[skill];
     const scores = stats.fullTestScores.filter((item) => item.skill === skill).map((item) => item.score);
     const current = scores.at(-1) ?? null;
@@ -121,27 +114,11 @@ function SkillGoalCard({ skill, stats, target, isGuest, focus }: SkillGoalCardPr
                     </span>
                 )}
             </div>
-
-            <div className={cn('flex items-center gap-2 p-2 rounded-lg', style.tip)}>
-                <LuLightbulb className="size-4 text-main shrink-0" aria-hidden="true" />
-                <div className="flex-1 min-w-0 text-xs truncate">
-                    <span className="font-semibold text-main">Trọng tâm:</span>
-                    {focus && MISTAKES_ENABLED ? (
-                        <Link href={getMistakeHref(focus.id)} className="ml-1 font-medium text-main hover:underline">
-                            {focus.title}
-                        </Link>
-                    ) : focus ? (
-                        <span className="ml-1 font-medium text-main">{focus.title}</span>
-                    ) : (
-                        <span className="ml-1 font-medium text-main">Chưa có lỗi lặp lại cần khắc phục.</span>
-                    )}
-                </div>
-            </div>
         </div>
     );
 }
 
-export default function SkillGoals({ stats, targets, isGuest, focus }: SkillGoalsProps) {
+export default function SkillGoals({ stats, targets, isGuest }: SkillGoalsProps) {
     return (
         <div className="flex flex-col flex-1 gap-4">
             {(['writing', 'speaking'] as const).map((skill) => (
@@ -151,7 +128,6 @@ export default function SkillGoals({ stats, targets, isGuest, focus }: SkillGoal
                     stats={stats}
                     target={targets[skill]}
                     isGuest={isGuest}
-                    focus={focus[skill]}
                 />
             ))}
         </div>

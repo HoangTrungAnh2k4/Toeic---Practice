@@ -1,4 +1,3 @@
-import type { MistakeItem } from '@/app/mistakes/types';
 import type { PlanTaskKind, Skill } from '@/lib/domain/types';
 
 export type DayStatus = 'done' | 'today' | 'missed' | 'upcoming';
@@ -21,7 +20,6 @@ export interface SkillProgress {
     current: number | null;
     target: number | null;
     targetLevel: number | null;
-    focus: MistakeItem | null;
 }
 
 export interface MonthlyProgress {

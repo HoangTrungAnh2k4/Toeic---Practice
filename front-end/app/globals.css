@@ -90,7 +90,7 @@
     --animate-stamp: stamp 450ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 
     /* Nhiều đỉnh không đều để giống biên độ giọng nói, không phải sóng sin */
-    /* Chiều cao mỗi cột lấy từ --h-low/--h-mid/--h-max đặt inline trong LandingHeroVisual */
+    /* Chiều cao mỗi cột lấy từ --h-low/--h-mid/--h-max đặt inline trong VoiceWave */
     @keyframes voice-wave {
         0%,
         100% {

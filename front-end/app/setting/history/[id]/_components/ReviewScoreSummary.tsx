@@ -1,29 +1,21 @@
-import Link from 'next/link';
-import { LuAudioLines, LuChevronRight, LuCircleCheck, LuEye } from 'react-icons/lu';
-import { MistakeStatusBadge } from '@/components/mistakes/mistake-badges';
-import { Criterion, MistakeItem } from '@/app/mistakes/types';
-import { CRITERION_LABEL, getMistakeHref, MISTAKES_ENABLED } from '@/app/mistakes/utils';
+import { LuAudioLines } from 'react-icons/lu';
 import { getScoreLevel } from '@/lib/domain/score-levels';
+import type { Criterion } from '@/lib/domain/types';
 import { HistoryRow, ReviewQuestion } from '../../types';
+import { CRITERION_LABEL } from '../../utils';
 
 interface ReviewScoreSummaryProps {
     row: HistoryRow;
     questions: ReviewQuestion[];
-    mistakeIndex: Record<string, MistakeItem>;
     /** Tổng 0–200 cả bài Writing (lượt chấm gần nhất của mỗi Part). */
 }
 
 const LABEL_CLASS = 'font-semibold text-subText text-xs uppercase tracking-wider';
 
-export default function ReviewScoreSummary({ row, questions, mistakeIndex }: ReviewScoreSummaryProps) {
+export default function ReviewScoreSummary({ row, questions }: ReviewScoreSummaryProps) {
     const { attempt, exam, scoreDelta } = row;
     const { score, feedback_summary: feedbackSummary, scoring_error: scoringError } = attempt;
     const annotations = questions.flatMap((q) => q.annotations);
-    const recurringIds = [
-        ...new Set(annotations.flatMap((a) => (a.mistake_pattern_id ? [a.mistake_pattern_id] : []))),
-    ];
-    const recurring = recurringIds.map((id) => mistakeIndex[id]).filter(Boolean);
-    const oneOffCount = annotations.filter((a) => !a.mistake_pattern_id).length;
     const perfectCount = questions.filter(
         ({ response }) => response?.score != null && response.score === response.max_score,
     ).length;
@@ -33,21 +25,19 @@ export default function ReviewScoreSummary({ row, questions, mistakeIndex }: Rev
 
     const stats = [
         { label: 'Lỗi ghi nhận', value: annotations.length },
-        { label: 'Thuộc sổ lỗi', value: recurring.length },
-        { label: 'Lỗi đơn lẻ', value: oneOffCount },
         { label: 'Câu đạt tối đa', value: `${perfectCount}/${questions.length}` },
     ];
 
     return (
-        <section aria-label="Tổng quan kết quả" className="gap-4 grid grid-cols-1 lg:grid-cols-3">
+        <section aria-label="Tổng quan kết quả" className="gap-4 grid grid-cols-1 lg:grid-cols-2">
             {/* Score */}
-            <div className="flex flex-col justify-between gap-4 bg-main shadow-main/20 shadow-md p-5 rounded-xl">
+            <div className="flex flex-col gap-4 bg-main shadow-main/20 shadow-md p-5 rounded-xl">
                 <div className="flex flex-col gap-1">
                     <span className="font-semibold text-sub1 text-xs uppercase tracking-wider">
                         {attempt.part_template_id === null ? 'Điểm quy đổi' : 'Điểm quy đổi của Part'}
                     </span>
                     <div className="flex flex-wrap items-baseline gap-2">
-                        <span className="font-bold text-sub1 text-4xl tabular-nums tracking-tight">{score ?? '—'}</span>
+                        <span className="font-bold tabular-nums text-sub1 text-4xl tracking-tight">{score ?? '—'}</span>
                         <span className="font-semibold text-sub1/80 text-sm">/ 200</span>
                         {score !== null && (
                             <span className="bg-sub3 px-2 py-0.5 rounded-md font-bold text-[0.6875rem] text-main">
@@ -75,7 +65,7 @@ export default function ReviewScoreSummary({ row, questions, mistakeIndex }: Rev
                     {stats.map(({ label, value }) => (
                         <div key={label} className="flex flex-col gap-0.5 bg-sub1/50 p-3 rounded-lg">
                             <dt className="font-medium text-subText text-xs">{label}</dt>
-                            <dd className="font-bold text-main text-xl tabular-nums">{value}</dd>
+                            <dd className="font-bold tabular-nums text-main text-xl">{value}</dd>
                         </div>
                     ))}
                 </dl>
@@ -88,56 +78,12 @@ export default function ReviewScoreSummary({ row, questions, mistakeIndex }: Rev
                         ))}
                     </ul>
                 )}
-            </div>
-
-            {/* Recurring mistakes */}
-            <div className="flex flex-col gap-3 bg-card shadow-sm p-5 border border-sub2/30 rounded-xl">
-                <span className={LABEL_CLASS}>Lỗi lặp lại trong bài này</span>
-                {recurring.length === 0 ? (
-                    <p className="flex items-center gap-2 font-medium text-main text-sm">
-                        <LuCircleCheck className="size-4 shrink-0" aria-hidden="true" />
-                        Không mắc lỗi nào trong sổ lỗi.
+                {exam.skill === 'speaking' && (
+                    <p className="flex items-start gap-1.5 mt-auto pt-3 border-sub2/20 border-t font-medium text-subText text-xs">
+                        <LuAudioLines className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+                        Transcript do AI nhận dạng từ bản ghi âm, có thể khác đôi chút so với lời bạn nói.
                     </p>
-                ) : (
-                    <ul className="flex flex-col gap-2">
-                        {recurring.map((mistake) => (
-                            <li key={mistake.id}>
-                                {MISTAKES_ENABLED ? (
-                                    <Link
-                                        href={getMistakeHref(mistake.id)}
-                                        className="flex items-center gap-2 hover:bg-sub1/50 p-2.5 border border-sub2/20 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"
-                                    >
-                                        <div className="flex flex-col flex-1 gap-1 min-w-0">
-                                            <span className="font-semibold text-main text-sm">{mistake.title}</span>
-                                            <MistakeStatusBadge status={mistake.status} className="w-fit" />
-                                        </div>
-                                        <LuChevronRight className="size-4 text-subText shrink-0" aria-hidden="true" />
-                                    </Link>
-                                ) : (
-                                    <div className="flex flex-col gap-1 p-2.5 border border-sub2/20 rounded-lg">
-                                        <span className="font-semibold text-main text-sm">{mistake.title}</span>
-                                        <MistakeStatusBadge status={mistake.status} className="w-fit" />
-                                    </div>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
                 )}
-
-                <div className="flex flex-col gap-1.5 mt-auto pt-3 border-sub2/20 border-t font-medium text-subText text-xs">
-                    {attempt.sample_viewed && (
-                        <p className="flex items-start gap-1.5">
-                            <LuEye className="mt-px size-3.5 shrink-0" aria-hidden="true" />
-                            Bài có xem bài mẫu: lỗi vẫn được ghi nhận nhưng không tính vào tiến độ khắc phục.
-                        </p>
-                    )}
-                    {exam.skill === 'speaking' && (
-                        <p className="flex items-start gap-1.5">
-                            <LuAudioLines className="mt-px size-3.5 shrink-0" aria-hidden="true" />
-                            Transcript do AI nhận dạng từ bản ghi âm, có thể khác đôi chút so với lời bạn nói.
-                        </p>
-                    )}
-                </div>
             </div>
         </section>
     );

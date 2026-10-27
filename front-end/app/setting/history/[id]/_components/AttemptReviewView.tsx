@@ -2,13 +2,10 @@
 
 import { use, useCallback, useEffect, useState } from 'react';
 import { LuFileQuestion } from 'react-icons/lu';
-import { getMistakeIndex } from '@/app/mistakes/_lib/data';
-import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
 import { LoadError } from '@/components/load-error';
-import { combineAsync, useAsync } from '@/hooks/use-async';
+import { useAsync } from '@/hooks/use-async';
 import { getAttempt, scoreWritingAttempt } from '@/lib/data/user-data';
 import { canRescore } from '@/lib/scoring/scale';
-import type { MistakePattern } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { loadAttemptReview } from '../../_lib/review';
 import { STATUS_GROUP } from '../../utils';
@@ -27,20 +24,15 @@ const SCORING_POLL_MS = 4000;
 interface AttemptReviewViewProps {
     params: Promise<{ id: string }>;
     exams: ExamSummary[];
-    patterns: MistakePattern[];
 }
 
 /** Lượt làm của khách nằm trong localStorage → nạp sau khi mount. */
-export default function AttemptReviewView({ params, exams, patterns }: AttemptReviewViewProps) {
+export default function AttemptReviewView({ params, exams }: AttemptReviewViewProps) {
     const { id } = use(params);
     // Bọc lại vì `null` = không có lượt làm này, trùng với `null` = đang tải của `useAsync`
     const reviewState = useAsync(
         useCallback(async () => ({ review: await loadAttemptReview(id, exams) }), [id, exams]),
     );
-    // Trạng thái của mẫu lỗi (nhãn "Lỗi lặp lại") tính từ toàn bộ bài làm, không chỉ bài này
-    const bookState = useMistakeBook(patterns, exams);
-    const { failed, retry } = combineAsync(reviewState, bookState);
-    const book = bookState.data;
     const attempt = reviewState.data?.review?.row.attempt;
     const reload = reviewState.retry;
     // Mỗi lần hỏi lại mà lượt làm chưa đổi: render lại để `canRescore` xét theo giờ hiện tại và hẹn lần hỏi kế
@@ -67,12 +59,10 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
         };
     }, [attempt, reload, pollCount]);
 
-    if (failed) return <LoadError message="Không tải được bài làm." onRetry={retry} />;
-    if (!reviewState.data || !book) return <AttemptReviewSkeleton />;
+    if (reviewState.failed) return <LoadError message="Không tải được bài làm." onRetry={reviewState.retry} />;
+    if (!reviewState.data) return <AttemptReviewSkeleton />;
     const { review } = reviewState.data;
     if (review === null) return <AttemptNotFound />;
-
-    const mistakeIndex = getMistakeIndex(book);
 
     const { row, questions } = review;
     const isSpeaking = row.exam.skill === 'speaking';
@@ -110,7 +100,6 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
                         key={question.question.id}
                         item={question}
                         isSpeaking={isSpeaking}
-                        mistakeIndex={mistakeIndex}
                         isPending
                     />
                 ))}
@@ -121,11 +110,7 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
     return (
         <>
             <ReviewHeader row={row} />
-            <ReviewScoreSummary
-                row={row}
-                questions={questions}
-                mistakeIndex={mistakeIndex}
-            />
+            <ReviewScoreSummary row={row} questions={questions} />
 
             {questions.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 bg-card shadow-sm px-4 py-12 border border-sub2/30 rounded-xl text-center">
@@ -146,7 +131,6 @@ export default function AttemptReviewView({ params, exams, patterns }: AttemptRe
                                 key={question.question.id}
                                 item={question}
                                 isSpeaking={isSpeaking}
-                                mistakeIndex={mistakeIndex}
                             />
                         ))}
                     </div>

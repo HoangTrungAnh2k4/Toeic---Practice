@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { IoBook, IoCalendar, IoSettings } from 'react-icons/io5';
+import { IoCalendar, IoSettings } from 'react-icons/io5';
 import { TbLayoutDashboardFilled } from 'react-icons/tb';
 import { FaMicrophoneAlt } from 'react-icons/fa';
 import { FaPenNib } from 'react-icons/fa6';
@@ -15,7 +15,6 @@ import { GuestMenu } from '@/components/user/guest-menu';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { MdEditDocument } from 'react-icons/md';
-import { MISTAKES_ENABLED, MISTAKES_PATH } from '@/app/mistakes/utils';
 
 /**
  * Chiều cao mỗi mục. PHẢI khớp với class `h-16` (64px) bên dưới,
@@ -29,10 +28,9 @@ const items: NavItem[] = [
     { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
     { label: 'Speaking', href: '/speaking', icon: FaMicrophoneAlt },
     { label: 'Writing', href: '/writing', icon: FaPenNib },
-    { label: 'Mistakes', href: MISTAKES_PATH, icon: IoBook },
     { label: 'Schedule', href: '/schedule', icon: IoCalendar },
     { label: 'Setting', href: '/setting', icon: IoSettings },
-].filter((item) => MISTAKES_ENABLED || item.href !== MISTAKES_PATH);
+];
 
 const adminItems: NavItem[] = [{ label: 'Quản trị đề', href: '/exam-management', icon: MdEditDocument }];
 
@@ -262,7 +260,7 @@ function MobileTopBar({ items, activeIndex, user }: MobileTopBarProps) {
 }
 
 /**
- * Khung giữ chỗ khi `usePathname` chưa resolve (route có param động như `/mistakes/[id]`),
+ * Khung giữ chỗ khi `usePathname` chưa resolve (route có param động như `/setting/history/[id]`),
  * cùng kích thước sidebar mở rộng để không bị giật layout.
  */
 export function SidebarFallback() {

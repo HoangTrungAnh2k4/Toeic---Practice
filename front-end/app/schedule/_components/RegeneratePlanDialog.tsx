@@ -71,7 +71,7 @@ export default function RegeneratePlanDialog({
                     </AlertDialogMedia>
                     <AlertDialogTitle className="font-bold text-main text-lg">Tạo lại lộ trình?</AlertDialogTitle>
                     <AlertDialogDescription className="text-subText">
-                        Lịch mới bắt đầu từ hôm nay, xếp theo điểm và sổ lỗi hiện tại. Lộ trình cũ được lưu trữ, bài đã
+                        Lịch mới bắt đầu từ hôm nay, xếp theo mục tiêu và điểm hiện tại. Lộ trình cũ được lưu trữ, bài đã
                         làm vẫn giữ trong lịch sử.
                     </AlertDialogDescription>
                 </AlertDialogHeader>

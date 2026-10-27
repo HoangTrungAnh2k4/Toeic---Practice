@@ -28,8 +28,7 @@ export default function ReviewInterruptedState({ row }: ReviewInterruptedStatePr
                         {isInProgress ? 'Bài làm đang dở nên chưa được chấm' : 'Bài làm bị gián đoạn nên chưa được chấm'}
                     </h2>
                     <p className="font-medium text-subText text-sm">
-                        Đã lưu {answeredCount}/{questionCount} câu. Bài chưa nộp không có nhận xét và không được tính
-                        vào sổ lỗi.
+                        Đã lưu {answeredCount}/{questionCount} câu. Bài chưa nộp không có điểm và nhận xét.
                     </p>
                 </div>
             </div>

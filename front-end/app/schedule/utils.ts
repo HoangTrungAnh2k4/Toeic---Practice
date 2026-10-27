@@ -1,5 +1,3 @@
-import { getTopMistake, type MistakeBook } from '@/app/mistakes/_lib/data';
-import { getMistakeHref, MISTAKES_ENABLED, MISTAKES_PATH } from '@/app/mistakes/utils';
 import { getAttemptHref } from '@/app/setting/history/utils';
 import { getDaysUntil } from '@/app/setting/profile/utils';
 import { getPlanWeekDays, getPlanWeekNo, isTaskDone, parseDayKey } from '@/lib/data/study-plan';
@@ -49,7 +47,7 @@ export function buildExamGoal(profile: Profile, plan: StudyPlan, streakDays: num
     };
 }
 
-export function buildSkillProgress(stats: UserStats, profile: Profile, book: MistakeBook): SkillProgress[] {
+export function buildSkillProgress(stats: UserStats, profile: Profile): SkillProgress[] {
     return (['speaking', 'writing'] as const).map((skill) => {
         const target = skill === 'speaking' ? profile.target_speaking : profile.target_writing;
         return {
@@ -58,13 +56,12 @@ export function buildSkillProgress(stats: UserStats, profile: Profile, book: Mis
             current: stats.skills[skill].latest_score,
             target,
             targetLevel: target === null ? null : getScoreLevel(skill, target),
-            focus: getTopMistake(book, skill),
         };
     });
 }
 
 function getTaskLabel(task: PlanTask, exam: ExamSummary | undefined) {
-    if (task.kind === 'review') return 'Ôn tập Sổ lỗi';
+    if (task.kind === 'review') return 'Ôn tập lỗi';
     if (task.kind === 'summary') return 'Tổng kết tuần';
     if (task.kind === 'mock') return exam ? `Thi thử ${SKILL_LABEL[exam.skill]}` : 'Thi thử';
 
@@ -74,14 +71,8 @@ function getTaskLabel(task: PlanTask, exam: ExamSummary | undefined) {
 
 function getTaskAction(task: PlanTask, exam: ExamSummary | undefined, isToday: boolean) {
     if (task.attempt_id) return { actionLabel: 'Xem lại bài làm', href: getAttemptHref(task.attempt_id) };
-    if (task.kind === 'review') {
-        // Lộ trình cũ có thể còn task ôn lỗi; khi Sổ lỗi khóa thì dẫn về lịch sử bài làm
-        if (!MISTAKES_ENABLED) return { actionLabel: 'Xem lịch sử bài làm', href: '/setting/history' };
-        return {
-            actionLabel: 'Mở sổ lỗi',
-            href: task.mistake_pattern_id ? getMistakeHref(task.mistake_pattern_id) : MISTAKES_PATH,
-        };
-    }
+    // Lộ trình cũ có thể còn task ôn lỗi (Sổ lỗi đã bỏ) → dẫn về lịch sử bài làm
+    if (task.kind === 'review') return { actionLabel: 'Xem lịch sử bài làm', href: '/setting/history' };
     if (task.kind === 'summary') return { actionLabel: 'Xem hồ sơ học', href: '/setting/profile' };
     // Đề đã lưu trữ không mở lượt mới nên cũng cho chọn đề khác
     if (exam?.status !== 'published') {

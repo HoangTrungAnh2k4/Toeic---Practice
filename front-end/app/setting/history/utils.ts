@@ -1,7 +1,7 @@
 import type { IconType } from 'react-icons';
-import { LuMic, LuPenLine } from 'react-icons/lu';
+import { LuInfo, LuMic, LuPenLine, LuTriangleAlert, LuZap } from 'react-icons/lu';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
-import type { Attempt, AttemptMode, AttemptStatus, Skill } from '@/lib/domain/types';
+import type { Attempt, AttemptMode, AttemptStatus, Criterion, Severity, Skill } from '@/lib/domain/types';
 import { buildTestHref } from '@/lib/exam-library/search-params';
 import {
     CategoryFilterType,
@@ -115,3 +115,30 @@ export const SKILL_STYLE: Record<Skill, { Icon: IconType; className: string; lab
     speaking: { Icon: LuMic, className: 'bg-main text-sub3', label: 'Speaking' },
     writing: { Icon: LuPenLine, className: 'bg-sub3 text-main', label: 'Writing' },
 };
+
+export const CRITERION_LABEL: Record<Criterion, string> = {
+    pronunciation: 'Phát âm',
+    intonation: 'Ngữ điệu & trọng âm',
+    grammar: 'Ngữ pháp',
+    vocabulary: 'Từ vựng',
+    cohesion: 'Mạch lạc',
+    relevance: 'Bám sát câu hỏi',
+    completeness: 'Hoàn thành nhiệm vụ',
+    organization: 'Bố cục',
+    support: 'Lý do & ví dụ',
+    fluency: 'Trôi chảy',
+    task_response: 'Đáp ứng yêu cầu',
+};
+
+export const SEVERITY_ICON: Record<Severity, IconType> = {
+    high: LuTriangleAlert,
+    medium: LuZap,
+    low: LuInfo,
+};
+
+/** 75 → "01:15" */
+export function formatTimestamp(seconds: number) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}

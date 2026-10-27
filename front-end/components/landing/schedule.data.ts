@@ -100,56 +100,6 @@ export const WRITING_PARTS: {
   },
 ]
 
-export const INITIAL_MISTAKES = [
-  {
-    id: 1,
-    severity: 'ẢNH HƯỞNG LỚN',
-    badgeBg: 'bg-[#3C3454] text-[#F5B841]',
-    title: 'Thiếu mạo từ (a / an / the) trước danh từ đếm được số ít',
-    count: 9,
-    reason:
-      'Tiếng Việt không có mạo từ tương đương nên bạn thường bỏ trống khi viết nhanh trong Writing Part 2.',
-    wrong: 'company',
-    right: 'a company',
-    contextBefore: 'I work at ',
-    contextAfter: ' in Ho Chi Minh City.',
-    rotate: '-rotate-1',
-    fixed: false,
-  },
-  {
-    id: 2,
-    severity: 'ẢNH HƯỞNG VỪA',
-    badgeBg: 'bg-[#F5B841] text-[#3C3454]',
-    title: 'Nuốt âm cuối /s/, /z/ và /t/ khi nói nhanh',
-    count: 6,
-    reason:
-      'Làm giảm điểm Pronunciation ở Speaking Part 1 và khiến AI nhận diện nhầm thì hiện tại/quá khứ.',
-    wrong: 'las week',
-    right: 'last week',
-    contextBefore: 'She work(s) hard ',
-    contextAfter: ' on the project.',
-    rotate: 'rotate-1',
-    fixed: false,
-  },
-  {
-    id: 3,
-    severity: 'ẢNH HƯỞNG NHỎ',
-    badgeBg: 'bg-[#8B84B8] text-white',
-    title: 'Ngắt nghỉ sai cụm danh từ ở Part 1 (Read Aloud)',
-    count: 4,
-    reason:
-      'Ngắt hơi giữa tính từ và danh từ làm câu đọc to bị đứt mạch tự nhiên.',
-    wrong: 'new / marketing',
-    right: 'new marketing manager',
-    contextBefore: 'Welcome our ',
-    contextAfter: ' to the stage.',
-    rotate: '-rotate-1',
-    fixed: false,
-  },
-]
-
-export type Mistake = (typeof INITIAL_MISTAKES)[number]
-
 export const LIBRARY_DECKS = [
   {
     id: 1,
@@ -206,23 +156,12 @@ export const LIBRARY_DECKS = [
     badge: 'ĐỀ ETS CHÍNH THỨC',
     badgeBg: 'bg-[#F5B841]',
   },
-  {
-    id: 6,
-    title: 'Bộ đề Khắc phục lỗi Mạo từ & Thì quá khứ (Cá nhân)',
-    type: 'internal',
-    mode: 'redo',
-    target: 'target160',
-    topic: 'Trích từ Sổ lỗi của bạn',
-    status: 'Ưu tiên hôm nay',
-    badge: 'GỢI Ý TỪ SỔ LỖI',
-    badgeBg: 'bg-[#5FD99A]',
-  },
 ]
 
 export const FAQS = [
   {
     q: 'Tôi có bắt buộc phải đăng ký tài khoản mới được làm bài không?',
-    a: 'Không cần! Toeco có Chế độ khách (Guest Mode) cho phép bạn vào phòng thi làm bài và nhận điểm chấm AI ngay lập tức. Toàn bộ dữ liệu bài làm và sổ lỗi được lưu trực tiếp trên trình duyệt. Khi muốn lưu lịch sử lâu dài và đồng bộ giữa nhiều thiết bị, bạn chỉ cần đăng nhập nhanh.',
+    a: 'Không cần! Toeco có Chế độ khách (Guest Mode) cho phép bạn vào phòng thi làm bài và nhận điểm chấm AI ngay lập tức. Toàn bộ dữ liệu bài làm được lưu trực tiếp trên trình duyệt. Khi muốn lưu lịch sử lâu dài và đồng bộ giữa nhiều thiết bị, bạn chỉ cần đăng nhập nhanh.',
   },
   {
     q: 'Toeco hỗ trợ những hình thức đăng nhập nào?',
@@ -260,8 +199,8 @@ export const HOW_STEPS = [
   ],
   [
     '4',
-    'Gom Sổ lỗi & Lên lịch',
-    'Lỗi lặp lại được đưa vào Sổ lỗi, lộ trình gợi ý bài luyện tiếp theo.',
+    'Xem cách sửa & Lên lịch',
+    'Mỗi lỗi kèm cách sửa, lộ trình gợi ý bài luyện tiếp theo.',
   ],
 ]
 
@@ -278,7 +217,7 @@ export const DEFAULT_DAY_TASKS = [
   'Xong',
   'Part 3 (45p)',
   'Email (30p)',
-  'Sổ lỗi (25p)',
+  'Ôn lỗi (25p)',
   'Part 5 (45p)',
   'Nghỉ',
   'Thi thử',

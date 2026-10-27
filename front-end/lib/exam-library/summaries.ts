@@ -15,7 +15,7 @@ export const expireExamSummaries = () => revalidateTag(EXAMS_CACHE_TAG, { expire
 
 /**
  * Đề đã phát hành và đã lưu trữ (server không có phiên nên RLS chỉ trả hai trạng thái này), cache dùng chung mọi
- * người dùng. Đề lưu trữ giữ cho lịch sử, sổ lỗi, thống kê; nơi mở lượt mới phải lọc `published`.
+ * người dùng. Đề lưu trữ giữ cho lịch sử, thống kê; nơi mở lượt mới phải lọc `published`.
  */
 export async function getExamSummaries(): Promise<ExamSummary[]> {
     'use cache';

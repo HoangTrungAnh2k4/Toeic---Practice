@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
 import FooterAssurance from './_components/footerAssurance';
 import OverviewProgress from './_components/overviewProgress';
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Overview() {
-    const [exams, patterns] = await Promise.all([getExamSummaries(), listMistakePatterns()]);
+    const exams = await getExamSummaries();
 
     return (
         <div className="flex flex-col gap-10 mx-auto w-full max-w-360">
@@ -20,7 +19,7 @@ export default async function Overview() {
             <WelcomeBanner />
 
             {/* Skill goals + progress chart */}
-            <OverviewProgress exams={exams} patterns={patterns} />
+            <OverviewProgress exams={exams} />
 
             {/* Recent attempts */}
             <RecentAttempt exams={exams} />

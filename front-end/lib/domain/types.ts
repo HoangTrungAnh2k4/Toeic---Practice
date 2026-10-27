@@ -172,8 +172,6 @@ export interface AttemptResponse {
 export interface Annotation {
     id: string;
     response_id: string;
-    /** Thuộc mẫu lỗi trong sổ lỗi; `null` = lỗi đơn lẻ. */
-    mistake_pattern_id: string | null;
     /** Vị trí [start, end) trong câu trả lời — dùng để tô sáng thay vì khớp chuỗi. */
     start_offset: number;
     end_offset: number;
@@ -184,31 +182,6 @@ export interface Annotation {
     severity: Severity;
     /** Mốc giây trong bản ghi âm (chỉ Speaking). */
     at_sec: number | null;
-}
-
-export interface MistakeRemedy {
-    /** Nguyên tắc cốt lõi, một câu. */
-    rule: string;
-    steps: string[];
-    phrases: { phrase: string; usage: string }[];
-    model: { before: string; after: string };
-    /** Tự kiểm tra trước khi nộp bài. */
-    checklist: string[];
-}
-
-export interface MistakePattern {
-    id: string;
-    skill: Skill;
-    /** `null` = áp dụng cho mọi Part của kỹ năng. */
-    part_template_id: number | null;
-    title: string;
-    summary: string;
-    /** Vì sao bị trừ điểm, giải thích theo rubric. */
-    why: string;
-    criteria: Criterion[];
-    severity: Severity;
-    impact: string;
-    remedy: MistakeRemedy;
 }
 
 export interface Bookmark {
@@ -247,7 +220,6 @@ export interface PlanTask {
     duration_min: number;
     exam_id: string | null;
     part_template_id: number | null;
-    mistake_pattern_id: string | null;
     /** Bài làm mở từ task, phòng thi ghi khi nộp. */
     attempt_id: string | null;
     /** Task không cần bài làm (review, summary) được đánh dấu xong. */
@@ -257,7 +229,6 @@ export interface PlanTask {
 export interface AiInsightItem {
     skill: Skill;
     part_template_id: number | null;
-    mistake_pattern_id: string | null;
     title: string;
     /** Chỉ số ngắn, vd "Tỷ lệ đạt 66% / mục tiêu 90%". */
     metric: string;
@@ -280,31 +251,6 @@ export interface ScoreLevel {
     skill: Skill;
     min_score: number;
     level: number;
-}
-
-/**
- * Trạng thái mẫu lỗi, TÍNH TỰ ĐỘNG từ các bài gần nhất:
- * - active: lặp lại ở bài gần nhất trong phạm vi.
- * - improving: đã có ít nhất 1 bài độc lập liên tiếp không lặp lại.
- * - resolved: đủ số bài độc lập liên tiếp không lặp lại.
- */
-export type MistakeStatus = 'active' | 'improving' | 'resolved';
-
-/** Row của view `user_mistake_stats` — một mẫu lỗi trong sổ lỗi của một người dùng. */
-export interface UserMistakeStats {
-    user_id: string;
-    mistake_pattern_id: string;
-    status: MistakeStatus;
-    /** Số bài lặp lại lỗi trong cửa sổ theo dõi. */
-    hit_count: number;
-    /** Số bài trong cửa sổ theo dõi. */
-    window_count: number;
-    /** Số bài độc lập liên tiếp gần nhất không lặp lại lỗi. */
-    clean_streak: number;
-    occurrence_count: number;
-    last_seen_attempt_id: string | null;
-    last_seen_at: string | null;
-    priority: number;
 }
 
 /** Row của view `user_skill_stats` — tổng hợp theo kỹ năng của một người dùng. */
