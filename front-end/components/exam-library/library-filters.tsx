@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { LuBookmark, LuRotateCcw } from 'react-icons/lu';
+import { LuRotateCcw } from 'react-icons/lu';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { cn } from '@/lib/utils';
 import type { Skill } from '@/lib/domain/types';
@@ -23,11 +22,6 @@ const SELECT_CLASS =
 
 const FOCUS_RING_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
 
-const TAB_ICONS: Partial<Record<LibraryTab, ReactNode>> = {
-    retake: <LuRotateCcw aria-hidden="true" />,
-    bookmark: <LuBookmark aria-hidden="true" />,
-};
-
 const SELECT_FILTERS = [
     { name: 'status', label: 'Lọc theo trạng thái', options: STATUS_OPTIONS },
 ] as const;
@@ -44,7 +38,6 @@ export function LibraryFilters({ skill, query, tabCounts, displayedCount }: Libr
                     options={TAB_OPTIONS.map(({ value, label }) => ({
                         value,
                         label,
-                        icon: TAB_ICONS[value],
                         href: buildLibraryHref(skill, query, { tab: value }),
                     }))}
                     value={query.tab}

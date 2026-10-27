@@ -1,14 +1,12 @@
 'use client';
 
-import { type ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export interface SegmentedTabOption<T extends string> {
     value: T;
     label: string;
-    /** Icon react-icons dạng element (`<LuMic />`), truyền được từ Server Component. */
-    icon?: ReactNode;
     /** Có `href` thì tab là link (lọc qua URL), không thì là nút gọi `onChange`. */
     href?: string;
 }
@@ -86,13 +84,12 @@ export function SegmentedTabs<T extends string>({
                 const isActive = option.value === current;
                 const count = counts?.[option.value];
                 const className = cn(
-                    'inline-flex z-10 relative items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs active:scale-95 transition-[color,background-color,scale] motion-reduce:transition-none duration-200 cursor-pointer [&_svg]:size-3.5 [&_svg]:shrink-0',
+                    'inline-flex z-10 relative items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs active:scale-95 transition-[color,background-color,scale] motion-reduce:transition-none duration-200 cursor-pointer',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3',
                     isActive ? 'text-main' : 'text-white hover:bg-white/15',
                 );
                 const content = (
                     <>
-                        {option.icon}
                         <span>{option.label}</span>
                         {count !== undefined && (
                             <span

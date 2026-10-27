@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { LuMic, LuPenLine, LuRotateCcw } from 'react-icons/lu';
+import { LuRotateCcw } from 'react-icons/lu';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { cn } from '@/lib/utils';
 import { buildHistoryHref, DEFAULT_HISTORY_QUERY } from '../_lib/searchParams';
@@ -19,11 +18,6 @@ const SELECT_CLASS =
     'bg-white px-3 border-sub2/40 focus-visible:border-main rounded-lg w-full data-[size=default]:h-10 font-medium text-main text-xs';
 
 const FOCUS_RING_CLASS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
-
-const SKILL_ICONS: Partial<Record<SkillType, ReactNode>> = {
-    speaking: <LuMic aria-hidden="true" />,
-    writing: <LuPenLine aria-hidden="true" />,
-};
 
 const SELECT_FILTERS = [
     { name: 'mode', label: 'Lọc theo chế độ', options: MODE_OPTIONS },
@@ -45,7 +39,6 @@ export default function HistoryFilters({ query, skillCounts, displayedCount }: H
                     options={SKILL_OPTIONS.map(({ value, label }) => ({
                         value,
                         label,
-                        icon: SKILL_ICONS[value],
                         href: buildHistoryHref(query, { skill: value }),
                     }))}
                     value={query.skill}

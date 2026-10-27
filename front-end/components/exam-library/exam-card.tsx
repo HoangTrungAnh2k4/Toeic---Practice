@@ -3,7 +3,6 @@ import { ReactNode } from 'react';
 import {
     LuBookmark,
     LuBookmarkCheck,
-    LuCalendar,
     LuEye,
     LuGraduationCap,
     LuPlay,
@@ -97,7 +96,6 @@ function CardShell({ entry, onToggleBookmark, badge, badgeTone, meta, footer, cl
                     </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                    <span className="font-mono font-semibold text-[11px] text-sub2">{exam.code}</span>
                     <h3 id={titleId} className="font-bold text-main text-base leading-snug">
                         {exam.title}
                     </h3>
@@ -165,7 +163,6 @@ function CompletedCard({ skill, entry, onToggleBookmark }: ExamCardProps) {
             meta={
                 last?.submitted_at && (
                     <span className={META_CLASS}>
-                        <LuCalendar className="size-4 text-sub2" aria-hidden="true" />
                         {formatDate(last.submitted_at)}
                     </span>
                 )
@@ -176,14 +173,12 @@ function CompletedCard({ skill, entry, onToggleBookmark }: ExamCardProps) {
                         href={buildHistoryHref(DEFAULT_HISTORY_QUERY, { skill, searchQuery: exam.title })}
                         className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-1.5 bg-white px-2 text-xs')}
                     >
-                        <LuEye className="size-4" aria-hidden="true" />
                         <span>Xem nhận xét</span>
                     </Link>
                     <Link
                         href={buildTestHref(skill, exam.id)}
                         className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5 px-2 text-xs')}
                     >
-                        <LuRotateCcw className="size-4" aria-hidden="true" />
                         <span>Làm lại (lần {user.completedCount + 1})</span>
                     </Link>
                 </div>
@@ -197,7 +192,7 @@ function CompletedCard({ skill, entry, onToggleBookmark }: ExamCardProps) {
             ) : (
                 <p className="font-semibold text-main text-sm">Lượt gần nhất đang chờ chấm điểm</p>
             )}
-            {last?.feedback_summary && (
+            {skill !== 'writing' && last?.feedback_summary && (
                 <p className="bg-sub1/50 p-2.5 rounded-lg text-subText text-xs leading-relaxed">
                     <strong className="font-semibold text-main">AI ghi nhận:</strong> {last.feedback_summary}
                 </p>
