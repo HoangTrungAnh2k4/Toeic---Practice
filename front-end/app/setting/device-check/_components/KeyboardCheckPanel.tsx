@@ -71,8 +71,6 @@ export default function KeyboardCheckPanel({ value, onChange }: KeyboardCheckPan
                     }}
                     onDrop={(event) => event.preventDefault()}
                     lang="en"
-                    spellCheck={false}
-                    autoCorrect="off"
                     autoCapitalize="none"
                     autoComplete="off"
                     aria-describedby={feedbackId}

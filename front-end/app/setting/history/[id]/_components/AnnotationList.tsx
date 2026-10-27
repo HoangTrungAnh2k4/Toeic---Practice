@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import { LuArrowRight, LuClock, LuRepeat } from 'react-icons/lu';
 import { MistakeItem } from '@/app/mistakes/types';
-import { CRITERION_LABEL, formatTimestamp, getMistakeHref, ONE_OFF_ICON, SEVERITY_META } from '@/app/mistakes/utils';
+import {
+    CRITERION_LABEL,
+    formatTimestamp,
+    getMistakeHref,
+    MISTAKES_ENABLED,
+    ONE_OFF_ICON,
+    SEVERITY_META,
+} from '@/app/mistakes/utils';
 import { cn } from '@/lib/utils';
 import { PlacedAnnotation } from '../../_lib/annotate';
 
@@ -47,7 +54,12 @@ export default function AnnotationList({ placed, mistakeIndex }: AnnotationListP
 
                             <div className="flex flex-col gap-2 min-w-0">
                                 <div className="flex flex-wrap items-center gap-1.5">
-                                    {mistake ? (
+                                    {mistake && !MISTAKES_ENABLED ? (
+                                        <span className={cn(CHIP_CLASS, 'bg-sub3 text-main')}>
+                                            <LuRepeat className="size-3" aria-hidden="true" />
+                                            Lỗi lặp lại: {mistake.title}
+                                        </span>
+                                    ) : mistake ? (
                                         <Link
                                             href={getMistakeHref(mistake.id)}
                                             className={cn(CHIP_CLASS, 'bg-sub3 text-main hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main')}
@@ -81,7 +93,7 @@ export default function AnnotationList({ placed, mistakeIndex }: AnnotationListP
                                 </p>
                                 <p className="text-subText text-xs leading-relaxed">{annotation.explanation}</p>
 
-                                {mistake && (
+                                {mistake && MISTAKES_ENABLED && (
                                     <Link
                                         href={`${getMistakeHref(mistake.id)}#remedy`}
                                         className="inline-flex items-center gap-1 rounded-md w-fit font-semibold text-main text-xs hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"

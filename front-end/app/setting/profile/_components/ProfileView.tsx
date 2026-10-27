@@ -3,6 +3,7 @@
 import { LuAlarmClock, LuCalendarCheck, LuFlame, LuSunMoon, LuTrophy } from 'react-icons/lu';
 import { getMistakes } from '@/app/mistakes/_lib/data';
 import { useMistakeBook } from '@/app/mistakes/_lib/useMistakeBook';
+import { MISTAKES_ENABLED } from '@/app/mistakes/utils';
 import { LoadError } from '@/components/load-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { combineAsync, useAsync } from '@/hooks/use-async';
@@ -105,17 +106,19 @@ export default function ProfileView({ exams, patterns }: ProfileViewProps) {
             </div>
 
             <div className="items-stretch gap-6 grid grid-cols-1 xl:grid-cols-3">
-                <PartScoreCard parts={stats.parts} className="xl:col-span-2" />
-                <ProfileMistakesCard
-                    limit={MISTAKE_LIMIT}
-                    mistakes={getMistakes(book, {
-                        skill: 'all',
-                        status: 'all',
-                        criterion: 'all',
-                        sort: 'frequency',
-                        searchQuery: '',
-                    }).slice(0, MISTAKE_LIMIT)}
-                />
+                <PartScoreCard parts={stats.parts} className={MISTAKES_ENABLED ? 'xl:col-span-2' : 'xl:col-span-3'} />
+                {MISTAKES_ENABLED && (
+                    <ProfileMistakesCard
+                        limit={MISTAKE_LIMIT}
+                        mistakes={getMistakes(book, {
+                            skill: 'all',
+                            status: 'all',
+                            criterion: 'all',
+                            sort: 'frequency',
+                            searchQuery: '',
+                        }).slice(0, MISTAKE_LIMIT)}
+                    />
+                )}
             </div>
         </>
     );

@@ -17,7 +17,6 @@ export default function EssayStimulus({ question, context }: EssayStimulusProps)
             className="flex flex-col gap-4 bg-white shadow-sm p-4 sm:p-5 border border-sub2/30 rounded-xl"
         >
             <h3 id={titleId} className="flex items-center gap-2 font-bold text-main text-xs uppercase tracking-wider">
-                <LuFileText className="size-4 text-sub2" aria-hidden="true" />
                 Essay question
             </h3>
             {context && (

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { IconType } from 'react-icons';
 import { LuLightbulb, LuMic, LuPenLine } from 'react-icons/lu';
-import { getMistakeHref } from '@/app/mistakes/utils';
+import { getMistakeHref, MISTAKES_ENABLED } from '@/app/mistakes/utils';
 import type { MistakeItem } from '@/app/mistakes/types';
 import type { UserStats } from '@/lib/data/user-stats';
 import type { Skill } from '@/lib/domain/types';
@@ -126,10 +126,12 @@ function SkillGoalCard({ skill, stats, target, isGuest, focus }: SkillGoalCardPr
                 <LuLightbulb className="size-4 text-main shrink-0" aria-hidden="true" />
                 <div className="flex-1 min-w-0 text-xs truncate">
                     <span className="font-semibold text-main">Trọng tâm:</span>
-                    {focus ? (
+                    {focus && MISTAKES_ENABLED ? (
                         <Link href={getMistakeHref(focus.id)} className="ml-1 font-medium text-main hover:underline">
                             {focus.title}
                         </Link>
+                    ) : focus ? (
+                        <span className="ml-1 font-medium text-main">{focus.title}</span>
                     ) : (
                         <span className="ml-1 font-medium text-main">Chưa có lỗi lặp lại cần khắc phục.</span>
                     )}

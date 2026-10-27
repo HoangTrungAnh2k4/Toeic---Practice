@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { LuAudioLines, LuChevronRight, LuCircleCheck, LuEye } from 'react-icons/lu';
 import { MistakeStatusBadge } from '@/components/mistakes/mistake-badges';
 import { Criterion, MistakeItem } from '@/app/mistakes/types';
-import { CRITERION_LABEL, getMistakeHref } from '@/app/mistakes/utils';
+import { CRITERION_LABEL, getMistakeHref, MISTAKES_ENABLED } from '@/app/mistakes/utils';
 import { getScoreLevel } from '@/lib/domain/score-levels';
 import { HistoryRow, ReviewQuestion } from '../../types';
 
@@ -102,16 +102,23 @@ export default function ReviewScoreSummary({ row, questions, mistakeIndex }: Rev
                     <ul className="flex flex-col gap-2">
                         {recurring.map((mistake) => (
                             <li key={mistake.id}>
-                                <Link
-                                    href={getMistakeHref(mistake.id)}
-                                    className="flex items-center gap-2 hover:bg-sub1/50 p-2.5 border border-sub2/20 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"
-                                >
-                                    <div className="flex flex-col flex-1 gap-1 min-w-0">
+                                {MISTAKES_ENABLED ? (
+                                    <Link
+                                        href={getMistakeHref(mistake.id)}
+                                        className="flex items-center gap-2 hover:bg-sub1/50 p-2.5 border border-sub2/20 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3"
+                                    >
+                                        <div className="flex flex-col flex-1 gap-1 min-w-0">
+                                            <span className="font-semibold text-main text-sm">{mistake.title}</span>
+                                            <MistakeStatusBadge status={mistake.status} className="w-fit" />
+                                        </div>
+                                        <LuChevronRight className="size-4 text-subText shrink-0" aria-hidden="true" />
+                                    </Link>
+                                ) : (
+                                    <div className="flex flex-col gap-1 p-2.5 border border-sub2/20 rounded-lg">
                                         <span className="font-semibold text-main text-sm">{mistake.title}</span>
                                         <MistakeStatusBadge status={mistake.status} className="w-fit" />
                                     </div>
-                                    <LuChevronRight className="size-4 text-subText shrink-0" aria-hidden="true" />
-                                </Link>
+                                )}
                             </li>
                         ))}
                     </ul>

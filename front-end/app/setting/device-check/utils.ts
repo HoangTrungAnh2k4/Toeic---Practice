@@ -17,7 +17,6 @@ import {
     LuMicVocal,
     LuPenLine,
     LuRuler,
-    LuSpellCheck,
     LuVolume2,
 } from 'react-icons/lu';
 import {
@@ -373,11 +372,6 @@ export const STEP_TIPS: Record<StepId, DeviceTip[]> = {
             title: 'Trên macOS',
             description: 'Chuyển nguồn nhập sang ABC hoặc U.S. bằng Control + Space hoặc phím Globe (fn).',
             Icon: LuCommand,
-        },
-        {
-            title: 'Không có kiểm tra chính tả',
-            description: 'Giao diện thi Writing không gợi ý chính tả, hãy luyện gõ chính xác ngay từ đầu.',
-            Icon: LuSpellCheck,
         },
     ],
     summary: [

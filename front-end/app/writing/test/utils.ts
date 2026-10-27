@@ -1,7 +1,7 @@
 import type { Attempt, PartTemplate } from '@/lib/domain/types';
 import { ExamSection } from './types';
 
-export { countSentences, countWords, findKeywordUsage } from '@/lib/domain/writing-text';
+export { countSentences, countWords } from '@/lib/domain/writing-text';
 
 export const TIME_WARNING_SECONDS = 60;
 

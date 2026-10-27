@@ -15,6 +15,7 @@ import { GuestMenu } from '@/components/user/guest-menu';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { MdEditDocument } from 'react-icons/md';
+import { MISTAKES_ENABLED, MISTAKES_PATH } from '@/app/mistakes/utils';
 
 /**
  * Chiều cao mỗi mục. PHẢI khớp với class `h-16` (64px) bên dưới,
@@ -28,10 +29,10 @@ const items: NavItem[] = [
     { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
     { label: 'Speaking', href: '/speaking', icon: FaMicrophoneAlt },
     { label: 'Writing', href: '/writing', icon: FaPenNib },
-    { label: 'Mistakes', href: '/mistakes', icon: IoBook },
+    { label: 'Mistakes', href: MISTAKES_PATH, icon: IoBook },
     { label: 'Schedule', href: '/schedule', icon: IoCalendar },
     { label: 'Setting', href: '/setting', icon: IoSettings },
-];
+].filter((item) => MISTAKES_ENABLED || item.href !== MISTAKES_PATH);
 
 const adminItems: NavItem[] = [{ label: 'Quản trị đề', href: '/exam-management', icon: MdEditDocument }];
 

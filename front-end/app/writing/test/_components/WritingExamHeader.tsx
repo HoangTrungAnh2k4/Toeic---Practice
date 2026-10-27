@@ -47,14 +47,11 @@ function SaveIndicator({ saveStatus, savedAt, isRestored }: Pick<WritingExamHead
         saveStatus === 'saved' && savedAt
             ? `Đã lưu nháp lúc ${new Date(savedAt).toLocaleTimeString('vi-VN')}`
             : isRestored
-              ? 'Đã khôi phục bản nháp trước đó'
-              : 'Tự động lưu nháp đang bật';
+                ? 'Đã khôi phục bản nháp trước đó'
+                : 'Tự động lưu nháp đang bật';
 
     return (
-        <>
-            <LuSave className="size-4 text-sub3" aria-hidden="true" />
-            <span>{label}</span>
-        </>
+        <span>{label}</span>
     );
 }
 
@@ -80,8 +77,8 @@ export default function WritingExamHeader({
     const timeNote = section_sec
         ? `${section_sec / 60} phút dùng chung cho ${q_to - q_from + 1} câu`
         : q_from === q_to
-          ? `${questionMin} phút cho câu này`
-          : `${questionMin} phút mỗi câu, giờ dư của câu trước được cộng dồn`;
+            ? `${questionMin} phút cho câu này`
+            : `${questionMin} phút mỗi câu, giờ dư của câu trước được cộng dồn`;
 
     return (
         <header className="shadow-sm border border-sub2/30 rounded-xl w-full overflow-hidden">
@@ -105,10 +102,7 @@ export default function WritingExamHeader({
                             <LuTimer className="size-3.5" aria-hidden="true" />
                             {MODE_LABEL[mode]}
                         </span>
-                        <span className="inline-flex items-center gap-1.5 bg-sub1/10 px-2.5 py-1 rounded-full font-medium text-sub1/80 text-xs">
-                            <LuLock className="size-3.5 text-sub2" aria-hidden="true" />
-                            Chuẩn ETS CBT · Tắt kiểm tra chính tả
-                        </span>
+
                     </div>
                 </div>
 
@@ -174,8 +168,8 @@ export default function WritingExamHeader({
                                 {isUntimed
                                     ? 'Tự do thời gian, có thể làm lại nhiều lần'
                                     : isTimeUp
-                                      ? 'Đã hết giờ — bài làm bị khóa'
-                                      : timeNote}
+                                        ? 'Đã hết giờ — bài làm bị khóa'
+                                        : timeNote}
                             </span>
                         </div>
 

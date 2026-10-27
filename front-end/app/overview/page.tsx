@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { GuestDataNotice } from '@/components/user/guest-data-notice';
 import { listMistakePatterns } from '@/lib/data/mistake-patterns';
 import { getExamSummaries } from '@/lib/exam-library/summaries';
 import FooterAssurance from './_components/footerAssurance';
@@ -17,8 +16,6 @@ export default async function Overview() {
 
     return (
         <div className="flex flex-col gap-10 mx-auto w-full max-w-360">
-            <GuestDataNotice />
-
             {/* Welcome banner */}
             <WelcomeBanner />
 

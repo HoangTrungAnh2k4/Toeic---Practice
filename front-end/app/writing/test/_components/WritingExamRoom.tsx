@@ -11,8 +11,7 @@ import type { RoomPart } from '@/lib/exam-library/room';
 import { getAttemptHref } from '@/app/setting/history/utils';
 import { useCountdown } from '../_lib/useCountdown';
 import { useWritingAttempt } from '../_lib/useWritingAttempt';
-import { findKeywordUsage, formatQuestionRange, getQuestionDeadline } from '../utils';
-import DirectionsCard from './DirectionsCard';
+import { formatQuestionRange, getQuestionDeadline } from '../utils';
 import EmailStimulus from './EmailStimulus';
 import EssayStimulus from './EssayStimulus';
 import ExamNavigation from './ExamNavigation';
@@ -131,9 +130,7 @@ export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: W
 
     const rangeLabel = formatQuestionRange(template);
     const question = questions[currentIndex];
-    const keywords = question.keywords ?? [];
     const answer = answers[currentIndex] ?? '';
-    const keywordUsages = keywords.map((keyword) => findKeywordUsage(answer, keyword));
     const answeredCount = answers.filter((item) => item.trim()).length;
 
     const handleDialogChange = (dialog: Exclude<ExamDialog, null>) => (open: boolean) =>
@@ -162,15 +159,10 @@ export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: W
             />
 
             <main className="items-start gap-6 grid grid-cols-1 lg:grid-cols-12">
-                {/* Stimulus: directions + picture/email/essay */}
+                {/* Stimulus: picture/email/essay */}
                 <div className="flex flex-col gap-4 lg:col-span-6">
-                    <DirectionsCard partNo={template.part_no} questionNumber={question.number} />
                     {template.part_no === 1 ? (
-                        <PictureStimulus
-                            question={question}
-                            total={questions.length}
-                            keywordUsages={keywordUsages}
-                        />
+                        <PictureStimulus question={question} total={questions.length} />
                     ) : template.part_no === 2 ? (
                         <EmailStimulus question={question} email={question.stimulus ?? part.part.context} />
                     ) : (
@@ -187,8 +179,6 @@ export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: W
                         questionNumber={question.number}
                         value={answer}
                         onChange={(value) => updateAnswer(offset + currentIndex, value)}
-                        keywords={keywords}
-                        keywordUsages={keywordUsages}
                         isLocked={isTimeUp}
                     />
                     <ExamNavigation

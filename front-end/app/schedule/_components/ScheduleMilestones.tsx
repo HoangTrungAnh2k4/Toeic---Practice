@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { LuFlag, LuFlame, LuTrendingUp } from 'react-icons/lu';
-import { getMistakeHref } from '@/app/mistakes/utils';
+import { getMistakeHref, MISTAKES_ENABLED } from '@/app/mistakes/utils';
 import { cn } from '@/lib/utils';
 import { SKILL_STYLE } from '../_lib/skillStyle';
 import type { ExamGoal, MonthlyProgress, SkillProgress } from '../types';
@@ -142,7 +142,9 @@ export default function ScheduleMilestones({ goal, skills, monthly }: ScheduleMi
                             />
                             <span className="font-medium text-[11px] text-subText truncate">
                                 Trọng tâm:{' '}
-                                {item.focus ? (
+                                {item.focus && !MISTAKES_ENABLED ? (
+                                    <span className="font-semibold text-main">{item.focus.title}</span>
+                                ) : item.focus ? (
                                     <Link
                                         href={getMistakeHref(item.focus.id)}
                                         className="font-semibold text-main hover:underline"

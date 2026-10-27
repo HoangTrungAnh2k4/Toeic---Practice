@@ -1,17 +1,14 @@
 import Image from 'next/image';
-import { LuCheck, LuImage, LuKeyRound, LuListChecks } from 'react-icons/lu';
-import { cn } from '@/lib/utils';
+import { LuImage, LuKeyRound, LuListChecks } from 'react-icons/lu';
 import type { Question } from '@/lib/domain/types';
 
 interface PictureStimulusProps {
     question: Question;
     /** Số câu trong nhóm, để hiển thị vị trí ảnh. */
     total: number;
-    /** Dạng từ khóa thí sinh đã dùng (theo thứ tự `question.keywords`), `null` nếu chưa dùng. */
-    keywordUsages: (string | null)[];
 }
 
-export default function PictureStimulus({ question, total, keywordUsages }: PictureStimulusProps) {
+export default function PictureStimulus({ question, total }: PictureStimulusProps) {
     const position = String(question.number).padStart(2, '0');
     const totalLabel = String(total).padStart(2, '0');
 
@@ -40,22 +37,14 @@ export default function PictureStimulus({ question, total, keywordUsages }: Pict
                     Từ khóa bắt buộc
                 </span>
                 <ul className="flex flex-wrap items-center gap-2" aria-label="Từ khóa bắt buộc">
-                    {(question.keywords ?? []).map((keyword, index) => {
-                        const isUsed = Boolean(keywordUsages[index]);
-                        return (
-                            <li
-                                key={keyword.word}
-                                className={cn(
-                                    'inline-flex items-center gap-1.5 shadow-sm px-4 py-1.5 border rounded-lg font-bold text-lg transition-colors',
-                                    isUsed ? 'bg-main border-main text-sub3' : 'bg-white border-sub2/40 text-main',
-                                )}
-                            >
-                                {isUsed && <LuCheck className="size-4" aria-hidden="true" />}
-                                {keyword.word}
-                                <span className="sr-only">{isUsed ? '(đã dùng)' : '(chưa dùng)'}</span>
-                            </li>
-                        );
-                    })}
+                    {(question.keywords ?? []).map((keyword) => (
+                        <li
+                            key={keyword.word}
+                            className="bg-white shadow-sm px-4 py-1.5 border border-sub2/40 rounded-lg font-bold text-main text-lg"
+                        >
+                            {keyword.word}
+                        </li>
+                    ))}
                 </ul>
             </div>
 

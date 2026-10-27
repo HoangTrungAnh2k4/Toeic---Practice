@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { getTopMistake, type MistakeBook } from '@/app/mistakes/_lib/data';
+import { MISTAKES_ENABLED } from '@/app/mistakes/utils';
 import { generatePlan } from '@/lib/data/generate-plan';
 import { toDayKey, type UserStats } from '@/lib/data/user-stats';
 import { createStudyPlan, listAttempts, type PlanGoals } from '@/lib/data/user-data';
@@ -65,7 +66,10 @@ export async function savePlan(values: PlanGoalsValues, { stats, book, exams }: 
         targets: { speaking: values.target_speaking, writing: values.target_writing },
         currentScores: { speaking: stats.skills.speaking.latest_score, writing: stats.skills.writing.latest_score },
         partRatios: new Map(stats.parts.map((part) => [part.part_template_id, part.avg_score_ratio])),
-        topMistakes: { speaking: getTopMistake(book, 'speaking'), writing: getTopMistake(book, 'writing') },
+        // Không có mẫu lỗi thì generatePlan không xếp task ôn Sổ lỗi
+        topMistakes: MISTAKES_ENABLED
+            ? { speaking: getTopMistake(book, 'speaking'), writing: getTopMistake(book, 'writing') }
+            : { speaking: null, writing: null },
         exams,
         lastAttemptAt,
         minutesPerDay: values.minutes_per_day,

@@ -41,6 +41,15 @@ export async function proxy(request: NextRequest) {
     if (data?.claims && GUEST_ONLY.includes(pathname)) {
         return NextResponse.redirect(new URL('/overview', request.url));
     }
+    // Admin không có Overview (sidebar admin chỉ có quản trị đề); mọi lối vào sau đăng nhập (form, OTP, Google) đều trỏ /overview nên đổi hướng ở đây
+    if (data?.claims && pathname === '/overview') {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.claims.sub).maybeSingle();
+        if (profile?.role === 'admin') {
+            const toAdmin = NextResponse.redirect(new URL('/exam-management', request.url));
+            response.cookies.getAll().forEach((cookie) => toAdmin.cookies.set(cookie));
+            return toAdmin;
+        }
+    }
 
     // Phòng thi stream từ <Suspense> nên notFound() trong page chỉ ra status 200; kiểm đề ở đây để trả 404 thật.
     // RLS quyết định: khách/học viên chỉ đọc được đề published, admin đọc được cả nháp (xem trước).

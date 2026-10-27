@@ -15,6 +15,9 @@ import {
 
 export const MISTAKES_PATH = '/mistakes';
 
+/** v1 khóa Sổ lỗi (route trả 404, ẩn mọi lối vào); v2 bật lại bằng cách đổi thành `true`. Dữ liệu lỗi vẫn được chấm và ghi. */
+export const MISTAKES_ENABLED = false;
+
 /** Số bài độc lập liên tiếp không lặp lại để lỗi tự chuyển sang "Đã khắc phục". */
 export const RESOLVE_STREAK = 3;
 

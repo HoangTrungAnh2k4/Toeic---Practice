@@ -1,5 +1,5 @@
 import { getTopMistake, type MistakeBook } from '@/app/mistakes/_lib/data';
-import { getMistakeHref } from '@/app/mistakes/utils';
+import { getMistakeHref, MISTAKES_ENABLED, MISTAKES_PATH } from '@/app/mistakes/utils';
 import { getAttemptHref } from '@/app/setting/history/utils';
 import { getDaysUntil } from '@/app/setting/profile/utils';
 import { getPlanWeekDays, getPlanWeekNo, isTaskDone, parseDayKey } from '@/lib/data/study-plan';
@@ -75,9 +75,11 @@ function getTaskLabel(task: PlanTask, exam: ExamSummary | undefined) {
 function getTaskAction(task: PlanTask, exam: ExamSummary | undefined, isToday: boolean) {
     if (task.attempt_id) return { actionLabel: 'Xem lại bài làm', href: getAttemptHref(task.attempt_id) };
     if (task.kind === 'review') {
+        // Lộ trình cũ có thể còn task ôn lỗi; khi Sổ lỗi khóa thì dẫn về lịch sử bài làm
+        if (!MISTAKES_ENABLED) return { actionLabel: 'Xem lịch sử bài làm', href: '/setting/history' };
         return {
             actionLabel: 'Mở sổ lỗi',
-            href: task.mistake_pattern_id ? getMistakeHref(task.mistake_pattern_id) : '/mistakes',
+            href: task.mistake_pattern_id ? getMistakeHref(task.mistake_pattern_id) : MISTAKES_PATH,
         };
     }
     if (task.kind === 'summary') return { actionLabel: 'Xem hồ sơ học', href: '/setting/profile' };

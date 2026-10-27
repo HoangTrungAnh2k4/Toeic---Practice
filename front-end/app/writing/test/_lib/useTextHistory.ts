@@ -4,7 +4,7 @@ const HISTORY_LIMIT = 100;
 /** Các lần gõ liên tiếp trong khoảng này được gộp thành một bước Undo. */
 const TYPING_BURST_MS = 800;
 
-/** Undo/Redo tự quản lý cho textarea controlled (giống nút Undo/Redo của phòng thi ETS). */
+/** Undo/Redo (Ctrl+Z / Ctrl+Y) tự quản lý cho textarea controlled. */
 export function useTextHistory(value: string, onChange: (next: string) => void) {
     const [past, setPast] = useState<string[]>([]);
     const [future, setFuture] = useState<string[]>([]);
@@ -49,5 +49,5 @@ export function useTextHistory(value: string, onChange: (next: string) => void) 
         onChange(next);
     };
 
-    return { commit, undo, redo, canUndo: past.length > 0, canRedo: future.length > 0 };
+    return { commit, undo, redo };
 }
