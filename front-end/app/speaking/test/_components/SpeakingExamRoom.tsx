@@ -188,7 +188,8 @@ function SpeakingExamSession({ exam, steps, mode, attemptId, startIndex, isFinis
             setSubmitFailed(false);
             if ((await submit()) !== 'error') {
                 // Hết lượt chấm (`limit`) vẫn nộp được; trang kết quả ghi rõ câu chưa có điểm
-                router.push(getAttemptHref(attemptId));
+                // replace: bỏ phòng thi khỏi history để Back không quay lại bài đã nộp
+                router.replace(getAttemptHref(attemptId));
                 return;
             }
             setIsSubmitting(false);

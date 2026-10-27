@@ -86,8 +86,9 @@ export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: W
             autoSubmittedRef.current = false;
             window.scrollTo({ top: 0, behavior: 'instant' });
         }
-        // Part cuối: sang trang kết quả, trang đó chờ chấm xong rồi hiện điểm
-        if (result === 'done') router.push(getAttemptHref(attempt.id));
+        // Part cuối: sang trang kết quả, trang đó chờ chấm xong rồi hiện điểm.
+        // replace: bỏ phòng thi khỏi history để Back không quay lại bài đã nộp
+        if (result === 'done') router.replace(getAttemptHref(attempt.id));
     };
 
     const autoSubmit = useEffectEvent(() => {
