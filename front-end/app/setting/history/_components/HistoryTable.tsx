@@ -1,7 +1,6 @@
 import {
     LuBadgeCheck,
     LuBrain,
-    LuCircleCheck,
     LuClock,
     LuEllipsisVertical,
     LuEye,
@@ -90,12 +89,6 @@ function ScoreCell({ row }: { row: HistoryRow }) {
                     </span>
                 )}
             </div>
-            {attempt.feedback_summary && (
-                <span className="flex items-center gap-1 font-medium text-[11px] text-subText">
-                    <LuCircleCheck className="size-3 text-sub2 shrink-0" aria-hidden="true" />
-                    {attempt.feedback_summary}
-                </span>
-            )}
             {scoreDelta !== null && (
                 <span className="font-semibold text-[11px] text-main">
                     {scoreDelta >= 0 ? '+' : ''}

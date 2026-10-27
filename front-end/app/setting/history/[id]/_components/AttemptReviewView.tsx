@@ -123,9 +123,9 @@ export default function AttemptReviewView({ params, exams }: AttemptReviewViewPr
                     </p>
                 </div>
             ) : (
-                <div className="items-start gap-6 grid grid-cols-1 lg:grid-cols-4">
+                <div className="items-start gap-6 grid grid-cols-1 lg:grid-cols-3">
                     <ReviewQuestionNav questions={questions} />
-                    <div className="flex flex-col gap-6 lg:col-span-3 min-w-0">
+                    <div className="flex flex-col gap-6 lg:col-span-2 min-w-0">
                         {questions.map((question) => (
                             <ReviewQuestionCard
                                 key={question.question.id}
