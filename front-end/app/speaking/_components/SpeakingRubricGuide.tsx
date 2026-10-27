@@ -9,18 +9,20 @@ export default function SpeakingRubricGuide() {
             aria-labelledby="speaking-rubric-title"
             className="flex flex-col gap-5 bg-white shadow-sm p-5 sm:p-6 border border-sub2/30 rounded-xl scroll-mt-4"
         >
-            <div className="flex flex-col gap-1.5">
-                <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-sub2 text-xs uppercase tracking-wider">
-                        Cấu trúc đề thi nói chuẩn ETS
-                    </span>
-                    <span className="bg-sub1 px-2 py-0.5 rounded-md font-semibold text-[11px] text-main">
-                        200 điểm · 11 câu · 20 phút
-                    </span>
-                </div>
+            <div className="flex sm:flex-row flex-col justify-between sm:items-center gap-3">
                 <h2 id="speaking-rubric-title" className="font-bold text-main text-xl tracking-tight">
-                    5 phần thi, thời gian & tiêu chí chấm từng phần
+                    Cấu trúc đề & tiêu chí chấm
                 </h2>
+                <ul className="flex flex-wrap gap-2">
+                    {['200 điểm', '11 câu', '20 phút'].map((fact) => (
+                        <li
+                            key={fact}
+                            className="bg-sub1 px-2.5 py-1 rounded-md font-semibold text-[0.6875rem] text-main tracking-wider"
+                        >
+                            {fact}
+                        </li>
+                    ))}
+                </ul>
             </div>
 
             <ol className="gap-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">

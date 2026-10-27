@@ -4,8 +4,6 @@ import {
     LuBookmark,
     LuBookmarkCheck,
     LuEye,
-    LuGraduationCap,
-    LuPlay,
     LuRotateCcw,
     LuSave,
     LuStepForward,
@@ -24,10 +22,9 @@ interface ExamCardProps {
     onToggleBookmark: (examId: string) => void;
 }
 
-type BadgeTone = 'main' | 'sub3' | 'neutral';
+type BadgeTone = 'sub3' | 'neutral';
 
 const BADGE_TONE_CLASS: Record<BadgeTone, string> = {
-    main: 'bg-main text-sub3',
     sub3: 'bg-sub3 text-main',
     neutral: 'bg-sub1 text-main',
 };
@@ -47,7 +44,7 @@ function formatRemaining(endsAt: string): string | null {
 }
 
 interface CardShellProps extends Pick<ExamCardProps, 'entry' | 'onToggleBookmark'> {
-    badge: string;
+    badge?: string;
     badgeTone: BadgeTone;
     meta?: ReactNode;
     footer: ReactNode;
@@ -70,15 +67,17 @@ function CardShell({ entry, onToggleBookmark, badge, badgeTone, meta, footer, cl
         >
             <div className="flex flex-col gap-2.5">
                 <div className="flex justify-between items-center gap-2">
-                    <span
-                        className={cn(
-                            'px-2 py-0.5 rounded-md font-bold text-[11px] uppercase tracking-wide',
-                            BADGE_TONE_CLASS[badgeTone],
-                        )}
-                    >
-                        {badge}
-                    </span>
-                    <div className="flex items-center gap-2">
+                    {badge && (
+                        <span
+                            className={cn(
+                                'px-2 py-0.5 rounded-md font-bold text-[11px] uppercase tracking-wide',
+                                BADGE_TONE_CLASS[badgeTone],
+                            )}
+                        >
+                            {badge}
+                        </span>
+                    )}
+                    <div className="flex items-center gap-2 ml-auto">
                         {meta}
                         <button
                             type="button"
@@ -114,8 +113,8 @@ function NotStartedCard({ skill, entry, isRecommended, onToggleBookmark }: ExamC
         <CardShell
             entry={entry}
             onToggleBookmark={onToggleBookmark}
-            badge={exam.source === 'ets' ? 'Chuẩn ETS' : 'Toeco biên soạn'}
-            badgeTone={exam.source === 'ets' ? 'neutral' : 'main'}
+            badge={exam.source === 'ets' ? 'Chuẩn ETS' : undefined}
+            badgeTone="neutral"
             footer={
                 <>
                     <div className={SUMMARY_STRIP_CLASS}>
@@ -129,18 +128,16 @@ function NotStartedCard({ skill, entry, isRecommended, onToggleBookmark }: ExamC
                             href={buildTestHref(skill, exam.id)}
                             className={cn(
                                 buttonVariants({ variant: isRecommended ? 'primary' : 'third', size: 'sm' }),
-                                'gap-1.5 px-2 text-xs',
+                                'px-2 text-xs',
                                 !isRecommended && 'bg-white',
                             )}
                         >
-                            <LuPlay className="size-4" aria-hidden="true" />
-                            <span>Thi thử CBT</span>
+                            <span>Thi thử</span>
                         </Link>
                         <Link
                             href={buildTestHref(skill, exam.id, 'guided')}
-                            className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-1.5 px-2 text-xs')}
+                            className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'px-2 text-xs')}
                         >
-                            <LuGraduationCap className="size-4" aria-hidden="true" />
                             <span>Có hướng dẫn</span>
                         </Link>
                     </div>

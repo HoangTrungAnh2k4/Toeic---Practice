@@ -1,7 +1,5 @@
-import { LuLightbulb } from 'react-icons/lu';
 import type { Skill } from '@/lib/domain/types';
 import type { PartStrategy } from '@/lib/exam-library/types';
-import { SKILL_COPY } from './skill-copy';
 
 interface StrategyTipsProps {
     skill: Skill;
@@ -9,29 +7,14 @@ interface StrategyTipsProps {
 }
 
 export function StrategyTips({ skill, strategies }: StrategyTipsProps) {
-    const copy = SKILL_COPY[skill];
-
     return (
         <section
             aria-labelledby={`${skill}-strategy-title`}
             className="flex flex-col gap-5 bg-white shadow-sm p-5 sm:p-6 border border-sub2/30 rounded-xl"
         >
-            <div className="flex items-start gap-3">
-                <span className="flex justify-center items-center bg-sub3 rounded-lg size-10 text-main shrink-0">
-                    <LuLightbulb className="size-5" aria-hidden="true" />
-                </span>
-                <div className="flex flex-col gap-1">
-                    <span className="font-semibold text-sub2 text-xs uppercase tracking-wider">
-                        Bí quyết phòng thi CBT · ETS Scoring Secrets
-                    </span>
-                    <h2 id={`${skill}-strategy-title`} className="font-bold text-main text-xl tracking-tight">
-                        Chiến thuật tối ưu điểm từng phần thi TOEIC {copy.label}
-                    </h2>
-                    <p className="font-medium text-subText text-sm">
-                        {copy.strategySubtitle}
-                    </p>
-                </div>
-            </div>
+            <h2 id={`${skill}-strategy-title`} className="font-bold text-main text-xl tracking-tight">
+                Chiến thuật từng Part
+            </h2>
 
             <div className="gap-4 grid grid-cols-1 lg:grid-cols-3">
                 {strategies.map(({ part, timing, tips, formula }) => (

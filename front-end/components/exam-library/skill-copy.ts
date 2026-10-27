@@ -15,7 +15,6 @@ interface SkillCopy {
     searchPlaceholder: string;
     roomChecks: RoomCheck[];
     deviceCheckLabel: string;
-    strategySubtitle: string;
 }
 
 /** Nội dung riêng theo kỹ năng cho các khối dùng chung của thư viện đề. */
@@ -42,7 +41,6 @@ export const SKILL_COPY: Record<Skill, SkillCopy> = {
             },
         ],
         deviceCheckLabel: 'Kiểm tra micro & loa',
-        strategySubtitle: 'Đúc kết từ kinh nghiệm luyện thi 200/200 và dữ liệu phân tích giọng nói của AI.',
     },
     writing: {
         label: 'Writing',
@@ -66,6 +64,5 @@ export const SKILL_COPY: Record<Skill, SkillCopy> = {
             },
         ],
         deviceCheckLabel: 'Kiểm tra bàn phím',
-        strategySubtitle: 'Đúc kết từ kinh nghiệm luyện thi 200/200 và thuật toán chấm rubric tự động của AI.',
     },
 };
