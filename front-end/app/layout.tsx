@@ -44,6 +44,7 @@ export default function RootLayout({
             <body
                 className={`${roboto.variable} ${geistMono.variable} group/app antialiased min-h-screen flex flex-col`}
             >
+                <Analytics />
                 {/* Footer nằm ngoài khối này để sidebar sticky dừng ở đáy nội dung, không trượt đè lên footer */}
                 <div className="flex md:flex-row flex-col flex-1 has-[.sidebar-root]:bg-main">
                     {/* usePathname cần Suspense trên các route có param động (cacheComponents) */}
