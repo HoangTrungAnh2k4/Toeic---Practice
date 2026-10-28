@@ -8,6 +8,7 @@ import { HideOnExam } from '@/components/layout/footer/hide-on-exam';
 import { HideOnAuth } from '@/components/layout/hide-on-auth';
 import { SITE_URL } from '@/lib/site';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const roboto = Roboto({
     weight: ['300', '400', '500', '700'],
@@ -45,6 +46,7 @@ export default function RootLayout({
                 className={`${roboto.variable} ${geistMono.variable} group/app antialiased min-h-screen flex flex-col`}
             >
                 <Analytics />
+                <SpeedInsights />
                 {/* Footer nằm ngoài khối này để sidebar sticky dừng ở đáy nội dung, không trượt đè lên footer */}
                 <div className="flex md:flex-row flex-col flex-1 has-[.sidebar-root]:bg-main">
                     {/* usePathname cần Suspense trên các route có param động (cacheComponents) */}
