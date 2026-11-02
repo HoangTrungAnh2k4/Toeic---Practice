@@ -6,9 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { IoCalendar, IoSettings } from 'react-icons/io5';
+import { IoSettings } from 'react-icons/io5';
 import { TbLayoutDashboardFilled } from 'react-icons/tb';
-import { FaMicrophoneAlt } from 'react-icons/fa';
 import { FaPenNib } from 'react-icons/fa6';
 import { UserMenu } from '@/components/user/user-menu';
 import { GuestMenu } from '@/components/user/guest-menu';
@@ -26,9 +25,8 @@ type NavItem = { label: string; href: string; icon: IconType };
 
 const items: NavItem[] = [
     { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
-    { label: 'Speaking', href: '/speaking', icon: FaMicrophoneAlt },
+    // Tạm ẩn Speaking và Schedule; route vẫn còn
     { label: 'Writing', href: '/writing', icon: FaPenNib },
-    { label: 'Schedule', href: '/schedule', icon: IoCalendar },
     { label: 'Setting', href: '/setting', icon: IoSettings },
 ];
 

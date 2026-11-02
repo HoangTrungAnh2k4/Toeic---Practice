@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { LuImage, LuKeyRound, LuListChecks } from 'react-icons/lu';
+import { LuImage, LuKeyRound } from 'react-icons/lu';
 import type { Question } from '@/lib/domain/types';
 
 interface PictureStimulusProps {
@@ -14,7 +14,7 @@ export default function PictureStimulus({ question, total }: PictureStimulusProp
 
     return (
         <figure className="flex flex-col gap-4 bg-white shadow-sm p-4 border border-sub2/30 rounded-xl">
-            <div className="relative bg-sub1 rounded-lg w-full aspect-4/3 overflow-hidden">
+            <div className="relative bg-white rounded-lg w-full aspect-4/3 overflow-hidden">
                 <Image
                     src={question.image_path ?? ''}
                     alt={question.image_alt ?? `Hình ảnh câu ${question.number}`}
@@ -22,7 +22,7 @@ export default function PictureStimulus({ question, total }: PictureStimulusProp
                     unoptimized
                     priority
                     sizes="(min-width: 1024px) 50vw, 100vw"
-                    className="object-cover pointer-events-none select-none"
+                    className="object-contain pointer-events-none select-none"
                 />
                 <figcaption className="right-3 bottom-3 absolute flex items-center gap-1.5 bg-main/90 backdrop-blur-xs px-2.5 py-1 rounded-md font-medium tabular-nums text-sub1 text-xs">
                     <LuImage className="size-3.5" aria-hidden="true" />
@@ -46,14 +46,6 @@ export default function PictureStimulus({ question, total }: PictureStimulusProp
                         </li>
                     ))}
                 </ul>
-            </div>
-
-            <div className="flex flex-wrap justify-between items-center gap-2 px-1 text-subText text-xs">
-                <span className="flex items-center gap-1.5">
-                    <LuListChecks className="size-4 text-sub2" aria-hidden="true" />
-                    Yêu cầu: đúng ngữ pháp, hợp nghĩa với tranh, dùng đủ 2 từ.
-                </span>
-                <span className="font-semibold text-main">Thang điểm: 0 – 3</span>
             </div>
         </figure>
     );

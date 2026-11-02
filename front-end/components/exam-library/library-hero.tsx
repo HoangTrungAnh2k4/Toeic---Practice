@@ -195,13 +195,25 @@ export function LibraryHero({ skill, exams }: LibraryHeroProps) {
                         </li>
                     ))}
                 </ul>
-                <Link
-                    href="/setting/device-check"
-                    className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'self-start gap-1.5')}
-                >
-                    {copy.deviceCheckLabel}
-                    <LuArrowRight className="size-3.5" aria-hidden="true" />
-                </Link>
+                {/* Tạm khóa nút kiểm tra bàn phím của Writing */}
+                {skill === 'writing' ? (
+                    <button
+                        type="button"
+                        disabled
+                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'self-start gap-1.5')}
+                    >
+                        {copy.deviceCheckLabel}
+                        <LuArrowRight className="size-3.5" aria-hidden="true" />
+                    </button>
+                ) : (
+                    <Link
+                        href="/setting/device-check"
+                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'self-start gap-1.5')}
+                    >
+                        {copy.deviceCheckLabel}
+                        <LuArrowRight className="size-3.5" aria-hidden="true" />
+                    </Link>
+                )}
             </div>
         </section>
     );

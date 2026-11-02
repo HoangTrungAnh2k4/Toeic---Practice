@@ -1,4 +1,4 @@
-import { LuHeadset, LuHistory, LuMic, LuUserRound } from 'react-icons/lu';
+import { LuHistory, LuUserRound } from 'react-icons/lu';
 import { SettingGroup } from './types';
 
 export const SETTING_BASE_PATH = '/setting';
@@ -31,20 +31,5 @@ export const SETTING_GROUPS: SettingGroup[] = [
             },
         ],
     },
-    {
-        id: 'exam-room',
-        title: 'Phòng thi',
-        description: 'Chuẩn bị thiết bị trước khi vào phòng thi Speaking.',
-        Icon: LuMic,
-        sections: [
-            {
-                id: 'device-check',
-                title: 'Kiểm tra thiết bị',
-                description: 'Kiểm tra micro, loa và quyền ghi âm của trình duyệt để phòng thi Speaking hoạt động ổn định.',
-                href: `${SETTING_BASE_PATH}/device-check`,
-                actionLabel: 'Bắt đầu kiểm tra',
-                Icon: LuHeadset,
-            },
-        ],
-    },
+    // Tạm ẩn nhóm "Phòng thi" (Kiểm tra thiết bị); route /setting/device-check vẫn còn
 ];

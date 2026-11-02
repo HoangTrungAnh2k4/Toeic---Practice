@@ -13,14 +13,14 @@ const DESCRIBE_CUES = ['Đối tượng chính', 'Hoạt động', 'Vị trí', 
 export default function PictureStimulus({ imageUrl, imageAlt, questionRef, questionNumber }: PictureStimulusProps) {
     return (
         <figure className="flex flex-col gap-4 bg-white p-4 border border-sub1 rounded-2xl h-full">
-            <div className="relative bg-sub1 rounded-xl w-full aspect-4/3 overflow-hidden">
+            <div className="relative bg-white rounded-xl w-full aspect-4/3 overflow-hidden">
                 <Image
                     src={imageUrl}
                     alt={imageAlt ?? `Hình ảnh đề thi câu ${questionNumber}, cần miêu tả bằng tiếng Anh`}
                     fill
                     unoptimized
                     loading="eager"
-                    className="size-full object-cover pointer-events-none select-none"
+                    className="size-full object-contain pointer-events-none select-none"
                 />
                 <figcaption className="right-3 bottom-3 absolute bg-main/90 backdrop-blur-xs px-2.5 py-1 rounded-md font-medium tabular-nums text-sub1 text-xs">
                     {questionRef}

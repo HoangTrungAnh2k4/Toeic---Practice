@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { LuCircleCheck, LuClock, LuKeyRound, LuMessageSquareText, LuSparkles } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import { placeAnnotations } from '../../_lib/annotate';
@@ -58,6 +59,18 @@ export default function ReviewQuestionCard({ item, isSpeaking, isPending }: Revi
             <div className="flex flex-col gap-3 bg-sub1/50 p-4 rounded-xl">
                 <span className={BLOCK_LABEL_CLASS}>Đề bài</span>
                 <p className="font-medium text-main text-sm leading-relaxed whitespace-pre-line">{prompt}</p>
+                {question.image_path && (
+                    <div className="relative bg-card rounded-lg w-full max-w-md aspect-4/3 overflow-hidden">
+                        <Image
+                            src={question.image_path}
+                            alt={question.image_alt ?? `Hình ảnh câu ${number}`}
+                            fill
+                            unoptimized
+                            sizes="(min-width: 640px) 28rem, 100vw"
+                            className="object-contain"
+                        />
+                    </div>
+                )}
                 {stimulus && (
                     <p className="bg-card p-3 rounded-lg font-medium text-subText text-sm leading-relaxed whitespace-pre-line">
                         {stimulus}

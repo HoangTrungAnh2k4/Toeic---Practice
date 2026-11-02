@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { IoShieldCheckmarkSharp } from 'react-icons/io5';
@@ -19,12 +18,10 @@ export default function FooterAssurance() {
                     </span>
                 </div>
             </div>
-            <Link
-                href="/setting/device-check"
-                className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'py-0')}
-            >
+            {/* Tạm khóa: trang kiểm tra thiết bị đang ẩn */}
+            <button type="button" disabled className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'py-0')}>
                 Kiểm tra âm thanh
-            </Link>
+            </button>
         </div>
     );
 }
