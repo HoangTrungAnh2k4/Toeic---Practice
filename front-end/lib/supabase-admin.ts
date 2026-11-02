@@ -6,7 +6,8 @@ import type { Database } from './database.types';
  * Bỏ qua RLS: chỗ gọi phải tự kiểm tra quyền (bằng client mang phiên) trước khi ghi.
  */
 export function createAdminSupabase() {
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Integration Supabase–Vercel sync tên mới (PUBLISHABLE_KEY / SECRET_KEY), local vẫn dùng tên cũ
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
     if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured');
     return createClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, key, {
         auth: { persistSession: false, autoRefreshToken: false },

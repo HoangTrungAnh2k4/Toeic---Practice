@@ -14,7 +14,7 @@ export function setRememberSession(remember: boolean) {
 /** Trên server không có `document` nên client này chỉ gọi Supabase như anon; cần phiên thì dùng `lib/supabase-server.ts`. */
 export const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)!,
     {
         // Tự retry 3 lần (chờ 1s, 2s, 4s) làm báo lỗi hiện sau ~15s; các trang đã có nút "Thử lại"
         db: { retry: false },
