@@ -1,0 +1,46 @@
+name: Deploy Vercel
+
+# Chỉ deploy khi CI trên main pass
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vercel
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      # Tên repo có "---" nên đặt tên project riêng
+      PROJECT: toeic-practice
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # corepack lấy đúng pnpm theo `packageManager` trong package.json
+      - run: corepack enable && npm i -g vercel@latest
+
+      # Tra id theo tên project để khỏi lưu ORG_ID/PROJECT_ID
+      - name: Resolve project
+        run: |
+          res=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$PROJECT") \
+            || { echo "::error::Không thấy project '$PROJECT' (hoặc thiếu secret VERCEL_TOKEN)"; exit 1; }
+          echo "VERCEL_ORG_ID=$(jq -r .accountId <<<"$res")" >> "$GITHUB_ENV"
+          echo "VERCEL_PROJECT_ID=$(jq -r .id <<<"$res")" >> "$GITHUB_ENV"
+
+      # Chạy ở repo root: project Vercel phải đặt Root Directory = front-end
+      - run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - run: vercel build --prod --token="$VERCEL_TOKEN"
+      - run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

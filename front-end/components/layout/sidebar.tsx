@@ -263,9 +263,10 @@ function MobileTopBar({ items, activeIndex, user }: MobileTopBarProps) {
  */
 export function SidebarFallback() {
     return (
-        <>
+        // Landing/auth không có sidebar: ẩn khung giữ chỗ để trang không nhảy khi hydrate. Fallback chỉ có trong HTML tải đầu nên :has() không dính route ẩn của cacheComponents
+        <div className="group-has-[[data-slot=auth-shell]]/app:hidden group-has-[[data-slot=landing]]/app:hidden contents">
             <div aria-hidden="true" className="md:hidden top-0 z-20 sticky bg-main h-14" />
             <div aria-hidden="true" className="hidden md:block top-0 sticky self-start bg-main w-64 h-dvh shrink-0" />
-        </>
+        </div>
     );
 }
