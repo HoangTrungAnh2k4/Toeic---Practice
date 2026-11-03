@@ -19,7 +19,9 @@ jobs:
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       # Tên repo có "---" nên đặt tên project riêng
-      PROJECT: toeic-practice
+      PROJECT: toeco
+      # Project nằm trong team, API không truyền team sẽ 404
+      TEAM: trung-anh4
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,8 +37,8 @@ jobs:
       # Tra id theo tên project để khỏi lưu ORG_ID/PROJECT_ID
       - name: Resolve project
         run: |
-          res=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$PROJECT") \
-            || { echo "::error::Không thấy project '$PROJECT' (hoặc thiếu secret VERCEL_TOKEN)"; exit 1; }
+          res=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v9/projects/$PROJECT?slug=$TEAM") \
+            || { echo "::error::Không thấy project '$PROJECT' trong team '$TEAM' (hoặc thiếu secret VERCEL_TOKEN)"; exit 1; }
           echo "VERCEL_ORG_ID=$(jq -r .accountId <<<"$res")" >> "$GITHUB_ENV"
           echo "VERCEL_PROJECT_ID=$(jq -r .id <<<"$res")" >> "$GITHUB_ENV"
 
