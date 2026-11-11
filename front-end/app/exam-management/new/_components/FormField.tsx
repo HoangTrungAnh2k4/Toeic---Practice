@@ -12,13 +12,15 @@ export interface ControlProps {
 interface FormFieldProps {
     label: string;
     required?: boolean;
+    /** Ẩn nhãn khỏi mắt nhưng vẫn giữ cho trình đọc màn hình. */
+    hideLabel?: boolean;
     description?: string;
     error?: string;
     /** Nhận id và aria cho ô nhập để nhãn, mô tả và lỗi gắn đúng vào control. */
     children: (control: ControlProps) => ReactNode;
 }
 
-export default function FormField({ label, required, description, error, children }: FormFieldProps) {
+export default function FormField({ label, required, hideLabel, description, error, children }: FormFieldProps) {
     const id = useId();
     const descriptionId = `${id}-description`;
     const errorId = `${id}-error`;
@@ -27,7 +29,7 @@ export default function FormField({ label, required, description, error, childre
 
     return (
         <Field data-invalid={invalid}>
-            <FieldLabel htmlFor={id} className="font-medium text-main">
+            <FieldLabel htmlFor={id} className={hideLabel ? 'sr-only' : 'font-medium text-main'}>
                 {label}
                 {required && (
                     <span className="text-destructive" aria-hidden="true">

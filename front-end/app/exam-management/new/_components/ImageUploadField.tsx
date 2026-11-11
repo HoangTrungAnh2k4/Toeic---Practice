@@ -1,10 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import { type ClipboardEvent, useEffect, useRef, useState } from 'react';
-import { LuImageUp, LuLoaderCircle, LuTrash2 } from 'react-icons/lu';
+import { type DragEvent, useEffect, useEffectEvent, useRef, useState } from 'react';
+import { LuImageUp, LuLoaderCircle, LuRefreshCw, LuTrash2 } from 'react-icons/lu';
 import Button from '@/components/ui/button';
 import { compressImage } from '@/lib/image/compress';
+import { cn } from '@/lib/utils';
 import { IMAGE_TYPES, MAX_IMAGE_MB, MAX_SOURCE_IMAGE_MB } from '../../_lib/examSchema';
 import type { ControlProps } from './FormField';
 
@@ -31,9 +32,12 @@ export default function ImageUploadField({
     onBlur,
 }: ImageUploadFieldProps) {
     const inputRef = useRef<HTMLInputElement>(null);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const hoveredRef = useRef(false);
     const [previewUrl, setPreviewUrl] = useState('');
     const [error, setError] = useState('');
     const [compressing, setCompressing] = useState(false);
+    const [dragging, setDragging] = useState(false);
 
     // Data URL thay cho object URL: không phải revoke, nên không vỡ preview khi StrictMode chạy effect hai lần
     useEffect(() => {
@@ -44,9 +48,14 @@ export default function ImageUploadField({
         return () => reader.abort();
     }, [value]);
 
+    const src = value ? previewUrl : existingUrl;
+    const hasImage = Boolean(value || existingUrl);
+    // Dán/thả không đi qua nút nên tự kiểm tra: fieldset `disabled` (đề đã có lượt làm) khoá cả input file
+    const isDisabled = () => inputRef.current?.matches(':disabled') ?? false;
+
     /** Nén ngay khi chọn: nhiều ảnh gửi chung một request lưu đề phải dưới giới hạn body của proxy. */
     const pick = async (file: File | undefined) => {
-        if (!file) return;
+        if (!file || isDisabled()) return;
         if (!(IMAGE_TYPES as readonly string[]).includes(file.type))
             return setError('Chỉ nhận ảnh JPG, PNG hoặc WebP.');
         if (file.size > MAX_SOURCE_IMAGE_MB * 1024 * 1024) return setError(`Ảnh tối đa ${MAX_SOURCE_IMAGE_MB} MB.`);
@@ -65,71 +74,121 @@ export default function ImageUploadField({
         }
     };
 
-    const onPaste = (event: ClipboardEvent) => {
-        const file = Array.from(event.clipboardData.files).find((item) => item.type.startsWith('image/'));
+    /** Ctrl+V chỉ bắn vào phần tử đang focus: nghe ở document, nhận ảnh khi chuột đang trên khung hoặc focus nằm trong cùng câu. */
+    const onDocumentPaste = useEffectEvent((event: globalThis.ClipboardEvent) => {
+        const root = rootRef.current;
+        if (!root || event.defaultPrevented) return;
+        const file = Array.from(event.clipboardData?.files ?? []).find((item) => item.type.startsWith('image/'));
         if (!file) return;
+        const question = root.closest('fieldset') ?? root;
+        if (!hoveredRef.current && !question.contains(event.target as Node)) return;
         event.preventDefault();
         void pick(file);
+    });
+
+    useEffect(() => {
+        const listener = (event: globalThis.ClipboardEvent) => onDocumentPaste(event);
+        document.addEventListener('paste', listener);
+        return () => document.removeEventListener('paste', listener);
+    }, []);
+
+    const onDragOver = (event: DragEvent) => {
+        if (!event.dataTransfer.types.includes('Files') || isDisabled()) return;
+        event.preventDefault();
+        setDragging(true);
+    };
+
+    const onDrop = (event: DragEvent) => {
+        event.preventDefault();
+        setDragging(false);
+        void pick(event.dataTransfer.files[0]);
     };
 
     return (
         <div
+            ref={rootRef}
             tabIndex={0}
-            onPaste={onPaste}
-            aria-label="Vùng dán ảnh"
-            className="flex sm:flex-row flex-col sm:items-center gap-4 bg-white p-4 border-2 border-sub2/30 focus-visible:border-sub2 border-dashed rounded-lg focus-visible:outline-none"
+            onPointerEnter={() => (hoveredRef.current = true)}
+            onPointerLeave={() => (hoveredRef.current = false)}
+            onDragOver={onDragOver}
+            // Rời vào phần tử con cũng bắn dragleave: chỉ tắt khi chuột ra hẳn khỏi khung
+            onDragLeave={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false);
+            }}
+            onDrop={onDrop}
+            aria-label="Vùng dán hoặc thả ảnh"
+            className={cn(
+                'flex flex-col bg-white border-2 border-dashed rounded-xl overflow-hidden transition-colors',
+                'focus-visible:outline-none focus-visible:border-sub2 focus-visible:ring-2 focus-visible:ring-sub2/30',
+                dragging ? 'border-sub3 bg-sub3/10' : error ? 'border-destructive/60' : 'border-sub2/40',
+            )}
         >
-            <div className="relative flex justify-center items-center bg-sub1 rounded-lg w-full sm:w-48 aspect-4/3 overflow-hidden shrink-0">
-                {value && previewUrl ? (
-                    <Image src={previewUrl} alt={alt} fill unoptimized className="object-cover" />
-                ) : !value && existingUrl ? (
-                    <Image src={existingUrl} alt={alt} fill unoptimized loading="eager" className="object-cover" />
+            <div className="relative flex justify-center items-center bg-canvas/60 w-full aspect-video">
+                {src ? (
+                    <Image src={src} alt={alt} fill unoptimized loading="eager" className="object-contain" />
                 ) : (
-                    <LuImageUp className="size-8 text-sub2" aria-hidden="true" />
+                    <div className="flex flex-col items-center gap-2 p-6 text-center">
+                        <span
+                            className={cn(
+                                'flex justify-center items-center rounded-full size-14 transition-colors',
+                                dragging ? 'bg-sub3 text-main' : 'bg-sub1 text-main',
+                            )}
+                            aria-hidden="true"
+                        >
+                            <LuImageUp className="size-7" />
+                        </span>
+                        <p className="font-semibold text-main text-sm">
+                            {dragging ? 'Thả ảnh vào đây' : 'Kéo thả hoặc dán ảnh (Ctrl+V)'}
+                        </p>
+                        <p className="font-medium text-subText text-xs">
+                            JPG, PNG, WebP tối đa {MAX_SOURCE_IMAGE_MB} MB · tự thu nhỏ trước khi lưu
+                        </p>
+                    </div>
+                )}
+                {compressing && (
+                    <div className="absolute inset-0 flex justify-center items-center gap-2 bg-white/80 font-semibold text-main text-sm">
+                        <LuLoaderCircle className="size-5 animate-spin" aria-hidden="true" />
+                        Đang nén ảnh...
+                    </div>
                 )}
             </div>
 
-            <div className="flex flex-col items-start gap-2">
-                <p className="font-medium text-subText text-sm">
-                    Dán ảnh (Ctrl+V) vào khung này hoặc chọn từ máy. JPG, PNG, WebP tối đa {MAX_SOURCE_IMAGE_MB} MB, tự
-                    thu nhỏ trước khi lưu.
-                </p>
-                <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2 p-3 border-sub2/20 border-t">
+                <Button
+                    {...control}
+                    type="button"
+                    variant={hasImage ? 'third' : 'secondary'}
+                    size="sm"
+                    className={cn('gap-2', hasImage && 'bg-white')}
+                    disabled={compressing}
+                    onClick={() => inputRef.current?.click()}
+                    onBlur={onBlur}
+                >
+                    {hasImage ? (
+                        <LuRefreshCw className="size-4" aria-hidden="true" />
+                    ) : (
+                        <LuImageUp className="size-4" aria-hidden="true" />
+                    )}
+                    {hasImage ? 'Đổi ảnh' : 'Chọn ảnh'}
+                </Button>
+                {hasImage && (
                     <Button
-                        {...control}
                         type="button"
-                        variant="secondary"
+                        variant="outline"
                         size="sm"
                         className="gap-2"
                         disabled={compressing}
-                        onClick={() => inputRef.current?.click()}
-                        onBlur={onBlur}
+                        onClick={() => {
+                            setError('');
+                            // Xoá ảnh mới chọn thì quay về ảnh đang có; không có ảnh mới thì bỏ ảnh đang có
+                            if (value) onChange(null);
+                            else onRemoveExisting?.();
+                        }}
                     >
-                        {compressing ? (
-                            <LuLoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-                        ) : (
-                            <LuImageUp className="size-4" aria-hidden="true" />
-                        )}
-                        {compressing ? 'Đang nén ảnh...' : value || existingUrl ? 'Đổi ảnh' : 'Chọn ảnh'}
+                        <LuTrash2 className="size-4" aria-hidden="true" />
+                        Xóa ảnh
                     </Button>
-                    {(value || existingUrl) && (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="gap-2"
-                            onClick={() => {
-                                setError('');
-                                // Xoá ảnh mới chọn thì quay về ảnh đang có; không có ảnh mới thì bỏ ảnh đang có
-                                if (value) onChange(null);
-                                else onRemoveExisting?.();
-                            }}
-                        >
-                            <LuTrash2 className="size-4" aria-hidden="true" />
-                            Xóa ảnh
-                        </Button>
-                    )}
-                </div>
+                )}
                 <input
                     ref={inputRef}
                     type="file"
@@ -141,10 +200,11 @@ export default function ImageUploadField({
                         event.target.value = '';
                     }}
                 />
-                <p role="status" className="font-medium text-destructive text-sm">
-                    {error}
-                </p>
             </div>
+            {/* Không ẩn bằng display: live region bị ẩn rồi hiện lại thì trình đọc màn hình hay bỏ qua */}
+            <p role="status" className="px-3 pb-3 empty:p-0 font-medium text-destructive text-sm">
+                {error}
+            </p>
         </div>
     );
 }

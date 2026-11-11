@@ -23,6 +23,8 @@ const ACCOUNT_LINKS = [
     { label: 'Lịch sử làm bài', href: '/setting/history', Icon: LuHistory },
 ];
 
+const ITEM_CLASS = 'gap-3 px-2 py-1.5 rounded-lg font-medium text-main focus:bg-canvas cursor-pointer';
+
 interface UserMenuProps {
     /** Sidebar đang thu gọn: chỉ còn avatar, tên & email ẩn đi giống nhãn các mục nav. */
     collapsed: boolean;
@@ -73,27 +75,30 @@ export function UserMenu({ collapsed, user }: UserMenuProps) {
                 align={isMobile ? 'start' : 'end'}
                 sideOffset={isMobile ? 28 : 20}
                 alignOffset={isMobile ? 0 : 50}
-                className="w-60"
+                className="p-1.5 border border-sub2/30 rounded-xl ring-0 w-64"
             >
                 <DropdownMenuGroup>
-                    <DropdownMenuLabel className="flex items-center gap-2 py-1.5 font-normal text-sm">
-                        <UserAvatar user={user} />
+                    <DropdownMenuLabel className="flex items-center gap-3 bg-canvas mb-1.5 p-2.5 rounded-lg font-normal text-sm">
+                        <UserAvatar user={user} size="lg" />
                         <span className="flex-1 grid min-w-0 leading-tight">
-                            <span className="font-semibold text-main truncate">{user.name}</span>
-                            <span className="text-subText text-xs truncate">{user.email}</span>
+                            <span className="font-bold text-main truncate tracking-tight">{user.name}</span>
+                            <span className="font-medium text-subText text-xs truncate">{user.email}</span>
                         </span>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
                     {ACCOUNT_LINKS.map(({ label, href, Icon }) => (
-                        <DropdownMenuItem key={href} render={<Link href={href} />}>
-                            <Icon aria-hidden="true" className="text-gray-00" />
+                        <DropdownMenuItem key={href} render={<Link href={href} />} className={ITEM_CLASS}>
+                            <span className="place-items-center grid bg-sub1 rounded-md size-7 text-main">
+                                <Icon aria-hidden="true" />
+                            </span>
                             {label}
                         </DropdownMenuItem>
                     ))}
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={handleLogout}>
-                    <LuLogOut aria-hidden="true" />
+                <DropdownMenuSeparator className="my-1.5" />
+                <DropdownMenuItem variant="destructive" onClick={handleLogout} className={ITEM_CLASS}>
+                    <span className="place-items-center grid bg-destructive/10 rounded-md size-7">
+                        <LuLogOut aria-hidden="true" />
+                    </span>
                     Đăng xuất
                 </DropdownMenuItem>
             </DropdownMenuContent>

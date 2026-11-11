@@ -34,6 +34,7 @@ export default function AuthInput({ icon: Icon, type, disabled, className, ...pr
             {isPassword && (
                 <button
                     type="button"
+                    tabIndex={-1}
                     onClick={() => setRevealed((value) => !value)}
                     disabled={disabled}
                     aria-label="Hiện mật khẩu"

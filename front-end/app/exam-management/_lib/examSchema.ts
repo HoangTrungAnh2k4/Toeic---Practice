@@ -10,24 +10,28 @@ export interface PartFields {
     context: boolean;
     stimulus: boolean;
     keywords: boolean;
+    sample: boolean;
 }
 
-/** Speaking: Part 2 tả tranh, Part 3–4 có ngữ liệu chung. Writing: Part 1 tranh + từ khoá, Part 2 email (kèm directions) riêng từng câu. */
+/** Speaking: Part 1 đọc to nên không cần bài mẫu, Part 2 tả tranh, Part 3–4 có ngữ liệu chung. Writing: Part 1 tranh + từ khoá, Part 2 email (kèm directions) riêng từng câu. */
 const PART_FIELDS: Record<Skill, Record<number, Partial<PartFields>>> = {
-    speaking: { 2: { image: true }, 3: { context: true }, 4: { context: true } },
+    speaking: { 1: { sample: false }, 2: { image: true }, 3: { context: true }, 4: { context: true } },
     writing: { 1: { image: true, keywords: true }, 2: { prompt: false, stimulus: true } },
 };
 
 export function getPartFields(skill: Skill, partNo: number): PartFields {
-    return { prompt: true, image: false, context: false, stimulus: false, keywords: false, ...PART_FIELDS[skill][partNo] };
+    return { prompt: true, image: false, context: false, stimulus: false, keywords: false, sample: true, ...PART_FIELDS[skill][partNo] };
 }
 
-/** Yêu cầu chuẩn ETS của Writing Q1–5: cố định, admin không nhập. */
-const PICTURE_SENTENCE_PROMPT = 'Write ONE sentence based on the picture. Use the TWO words or phrases under the picture.';
+/** Yêu cầu chuẩn ETS của Part tả tranh (Speaking Q3–4, Writing Q1–5): cố định, admin không nhập. */
+const FIXED_PROMPTS: Record<Skill, Record<number, string>> = {
+    speaking: { 2: 'Describe the picture in as much detail as you can.' },
+    writing: { 1: 'Write ONE sentence based on the picture. Use the TWO words or phrases under the picture.' },
+};
 
 /** Yêu cầu cố định của Part; `null` khi admin tự nhập từng câu. */
 export function getFixedPrompt(skill: Skill, partNo: number): string | null {
-    return skill === 'writing' && partNo === 1 ? PICTURE_SENTENCE_PROMPT : null;
+    return FIXED_PROMPTS[skill][partNo] ?? null;
 }
 
 /** Số từ khoá bắt buộc mỗi câu Writing Q1–5. */

@@ -99,7 +99,8 @@ function HeroVisual() {
 
 export default function LandingHero() {
     return (
-        <section aria-labelledby="landing-hero-title" className="relative bg-dots w-full h-screen overflow-hidden [--dots-alpha:30%] [--dots-size:1.6px]">
+        // 4.25rem = py-4 của khung root (1rem) + LandingHeader (logo 2.5rem + pb-3); min-h để mobile xếp dọc không bị cắt
+        <section aria-labelledby="landing-hero-title" className="relative bg-dots w-full min-h-[calc(100svh-4.25rem)] overflow-hidden [--dots-alpha:30%] [--dots-size:1.6px]">
             <div className="mx-auto pt-8 md:pt-14 pb-10 md:pb-14 max-w-300">
                 <div className="items-start gap-6 grid md:grid-cols-2 lg:grid-cols-12">
                     <div className="lg:col-span-4">
@@ -113,7 +114,7 @@ export default function LandingHero() {
                                 <span className="block mt-2 pb-1.5 -rotate-1">
                                     <span className="inline-block relative text-sub2 motion-safe:animate-cross-out">
                                         cho có
-                                        {/* Nét gạch tay đi sang phải rồi quay về; vẽ dần bằng stroke-dashoffset */}
+                                        {/* Nét bút gạch vội 3 lượt (phải → trái → phải, khớp pen-run), hơi rung và móc đuôi; vẽ dần bằng stroke-dashoffset */}
                                         <svg
                                             viewBox="0 0 300 27"
                                             preserveAspectRatio="none"
@@ -121,8 +122,8 @@ export default function LandingHero() {
                                         >
                                             <path
                                                 pathLength={1}
-                                                d="M4 12 C 75 8, 186 14, 294 6 C 222 13, 120 18, 10 22"
-                                                className="fill-none stroke-destructive motion-safe:animate-draw [stroke-dasharray:1] [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:5.5]"
+                                                d="M3 15 C 40 10, 82 16, 124 12 S 214 7, 297 6 C 236 11, 150 16, 66 17 S 16 21, 9 22 C 92 17, 196 15, 288 11 l 7 -5"
+                                                className="fill-none stroke-destructive motion-safe:animate-draw [stroke-dasharray:1] [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:3.5]"
                                             />
                                         </svg>
                                         <FaPencil className="motion-reduce:hidden absolute size-[0.62em] text-destructive origin-[8%_92%] motion-safe:animate-pen-run" />
