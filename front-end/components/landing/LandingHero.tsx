@@ -155,9 +155,6 @@ export default function LandingHero() {
                             <Link href="/speaking" className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 text-base')}>
                                 Vào phòng thi ngay
                             </Link>
-                            <Link href="#chuan-ets" className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'bg-white text-base text-black')}>
-                                Xem đề mẫu
-                            </Link>
                         </div>
                         <div className="flex items-center gap-3 mt-6.5">
                             <div aria-hidden="true" className="flex -space-x-2.5">
