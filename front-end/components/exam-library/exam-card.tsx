@@ -1,13 +1,6 @@
 import Link from 'next/link';
 import { ReactNode } from 'react';
-import {
-    LuBookmark,
-    LuBookmarkCheck,
-    LuEye,
-    LuRotateCcw,
-    LuSave,
-    LuStepForward,
-} from 'react-icons/lu';
+import { LuBookmark, LuBookmarkCheck } from 'react-icons/lu';
 import { buildHistoryHref, DEFAULT_HISTORY_QUERY } from '@/app/setting/history/_lib/searchParams';
 import { buttonVariants } from '@/components/ui/button';
 import type { Skill } from '@/lib/domain/types';
@@ -22,17 +15,15 @@ interface ExamCardProps {
     onToggleBookmark: (examId: string) => void;
 }
 
-type BadgeTone = 'sub3' | 'neutral';
+/** Cột của hàng đề; header trong `ExamListHeader` dùng chung để thẳng cột. */
+export const EXAM_ROW_GRID =
+    'grid grid-cols-[minmax(0,1fr)_auto_2rem] md:grid-cols-[minmax(0,1fr)_7rem_8rem_15rem_2rem] items-center gap-x-4';
 
-const BADGE_TONE_CLASS: Record<BadgeTone, string> = {
-    sub3: 'bg-sub3 text-main',
-    neutral: 'bg-sub1 text-main',
-};
+const CHIP_CLASS = 'px-2 py-0.5 rounded-md font-semibold text-[0.6875rem] tracking-wider whitespace-nowrap';
 
-const SUMMARY_STRIP_CLASS =
-    'flex flex-wrap justify-between items-center gap-x-3 gap-y-1 bg-sub1/50 px-3 py-2 rounded-lg font-medium text-subText text-xs';
-
-const META_CLASS = 'inline-flex items-center gap-1 font-semibold text-subText text-xs';
+const TEXT_LINK_CLASS =
+    'px-1 rounded-md font-semibold text-main text-xs underline-offset-4 whitespace-nowrap hover:underline ' +
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3';
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString('vi-VN');
 
@@ -43,232 +34,186 @@ function formatRemaining(endsAt: string): string | null {
     return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
-interface CardShellProps extends Pick<ExamCardProps, 'entry' | 'onToggleBookmark'> {
-    badge?: string;
-    badgeTone: BadgeTone;
-    meta?: ReactNode;
-    footer: ReactNode;
-    className?: string;
-    children?: ReactNode;
+export function ExamListHeader() {
+    return (
+        <div
+            aria-hidden="true"
+            className={cn(EXAM_ROW_GRID, 'hidden md:grid px-5 py-3 font-semibold text-subText text-xs')}
+        >
+            <span>Bộ đề</span>
+            <span>Độ dài</span>
+            <span>Điểm gần nhất</span>
+            <span />
+            <span />
+        </div>
+    );
 }
 
-function CardShell({ entry, onToggleBookmark, badge, badgeTone, meta, footer, className, children }: CardShellProps) {
+function StatusChip({ entry }: Pick<ExamCardProps, 'entry'>) {
     const { exam, user } = entry;
-    const titleId = `exam-card-${exam.id}`;
+    switch (user.progress) {
+        case 'completed':
+            return <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>Đã làm {user.completedCount} lượt</span>;
+        case 'in_progress':
+            return (
+                <span className={cn(CHIP_CLASS, 'bg-sub3 text-main')}>
+                    Đang làm {user.answeredCount}/{exam.questionCount}
+                </span>
+            );
+        case 'not_started':
+            return <span className={cn(CHIP_CLASS, 'border border-sub2/40 border-dashed text-subText')}>Chưa làm</span>;
+    }
+}
+
+function ScoreCell({ entry }: Pick<ExamCardProps, 'entry'>) {
+    const { user } = entry;
+    const last = user.lastCompleted;
+
+    if (user.progress === 'in_progress') {
+        const endsAt = user.inProgress?.ends_at;
+        if (!endsAt) return <span className="text-subText text-sm">Lưu trên máy này</span>;
+        const remaining = formatRemaining(endsAt);
+        return (
+            <span className="text-subText text-sm">
+                {remaining ? (
+                    <>
+                        Còn <span className="font-semibold text-main tabular-nums">{remaining}</span>
+                    </>
+                ) : (
+                    <span className="font-semibold text-main">Đã hết giờ</span>
+                )}
+            </span>
+        );
+    }
+    if (user.progress === 'completed') {
+        if (last?.score === null || last?.score === undefined) {
+            return <span className="font-semibold text-main text-sm">Đang chờ chấm</span>;
+        }
+        return (
+            <span className="flex flex-col">
+                <span className="font-bold text-main text-lg tabular-nums leading-tight tracking-tight">
+                    {last.score}
+                    <span className="font-semibold text-subText text-xs">/200</span>
+                </span>
+                {last.submitted_at && (
+                    <span className="text-subText text-xs tabular-nums">{formatDate(last.submitted_at)}</span>
+                )}
+            </span>
+        );
+    }
+    return <span className="text-subText text-sm">Chưa có</span>;
+}
+
+function RowActions({ skill, entry, isRecommended }: Omit<ExamCardProps, 'onToggleBookmark'>) {
+    const { exam, user } = entry;
+    let secondary: ReactNode = null;
+    let primary: ReactNode;
+
+    switch (user.progress) {
+        case 'in_progress':
+            primary = (
+                <Link
+                    href={buildTestHref(skill, exam.id, user.inProgress?.mode, user.inProgress?.part_template_id)}
+                    className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'px-4 text-xs')}
+                >
+                    Tiếp tục làm bài
+                </Link>
+            );
+            break;
+        case 'completed':
+            secondary = (
+                <Link
+                    href={buildHistoryHref(DEFAULT_HISTORY_QUERY, { skill, searchQuery: exam.title })}
+                    className={TEXT_LINK_CLASS}
+                >
+                    Xem nhận xét
+                </Link>
+            );
+            primary = (
+                <Link
+                    href={buildTestHref(skill, exam.id)}
+                    className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'bg-white px-4 text-main text-xs')}
+                >
+                    Làm lại
+                </Link>
+            );
+            break;
+        case 'not_started':
+            secondary = (
+                <Link href={buildTestHref(skill, exam.id, 'guided')} className={TEXT_LINK_CLASS}>
+                    Có hướng dẫn
+                </Link>
+            );
+            primary = (
+                <Link
+                    href={buildTestHref(skill, exam.id)}
+                    className={cn(
+                        buttonVariants({ variant: isRecommended ? 'primary' : 'third', size: 'sm' }),
+                        'px-4 text-xs',
+                        !isRecommended && 'bg-white text-main',
+                    )}
+                >
+                    Thi thử
+                </Link>
+            );
+            break;
+    }
+
+    return (
+        <div className="flex justify-end items-center gap-3">
+            {secondary && <span className="hidden sm:inline">{secondary}</span>}
+            {primary}
+        </div>
+    );
+}
+
+/** Một hàng trong danh sách đề: tên + trạng thái, độ dài, điểm, một nút chính. */
+export function ExamCard({ skill, entry, isRecommended, onToggleBookmark }: ExamCardProps) {
+    const { exam, user } = entry;
+    const titleId = `exam-row-${exam.id}`;
     const BookmarkIcon = user.bookmarked ? LuBookmarkCheck : LuBookmark;
 
     return (
-        <article
-            aria-labelledby={titleId}
-            className={cn(
-                'flex flex-col justify-between gap-4 bg-white shadow-sm hover:shadow-md p-5 border border-sub2/30 rounded-xl transition-shadow',
-                className,
-            )}
-        >
-            <div className="flex flex-col gap-2.5">
-                <div className="flex justify-between items-center gap-2">
-                    {badge && (
-                        <span
-                            className={cn(
-                                'px-2 py-0.5 rounded-md font-bold text-[11px] uppercase tracking-wide',
-                                BADGE_TONE_CLASS[badgeTone],
-                            )}
-                        >
-                            {badge}
-                        </span>
-                    )}
-                    <div className="flex items-center gap-2 ml-auto">
-                        {meta}
-                        <button
-                            type="button"
-                            onClick={() => onToggleBookmark(exam.id)}
-                            aria-pressed={user.bookmarked}
-                            aria-label={user.bookmarked ? `Bỏ đánh dấu ${exam.title}` : `Đánh dấu ${exam.title}`}
-                            className={cn(
-                                'flex justify-center items-center rounded-md size-7 transition-colors cursor-pointer',
-                                'hover:bg-sub1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3',
-                                user.bookmarked ? 'text-main' : 'text-sub2',
-                            )}
-                        >
-                            <BookmarkIcon className="size-4" aria-hidden="true" />
-                        </button>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                    <h3 id={titleId} className="font-bold text-main text-base leading-snug">
+        <li>
+            <article
+                aria-labelledby={titleId}
+                className={cn(EXAM_ROW_GRID, 'hover:bg-sub1/40 px-5 py-3.5 transition-colors')}
+            >
+                <div className="flex flex-col items-start gap-1.5 min-w-0">
+                    <h3 id={titleId} className="font-semibold text-main text-sm truncate leading-snug">
                         {exam.title}
                     </h3>
-                </div>
-                {children}
-            </div>
-            <div className="flex flex-col gap-3">{footer}</div>
-        </article>
-    );
-}
-
-function NotStartedCard({ skill, entry, isRecommended, onToggleBookmark }: ExamCardProps) {
-    const { exam } = entry;
-
-    return (
-        <CardShell
-            entry={entry}
-            onToggleBookmark={onToggleBookmark}
-            badge={exam.source === 'ets' ? 'Chuẩn ETS' : undefined}
-            badgeTone="neutral"
-            footer={
-                <>
-                    <div className={SUMMARY_STRIP_CLASS}>
-                        <span>
-                            {exam.questionCount} câu · {exam.durationMin} phút
-                        </span>
-                        <span className="font-semibold text-main">Chưa làm</span>
+                    <div className="flex flex-wrap gap-1.5">
+                        <StatusChip entry={entry} />
+                        {exam.source === 'ets' && (
+                            <span className={cn(CHIP_CLASS, 'bg-sub1 text-main')}>Chuẩn ETS</span>
+                        )}
+                        {isRecommended && user.progress === 'not_started' && (
+                            <span className={cn(CHIP_CLASS, 'bg-sub3 text-main')}>Nên làm tiếp</span>
+                        )}
                     </div>
-                    <div className="gap-2 grid grid-cols-2">
-                        <Link
-                            href={buildTestHref(skill, exam.id)}
-                            className={cn(
-                                buttonVariants({ variant: isRecommended ? 'primary' : 'third', size: 'sm' }),
-                                'px-2 text-xs',
-                                !isRecommended && 'bg-white',
-                            )}
-                        >
-                            <span>Thi thử</span>
-                        </Link>
-                        <Link
-                            href={buildTestHref(skill, exam.id, 'guided')}
-                            className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'px-2 text-xs')}
-                        >
-                            <span>Có hướng dẫn</span>
-                        </Link>
-                    </div>
-                </>
-            }
-        />
-    );
-}
-
-function CompletedCard({ skill, entry, onToggleBookmark }: ExamCardProps) {
-    const { exam, user } = entry;
-    const last = user.lastCompleted;
-
-    return (
-        <CardShell
-            entry={entry}
-            onToggleBookmark={onToggleBookmark}
-            badge={`Đã làm ${user.completedCount} lượt`}
-            badgeTone="neutral"
-            meta={
-                last?.submitted_at && (
-                    <span className={META_CLASS}>
-                        {formatDate(last.submitted_at)}
-                    </span>
-                )
-            }
-            footer={
-                <div className="gap-2 grid grid-cols-2">
-                    <Link
-                        href={buildHistoryHref(DEFAULT_HISTORY_QUERY, { skill, searchQuery: exam.title })}
-                        className={cn(buttonVariants({ variant: 'third', size: 'sm' }), 'gap-1.5 bg-white px-2 text-xs')}
-                    >
-                        <span>Xem nhận xét</span>
-                    </Link>
-                    <Link
-                        href={buildTestHref(skill, exam.id)}
-                        className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-1.5 px-2 text-xs')}
-                    >
-                        <span>Làm lại (lần {user.completedCount + 1})</span>
-                    </Link>
                 </div>
-            }
-        >
-            {last?.score !== null && last?.score !== undefined ? (
-                <div className="flex items-baseline gap-1">
-                    <span className="font-bold text-main text-2xl tracking-tight">{last.score}</span>
-                    <span className="font-semibold text-sub2 text-xs">/200 · lượt gần nhất</span>
-                </div>
-            ) : (
-                <p className="font-semibold text-main text-sm">Lượt gần nhất đang chờ chấm điểm</p>
-            )}
-            {skill !== 'writing' && last?.feedback_summary && (
-                <p className="bg-sub1/50 p-2.5 rounded-lg text-subText text-xs leading-relaxed">
-                    <strong className="font-semibold text-main">AI ghi nhận:</strong> {last.feedback_summary}
-                </p>
-            )}
-        </CardShell>
-    );
-}
-
-function InProgressCard({ skill, entry, onToggleBookmark }: ExamCardProps) {
-    const { exam, user } = entry;
-    const attempt = user.inProgress;
-    const percent = exam.questionCount ? Math.round((user.answeredCount / exam.questionCount) * 100) : 0;
-    const remaining = attempt?.ends_at ? formatRemaining(attempt.ends_at) : null;
-
-    return (
-        <CardShell
-            entry={entry}
-            onToggleBookmark={onToggleBookmark}
-            badge="Đang làm dở"
-            badgeTone="sub3"
-            className="border-sub3/60"
-            meta={
-                <span className={META_CLASS}>
-                    <LuSave className="size-4 text-sub2" aria-hidden="true" />
-                    Lưu trên máy này
+                <span className="hidden md:inline text-subText text-sm tabular-nums">
+                    {exam.questionCount} câu, {exam.durationMin} phút
                 </span>
-            }
-            footer={
-                <Link
-                    href={buildTestHref(skill, exam.id, attempt?.mode, attempt?.part_template_id)}
-                    className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 w-full')}
-                >
-                    <LuStepForward className="size-4" aria-hidden="true" />
-                    <span>Tiếp tục làm bài</span>
-                </Link>
-            }
-        >
-            <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center font-medium text-subText text-xs">
-                    <span>
-                        Tiến độ:{' '}
-                        <strong className="font-semibold text-main">
-                            {user.answeredCount}/{exam.questionCount} câu
-                        </strong>
-                    </span>
-                    {attempt?.ends_at && (
-                        <span>
-                            {remaining ? (
-                                <>
-                                    Còn lại <span className="font-mono font-semibold text-main">{remaining}</span>
-                                </>
-                            ) : (
-                                <span className="font-semibold text-main">Đã hết giờ</span>
-                            )}
-                        </span>
+                <span className="hidden md:block">
+                    <ScoreCell entry={entry} />
+                </span>
+                <RowActions skill={skill} entry={entry} isRecommended={isRecommended} />
+                <button
+                    type="button"
+                    onClick={() => onToggleBookmark(exam.id)}
+                    aria-pressed={user.bookmarked}
+                    aria-label={user.bookmarked ? `Bỏ đánh dấu ${exam.title}` : `Đánh dấu ${exam.title}`}
+                    className={cn(
+                        'flex justify-center items-center rounded-md size-8 transition-colors cursor-pointer',
+                        'hover:bg-sub1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub3',
+                        user.bookmarked ? 'text-main' : 'text-sub2',
                     )}
-                </div>
-                <div
-                    role="progressbar"
-                    aria-label="Tiến độ làm bài"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={percent}
-                    className="bg-sub1 rounded-full w-full h-2 overflow-hidden"
                 >
-                    <div className="bg-sub3 rounded-full h-full" style={{ width: `${percent}%` }} />
-                </div>
-            </div>
-        </CardShell>
+                    <BookmarkIcon className="size-4" aria-hidden="true" />
+                </button>
+            </article>
+        </li>
     );
-}
-
-export function ExamCard(props: ExamCardProps) {
-    switch (props.entry.user.progress) {
-        case 'not_started':
-            return <NotStartedCard {...props} />;
-        case 'in_progress':
-            return <InProgressCard {...props} />;
-        case 'completed':
-            return <CompletedCard {...props} />;
-    }
 }

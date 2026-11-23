@@ -18,20 +18,15 @@ export function LibraryResultsSkeleton() {
                 </div>
             </div>
 
-            {/* Test cards */}
-            <div className="gap-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+            {/* Test rows */}
+            <div className="bg-white shadow-sm border border-sub2/30 rounded-xl divide-y divide-sub2/20">
                 {Array.from({ length: PAGE_SIZE }, (_, i) => (
-                    <div
-                        key={i}
-                        className="flex flex-col gap-3 bg-white shadow-sm p-5 border border-sub2/30 rounded-xl"
-                    >
-                        <div className="flex justify-between">
-                            <Skeleton className="bg-sub1 w-24 h-5" />
-                            <Skeleton className="bg-sub1 w-16 h-5" />
+                    <div key={i} className="flex justify-between items-center gap-4 px-5 py-3.5">
+                        <div className="flex flex-col gap-1.5">
+                            <Skeleton className="bg-sub1 w-36 h-4" />
+                            <Skeleton className="bg-sub1 w-20 h-4" />
                         </div>
-                        <Skeleton className="bg-sub1 w-4/5 h-5" />
-                        <Skeleton className="bg-sub1 w-full h-12" />
-                        <Skeleton className="bg-sub1 mt-2 w-full h-9" />
+                        <Skeleton className="bg-sub1 rounded-lg w-24 h-9" />
                     </div>
                 ))}
             </div>

@@ -18,7 +18,7 @@ import {
 import type { ExamSummary } from '@/lib/exam-library/types';
 import { useUserExamStates } from '@/lib/exam-library/use-user-exam-states';
 import { cn } from '@/lib/utils';
-import { ExamCard } from './exam-card';
+import { ExamCard, ExamListHeader } from './exam-card';
 import { LibraryFilters } from './library-filters';
 import { LibraryPagination } from './library-pagination';
 import { LibraryResultsSkeleton } from './library-results-skeleton';
@@ -40,7 +40,11 @@ export function ExamLibraryResults({ skill, exams, searchParams }: ExamLibraryRe
     const query = parseLibraryQuery(use(searchParams));
     const { states, loadFailed, retry, bookmarkFailed, toggleBookmark } = useUserExamStates();
     // Provider ở ngoài Suspense có thể tải xong trước khi khối này hydrate → lần hydrate phải khớp skeleton của server
-    const hydrated = useSyncExternalStore(subscribeNothing, () => true, () => false);
+    const hydrated = useSyncExternalStore(
+        subscribeNothing,
+        () => true,
+        () => false,
+    );
 
     if (!hydrated) return <LibraryResultsSkeleton />;
     if (loadFailed) return <LoadError message="Không tải được tiến độ làm bài." onRetry={retry} />;
@@ -84,16 +88,19 @@ export function ExamLibraryResults({ skill, exams, searchParams }: ExamLibraryRe
                         </Link>
                     </div>
                 ) : (
-                    <div className="gap-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                        {result.items.map((entry) => (
-                            <ExamCard
-                                key={entry.exam.id}
-                                skill={skill}
-                                entry={entry}
-                                isRecommended={entry.exam.id === recommendedId}
-                                onToggleBookmark={toggleBookmark}
-                            />
-                        ))}
+                    <div className="bg-white shadow-sm border border-sub2/30 rounded-xl overflow-hidden">
+                        <ExamListHeader />
+                        <ul className="divide-y divide-sub2/20 md:border-sub2/20 md:border-t">
+                            {result.items.map((entry) => (
+                                <ExamCard
+                                    key={entry.exam.id}
+                                    skill={skill}
+                                    entry={entry}
+                                    isRecommended={entry.exam.id === recommendedId}
+                                    onToggleBookmark={toggleBookmark}
+                                />
+                            ))}
+                        </ul>
                     </div>
                 )}
             </section>
