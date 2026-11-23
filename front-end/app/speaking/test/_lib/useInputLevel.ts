@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useEffectEvent, useState } from 'react';
-import { METER_MIN_DB, METER_RELEASE_DB_PER_SECOND, readLevelDb, SPEECH_CONFIRM_MS, SPEECH_MIN_DB } from '../utils';
+import { METER_MIN_DB, METER_RELEASE_DB_PER_SECOND, readLevelDb, SPEECH_CONFIRM_MS, SPEECH_MIN_DB } from './microphone';
 
 /**
  * Theo dõi mức âm lượng micro (dBFS) theo từng khung hình: lên nhanh, hạ chậm để dễ quan sát.

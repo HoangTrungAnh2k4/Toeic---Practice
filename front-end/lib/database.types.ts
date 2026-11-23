@@ -23,27 +23,7 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "ai_insights": {
-                  Row: {
-                    "generated_at": string,"id": string,"payload": NonNullable<Json>,"user_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "generated_at"?: string,"id"?: string,"payload": NonNullable<Json>,"user_id": string
-                  }
-                  Update: {
-                    "generated_at"?: string,"id"?: string,"payload"?: NonNullable<Json>,"user_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "ai_insights_user_id_fkey"
-      columns: ["user_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"annotations": {
+            "annotations": {
                   Row: {
                     "at_sec": number | null,"correction": string,"criterion": Database["public"]['Enums']["criterion"],"end_offset": number,"explanation": string,"id": string,"quote": string,"response_id": string,"severity": Database["public"]['Enums']["severity"],"start_offset": number
                   }
@@ -181,54 +161,16 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"plan_tasks": {
-                  Row: {
-                    "attempt_id": string | null,"completed_at": string | null,"description": string | null,"duration_min": number,"exam_id": string | null,"goal": string | null,"id": string,"kind": Database["public"]['Enums']["plan_task_kind"],"part_template_id": number | null,"plan_id": string,"scheduled_date": string,"sort_order": number,"title": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "attempt_id"?: string | null,"completed_at"?: string | null,"description"?: string | null,"duration_min": number,"exam_id"?: string | null,"goal"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["plan_task_kind"],"part_template_id"?: number | null,"plan_id": string,"scheduled_date": string,"sort_order"?: number,"title": string
-                  }
-                  Update: {
-                    "attempt_id"?: string | null,"completed_at"?: string | null,"description"?: string | null,"duration_min"?: number,"exam_id"?: string | null,"goal"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["plan_task_kind"],"part_template_id"?: number | null,"plan_id"?: string,"scheduled_date"?: string,"sort_order"?: number,"title"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "plan_tasks_attempt_id_fkey"
-      columns: ["attempt_id"]
-isOneToOne: true
-      referencedRelation: "attempts"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "plan_tasks_exam_id_fkey"
-      columns: ["exam_id"]
-isOneToOne: false
-      referencedRelation: "exams"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "plan_tasks_part_template_id_fkey"
-      columns: ["part_template_id"]
-isOneToOne: false
-      referencedRelation: "part_templates"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "plan_tasks_plan_id_fkey"
-      columns: ["plan_id"]
-isOneToOne: false
-      referencedRelation: "study_plans"
-      referencedColumns: ["id"]
-    }
-                  ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"exam_date": string | null,"id": string,"preferred_time": string | null,"reminder_enabled": boolean,"role": Database["public"]['Enums']["user_role"],"target_speaking": number | null,"target_writing": number | null,"updated_at": string
+                    "created_at": string,"id": string,"role": Database["public"]['Enums']["user_role"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"exam_date"?: string | null,"id": string,"preferred_time"?: string | null,"reminder_enabled"?: boolean,"role"?: Database["public"]['Enums']["user_role"],"target_speaking"?: number | null,"target_writing"?: number | null,"updated_at"?: string
+                    "created_at"?: string,"id": string,"role"?: Database["public"]['Enums']["user_role"],"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"exam_date"?: string | null,"id"?: string,"preferred_time"?: string | null,"reminder_enabled"?: boolean,"role"?: Database["public"]['Enums']["user_role"],"target_speaking"?: number | null,"target_writing"?: number | null,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"role"?: Database["public"]['Enums']["user_role"],"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -307,46 +249,6 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"study_plan_weeks": {
-                  Row: {
-                    "plan_id": string,"theme": string,"week_no": number
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "plan_id": string,"theme": string,"week_no": number
-                  }
-                  Update: {
-                    "plan_id"?: string,"theme"?: string,"week_no"?: number
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "study_plan_weeks_plan_id_fkey"
-      columns: ["plan_id"]
-isOneToOne: false
-      referencedRelation: "study_plans"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"study_plans": {
-                  Row: {
-                    "ai_rationale": string | null,"created_at": string,"days_per_week": number,"id": string,"minutes_per_day": number,"status": Database["public"]['Enums']["plan_status"],"user_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "ai_rationale"?: string | null,"created_at"?: string,"days_per_week": number,"id"?: string,"minutes_per_day": number,"status"?: Database["public"]['Enums']["plan_status"],"user_id"?: string
-                  }
-                  Update: {
-                    "ai_rationale"?: string | null,"created_at"?: string,"days_per_week"?: number,"id"?: string,"minutes_per_day"?: number,"status"?: Database["public"]['Enums']["plan_status"],"user_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "study_plans_user_id_fkey"
-      columns: ["user_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
                 }
           }
           Views: {
@@ -373,9 +275,6 @@ isOneToOne: false
 "create_exam":
 { Args: { "payload": Json }; Returns: string
                            },
-"create_study_plan":
-{ Args: { "payload": Json }; Returns: string
-                           },
 "duplicate_exam":
 { Args: { "source_exam_id": string }; Returns: string
                            },
@@ -387,7 +286,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support"|"fluency"|"task_response","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published"|"archived","plan_status": "active"|"archived","plan_task_kind": "speaking"|"writing"|"review"|"mock"|"summary","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
+            "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support"|"fluency"|"task_response","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published"|"archived","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -507,7 +406,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "attempt_mode": ["cbt", "timed", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support", "fluency", "task_response"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published", "archived"],"plan_status": ["active", "archived"],"plan_task_kind": ["speaking", "writing", "review", "mock", "summary"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
+            "attempt_mode": ["cbt", "timed", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support", "fluency", "task_response"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published", "archived"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
           }
         }
 } as const

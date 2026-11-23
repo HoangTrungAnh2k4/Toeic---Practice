@@ -1,8 +1,8 @@
 'use client';
 
 import { LuMic, LuSkipForward } from 'react-icons/lu';
-import { useInputLevel } from '@/app/setting/device-check/_lib/useInputLevel';
-import { getLevelZone, LEVEL_ZONE_LABEL, METER_MIN_DB } from '@/app/setting/device-check/utils';
+import { useInputLevel } from '../_lib/useInputLevel';
+import { getLevelZone, LEVEL_ZONE_LABEL, METER_MIN_DB } from '../_lib/microphone';
 import { cn } from '@/lib/utils';
 import type { SpeakingPhase } from '../types';
 

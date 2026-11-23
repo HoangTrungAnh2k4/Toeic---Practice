@@ -4,7 +4,6 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const NAV = [
-    { label: 'Tính năng', href: '#tinh-nang' },
     { label: 'Chuẩn ETS', href: '#chuan-ets' },
     { label: 'Câu hỏi', href: '#faq' },
 ];

@@ -1,5 +1,5 @@
 import type { IconType } from 'react-icons';
-import { LuCalendarCheck, LuMic, LuPenLine } from 'react-icons/lu';
+import { LuHistory, LuMic, LuPenLine } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -29,9 +29,9 @@ const HIGHLIGHTS: Highlight[] = [
         tilt: 'sm:rotate-1 sm:translate-y-2.5',
     },
     {
-        icon: LuCalendarCheck,
-        title: 'Lộ trình cá nhân',
-        detail: 'Xếp lịch học theo mục tiêu điểm và ngày thi',
+        icon: LuHistory,
+        title: 'Lưu lịch sử làm bài',
+        detail: 'Xem lại điểm và nhận xét của từng lượt',
         tone: 'bg-success text-black',
         tilt: 'sm:-rotate-1',
     },
@@ -46,7 +46,7 @@ export default function AuthShowcase() {
         >
             <header className="flex items-center gap-2.5 mx-auto w-full max-w-6xl">
                 <Link
-                    href="/overview"
+                    href="/"
                     className="place-items-center grid bg-main rounded-lg size-12 text-white"
                 >
                     {/* <LuGraduationCap aria-hidden="true" className="size-5" /> */}

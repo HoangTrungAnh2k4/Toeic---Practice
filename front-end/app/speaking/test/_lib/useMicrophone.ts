@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AudioInputDevice, MicStatus } from '../types';
-import { getMicIssue } from '../utils';
+import { AudioInputDevice, MicStatus } from './microphone';
+import { getMicIssue } from './microphone';
 
 interface MicSession {
     stream: MediaStream;

@@ -4,8 +4,10 @@ import { REMEMBER_COOKIE, sessionCookieOptions } from '@/lib/supabase-cookies';
 
 /** Route cần đăng nhập. Quyền theo role (admin) kiểm tra tiếp ở layout của route. */
 const PROTECTED = ['/exam-management'];
-/** Route chỉ dành cho khách: đã đăng nhập thì chuyển thẳng vào /overview. */
+/** Route chỉ dành cho khách: đã đăng nhập thì chuyển qua POST_LOGIN. */
 const GUEST_ONLY = ['/login', '/register'];
+/** Mọi lối vào sau đăng nhập (form, OTP, Google) trỏ về đây; không có trang, proxy chia theo role. */
+const POST_LOGIN = '/overview';
 /** Phòng thi → kỹ năng của đề (`?id=`). */
 const EXAM_ROOMS: Record<string, 'speaking' | 'writing'> = { '/speaking/test': 'speaking', '/writing/test': 'writing' };
 
@@ -39,16 +41,26 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
     if (data?.claims && GUEST_ONLY.includes(pathname)) {
-        return NextResponse.redirect(new URL('/overview', request.url));
+        return NextResponse.redirect(new URL(POST_LOGIN, request.url));
     }
-    // Admin không có Overview (sidebar admin chỉ có quản trị đề); mọi lối vào sau đăng nhập (form, OTP, Google) đều trỏ /overview nên đổi hướng ở đây
-    if (data?.claims && pathname === '/overview') {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.claims.sub).maybeSingle();
-        if (profile?.role === 'admin') {
-            const toAdmin = NextResponse.redirect(new URL('/exam-management', request.url));
-            response.cookies.getAll().forEach((cookie) => toAdmin.cookies.set(cookie));
-            return toAdmin;
+    // Admin vào quản trị đề, còn lại (kể cả khách mở link cũ) vào thư viện Writing
+    if (pathname === POST_LOGIN) {
+        let target = '/writing';
+        if (data?.claims) {
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', data.claims.sub)
+                .maybeSingle();
+            if (error) console.error('proxy: cannot read role after login', error.message);
+            if (profile?.role === 'admin') target = '/exam-management';
         }
+        const url = new URL(target, request.url);
+        // Giữ query: Google OAuth quay về đây kèm `?code=` để supabase-js đổi lấy session ở trang đích
+        url.search = request.nextUrl.search;
+        const redirect = NextResponse.redirect(url);
+        response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+        return redirect;
     }
 
     // Phòng thi stream từ <Suspense> nên notFound() trong page chỉ ra status 200; kiểm đề ở đây để trả 404 thật.

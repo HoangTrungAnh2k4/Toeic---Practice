@@ -26,7 +26,6 @@ export const linkGroups: FooterLinkGroup[] = [
         title: 'Hỗ trợ',
         links: [
             { label: 'Hướng dẫn làm bài', href: '#' },
-            { label: 'Kiểm tra micro và loa', href: '/setting/device-check' },
             { label: 'Báo lỗi đề thi', href: '#' },
             { label: 'Góp ý tính năng', href: '#' },
         ],

@@ -10,7 +10,7 @@ export default function LoginPage() {
     return (
         <AuthCard
             title="Chào mừng trở lại"
-            description="Đăng nhập để tiếp tục lộ trình luyện TOEIC Speaking & Writing của bạn."
+            description="Đăng nhập để lưu lịch sử làm bài TOEIC Speaking & Writing của bạn."
             alternate={{ prompt: 'Chưa có tài khoản?', label: 'Đăng ký ngay', href: '/register' }}
         >
             <LoginForm />

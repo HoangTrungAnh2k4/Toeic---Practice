@@ -1,43 +1,34 @@
 'use client';
 
-import { LuAlarmClock, LuCalendarCheck, LuFlame, LuSunMoon, LuTrophy } from 'react-icons/lu';
 import { LoadError } from '@/components/load-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { combineAsync, useAsync } from '@/hooks/use-async';
 import { useUserStats } from '@/hooks/use-user-stats';
-import { getMonthTaskProgress, getPlanWeekNo } from '@/lib/data/study-plan';
-import { getActivePlan, getProfile } from '@/lib/data/user-data';
+import { getProfile } from '@/lib/data/user-data';
 import type { ExamSummary } from '@/lib/exam-library/types';
-import { ProfileField } from '../types';
-import { formatDuration, getAverageGain, getRecentStudyDays, getScoreTrend } from '../utils';
+import { getAverageGain, getScoreTrend } from '../utils';
 import PartScoreCard from './PartScoreCard';
-import ProfileGoalCard from './ProfileGoalCard';
 import ProfileIdentityCard from './ProfileIdentityCard';
-import StudyHabitCard from './StudyHabitCard';
+import ProfileScoreCard from './ProfileScoreCard';
 
 interface ProfileViewProps {
     exams: ExamSummary[];
 }
 
-async function loadUser() {
-    const [profile, active] = await Promise.all([getProfile(), getActivePlan()]);
-    return { profile, active };
-}
+// Bọc trong object: `useAsync` dùng `null` cho "chưa tải xong", còn khách thì profile cũng là `null`
+const loadUser = async () => ({ profile: await getProfile() });
 
 function ProfileSkeleton() {
     return (
         <div className="flex flex-col gap-6" aria-busy="true" aria-label="Đang tải hồ sơ">
             <Skeleton className="rounded-2xl h-56" />
-            <div className="gap-6 grid grid-cols-1 xl:grid-cols-3">
-                <Skeleton className="xl:col-span-2 rounded-xl h-96" />
-                <Skeleton className="rounded-xl h-96" />
-            </div>
+            <Skeleton className="rounded-xl h-96" />
             <Skeleton className="rounded-xl h-72" />
         </div>
     );
 }
 
-/** Hồ sơ đọc bài làm trong localStorage → render sau khi mount. Khách không có mục tiêu, ngày thi, giờ học. */
+/** Hồ sơ đọc bài làm trong localStorage → render sau khi mount. */
 export default function ProfileView({ exams }: ProfileViewProps) {
     const statsState = useUserStats(exams);
     const userState = useAsync(loadUser);
@@ -48,50 +39,10 @@ export default function ProfileView({ exams }: ProfileViewProps) {
     if (failed) return <LoadError message="Không tải được hồ sơ học tập." onRetry={retry} />;
     if (!stats || !user) return <ProfileSkeleton />;
 
-    const { profile, active } = user;
-    const now = new Date();
-
-    const monthly = formatDuration(stats.study.minutes_this_month);
-    const habitFields: ProfileField[] = [
-        { id: 'streak', label: 'Chuỗi ngày học', value: `${stats.study.streak_days} ngày`, Icon: LuFlame },
-        { id: 'best', label: 'Chuỗi dài nhất', value: `${stats.study.best_streak_days} ngày`, Icon: LuTrophy },
-        { id: 'month', label: 'Học trong tháng', value: `${monthly.value} ${monthly.unit}`, Icon: LuCalendarCheck },
-    ];
-    if (profile) {
-        habitFields.push(
-            { id: 'time', label: 'Giờ học quen thuộc', value: profile.preferred_time ?? 'Chưa đặt', Icon: LuSunMoon },
-            { id: 'reminder', label: 'Nhắc học', value: profile.reminder_enabled ? 'Bật' : 'Tắt', Icon: LuAlarmClock },
-        );
-    }
-
     return (
         <>
-            <ProfileIdentityCard
-                profile={profile}
-                plan={
-                    active && {
-                        weekNo: getPlanWeekNo(active.plan, now),
-                        month: getMonthTaskProgress(active.tasks, now),
-                    }
-                }
-            />
-
-            <div className="items-stretch gap-6 grid grid-cols-1 xl:grid-cols-3">
-                <ProfileGoalCard
-                    skills={stats.skills}
-                    targets={{ speaking: profile?.target_speaking ?? null, writing: profile?.target_writing ?? null }}
-                    isGuest={!profile}
-                    history={getScoreTrend(stats)}
-                    averageGain={getAverageGain(stats)}
-                    className="xl:col-span-2"
-                />
-                <StudyHabitCard
-                    days={getRecentStudyDays(stats)}
-                    goalMinutes={active?.plan.minutes_per_day ?? null}
-                    fields={habitFields}
-                />
-            </div>
-
+            <ProfileIdentityCard profile={user.profile} />
+            <ProfileScoreCard skills={stats.skills} history={getScoreTrend(stats)} averageGain={getAverageGain(stats)} />
             <PartScoreCard parts={stats.parts} />
         </>
     );

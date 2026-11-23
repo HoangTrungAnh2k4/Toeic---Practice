@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { LuArrowDownRight, LuPlus } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { FAQS } from './schedule.data';
+import { FAQS } from './faq.data';
 
 /**
  * Section Q&A: tiêu đề dính bên trái, thẻ câu hỏi đánh số bên phải. `<details name>` native: mở một câu đóng câu khác, không cần JS.

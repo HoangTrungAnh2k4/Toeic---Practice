@@ -12,11 +12,11 @@ export default function NotFound() {
             <h1 className="font-semibold text-main text-base">Không tìm thấy trang</h1>
             <p className="max-w-md text-subText text-xs">Đường dẫn không tồn tại hoặc đã được chuyển đi nơi khác.</p>
             <Link
-                href="/overview"
+                href="/writing"
                 className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'gap-2 mt-2 text-xs')}
             >
                 <LuArrowLeft className="size-4" aria-hidden="true" />
-                Về trang tổng quan
+                Về thư viện đề
             </Link>
         </div>
     );

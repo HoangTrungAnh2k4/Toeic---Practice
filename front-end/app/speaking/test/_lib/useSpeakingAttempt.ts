@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { toWav16k } from '@/lib/audio/wav';
 import {
     finalizeSpeakingAttempt,
-    linkPlanTask,
     resumeOrStartAttempt,
     scoreSpeakingAnswer,
     ScoringLimitError,
@@ -89,8 +88,6 @@ export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions:
 
         try {
             await finalizeSpeakingAttempt(attempt.id, questions, limitedRef.current);
-            // Lỗi gắn task lộ trình không chặn việc nộp
-            linkPlanTask(attempt).catch(() => undefined);
             return limitedRef.current ? 'limit' : 'ok';
         } catch {
             return 'error';

@@ -1,7 +1,7 @@
 import { LuLoaderCircle, LuMic, LuRefreshCw } from 'react-icons/lu';
 import Button from '@/components/ui/button';
-import { MicStatus } from '../types';
-import { isMicIssue, MIC_ISSUE_COPY, PERMANENT_MIC_ISSUES } from '../utils';
+import { MicStatus } from '../_lib/microphone';
+import { isMicIssue, MIC_ISSUE_COPY, PERMANENT_MIC_ISSUES } from '../_lib/microphone';
 import CheckNotice from './CheckNotice';
 
 interface MicrophoneAccessNoticeProps {

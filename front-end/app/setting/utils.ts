@@ -8,14 +8,14 @@ export const SETTING_GROUPS: SettingGroup[] = [
     {
         id: 'account',
         title: 'Tài khoản',
-        description: 'Thông tin cá nhân, mục tiêu điểm và kết quả các lượt làm bài.',
+        description: 'Thông tin cá nhân và kết quả các lượt làm bài.',
         Icon: LuUserRound,
         sections: [
             {
                 id: 'profile',
                 title: 'Hồ sơ cá nhân',
                 description:
-                    'Xem thông tin tài khoản, thói quen học cùng điểm mục tiêu và lịch thi TOEIC Speaking & Writing.',
+                    'Xem thông tin tài khoản và điểm TOEIC Speaking & Writing hiện tại.',
                 href: `${SETTING_BASE_PATH}/profile`,
                 actionLabel: 'Xem hồ sơ',
                 Icon: LuUserRound,
@@ -31,5 +31,4 @@ export const SETTING_GROUPS: SettingGroup[] = [
             },
         ],
     },
-    // Tạm ẩn nhóm "Phòng thi" (Kiểm tra thiết bị); route /setting/device-check vẫn còn
 ];

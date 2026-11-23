@@ -81,10 +81,9 @@ export default defineConfig({
         },
     },
     projects: [
-        // Seed dữ liệu nền; `exclusive` chạy sau cùng (kể cả khi có test fail) vì cần toàn bộ DB cho riêng mình
-        { name: 'seed', testMatch: /seed\.setup\.ts/, teardown: 'exclusive' },
-        { name: 'main', dependencies: ['seed'], testIgnore: /(seed\.setup|exclusive\.spec)\.ts/ },
-        { name: 'exclusive', testMatch: /exclusive\.spec\.ts/ },
+        // Seed dữ liệu nền trước mọi test
+        { name: 'seed', testMatch: /seed\.setup\.ts/ },
+        { name: 'main', dependencies: ['seed'], testIgnore: /seed\.setup\.ts/ },
     ],
     webServer: {
         // Cổng riêng, không dùng lại server có sẵn: server đang chạy có thể đang dùng .env.local

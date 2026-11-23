@@ -1,14 +1,10 @@
 import type {
-    AiInsight,
     Annotation,
     Attempt,
     AttemptMode,
     AttemptResponse,
     Bookmark,
-    PlanTask,
     Profile,
-    StudyPlan,
-    StudyPlanWeek,
 } from '@/lib/domain/types';
 import {
     SCORE_ERROR_MESSAGE,
@@ -19,9 +15,7 @@ import {
 } from '@/lib/scoring/scale';
 import type { WritingOutcome } from '@/lib/scoring/writing';
 import { supabase } from '@/lib/supabase';
-import type { PlanDraft } from './generate-plan';
 import { readTable, writeTable } from './local-store';
-import { toDayKey } from './user-stats';
 
 /**
  * Dữ liệu cá nhân (bài làm, câu trả lời, đề đã lưu). Người đã đăng nhập đọc/ghi attempts, responses, annotations,
@@ -38,7 +32,7 @@ const ANNOTATIONS = 'annotations';
 const now = () => new Date().toISOString();
 
 /**
- * Hồ sơ của người dùng đã đăng nhập; khách không có hồ sơ nên mục tiêu, ngày thi, giờ học đều ẩn.
+ * Hồ sơ của người dùng đã đăng nhập; khách không có hồ sơ.
  * Dòng `profiles` do trigger tạo lúc đăng ký, RLS chỉ cho đọc của chính mình.
  */
 export async function getProfile(): Promise<Profile | null> {
@@ -48,97 +42,6 @@ export async function getProfile(): Promise<Profile | null> {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
     if (error) throw error;
     return data;
-}
-
-export interface ActivePlan {
-    plan: StudyPlan;
-    weeks: StudyPlanWeek[];
-    /** Theo `scheduled_date`, rồi `sort_order`. */
-    tasks: PlanTask[];
-}
-
-/** Lộ trình `active` mới nhất của người dùng đã đăng nhập; khách không có lộ trình. */
-export async function getActivePlan(): Promise<ActivePlan | null> {
-    if (!(await sessionUserId())) return null;
-    // RLS chỉ trả lộ trình của chính mình
-    const { data: plan, error } = await supabase
-        .from('study_plans')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-    if (error) throw error;
-    if (!plan) return null;
-
-    const [weeks, tasks] = await Promise.all([
-        supabase.from('study_plan_weeks').select('*').eq('plan_id', plan.id).order('week_no'),
-        supabase.from('plan_tasks').select('*').eq('plan_id', plan.id).order('scheduled_date').order('sort_order'),
-    ]);
-    if (weeks.error) throw weeks.error;
-    if (tasks.error) throw tasks.error;
-    return { plan, weeks: weeks.data, tasks: tasks.data };
-}
-
-/** Đổi thời lượng mỗi buổi học của lộ trình. */
-export async function updatePlanMinutes(planId: string, minutesPerDay: number): Promise<void> {
-    const { data, error } = await supabase
-        .from('study_plans')
-        .update({ minutes_per_day: minutesPerDay })
-        .eq('id', planId)
-        .select('id');
-    if (error) throw error;
-    // RLS chặn thì không báo lỗi, chỉ cập nhật 0 dòng
-    if (data.length === 0) throw new Error('Plan not found');
-}
-
-export type PlanGoals = Pick<Profile, 'target_speaking' | 'target_writing' | 'exam_date'>;
-
-/** Lưu mục tiêu + thay lộ trình `active` bằng `draft` trong một transaction (RPC `create_study_plan`). */
-export async function createStudyPlan(goals: PlanGoals, draft: PlanDraft): Promise<void> {
-    const { error } = await supabase.rpc('create_study_plan', { payload: { ...goals, ...draft } });
-    if (error) throw error;
-}
-
-/** Đánh dấu xong task không cần bài làm (review, summary). */
-export async function completePlanTask(taskId: string): Promise<void> {
-    const { data, error } = await supabase
-        .from('plan_tasks')
-        .update({ completed_at: now() })
-        .eq('id', taskId)
-        .select('id');
-    if (error) throw error;
-    if (data.length === 0) throw new Error('Task not found');
-}
-
-/**
- * Gắn lượt vừa nộp vào task chưa xong sớm nhất (tới hôm nay) của lộ trình `active`: ưu tiên task thi thử cùng đề, rồi
- * task luyện cùng Part. Không có task khớp thì bỏ qua.
- */
-export async function linkPlanTask(attempt: Pick<Attempt, 'id' | 'exam_id' | 'part_template_id'>): Promise<void> {
-    if (!(await isRemoteAttempt(attempt.id))) return;
-    const active = await getActivePlan();
-    if (!active) return;
-
-    const today = toDayKey(new Date());
-    const open = active.tasks.filter((item) => !item.attempt_id && !item.completed_at && item.scheduled_date <= today);
-    const task =
-        open.find((item) => item.kind === 'mock' && item.exam_id === attempt.exam_id) ??
-        open.find((item) => attempt.part_template_id !== null && item.part_template_id === attempt.part_template_id);
-    if (!task) return;
-
-    // `attempt_id is null`: tab khác vừa gắn thì không ghi đè
-    const { error } = await supabase
-        .from('plan_tasks')
-        .update({ attempt_id: attempt.id })
-        .eq('id', task.id)
-        .is('attempt_id', null);
-    if (error) throw error;
-}
-
-/** shortcut: chưa có auth nên luôn trả `null`; đọc bản mới nhất của `ai_insights` khi nối Supabase. */
-export async function getLatestInsight(): Promise<AiInsight | null> {
-    return null;
 }
 
 /** Id người đã đăng nhập, `null` = khách. getSession đọc phiên đã lưu, không gọi mạng. */

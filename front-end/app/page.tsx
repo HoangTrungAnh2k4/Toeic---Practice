@@ -6,7 +6,6 @@ import LandingEtsFormat from '../components/landing/LandingEtsFormat';
 import LandingFaq from '../components/landing/LandingFaq';
 import LandingHeader from '../components/landing/LandingHeader';
 import LandingHero from '../components/landing/LandingHero';
-import { LandingSchedule } from '../components/landing/LandingSchedule';
 import { SiteFooter } from '@/components/layout/footer/site-footer';
 
 // Font viết tay chỉ dùng ở landing (chú thích, chữ sửa lỗi)
@@ -24,7 +23,6 @@ export default function LandingPage() {
             <LandingHeader />
             <main className="flex flex-col items-center">
                 <LandingHero />
-                <LandingSchedule />
                 <LandingEtsFormat />
                 <LandingFaq />
             </main>

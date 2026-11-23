@@ -32,18 +32,9 @@ export type Criterion =
 
 export type Severity = 'high' | 'medium' | 'low';
 
-export type PlanStatus = 'active' | 'archived';
-
-export type PlanTaskKind = 'speaking' | 'writing' | 'review' | 'mock' | 'summary';
-
 export interface Profile {
     id: string;
     role: UserRole;
-    target_speaking: number | null;
-    target_writing: number | null;
-    exam_date: string | null;
-    preferred_time: string | null;
-    reminder_enabled: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -190,62 +181,6 @@ export interface Bookmark {
     created_at: string;
 }
 
-export interface StudyPlan {
-    id: string;
-    user_id: string;
-    /** Mỗi ngày học một buổi nên đây cũng là thời lượng một buổi. */
-    minutes_per_day: number;
-    days_per_week: number;
-    status: PlanStatus;
-    ai_rationale: string | null;
-    created_at: string;
-}
-
-export interface StudyPlanWeek {
-    plan_id: string;
-    week_no: number;
-    theme: string;
-}
-
-export interface PlanTask {
-    id: string;
-    plan_id: string;
-    scheduled_date: string;
-    sort_order: number;
-    kind: PlanTaskKind;
-    title: string;
-    description: string | null;
-    /** Tiêu chí cần đạt của buổi học. */
-    goal: string | null;
-    duration_min: number;
-    exam_id: string | null;
-    part_template_id: number | null;
-    /** Bài làm mở từ task, phòng thi ghi khi nộp. */
-    attempt_id: string | null;
-    /** Task không cần bài làm (review, summary) được đánh dấu xong. */
-    completed_at: string | null;
-}
-
-export interface AiInsightItem {
-    skill: Skill;
-    part_template_id: number | null;
-    title: string;
-    /** Chỉ số ngắn, vd "Tỷ lệ đạt 66% / mục tiêu 90%". */
-    metric: string;
-    tone: 'critical' | 'warning';
-    body: string;
-    action_label: string;
-    href: string;
-}
-
-/** Nhận định do AI sinh cho lịch học, cache để không gọi AI mỗi lần tải trang. */
-export interface AiInsight {
-    id: string;
-    user_id: string;
-    payload: { based_on_attempts: number; items: AiInsightItem[] };
-    generated_at: string;
-}
-
 /** Bảng quy đổi điểm → Level theo ETS: Level là mức cao nhất có `min_score` ≤ điểm. Xem `SCORE_LEVELS`. */
 export interface ScoreLevel {
     skill: Skill;
@@ -273,10 +208,3 @@ export interface UserPartStats {
     avg_score_ratio: number | null;
 }
 
-/** Row của view `user_study_stats` — thói quen học của một người dùng. */
-export interface UserStudyStats {
-    user_id: string;
-    streak_days: number;
-    best_streak_days: number;
-    minutes_this_month: number;
-}

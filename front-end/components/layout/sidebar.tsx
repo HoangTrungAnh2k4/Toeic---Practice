@@ -7,7 +7,6 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
 import { IoSettings } from 'react-icons/io5';
-import { TbLayoutDashboardFilled } from 'react-icons/tb';
 import { FaPenNib } from 'react-icons/fa6';
 import { UserMenu } from '@/components/user/user-menu';
 import { GuestMenu } from '@/components/user/guest-menu';
@@ -24,8 +23,7 @@ const ITEM_H = 64;
 type NavItem = { label: string; href: string; icon: IconType };
 
 const items: NavItem[] = [
-    { label: 'Overview', href: '/overview', icon: TbLayoutDashboardFilled },
-    // Tạm ẩn Speaking và Schedule; route vẫn còn
+    // Tạm ẩn Speaking; route vẫn còn
     { label: 'Writing', href: '/writing', icon: FaPenNib },
     { label: 'Setting', href: '/setting', icon: IoSettings },
 ];

@@ -62,27 +62,6 @@ test('GU-C01: Khách làm bài rồi đăng nhập: lịch sử tài khoản kh�
     expect(stillThere.map((attempt) => attempt.id)).toEqual(expect.arrayContaining(guestAttempts.map((attempt) => attempt.id)));
 });
 
-test('GU-E01: Đóng banner nhắc dữ liệu khách rồi tải lại trang, banner vẫn ẩn', async ({ page }) => {
-    const banner = page.getByRole('complementary', { name: 'Bạn đang làm bài ở chế độ khách' });
-    await page.goto('/overview');
-    await expect(banner).toBeVisible();
-    await banner.getByRole('button', { name: 'Đóng thông báo' }).click();
-    await expect(banner).toBeHidden();
-
-    await page.reload();
-    await ready(page);
-    // Sidebar đã đọc xong phiên (khách) → banner, nếu có, cũng đã render
-    await expect(page.getByText('Bạn chưa đăng nhập').first()).toBeVisible();
-    await expect(banner).toHaveCount(0);
-});
-
-test('GU-H02: Khách mở /schedule thấy thẻ "Đăng ký để nhận lộ trình học riêng", không có lộ trình', async ({ page }) => {
-    await page.goto('/schedule');
-    await expect(page.getByRole('heading', { name: 'Đăng ký để nhận lộ trình học riêng' })).toBeVisible();
-    await expect(page.locator('#weekly-task-title')).toHaveCount(0);
-    await expect(page.getByRole('progressbar', { name: 'Tiến độ tuần' })).toHaveCount(0);
-});
-
 test('GU-H03: Khách làm và nộp bài Speaking: kết quả lưu ở trình duyệt, không có request ghi lượt làm lên Supabase', async ({ page, db }) => {
     const exam = IDS.speaking.published[1];
     const ids = await questionNumbers(db, exam);

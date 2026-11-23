@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
     },
     async redirects() {
         return [
+            { source: '/schedule', destination: '/writing', permanent: false },
+            { source: '/setting/device-check', destination: '/speaking', permanent: false },
             {
                 source: '/history/:path*',
                 destination: '/setting/history/:path*',

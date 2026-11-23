@@ -8,28 +8,16 @@ import type {
     Skill,
     UserPartStats,
     UserSkillStats,
-    UserStudyStats,
 } from '@/lib/domain/types';
 import { listExamParts, listQuestions } from './content';
 import { GUEST_USER_ID, listAttempts, listResponses } from './user-data';
 
-/** Thống kê học tập của người dùng — logic của các view `user_skill_stats`, `user_part_stats`, `user_study_stats`. */
+/** Thống kê điểm của người dùng — logic của các view `user_skill_stats`, `user_part_stats`. */
 export interface UserStats {
     skills: Record<Skill, UserSkillStats>;
     parts: UserPartStats[];
-    study: UserStudyStats;
     /** Điểm các lượt làm cả đề đã chấm, cũ → mới; lượt luyện riêng Part không phản ánh điểm 0-200 của kỹ năng. */
     fullTestScores: { attempt_id: string; skill: Skill; score: number; scored_at: string }[];
-    /** Số phút học theo ngày, key `YYYY-MM-DD` giờ địa phương. */
-    minutesByDay: Record<string, number>;
-}
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-/** `YYYY-MM-DD` theo giờ địa phương (toISOString lệch ngày ở múi giờ +7). */
-export function toDayKey(date: Date) {
-    const pad = (value: number) => String(value).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 /**
@@ -40,29 +28,6 @@ function attemptMinutes(attempt: Attempt) {
     if (!attempt.submitted_at) return 0;
     const end = Math.min(Date.parse(attempt.submitted_at), attempt.ends_at ? Date.parse(attempt.ends_at) : Infinity);
     return Math.max(0, Math.round((end - Date.parse(attempt.started_at)) / 60000));
-}
-
-/** Chuỗi ngày học hiện tại (tính tới hôm nay, hoặc hôm qua nếu hôm nay chưa học) và chuỗi dài nhất. */
-function getStreaks(days: Set<string>, now: Date) {
-    const sorted = [...days].sort();
-    let best = 0;
-    let run = 0;
-    let prev: number | null = null;
-    for (const key of sorted) {
-        const time = Date.parse(`${key}T00:00:00`);
-        run = prev !== null && Math.round((time - prev) / DAY_MS) === 1 ? run + 1 : 1;
-        best = Math.max(best, run);
-        prev = time;
-    }
-
-    const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (!days.has(toDayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
-    let current = 0;
-    while (days.has(toDayKey(cursor))) {
-        current += 1;
-        cursor.setDate(cursor.getDate() - 1);
-    }
-    return { current, best };
 }
 
 /** Câu trả lời, Part và câu hỏi của một lượt đã chấm; nạp một lần, dùng cho điểm theo Part. */
@@ -104,7 +69,7 @@ function scoreParts(details: Iterable<AttemptDetails>) {
 }
 
 /** Thống kê từ bài làm của người dùng. Lượt của đề không còn trong `exams` bị bỏ qua. */
-export async function loadUserStats(exams: Exam[], now = new Date()): Promise<UserStats> {
+export async function loadUserStats(exams: Exam[]): Promise<UserStats> {
     const skillOf = new Map(exams.map((exam) => [exam.id, exam.skill]));
     const attempts = (await listAttempts()).filter((attempt) => skillOf.has(attempt.exam_id)).reverse();
     const scored = attempts.filter((attempt) => attempt.status === 'scored');
@@ -153,27 +118,9 @@ export async function loadUserStats(exams: Exam[], now = new Date()): Promise<Us
         };
     });
 
-    const minutesByDay: Record<string, number> = {};
-    for (const attempt of submitted) {
-        // Có submitted_at nhờ filter `submitted`
-        const key = toDayKey(new Date(attempt.submitted_at as string));
-        minutesByDay[key] = (minutesByDay[key] ?? 0) + attemptMinutes(attempt);
-    }
-    const monthPrefix = toDayKey(now).slice(0, 7);
-    const streaks = getStreaks(new Set(Object.keys(minutesByDay)), now);
-
     return {
         skills: { speaking: skillStats('speaking'), writing: skillStats('writing') },
         parts,
-        study: {
-            user_id: GUEST_USER_ID,
-            streak_days: streaks.current,
-            best_streak_days: streaks.best,
-            minutes_this_month: Object.entries(minutesByDay)
-                .filter(([key]) => key.startsWith(monthPrefix))
-                .reduce((sum, [, minutes]) => sum + minutes, 0),
-        },
         fullTestScores,
-        minutesByDay,
     };
 }

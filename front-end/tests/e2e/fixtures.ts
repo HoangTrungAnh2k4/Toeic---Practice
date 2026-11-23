@@ -169,11 +169,6 @@ export async function insertAnnotation(
     return row.id;
 }
 
-/** `YYYY-MM-DD` theo giờ VN, cách hôm nay `offset` ngày. */
-export function dayKey(offset = 0) {
-    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(Date.now() + offset * 86_400_000));
-}
-
 export const daysAgo = (days: number, from = Date.now()) => new Date(from - days * 24 * 60 * 60 * 1000).toISOString();
 
 /* ------------------------------------------------------------------ */

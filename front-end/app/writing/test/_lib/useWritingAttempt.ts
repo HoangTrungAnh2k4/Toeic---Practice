@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readTable, writeTable } from '@/lib/data/local-store';
 import {
-    linkPlanTask,
     resumeOrStartAttempt,
     saveResponse,
     scoreWritingAttempt,
@@ -229,8 +228,6 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
             saveProgress(attempt.id, null);
             // Chấm lỗi/mất mạng: attempt giữ `submitted`, trang xem bài cho chấm lại
             scoreWritingAttempt(attempt, questions).catch(() => undefined);
-            // Lỗi gắn task lộ trình không chặn việc nộp
-            linkPlanTask(attempt).catch(() => undefined);
             return 'done';
         } catch {
             setSaveStatus('error');

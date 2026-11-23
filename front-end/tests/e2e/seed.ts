@@ -6,7 +6,7 @@
  * - 2 tài khoản cố định: học viên + admin (email/mật khẩu trong .env.test)
  * - Speaking: đúng 6 đề published + 1 draft + 1 review (đủ 11 câu)
  * - Writing: 2 đề published + 1 draft (đủ 8 câu)
- * Test cần dữ liệu riêng (lượt làm, lộ trình, đề để sửa/xoá...) tự tạo bằng các helper bên dưới, với tài khoản riêng.
+ * Test cần dữ liệu riêng (lượt làm, đề để sửa/xoá...) tự tạo bằng các helper bên dưới, với tài khoản riêng.
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
@@ -287,7 +287,7 @@ async function wipe(db: Db) {
         ids.push(...data.users.filter((user) => user.email?.endsWith(`@${E2E_DOMAIN}`)).map((user) => user.id));
         if (data.users.length < 1000) break;
     }
-    // Xoá user kéo theo profile, lượt làm, bookmark, lộ trình (on delete cascade)
+    // Xoá user kéo theo profile, lượt làm, bookmark (on delete cascade)
     for (let i = 0; i < ids.length; i += 20) {
         await Promise.all(
             ids.slice(i, i + 20).map(async (id) => {

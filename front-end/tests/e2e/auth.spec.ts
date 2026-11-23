@@ -193,7 +193,7 @@ test('AU-H03: Đăng xuất từ menu sidebar thì sidebar hiện nút Đăng nh
     freshStudent,
 }) => {
     const user = await freshStudent();
-    await page.goto('/overview');
+    await page.goto('/writing');
     const account = page.getByRole('button', { name: new RegExp(user.name) });
     await account.click();
     await page.getByRole('menuitem', { name: 'Đăng xuất' }).click();
@@ -266,7 +266,7 @@ test('AU-S04: Học viên gọi thẳng POST /api/exams với body hợp lệ nh
     db,
 }) => {
     await loginAs(STUDENT);
-    await page.goto('/overview');
+    await page.goto('/writing');
     const title = `E2E AU-S04 ${crypto.randomUUID().slice(0, 8)}`;
     const response = await page.request.post('/api/exams', { multipart: validSpeakingExamForm(title) });
     expect(response.status()).toBe(403);
@@ -367,7 +367,7 @@ test('AU-S07: Học viên gọi thẳng API đổi trạng thái và xoá đề 
         title: `E2E AU-S07 ${crypto.randomUUID().slice(0, 8)}`,
     });
     await loginAs(STUDENT);
-    await page.goto('/overview');
+    await page.goto('/writing');
     const status = await page.request.post(`/api/exams/${exam.id}/status`, { data: { status: 'review' } });
     const remove = await page.request.delete(`/api/exams/${exam.id}`);
     expect.soft(status.status(), 'POST status').toBe(403);

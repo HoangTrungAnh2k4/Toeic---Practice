@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { IconType } from 'react-icons';
 import { LuCircleAlert, LuCircleCheck, LuInfo, LuTriangleAlert } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
-import { NoticeTone } from '../types';
+import { NoticeTone } from '../_lib/microphone';
 
 const TONE_STYLE: Record<NoticeTone, { container: string; icon: string; title: string; Icon: IconType }> = {
     info: { container: 'bg-sub1/50 border-sub2/20', icon: 'text-sub2', title: 'text-main', Icon: LuInfo },

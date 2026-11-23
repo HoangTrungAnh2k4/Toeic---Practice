@@ -14,7 +14,6 @@ interface SkillCopy {
     verb: string;
     searchPlaceholder: string;
     roomChecks: RoomCheck[];
-    deviceCheckLabel: string;
 }
 
 /** Nội dung riêng theo kỹ năng cho các khối dùng chung của thư viện đề. */
@@ -40,7 +39,6 @@ export const SKILL_COPY: Record<Skill, SkillCopy> = {
                 description: 'Chuẩn bị sẵn để ghi keyword cho Part 4 (Q8-10) và Part 5 (Q11).',
             },
         ],
-        deviceCheckLabel: 'Kiểm tra micro & loa',
     },
     writing: {
         label: 'Writing',
@@ -63,6 +61,5 @@ export const SKILL_COPY: Record<Skill, SkillCopy> = {
                 description: 'Bài viết được lưu trên trình duyệt sau mỗi lần gõ.',
             },
         ],
-        deviceCheckLabel: 'Kiểm tra bàn phím',
     },
 };
