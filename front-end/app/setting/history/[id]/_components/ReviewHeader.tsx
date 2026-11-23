@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { LuArrowLeft, LuCalendar, LuChevronRight, LuClock, LuEye } from 'react-icons/lu';
+import { LuArrowLeft, LuClock, LuEye } from 'react-icons/lu';
 import { cn } from '@/lib/utils';
 import { HistoryRow } from '../../types';
-import { formatDateTime, formatDuration, getAttemptCode, getPartLabel, MODE_LABEL, SKILL_STYLE } from '../../utils';
+import { formatDateTime, formatDuration, getPartLabel, MODE_LABEL } from '../../utils';
 
 interface ReviewHeaderProps {
     row: HistoryRow;
@@ -13,7 +13,6 @@ const CHIP_CLASS =
 
 export default function ReviewHeader({ row }: ReviewHeaderProps) {
     const { attempt, exam, attemptNo } = row;
-    const skill = SKILL_STYLE[exam.skill];
     const duration = formatDuration(attempt);
 
     return (

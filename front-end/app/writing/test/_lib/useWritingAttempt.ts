@@ -10,6 +10,11 @@ import type { Attempt, AttemptMode, Question } from '@/lib/domain/types';
 import { SaveStatus } from '../types';
 
 const AUTOSAVE_DELAY_MS = 600;
+/** Khớp khoảng dư trong policy `responses` (migration 20261125000000): quá `ends_at` + mốc này DB không nhận bài nữa. */
+const ANSWER_GRACE_MS = 30_000;
+
+const isPastDeadline = (attempt: Attempt) =>
+    attempt.ends_at !== null && Date.now() > Date.parse(attempt.ends_at) + ANSWER_GRACE_MS;
 
 interface UseWritingAttemptOptions {
     examId: string;
@@ -215,7 +220,11 @@ export function useWritingAttempt(options: UseWritingAttemptOptions) {
     const finishPart = async (): Promise<'next' | 'done' | false> => {
         if (!attempt) return false;
         // Câu lưu lỗi đã quay lại hàng chờ → còn câu chờ nghĩa là chưa lưu đủ
-        if (!(await flush()) || pendingRef.current.size > 0) return false;
+        if (!(await flush()) || pendingRef.current.size > 0) {
+            // Quá hạn thì DB không nhận nữa, thử lại cũng vô ích: nộp phần đã lưu trước hạn, bỏ nháp tới sau
+            if (!isPastDeadline(attempt)) return false;
+            pendingRef.current.clear();
+        }
         if (progress.partIndex < options.partCount - 1) {
             const next = { partIndex: progress.partIndex + 1, startedAt: Date.now() };
             saveProgress(attempt.id, next);

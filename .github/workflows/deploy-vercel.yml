@@ -32,7 +32,7 @@ jobs:
           node-version: 22
 
       # corepack lấy đúng pnpm theo `packageManager` trong package.json
-      - run: corepack enable && npm i -g vercel@latest
+      - run: corepack enable && npm i -g vercel@66.6.0
 
       # Tra id theo tên project để khỏi lưu ORG_ID/PROJECT_ID
       - name: Resolve project

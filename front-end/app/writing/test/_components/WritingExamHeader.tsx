@@ -1,4 +1,4 @@
-import { LuCheck, LuCloudAlert, LuLoaderCircle, LuLock, LuLogOut, LuPenLine, LuSave, LuTimer } from 'react-icons/lu';
+import { LuCheck, LuCloudAlert, LuLoaderCircle, LuLock, LuLogOut, LuPenLine, LuTimer } from 'react-icons/lu';
 import type { AttemptMode, PartTemplate } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
 import { SaveStatus } from '../types';

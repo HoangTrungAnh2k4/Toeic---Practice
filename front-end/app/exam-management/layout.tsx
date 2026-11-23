@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { LuArrowLeft, LuShieldAlert } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { createServerSupabase, isAdmin } from '@/lib/supabase-server';
 import { cn } from '@/lib/utils';
 import { SETTING_BASE_PATH } from '@/app/setting/utils';

@@ -183,7 +183,6 @@ export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: W
                         isLocked={isTimeUp}
                     />
                     <ExamNavigation
-                        partNo={template.part_no}
                         rangeLabel={rangeLabel}
                         timeUpLabel={template.response_sec ? `Câu ${question.number}` : rangeLabel}
                         currentIndex={currentIndex}

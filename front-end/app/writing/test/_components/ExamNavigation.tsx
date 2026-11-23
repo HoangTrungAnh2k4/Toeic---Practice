@@ -1,8 +1,7 @@
-import { LuChevronLeft, LuChevronRight, LuCircleCheckBig, LuLightbulb, LuTimerOff } from 'react-icons/lu';
+import { LuChevronLeft, LuChevronRight, LuCircleCheckBig, LuTimerOff } from 'react-icons/lu';
 import Button from '@/components/ui/button';
 
 interface ExamNavigationProps {
-    partNo: number;
     /** Nhóm câu của Part, vd "Câu 1–5". */
     rangeLabel: string;
     /** Phạm vi vừa hết giờ: cả Part (Q1-5) hoặc riêng câu đang làm (Q6-7). */
@@ -15,15 +14,7 @@ interface ExamNavigationProps {
     onFinish: () => void;
 }
 
-/** Lời khuyên theo Part (key = `part_no`). */
-const TIPS: Record<number, string> = {
-    1: 'Không viết hai câu riêng lẻ. Dùng liên từ phụ thuộc (while, because, although) hoặc mệnh đề quan hệ để tạo một câu phức tự nhiên và đạt trọn 3/3 điểm.',
-    2: 'Trả lời đủ mọi yêu cầu trong đề (số câu hỏi, đề xuất, thông tin cần nêu), có lời chào, mở thư, kết thư và ký tên. Thiếu một yêu cầu là khó đạt 4/4.',
-    3: 'Nêu rõ quan điểm ngay ở mở bài, mỗi đoạn thân bài một lý do kèm ví dụ cụ thể, kết bài nhắc lại quan điểm. Dành 3–5 phút cuối để đọc lại và sửa lỗi.',
-};
-
 export default function ExamNavigation({
-    partNo,
     rangeLabel,
     timeUpLabel,
     currentIndex,

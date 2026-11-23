@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { LuBadgeCheck, LuClock3, LuCopy, LuEllipsisVertical, LuEye, LuInbox, LuPencil, LuSearchX, LuTrash2, LuTriangleAlert } from 'react-icons/lu';
-import Button, { buttonVariants } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,

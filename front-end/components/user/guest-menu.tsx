@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { LuLogIn, LuUserRound } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { FaUser } from 'react-icons/fa';

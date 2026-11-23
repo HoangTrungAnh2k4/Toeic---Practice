@@ -196,7 +196,6 @@ export interface UserSkillStats {
     scored_count: number;
     latest_score: number | null;
     latest_scored_at: string | null;
-    total_minutes: number;
 }
 
 /** Row của view `user_part_stats` — số lượt và điểm trung bình theo Part. */

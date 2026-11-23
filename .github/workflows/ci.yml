@@ -32,3 +32,48 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm exec tsc --noEmit
+
+  # E2E chạy trên Supabase local (stack test cổng 553xx) với key demo cố định của CLI; Azure/Groq/R2 được mock.
+  # Deploy Vercel chỉ chạy khi cả workflow CI pass, nên test hỏng là chặn deploy.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: front-end/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            front-end/pnpm-lock.yaml
+            back-end/pnpm-lock.yaml
+
+      # Supabase CLI nằm trong devDependencies của back-end
+      - run: pnpm install --frozen-lockfile
+        working-directory: back-end
+      - run: pnpm install --frozen-lockfile
+        working-directory: front-end
+
+      - name: Start Supabase test stack
+        working-directory: front-end
+        run: |
+          cp .env.test.example .env.test
+          node tests/e2e/supabase.mjs start
+
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: front-end
+
+      - run: pnpm test:e2e
+        working-directory: front-end
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: front-end/playwright-report
+          retention-days: 7

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { GoDotFill } from 'react-icons/go';
-import { LuArrowRight, LuHistory, LuRotateCcw, LuTimer, LuTrophy } from 'react-icons/lu';
+import { LuArrowRight, LuTimer } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';

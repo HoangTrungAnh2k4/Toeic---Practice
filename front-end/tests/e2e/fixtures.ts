@@ -9,11 +9,6 @@ import { adminDb, adminSessionDb, createUser, env, IDS, must, type Db, type Test
 export { expect, IDS };
 export type { TestUser };
 
-export const MISTAKE = {
-    /** Writing Q8: "Không nêu rõ quan điểm trong bài luận" */
-    essayOpinion: '00000000-0000-4000-8000-000000000011',
-};
-
 /** Đăng nhập bằng cookie phiên của @supabase/ssr (giống hệt cookie trình duyệt nhận khi đăng nhập qua form). */
 export async function login(context: BrowserContext, user: Pick<TestUser, 'email' | 'password'>, baseURL: string) {
     const jar = new Map<string, { value: string; maxAge?: number }>();
@@ -140,35 +135,6 @@ export async function insertResponse(
     return row.id;
 }
 
-export async function insertAnnotation(
-    db: Db,
-    annotation: {
-        response_id: string;
-        mistake_pattern_id: string | null;
-        quote: string;
-        start_offset?: number;
-        explanation?: string;
-        correction?: string;
-    },
-): Promise<string> {
-    const start = annotation.start_offset ?? 0;
-    const [row] = await must(
-        db
-            .from('annotations')
-            .insert({
-                correction: 'Sửa lại cho đúng',
-                explanation: 'Giải thích lỗi do test seed',
-                criterion: 'task_response',
-                severity: 'high',
-                ...annotation,
-                start_offset: start,
-                end_offset: start + annotation.quote.length,
-            })
-            .select('id'),
-    );
-    return row.id;
-}
-
 export const daysAgo = (days: number, from = Date.now()) => new Date(from - days * 24 * 60 * 60 * 1000).toISOString();
 
 /* ------------------------------------------------------------------ */
@@ -229,7 +195,7 @@ export async function mockSpeakingScore(
 }
 
 /** Kết quả chấm 1 câu Writing đúng shape `WritingScore`. */
-export const writingResult = (score: number, max: number) => ({
+const writingResult = (score: number, max: number) => ({
     score,
     max_score: max,
     feedback: `Mock ${score}/${max}`,
@@ -414,7 +380,8 @@ export async function questionNumbers(db: Db, examId: string): Promise<Record<st
 /* ------------------------------------------------------------------ */
 
 export const reviewSummary = (page: Page) => page.getByRole('region', { name: 'Tổng quan kết quả' });
-/** Số điểm 0–200 lớn ở khối tổng quan (ngay trước "/ 200"). */
-export const reviewScore = (page: Page) => reviewSummary(page).locator('xpath=.//span[normalize-space()="/ 200"]/preceding-sibling::span[1]');
-/** Nhãn Level đứng ngay sau "/ 200". */
-export const reviewLevel = (page: Page) => reviewSummary(page).locator('xpath=.//span[normalize-space()="/ 200"]/following-sibling::span[1]');
+/** Số điểm 0–200 lớn giữa vòng gauge (ngay trước "/ 200 điểm"). */
+export const reviewScore = (page: Page) =>
+    reviewSummary(page).locator('xpath=.//span[starts-with(normalize-space(), "/ 200")]/preceding-sibling::span[1]');
+/** Chip Level, dạng "Level 5 / 8". */
+export const reviewLevel = (page: Page) => reviewSummary(page).getByText(/^Level \d+ \/ \d+$/);

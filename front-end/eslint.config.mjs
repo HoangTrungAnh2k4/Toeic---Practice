@@ -5,6 +5,8 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
     ...nextVitals,
     ...nextTs,
+    // Import/biến thừa chặn ở CI thay vì để thành warning bị lờ đi
+    { rules: { '@typescript-eslint/no-unused-vars': 'error' } },
     // Override default ignores of eslint-config-next.
     globalIgnores([
         // Default ignores of eslint-config-next:

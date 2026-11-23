@@ -1,9 +1,6 @@
-import { LuAward, LuLock, LuMic, LuTimer } from 'react-icons/lu';
 import { getPartDurationSec, getPartTemplates, TEST_DURATION_MIN } from '@/lib/domain/parts';
 import type { PartTemplate, Skill } from '@/lib/domain/types';
 import { cn } from '@/lib/utils';
-import { IoTimerOutline } from 'react-icons/io5';
-import { CiMicrophoneOn } from 'react-icons/ci';
 
 const SHEETS: { skill: Skill; title: string; answerVerb: string; fill: string; tilt: string }[] = [
     { skill: 'speaking', title: 'TOEIC Speaking Test', answerVerb: 'nói', fill: 'bg-main', tilt: '-rotate-1 self-end' },

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LuFileCog, LuMenu, LuX } from 'react-icons/lu';
+import { LuMenu, LuX } from 'react-icons/lu';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';

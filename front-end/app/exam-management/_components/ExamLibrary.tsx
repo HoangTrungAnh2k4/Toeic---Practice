@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { LuDownload, LuPlus } from 'react-icons/lu';
+import { LuDownload } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import { deleteExam, duplicateExam } from '../_lib/data';
 import { downloadJson } from '../_lib/downloadJson';

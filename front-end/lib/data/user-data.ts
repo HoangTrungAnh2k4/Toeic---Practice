@@ -130,17 +130,28 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
  * Lượt làm dở (đang làm hoặc đã thoát giữa chừng) của đúng đề & Part kèm câu đã trả lời; lượt `interrupted` được
  * mở lại thành `in_progress`. Không có thì tạo lượt mới.
  */
-async function resumeOrStart(input: StartAttemptInput) {
-    const existing = (await listAttempts(input.exam_id)).find(
-        (attempt) =>
-            attempt.part_template_id === input.part_template_id &&
-            (attempt.status === 'in_progress' || attempt.status === 'interrupted'),
+async function resumeOrStart(input: StartAttemptInput, retried = false): Promise<{
+    attempt: Attempt;
+    responses: AttemptResponse[];
+    isRestored: boolean;
+}> {
+    const open = (await listAttempts(input.exam_id)).filter(
+        (attempt) => attempt.part_template_id === input.part_template_id,
     );
-    if (!existing) return { attempt: await startAttempt(input), responses: [] as AttemptResponse[], isRestored: false };
-
-    const attempt =
-        existing.status === 'interrupted' ? await updateAttempt(existing.id, { status: 'in_progress' }) : existing;
-    return { attempt, responses: await listResponses(attempt.id), isRestored: true };
+    // Lượt `in_progress` trước: DB chỉ cho một lượt đang làm mỗi đề & Part, mở lại lượt `interrupted` khi đã có thì trùng
+    const existing =
+        open.find((attempt) => attempt.status === 'in_progress') ??
+        open.find((attempt) => attempt.status === 'interrupted');
+    try {
+        if (!existing) return { attempt: await startAttempt(input), responses: [], isRestored: false };
+        const attempt =
+            existing.status === 'interrupted' ? await updateAttempt(existing.id, { status: 'in_progress' }) : existing;
+        return { attempt, responses: await listResponses(attempt.id), isRestored: true };
+    } catch (error) {
+        // 23505: tab khác vừa tạo/mở lượt đang làm của đúng đề & Part → đọc lại và dùng chung lượt đó
+        if (!retried && (error as { code?: string } | null)?.code === '23505') return resumeOrStart(input, true);
+        throw error;
+    }
 }
 
 const pendingResumes = new Map<string, ReturnType<typeof resumeOrStart>>();
@@ -190,6 +201,27 @@ export async function listResponses(attemptId: string): Promise<AttemptResponse[
     if (error) throw error;
     // metrics, strengths là jsonb do khâu chấm ghi theo dạng của AttemptResponse
     return data as AttemptResponse[];
+}
+
+/** Id mỗi lượt `.in()` gọn trong URL (~3,7 KB). */
+const IN_CHUNK = 100;
+
+/** Câu trả lời của nhiều lượt trong ít request nhất (theo lô `IN_CHUNK`), cho thống kê. */
+export async function listResponsesOf(attemptIds: string[]): Promise<AttemptResponse[]> {
+    if (!(await sessionUserId())) {
+        const ids = new Set(attemptIds);
+        return readTable<AttemptResponse>(RESPONSES).filter((response) => ids.has(response.attempt_id));
+    }
+    const chunks = Array.from({ length: Math.ceil(attemptIds.length / IN_CHUNK) }, (_, index) =>
+        attemptIds.slice(index * IN_CHUNK, (index + 1) * IN_CHUNK),
+    );
+    const results = await Promise.all(
+        chunks.map((ids) => supabase.from('responses').select('*').in('attempt_id', ids)),
+    );
+    return results.flatMap(({ data, error }) => {
+        if (error) throw error;
+        return data as AttemptResponse[];
+    });
 }
 
 /** Chỉ các cột client được phép ghi (grant trên `responses`); điểm, transcript do khâu chấm ghi. */

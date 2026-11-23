@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { LuRotateCw, LuTriangleAlert } from 'react-icons/lu';
 import Button from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { getExamLibrary } from '../_lib/data';
 import { ExamLibraryItem } from '../types';
 import ExamLibrary from './ExamLibrary';

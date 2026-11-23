@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LuArrowRight, LuBookOpen, LuCornerDownRight, LuMic, LuPencil, LuSparkles, LuTimer } from 'react-icons/lu';
+import { LuCornerDownRight } from 'react-icons/lu';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LandingHeroTimer from './LandingHeroTimer';

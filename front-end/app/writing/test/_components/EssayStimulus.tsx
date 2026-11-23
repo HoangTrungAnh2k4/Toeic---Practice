@@ -1,4 +1,3 @@
-import { LuFileText } from 'react-icons/lu';
 import type { Question } from '@/lib/domain/types';
 import { ESSAY_MIN_WORDS } from '../utils';
 

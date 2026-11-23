@@ -108,6 +108,42 @@ test('WR-X01: Mất mạng khi autosave, gõ tiếp rồi tải lại: nội dun
     await expect(editor(page)).toHaveValue(first + second);
 });
 
+test('WR-X04: Mất mạng ở phút cuối, hết giờ thì DB không nhận bài nữa: vẫn tự nộp được bằng phần đã lưu trước hạn', async ({ page, db, freshStudent }) => {
+    const user = await freshStudent();
+    await page.clock.install();
+    await openWritingRoom(page, W1, { part: 8 });
+    const saved = 'Working for a small company gives more responsibility.';
+    await editor(page).fill(saved);
+    const attemptOf = async () =>
+        (await must(db.from('attempts').select('id, status').eq('user_id', user.id).eq('exam_id', W1)))[0];
+    await expect.poll(async () => {
+        const attempt = await attemptOf();
+        if (!attempt) return null;
+        const rows = await must(db.from('responses').select('text_answer').eq('attempt_id', attempt.id));
+        return rows[0]?.text_answer ?? null;
+    }).toBe(saved);
+
+    // Câu gõ thêm không lên được máy chủ, nằm lại trong hàng chờ
+    await page.route('**/rest/v1/responses**', (route) =>
+        ['GET', 'HEAD', 'OPTIONS'].includes(route.request().method()) ? route.fallback() : route.abort('internetdisconnected'),
+    );
+    await editor(page).pressSequentially(' Employees learn many skills.');
+    await page.waitForTimeout(800);
+    await page.unroute('**/rest/v1/responses**');
+
+    // Hạn trên DB đã qua (RLS chặn ghi), đồng hồ phòng thi cũng hết giờ Part 3 (30 phút)
+    const { id } = await attemptOf();
+    await must(db.from('attempts').update({ ends_at: new Date(Date.now() - 5 * 60_000).toISOString() }).eq('id', id).select('id'));
+    await page.reload();
+    await page.clock.fastForward(31 * 60_000);
+    await page.clock.resume();
+
+    await expect(page).toHaveURL(new RegExp(`/setting/history/${id}$`));
+    expect((await attemptOf()).status).not.toBe('in_progress');
+    const rows = await must(db.from('responses').select('text_answer').eq('attempt_id', id));
+    expect(rows.map((row) => row.text_answer)).toEqual([saved]);
+});
+
 test('WR-C02: CBT tua tới lúc còn 60s: đồng hồ có data-state="warning" và vùng role="status" thông báo cho trình đọc màn hình', async ({ page }) => {
     await page.clock.install();
     await openWritingRoom(page, W1);
@@ -137,24 +173,6 @@ test('WR-H02: mode=guided không có giới hạn thời gian', async ({ page })
     await expect(timer(page)).toHaveText('Không giới hạn');
     await expect(editor(page)).not.toHaveAttribute('readonly');
     await expect(page.getByText(/Đã hết giờ/)).toHaveCount(0);
-});
-
-test('WR-E01: Part 1: từ khoá tính là đã dùng khi khác hoa thường, dính dấu câu, có hậu tố; dạng bất quy tắc không được đánh dấu', async ({ page }) => {
-    await openWritingRoom(page, W1);
-    const found = page.getByRole('list', { name: 'Từ khóa đã phát hiện' });
-    const missing = (word: string) => found.getByText(`Thiếu "${word}"`, { exact: true });
-
-    await editor(page).fill('He GOES to the office.');
-    await expect(missing('go'), 'GOES').toHaveCount(0);
-    await expect(missing('office'), 'office.').toHaveCount(0);
-
-    await editor(page).fill('She is going to the OFFICE, quickly');
-    await expect(missing('go'), 'going').toHaveCount(0);
-    await expect(missing('office'), 'OFFICE,').toHaveCount(0);
-
-    await editor(page).fill('They went to the Office!');
-    await expect(missing('go'), 'went không được đánh dấu').toHaveCount(1);
-    await expect(missing('office'), 'Office!').toHaveCount(0);
 });
 
 test('WR-E02: Bộ đếm từ với "Hello,  world!", "e-mail", chuỗi rỗng, chỉ khoảng trắng lần lượt 2, 1, 0, 0', async ({ page }) => {

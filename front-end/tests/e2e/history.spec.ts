@@ -73,7 +73,7 @@ test('HI-S01: Học viên A mở /setting/history/<id bài của học viên B> 
     await expect(page.getByText('170')).toHaveCount(0);
 });
 
-test('HI-E03: Có lượt làm của một đề, admin trả đề về nháp: lượt làm cũ vẫn hiện trong Lịch sử và xem lại được', async ({ page, db, adminApi, freshStudent }) => {
+test('HI-E03: Có lượt làm của một đề, admin lưu trữ đề: lượt làm cũ vẫn hiện trong Lịch sử và xem lại được', async ({ page, db, adminApi, freshStudent }) => {
     const title = `E2E HI-E03 ${crypto.randomUUID().slice(0, 8)}`;
     const exam = await createExam(adminApi, { skill: 'writing', status: 'published', title });
     const user = await freshStudent();
@@ -81,7 +81,7 @@ test('HI-E03: Có lượt làm của một đề, admin trả đề về nháp: 
     await page.goto('/setting/history');
     await expect(rowOf(page, code(id)), 'tiền điều kiện').toBeVisible();
 
-    await must(db.from('exams').update({ status: 'draft', review_note: 'Trả về nháp (E2E)' }).eq('id', exam.id));
+    await must(db.from('exams').update({ status: 'archived' }).eq('id', exam.id));
     await page.reload();
     await expect(rowOf(page, code(id))).toContainText(title);
     await rowOf(page, code(id)).getByRole('link', { name: 'Xem lại chi tiết' }).click();
@@ -95,6 +95,6 @@ test('HI-E04: Mở /setting/history?size=7 thì bỏ qua giá trị lạ, dùng 
         await insertAttempt(db, { user_id: user.id, exam_id: IDS.speaking.published[i % 6], score: 100, started_at: daysAgo(i + 1) });
     }
     await page.goto('/setting/history?size=7');
-    await expect(page.getByLabel('Số dòng mỗi trang')).toHaveText('10 dòng');
+    await expect(page.getByLabel('Số dòng mỗi trang')).toHaveText(/^10 dòng/);
     await expect(rows(page)).toHaveCount(10);
 });

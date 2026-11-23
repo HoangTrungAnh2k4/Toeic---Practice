@@ -133,6 +133,6 @@ test('LB-E04: Mở /speaking?status=abc&page=999 thì bỏ qua giá trị lạ, 
 
     await page.goto('/speaking?status=abc&page=999');
     await waitForCards(page);
-    await expect(page.getByLabel('Lọc theo trạng thái')).toHaveText('Trạng thái: Tất cả');
+    await expect(page.getByLabel('Lọc theo trạng thái')).toHaveText(/^Trạng thái: Tất cả/);
     await expect(page.getByRole('navigation', { name: 'Phân trang' }).locator('[aria-current=page]')).toHaveText('1');
 });

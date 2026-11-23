@@ -10,7 +10,7 @@ import type {
     UserSkillStats,
 } from '@/lib/domain/types';
 import { listExamParts, listQuestions } from './content';
-import { GUEST_USER_ID, listAttempts, listResponses } from './user-data';
+import { GUEST_USER_ID, listAttempts, listResponsesOf } from './user-data';
 
 /** Thống kê điểm của người dùng — logic của các view `user_skill_stats`, `user_part_stats`. */
 export interface UserStats {
@@ -18,16 +18,6 @@ export interface UserStats {
     parts: UserPartStats[];
     /** Điểm các lượt làm cả đề đã chấm, cũ → mới; lượt luyện riêng Part không phản ánh điểm 0-200 của kỹ năng. */
     fullTestScores: { attempt_id: string; skill: Skill; score: number; scored_at: string }[];
-}
-
-/**
- * Phút làm bài của một lượt đã nộp; lượt chưa nộp tính 0.
- * Không vượt quá `ends_at` để lượt bỏ dở rồi quay lại nộp muộn không thổi phồng thời gian học.
- */
-function attemptMinutes(attempt: Attempt) {
-    if (!attempt.submitted_at) return 0;
-    const end = Math.min(Date.parse(attempt.submitted_at), attempt.ends_at ? Date.parse(attempt.ends_at) : Infinity);
-    return Math.max(0, Math.round((end - Date.parse(attempt.started_at)) / 60000));
 }
 
 /** Câu trả lời, Part và câu hỏi của một lượt đã chấm; nạp một lần, dùng cho điểm theo Part. */
@@ -38,17 +28,22 @@ export interface AttemptDetails {
 }
 
 async function loadAttemptDetails(attempts: Attempt[]) {
-    const entries = await Promise.all(
-        attempts.map(async (attempt) => {
-            const [responses, parts, questions] = await Promise.all([
-                listResponses(attempt.id),
-                listExamParts(attempt.exam_id),
-                listQuestions(attempt.exam_id),
-            ]);
-            return [attempt.id, { responses, parts, questions }] as const;
+    // Một lượt tải câu trả lời cho mọi lượt; Part và câu hỏi tải một lần cho mỗi đề
+    const examIds = [...new Set(attempts.map((attempt) => attempt.exam_id))];
+    const [responses, contents] = await Promise.all([
+        listResponsesOf(attempts.map((attempt) => attempt.id)),
+        Promise.all(examIds.map((examId) => Promise.all([listExamParts(examId), listQuestions(examId)]))),
+    ]);
+    const contentOf = new Map(examIds.map((examId, index) => [examId, contents[index]]));
+    return new Map<string, AttemptDetails>(
+        attempts.map((attempt) => {
+            const [parts, questions] = contentOf.get(attempt.exam_id) as [ExamPart[], Question[]];
+            return [
+                attempt.id,
+                { responses: responses.filter((response) => response.attempt_id === attempt.id), parts, questions },
+            ];
         }),
     );
-    return new Map<string, AttemptDetails>(entries);
 }
 
 /** Tổng điểm / điểm tối đa của các câu đã chấm, gom theo Part. */
@@ -96,9 +91,6 @@ export async function loadUserStats(exams: Exam[]): Promise<UserStats> {
             scored_count: scored.filter((attempt) => skillOfAttempt(attempt) === skill).length,
             latest_score: latest?.score ?? null,
             latest_scored_at: latest?.scored_at ?? null,
-            total_minutes: submitted
-                .filter((attempt) => skillOfAttempt(attempt) === skill)
-                .reduce((sum, attempt) => sum + attemptMinutes(attempt), 0),
         };
     };
 

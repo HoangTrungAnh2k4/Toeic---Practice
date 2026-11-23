@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { createExam, createUser, E2E_DOMAIN, must } from './seed';
+import { createExam, createUser, E2E_DOMAIN, must, sessionDb } from './seed';
 import { expect, IDS, STUDENT, test } from './fixtures';
 
 const uniqueEmail = () => `reg-${crypto.randomUUID().slice(0, 10)}@${E2E_DOMAIN}`;
@@ -336,9 +336,8 @@ test('AU-E09: Đặt lại mật khẩu bằng chính mật khẩu cũ báo lỗ
     await fillPassword(page.getByLabel('Mật khẩu mới'), user.password);
     await page.getByRole('button', { name: 'Đặt lại mật khẩu' }).click();
     await expect(page.getByRole('alert').filter({ hasText: /mật khẩu mới phải khác mật khẩu cũ/i })).toBeVisible();
-    // Mật khẩu cũ vẫn đăng nhập được
-    const check = await db.auth.signInWithPassword({ email: user.email, password: user.password });
-    expect(check.error).toBeNull();
+    // Mật khẩu cũ vẫn đăng nhập được; client riêng, không đăng nhập trên `db` (service_role dùng chung cả worker)
+    await expect(sessionDb(user.email, user.password)).resolves.toBeDefined();
 });
 
 test('AU-S06: Học viên mở trang sửa đề và trang tạo đề thấy trang 403, không lộ nội dung đề hay form', async ({

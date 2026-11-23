@@ -67,7 +67,6 @@ async function fillSpeakingExam(page: Page, title: string, skip: string[] = []) 
         );
     await goToPart(page, 2);
     for (const n of [3, 4]) {
-        await fill(question(page, n), 'Yêu cầu', `${n}:prompt`, 'Describe the picture.');
         await question(page, n).locator('input[type=file]').setInputFiles(PNG);
         await expect(question(page, n).getByRole('img', { name: `Ảnh câu ${n}` })).toBeVisible();
         await fill(question(page, n), 'Mô tả ảnh', `${n}:alt`, 'Two people are talking at a desk.');
@@ -244,7 +243,7 @@ test('AD-E04: Mở /exam-management/<id không tồn tại>/edit hiện "Không 
     );
 });
 
-test('AD-C05: Trả một đề Đang khả dụng (đã có lượt làm) về nháp: hộp thoại cảnh báo số lượt làm bị ảnh hưởng', async ({
+test('AD-C05: Đề Đang khả dụng đã có lượt làm không có "Trả về nháp"; Lưu trữ cảnh báo số lượt làm', async ({
     page,
     adminApi,
     db,
@@ -252,11 +251,16 @@ test('AD-C05: Trả một đề Đang khả dụng (đã có lượt làm) về 
     const title = unique('AD-C05');
     const exam = await createExam(adminApi, { skill: 'writing', status: 'published', title });
     const student = await createUser(db);
-    for (const part of [6, 7, 8])
-        await insertAttempt(db, { user_id: student.id, exam_id: exam.id, part_template_id: part, score: 100 });
+    await insertAttempt(db, { user_id: student.id, exam_id: exam.id, part_template_id: 6, score: 100 });
     await openLibrary(page, title);
-    await (await openMenu(page, title)).getByRole('menuitem', { name: 'Trả về nháp' }).click();
-    await expect(page.getByRole('alertdialog').getByText(/3 lượt làm/)).toBeVisible();
+    const menu = await openMenu(page, title);
+    await expect(menu.getByRole('menuitem', { name: 'Trả về nháp' })).toHaveCount(0);
+    // Lưu trữ thì cảnh báo số lượt làm vẫn giữ trong Lịch sử
+    await menu.getByRole('menuitem', { name: 'Lưu trữ' }).click();
+    await expect(page.getByRole('alertdialog').getByText(/1 lượt làm vẫn giữ/)).toBeVisible();
+    // Gọi thẳng API cũng bị chặn
+    const response = await page.request.post(`/api/exams/${exam.id}/status`, { data: { status: 'draft', note: 'E2E' } });
+    expect(response.status()).toBe(409);
 });
 
 test('AD-E05: Writing câu 1: mô tả ảnh 1.000 ký tự hợp lệ; 1.001 ký tự báo lỗi dưới ô', async ({ page }) => {
@@ -316,12 +320,12 @@ test('AD-E07: Bấm lưu khi Part 2 có 2 ô lỗi, Part 4 có 1 ô lỗi: lỗi
     page,
 }) => {
     await page.goto('/exam-management/new');
-    await fillSpeakingExam(page, unique('AD-E07'), ['3:prompt', '4:prompt', 'part4:context']);
+    await fillSpeakingExam(page, unique('AD-E07'), ['3:alt', '4:alt', 'part4:context']);
     await page.getByRole('button', { name: 'Lưu nháp' }).click();
 
     await goToPart(page, 2);
     await expect(page.locator('section[aria-labelledby="part-2-title"]').getByText(/^\d+ lỗi$/)).toHaveText('2 lỗi');
-    for (const n of [3, 4]) await expect(errorUnder(field(question(page, n), 'Yêu cầu'))).toBeVisible();
+    for (const n of [3, 4]) await expect(errorUnder(field(question(page, n), 'Mô tả ảnh'))).toBeVisible();
 
     await goToPart(page, 4);
     const part4 = page.locator('section[aria-labelledby="part-4-title"]');
@@ -329,7 +333,7 @@ test('AD-E07: Bấm lưu khi Part 2 có 2 ô lỗi, Part 4 có 1 ô lỗi: lỗi
     await expect(errorUnder(field(part4, 'Bảng thông tin'))).toBeVisible();
 });
 
-test('AD-E08: Xoá đề đã có lượt làm: API trả 409, UI báo rõ đề đã có lượt làm nên không thể xoá, đề vẫn còn', async ({
+test('AD-E08: Đề đã có lượt làm: nút xóa bị khóa kèm lý do, API xóa trả 409, đề vẫn còn', async ({
     page,
     adminApi,
     db,
@@ -339,14 +343,10 @@ test('AD-E08: Xoá đề đã có lượt làm: API trả 409, UI báo rõ đề
     const student = await createUser(db);
     await insertAttempt(db, { user_id: student.id, exam_id: exam.id, part_template_id: 6, score: 100 });
     await openLibrary(page, title);
-    await page.getByRole('button', { name: `Xóa ${title}` }).click();
-    const deleted = page.waitForResponse(
-        (response) => response.url().includes(`/api/exams/${exam.id}`) && response.request().method() === 'DELETE',
-    );
-    await page.getByRole('alertdialog').getByRole('button', { name: 'Xóa đề thi' }).click();
-    expect((await deleted).status()).toBe(409);
-    const notice = page.getByRole('status').filter({ hasText: /lượt (thi|làm)/ });
-    await expect(notice).toContainText(/không thể (xóa|xoá)/i);
+    const remove = page.getByRole('button', { name: `Xóa ${title}` });
+    await expect(remove).toBeDisabled();
+    await expect(remove).toHaveAttribute('title', /không xóa được/);
+    expect((await page.request.delete(`/api/exams/${exam.id}`)).status()).toBe(409);
     await expect(examRow(page, title)).toBeVisible();
     expect(await must(db.from('exams').select('id').eq('id', exam.id))).toHaveLength(1);
 });

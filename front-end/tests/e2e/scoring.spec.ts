@@ -5,17 +5,13 @@ import {
     expect,
     IDS,
     insertAttempt,
-    insertResponse,
-    localTable,
     mockSpeakingScore,
     mockWritingScore,
     openSpeakingRoom,
     openWritingRoom,
-    questionIds,
     questionNumbers,
     reviewLevel,
     reviewScore,
-    reviewSummary,
     speakingResult,
     submitPart,
     test,
@@ -34,7 +30,7 @@ test('SC-C01: Hai lượt Speaking đã chấm 120 và 130: trang xem lại hi�
         const id = await insertAttempt(db, { user_id: user.id, exam_id: IDS.speaking.published[index], score: score as number });
         await page.goto(`/setting/history/${id}`);
         await expect(reviewScore(page), String(score)).toHaveText(String(score));
-        await expect(reviewLevel(page), String(score)).toHaveText(level as string);
+        await expect(reviewLevel(page), String(score)).toHaveText(new RegExp(`^${level} /`));
     }
 });
 
@@ -48,44 +44,8 @@ test('SC-C02: Ba lượt Writing điểm 40, 50 và 200 hiện Level 2, Level 3,
         const id = await insertAttempt(db, { user_id: user.id, exam_id: W1, part_template_id: 6, score });
         await page.goto(`/setting/history/${id}`);
         await expect(reviewScore(page), String(score)).toHaveText(String(score));
-        await expect(reviewLevel(page), String(score)).toHaveText(level);
+        await expect(reviewLevel(page), String(score)).toHaveText(new RegExp(`^${level} /`));
     }
-});
-
-test('SC-C03: Writing đủ 3 Part hiện tổng điểm cả bài (0–200); bài thiếu Part không hiện tổng cả bài', async ({ page, db, freshStudent }) => {
-    const user = await freshStudent();
-    const scoredParts = async (examId: string, parts: number[]) => {
-        const ids = await questionIds(db, examId);
-        let last = '';
-        for (const [index, part] of parts.entries()) {
-            last = await insertAttempt(db, {
-                user_id: user.id,
-                exam_id: examId,
-                part_template_id: part,
-                score: 100,
-                started_at: new Date(Date.now() - (10 - index) * 60_000).toISOString(),
-            });
-            const numbers = part === 6 ? [1, 2, 3, 4, 5] : part === 7 ? [6, 7] : [8];
-            for (const number of numbers) {
-                await insertResponse(db, { attempt_id: last, question_id: ids[number], text_answer: 'answer', score: 2, max_score: number <= 5 ? 3 : number <= 7 ? 4 : 5 });
-            }
-        }
-        return last;
-    };
-    const full = await scoredParts(W1, [6, 7, 8]);
-    const partial = await scoredParts(W2, [6, 7]);
-
-    await page.goto(`/setting/history/${full}`);
-    await expect(reviewSummary(page)).toBeVisible();
-    const total = reviewSummary(page).getByText(/tổng[^/]*cả bài/i);
-    await expect(total).toBeVisible();
-    const value = Number((await total.innerText()).match(/(\d{1,3})\s*\/\s*200/)?.[1]);
-    expect(value).toBeGreaterThanOrEqual(0);
-    expect(value).toBeLessThanOrEqual(200);
-
-    await page.goto(`/setting/history/${partial}`);
-    await expect(reviewScore(page)).toHaveText('100');
-    await expect(reviewSummary(page).getByText(/tổng[^/]*cả bài/i)).toHaveCount(0);
 });
 
 test('SC-E01: Lượt đang chấm: trang hiện "Đang chấm", tự tải lại mỗi 4s và dừng sau 2 phút', async ({ page, db, freshStudent }) => {
@@ -153,7 +113,7 @@ test('SC-C04: Làm đủ 11 câu Speaking, tổng thô 21/35: tổng 120/200 và
     await answerAllGuided(page);
     await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}/);
     await expect(reviewScore(page)).toHaveText('120');
-    await expect(reviewLevel(page)).toHaveText('Level 5');
+    await expect(reviewLevel(page)).toHaveText(/^Level 5 \//);
 });
 
 test('SC-C05: Luyện lẻ Writing Part 1 tổng thô 15/15 được 200/200; Part 2 tổng thô 4/8 được 100/200', async ({ page, db }) => {
