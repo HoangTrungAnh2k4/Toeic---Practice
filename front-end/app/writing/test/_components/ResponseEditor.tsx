@@ -3,6 +3,7 @@
 import { KeyboardEvent } from 'react';
 import { LuCircleCheck, LuTriangleAlert } from 'react-icons/lu';
 import { Textarea } from '@/components/ui/textarea';
+import { MAX_ANSWER_CHARS } from '@/lib/domain/writing-text';
 import { cn } from '@/lib/utils';
 import { useTextHistory } from '../_lib/useTextHistory';
 import { countSentences, countWords, ESSAY_MIN_WORDS, OPTIMAL_WORD_RANGE } from '../utils';
@@ -55,6 +56,7 @@ export default function ResponseEditor({ partNo, questionNumber, value, onChange
                     onKeyDown={handleKeyDown}
                     readOnly={isLocked}
                     aria-readonly={isLocked}
+                    maxLength={MAX_ANSWER_CHARS}
                     autoCapitalize="none"
                     autoComplete="off"
                     placeholder="Nhập câu trả lời của bạn tại đây..."

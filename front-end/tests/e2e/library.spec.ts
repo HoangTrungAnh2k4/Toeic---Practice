@@ -24,6 +24,30 @@ test('LB-C01: Seed 3 đề Speaking draft/review/published, mở /speaking chỉ
     await expect(page.getByText('E2E Speaking Chờ duyệt')).toHaveCount(0);
 });
 
+test('LB-C02: Lượt Speaking CBT bị gián đoạn sau 3 câu đã chấm: thẻ đề hiện "Tiếp tục làm bài" theo đúng chế độ và tiến độ 3/11', async ({
+    page,
+    db,
+    freshStudent,
+}) => {
+    const user = await freshStudent();
+    const exam = IDS.speaking.published[5];
+    const ids = await questionIds(db, exam);
+    const attemptId = await insertAttempt(db, { user_id: user.id, exam_id: exam, status: 'interrupted', mode: 'cbt' });
+    for (const number of [1, 2, 3]) {
+        await insertResponse(db, { attempt_id: attemptId, question_id: ids[number], score: 2, max_score: 3, feedback: 'ok' });
+    }
+
+    await page.goto('/speaking');
+    await waitForCards(page);
+    const resume = card(page, 'E2E Speaking 6').getByRole('link', { name: 'Tiếp tục làm bài' });
+    await expect(resume).toHaveAttribute('href', `/speaking/test?id=${exam}&mode=cbt`);
+    await expect(card(page, 'E2E Speaking 6')).toContainText('Đang làm 3/11');
+    await expect(card(page, 'E2E Speaking 6').getByRole('link', { name: 'Có hướng dẫn' })).toHaveCount(0);
+
+    await page.goto('/setting/history');
+    await expect(page.getByText('Đã lưu 3/11 câu')).toBeVisible();
+});
+
 test('LB-E03: Tìm một mã đề không tồn tại hiện trạng thái rỗng, không lỗi', async ({ page }) => {
     await page.goto('/speaking');
     await waitForCards(page);

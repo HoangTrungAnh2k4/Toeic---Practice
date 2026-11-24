@@ -25,7 +25,7 @@ export type SubmitResult = 'ok' | 'limit' | 'error';
  * ngay khi chốt (chạy nền, audio chỉ nằm trên RAM). Nộp bài: chờ các câu đang chấm, thử lại câu lỗi rồi tính tổng điểm.
  * Rời phòng khi câu chưa chấm xong thì mất audio câu đó, lần vào sau làm lại từ câu đó.
  */
-export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions: ScoredQuestion[]) {
+export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions: ScoredQuestion[], preview: boolean) {
     const [attempt, setAttempt] = useState<Attempt | null>(null);
     /** Câu đã được chấm ở lần vào phòng trước. */
     const [answeredIds, setAnsweredIds] = useState<ReadonlySet<string>>(new Set());
@@ -38,7 +38,7 @@ export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions:
 
     useEffect(() => {
         let cancelled = false;
-        resumeOrStartAttempt({ exam_id: examId, part_template_id: null, mode, duration_sec: null })
+        resumeOrStartAttempt({ exam_id: examId, part_template_id: null, mode, duration_sec: null, preview })
             .then((result) => {
                 if (cancelled) return;
                 setAttempt(result.attempt);
@@ -49,7 +49,7 @@ export function useSpeakingAttempt(examId: string, mode: AttemptMode, questions:
         return () => {
             cancelled = true;
         };
-    }, [examId, mode, loadCount]);
+    }, [examId, mode, preview, loadCount]);
 
     const retryLoad = useCallback(() => {
         setLoadError(false);

@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { LuBookmark, LuBookmarkCheck } from 'react-icons/lu';
 import { buildHistoryHref, DEFAULT_HISTORY_QUERY } from '@/app/setting/history/_lib/searchParams';
 import { buttonVariants } from '@/components/ui/button';
+import { GUEST_USER_ID } from '@/lib/data/user-data';
 import type { Skill } from '@/lib/domain/types';
 import { buildTestHref } from '@/lib/exam-library/search-params';
 import type { LibraryEntry } from '@/lib/exam-library/types';
@@ -71,7 +72,10 @@ function ScoreCell({ entry }: Pick<ExamCardProps, 'entry'>) {
 
     if (user.progress === 'in_progress') {
         const endsAt = user.inProgress?.ends_at;
-        if (!endsAt) return <span className="text-subText text-sm">Lưu trên máy này</span>;
+        if (!endsAt) {
+            const isLocal = user.inProgress?.user_id === GUEST_USER_ID;
+            return <span className="text-subText text-sm">{isLocal ? 'Lưu trên máy này' : 'Lưu trên tài khoản'}</span>;
+        }
         const remaining = formatRemaining(endsAt);
         return (
             <span className="text-subText text-sm">

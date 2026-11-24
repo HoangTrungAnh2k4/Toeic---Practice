@@ -57,6 +57,30 @@ test('HI-X01: Mở /setting/history/<id không tồn tại> hiện thông báo k
     await expect(page.getByText(/không tìm thấy lượt làm/i)).toBeVisible();
 });
 
+test('HI-X02: Khách còn lượt cũ chế độ "timed" (đã bỏ) trong máy: trang lịch sử vẫn mở, lượt hiện là Thi thử chuẩn (CBT)', async ({ page }) => {
+    const at = new Date().toISOString();
+    const attempt = {
+        id: crypto.randomUUID(),
+        user_id: 'guest',
+        exam_id: IDS.writing.published[0],
+        part_template_id: 6,
+        mode: 'timed',
+        status: 'scored',
+        sample_viewed: false,
+        started_at: at,
+        ends_at: at,
+        submitted_at: at,
+        scored_at: at,
+        score: 150,
+        feedback_summary: null,
+        scoring_error: null,
+        scoring_started_at: null,
+    };
+    await page.addInitScript((row) => localStorage.setItem('toeco:v1:attempts', JSON.stringify([row])), attempt);
+    await page.goto('/setting/history');
+    await expect(rowOf(page, 'E2E Writing 1')).toContainText('Thi thử chuẩn (CBT)');
+});
+
 test('HI-S01: Học viên A mở /setting/history/<id bài của học viên B> không thấy bất kỳ nội dung nào trong bài của B', async ({ page, db, freshStudent }) => {
     const studentB = await createUser(db);
     const exam = IDS.speaking.published[2];

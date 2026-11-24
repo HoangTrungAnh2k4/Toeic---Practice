@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
-import { createExam, must } from './seed';
+import { createClient } from '@supabase/supabase-js';
+import { createExam, env, must } from './seed';
 import {
     ADMIN,
     answerPart,
@@ -14,6 +15,7 @@ import {
     openWritingRoom,
     questionIds,
     questionNumbers,
+    reviewScore,
     STUDENT,
     submitButton,
     submitPart,
@@ -175,6 +177,29 @@ test('WR-H02: mode=guided không có giới hạn thời gian', async ({ page })
     await expect(page.getByText(/Đã hết giờ/)).toHaveCount(0);
 });
 
+test('WR-C05: Lượt CBT đang dở mở lại qua link guided vẫn là CBT: hết giờ Part 1 thì tự nộp sang Part 2', async ({ page }) => {
+    await page.clock.install();
+    await openWritingRoom(page, W2);
+    await openWritingRoom(page, W2, { mode: 'guided' });
+    await expect(page.getByText('Thi thử chuẩn (CBT)')).toBeVisible();
+    await page.clock.fastForward('09:00');
+    await expect(submitButton(page, 'Câu 6–7')).toBeVisible();
+});
+
+test('WR-X05: DB không nhận câu trả lời dài quá 8000 ký tự của học viên', async ({ db, freshStudent }) => {
+    const user = await freshStudent();
+    const client = createClient(env('NEXT_PUBLIC_SUPABASE_URL'), env('NEXT_PUBLIC_SUPABASE_ANON_KEY'), {
+        auth: { persistSession: false },
+    });
+    const { error: loginError } = await client.auth.signInWithPassword({ email: user.email, password: user.password });
+    expect(loginError).toBeNull();
+    const [attempt] = await must(client.from('attempts').insert({ exam_id: W1, part_template_id: null, mode: 'guided' }).select('id'));
+    const ids = await questionIds(db, W1);
+    const save = (text: string) => client.from('responses').insert({ attempt_id: attempt.id, question_id: ids[8], text_answer: text });
+    expect((await save('a'.repeat(8001))).error?.code).toBe('23514');
+    expect((await save('a'.repeat(8000))).error).toBeNull();
+});
+
 test('WR-E02: Bộ đếm từ với "Hello,  world!", "e-mail", chuỗi rỗng, chỉ khoảng trắng lần lượt 2, 1, 0, 0', async ({ page }) => {
     await openWritingRoom(page, W2);
     const count = page.locator('span', { hasText: /^Số từ:/ }).locator('strong');
@@ -232,12 +257,42 @@ test('WR-X02: Chấm cả đề có câu 5 lỗi: trang xem bài báo lỗi và 
 });
 
 test('WR-C04: Admin xem trước một đề Writing draft không tạo lượt làm thật trong lịch sử', async ({ page, loginAs, adminApi, db }) => {
-    test.fail(true, 'BUG-03: xem trước đề Writing nháp tạo lượt làm thật trong lịch sử của admin');
     const exam = await createExam(adminApi, { skill: 'writing', status: 'draft', title: `E2E WR-C04 ${crypto.randomUUID().slice(0, 8)}` });
     await loginAs(ADMIN);
     await openWritingRoom(page, exam.id);
     await editor(page).fill('Preview text.');
     await page.waitForTimeout(1500);
+    expect(await must(db.from('attempts').select('id').eq('exam_id', exam.id))).toEqual([]);
+});
+
+test('WR-C06: Admin xem trước Part 3 của đề Writing draft, nộp bài: trang kết quả hiện điểm và lỗi AI đánh dấu', async ({ page, loginAs, adminApi, db }) => {
+    const exam = await createExam(adminApi, { skill: 'writing', status: 'draft', title: `E2E WR-C06 ${crypto.randomUUID().slice(0, 8)}` });
+    const answer = 'A man goes to the office every day.';
+    await mockWritingScore(page, (body) => ({
+        status: 200,
+        body: {
+            outcomes: (body.answers ?? []).map(({ questionId }) => ({
+                questionId,
+                result: {
+                    score: 4,
+                    max_score: 5,
+                    feedback: 'Mock 4/5',
+                    metrics: { words: 8 },
+                    scoring_model: 'e2e-mock',
+                    annotations: [
+                        { quote: 'goes', correction: 'walks', explanation: 'Dùng động từ cụ thể hơn.', criterion: 'vocabulary', severity: 'low', start_offset: 6, end_offset: 10 },
+                    ],
+                },
+            })),
+        },
+    }));
+    await loginAs(ADMIN);
+    await openWritingRoom(page, exam.id, { part: 8 });
+    await editor(page).fill(answer);
+    await submitPart(page);
+    await expect(page).toHaveURL(/\/setting\/history\/[0-9a-f-]{36}$/);
+    await expect(reviewScore(page)).toHaveText('160');
+    await expect(page.locator('mark', { hasText: 'goes' })).toBeVisible();
     expect(await must(db.from('attempts').select('id').eq('exam_id', exam.id))).toEqual([]);
 });
 

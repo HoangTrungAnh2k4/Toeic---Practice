@@ -3,14 +3,9 @@
 import { Fragment } from 'react';
 import { LuAudioLines, LuCheck, LuLock, LuLogOut, LuMic, LuShieldCheck } from 'react-icons/lu';
 import type { AttemptMode } from '@/lib/domain/types';
+import { MODE_LABEL } from '@/app/setting/history/utils';
 import type { SpeakingPhase } from '../types';
 import { formatTime } from '../utils';
-
-const MODE_LABEL: Record<AttemptMode, string> = {
-    cbt: 'Thi thử chuẩn',
-    timed: 'Luyện có thời gian',
-    guided: 'Học có hướng dẫn',
-};
 
 interface ExamHeaderProps {
     title: string;

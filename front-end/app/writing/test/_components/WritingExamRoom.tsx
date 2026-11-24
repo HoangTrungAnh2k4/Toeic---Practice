@@ -6,6 +6,7 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { LuRotateCw, LuTriangleAlert } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
+import { isPreview } from '@/lib/exam-library/room';
 import { getPartDurationSec } from '@/lib/domain/parts';
 import type { RoomPart } from '@/lib/exam-library/room';
 import { getAttemptHref } from '@/app/setting/history/utils';
@@ -54,6 +55,7 @@ export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: W
         durationSec: partTemplateId === null ? null : getPartDurationSec(parts[0].template),
         questions: parts.flatMap((item) => item.questions),
         partCount: parts.length,
+        preview: isPreview(exam),
     });
     const part = parts[partIndex];
     const { template, questions } = part;
@@ -98,10 +100,12 @@ export default function WritingExamRoom({ exam, parts, partTemplateId, mode }: W
         void handleSubmit();
     });
 
-    // CBT như phòng thi thật: hết giờ Part thì tự nộp; nộp lỗi thì người làm bấm nộp lại bằng tay
+    // CBT như phòng thi thật: hết giờ Part thì tự nộp; nộp lỗi thì người làm bấm nộp lại bằng tay.
+    // Theo chế độ của lượt làm (lượt dở mở lại giữ chế độ cũ), không theo link vừa bấm
+    const attemptMode = attempt?.mode;
     useEffect(() => {
-        if (mode === 'cbt' && isPartTimeUp) autoSubmit();
-    }, [mode, isPartTimeUp]);
+        if (attemptMode === 'cbt' && isPartTimeUp) autoSubmit();
+    }, [attemptMode, isPartTimeUp]);
 
     if (loadError) {
         return (

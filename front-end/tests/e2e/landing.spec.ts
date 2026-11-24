@@ -15,7 +15,6 @@ test('LD-E01: FAQ mở câu 1, sau đó mở câu 2 thì chỉ câu 2 đang mở
 
 
 test('LD-C01: Câu FAQ về cách đăng nhập mô tả đăng nhập bằng email + mật khẩu, khớp luồng ở AU', async ({ page }) => {
-    test.fail(true, 'BUG-01: FAQ ghi đăng nhập bằng Google hoặc email + OTP, không cần mật khẩu');
     await page.goto('/');
     const item = page.locator('#faq details').filter({ hasText: 'hình thức đăng nhập' });
     await item.locator('summary').click();

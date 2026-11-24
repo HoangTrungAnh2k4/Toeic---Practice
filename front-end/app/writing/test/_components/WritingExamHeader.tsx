@@ -1,5 +1,6 @@
 import { LuCheck, LuCloudAlert, LuLoaderCircle, LuLock, LuLogOut, LuPenLine, LuTimer } from 'react-icons/lu';
 import type { AttemptMode, PartTemplate } from '@/lib/domain/types';
+import { MODE_LABEL } from '@/app/setting/history/utils';
 import { cn } from '@/lib/utils';
 import { SaveStatus } from '../types';
 import { EXAM_SECTIONS, formatTime, TIME_WARNING_SECONDS } from '../utils';
@@ -17,12 +18,6 @@ interface WritingExamHeaderProps {
     isRestored: boolean;
     onExit: () => void;
 }
-
-const MODE_LABEL: Record<AttemptMode, string> = {
-    cbt: 'Thi thử chuẩn CBT',
-    timed: 'Luyện có thời gian',
-    guided: 'Học có hướng dẫn',
-};
 
 function SaveIndicator({ saveStatus, savedAt, isRestored }: Pick<WritingExamHeaderProps, 'saveStatus' | 'savedAt' | 'isRestored'>) {
     if (saveStatus === 'saving') {

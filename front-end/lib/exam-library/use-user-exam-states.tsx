@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { listAttempts, listBookmarkedExamIds, listResponses, toggleBookmark } from '@/lib/data/user-data';
-import { buildUserStates, withBookmark } from './entries';
+import { isAnswered, listAttempts, listBookmarkedExamIds, listResponses, toggleBookmark } from '@/lib/data/user-data';
+import { buildUserStates, isOpenAttempt, withBookmark } from './entries';
 import type { UserExamState } from './types';
 
 async function loadStates(examIds: Set<string>) {
@@ -11,15 +11,10 @@ async function loadStates(examIds: Set<string>) {
     const answered = new Map<string, number>();
 
     await Promise.all(
-        own
-            .filter((attempt) => attempt.status === 'in_progress')
-            .map(async (attempt) => {
-                const responses = await listResponses(attempt.id);
-                answered.set(
-                    attempt.id,
-                    responses.filter((response) => response.text_answer?.trim() || response.audio_path).length,
-                );
-            }),
+        own.filter(isOpenAttempt).map(async (attempt) => {
+            const responses = await listResponses(attempt.id);
+            answered.set(attempt.id, responses.filter(isAnswered).length);
+        }),
     );
     return buildUserStates(own, bookmarkedIds, answered);
 }

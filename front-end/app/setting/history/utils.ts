@@ -19,9 +19,9 @@ export const SKILL_OPTIONS: Option<SkillType>[] = [
     { value: 'writing', label: 'Writing' },
 ];
 
+/** Tên chế độ thi, dùng chung cho lịch sử và header phòng thi. */
 export const MODE_LABEL: Record<AttemptMode, string> = {
     cbt: 'Thi thử chuẩn (CBT)',
-    timed: 'Luyện có thời gian',
     guided: 'Học có hướng dẫn',
 };
 

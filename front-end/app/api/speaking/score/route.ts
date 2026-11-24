@@ -17,7 +17,8 @@ const fail = (error: string, status: number) => NextResponse.json({ error }, { s
 
 /**
  * Chấm một câu Speaking. Audio chỉ nằm trong RAM của request rồi bỏ.
- * Người đăng nhập: ghi điểm vào `responses` (service_role). Khách: chỉ trả kết quả, client lưu localStorage.
+ * Lượt trên DB của người đăng nhập: ghi điểm vào `responses` (service_role). Lượt lưu trên máy (`local=1`, khách):
+ * chỉ trả kết quả, client lưu localStorage. Hạn mức vẫn tính theo người đăng nhập nếu có.
  */
 export async function POST(request: Request) {
     const form = await request.formData().catch(() => null);
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
     const supabase = await createServerSupabase();
     const { data: auth } = await supabase.auth.getClaims();
     const userId = auth?.claims.sub ?? null;
+    // Lượt lưu trên máy (khách, admin xem trước đề nháp, lượt khách khi vừa đăng nhập ở tab khác): chỉ chấm, không ghi DB
+    const saveToDb = userId !== null && form?.get('local') !== '1';
 
     // Client mang phiên: RLS chỉ trả câu của đề đã phát hành (hoặc đề nháp với admin)
     const { data: question, error: questionError } = await supabase
@@ -42,7 +45,7 @@ export async function POST(request: Request) {
     const template = PART_TEMPLATES.find((item) => item.id === question?.exam_parts.part_template_id);
     if (!question || template?.skill !== 'speaking') return fail('question_not_found', 404);
 
-    if (userId) {
+    if (saveToDb) {
         const { data: attempt, error } = await supabase
             .from('attempts')
             .select('id')
@@ -86,7 +89,7 @@ export async function POST(request: Request) {
         return refund('scoring_failed', 502);
     }
 
-    if (userId) {
+    if (saveToDb) {
         const { error } = await createAdminSupabase()
             .from('responses')
             .upsert(

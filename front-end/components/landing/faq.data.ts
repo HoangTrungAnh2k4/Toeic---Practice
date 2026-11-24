@@ -5,7 +5,7 @@ export const FAQS = [
   },
   {
     q: 'Toeco hỗ trợ những hình thức đăng nhập nào?',
-    a: 'Bạn có thể đăng nhập trong 5 giây bằng tài khoản Google hoặc bằng Email thông qua mã xác thực OTP một lần (không cần nhớ mật khẩu).',
+    a: 'Bạn có thể đăng nhập bằng tài khoản Google, hoặc bằng email và mật khẩu đã đăng ký.',
   },
   {
     q: 'Giới hạn chấm bài Speaking bằng AI mỗi ngày là bao nhiêu?',

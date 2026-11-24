@@ -286,7 +286,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "attempt_mode": "cbt"|"timed"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support"|"fluency"|"task_response","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published"|"archived","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
+            "attempt_mode": "cbt"|"guided","attempt_status": "in_progress"|"submitted"|"scoring"|"scored"|"interrupted","criterion": "pronunciation"|"intonation"|"grammar"|"vocabulary"|"cohesion"|"relevance"|"completeness"|"organization"|"support"|"fluency"|"task_response","exam_source": "ets"|"internal","exam_status": "draft"|"review"|"published"|"archived","severity": "high"|"medium"|"low","skill": "speaking"|"writing","user_role": "student"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -406,7 +406,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "attempt_mode": ["cbt", "timed", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support", "fluency", "task_response"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published", "archived"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
+            "attempt_mode": ["cbt", "guided"],"attempt_status": ["in_progress", "submitted", "scoring", "scored", "interrupted"],"criterion": ["pronunciation", "intonation", "grammar", "vocabulary", "cohesion", "relevance", "completeness", "organization", "support", "fluency", "task_response"],"exam_source": ["ets", "internal"],"exam_status": ["draft", "review", "published", "archived"],"severity": ["high", "medium", "low"],"skill": ["speaking", "writing"],"user_role": ["student", "admin"]
           }
         }
 } as const

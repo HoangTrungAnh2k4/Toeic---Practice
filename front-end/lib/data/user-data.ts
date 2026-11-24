@@ -15,6 +15,7 @@ import {
 } from '@/lib/scoring/scale';
 import type { WritingOutcome } from '@/lib/scoring/writing';
 import { supabase } from '@/lib/supabase';
+import { MAX_ANSWER_CHARS } from '@/lib/domain/writing-text';
 import { readTable, writeTable } from './local-store';
 
 /**
@@ -23,6 +24,8 @@ import { readTable, writeTable } from './local-store';
  * Đăng nhập/đăng ký không chuyển dữ liệu khách sang tài khoản (chốt ở E1-5). Hàm đều async để giữ nguyên signature khi đổi nguồn.
  */
 export const GUEST_USER_ID = 'guest';
+/** `user_id` của lượt admin xem trước đề chưa phát hành: lưu trên máy nhưng không phải dữ liệu của khách. */
+export const PREVIEW_USER_ID = 'preview';
 
 const ATTEMPTS = 'attempts';
 const RESPONSES = 'responses';
@@ -55,27 +58,47 @@ async function sessionUserId(): Promise<string | null> {
  * người dùng đăng nhập ở tab khác giữa chừng — không thì lượt lưu kế tiếp gửi id cục bộ lên Supabase và lỗi.
  */
 async function isRemoteAttempt(attemptId: string): Promise<boolean> {
-    if (readTable<Attempt>(ATTEMPTS).some((attempt) => attempt.id === attemptId)) return false;
+    if (readLocalAttempts().some((attempt) => attempt.id === attemptId)) return false;
     return (await sessionUserId()) !== null;
 }
 
+/** Lượt lưu trên máy; lượt khách cũ còn chế độ `timed` (đã bỏ ở migration 20261126000000) đọc thành `cbt`. */
+const readLocalAttempts = () =>
+    readTable<Attempt>(ATTEMPTS).map((attempt) =>
+        (attempt.mode as string) === 'timed' ? { ...attempt, mode: 'cbt' as const } : attempt,
+    );
+
+/** Lượt trên máy của khách (`preview = false`) hoặc lượt admin xem trước (`preview = true`), mới nhất trước. */
+const listLocalAttempts = (examId?: string, preview = false) =>
+    readLocalAttempts()
+        .filter((attempt) => (attempt.user_id === PREVIEW_USER_ID) === preview && (!examId || attempt.exam_id === examId))
+        .sort((a, b) => b.started_at.localeCompare(a.started_at));
+
+/** `max_rows` của PostgREST (supabase/config.toml): một request trả tối đa chừng này dòng, quá thì bị cắt im lặng. */
+const MAX_ROWS = 1000;
+
 /** Lượt làm của người dùng, mới nhất trước; truyền `examId` để chỉ lấy lượt của một đề. */
 export async function listAttempts(examId?: string): Promise<Attempt[]> {
-    if (!(await sessionUserId())) {
-        return readTable<Attempt>(ATTEMPTS)
-            .filter((attempt) => !examId || attempt.exam_id === examId)
-            .sort((a, b) => b.started_at.localeCompare(a.started_at));
+    if (!(await sessionUserId())) return listLocalAttempts(examId);
+
+    // RLS chỉ trả attempt của chính mình; đọc theo trang vì quá MAX_ROWS thì PostgREST cắt bớt.
+    // Map theo id: lượt mới chen vào giữa hai trang làm offset lệch một dòng, lượt đó không bị lặp
+    const attempts = new Map<string, Attempt>();
+    for (let from = 0; ; from += MAX_ROWS) {
+        let query = supabase.from('attempts').select('*');
+        if (examId) query = query.eq('exam_id', examId);
+        const { data, error } = await query
+            .order('started_at', { ascending: false })
+            .order('id')
+            .range(from, from + MAX_ROWS - 1);
+        if (error) throw error;
+        for (const attempt of data) attempts.set(attempt.id, attempt);
+        if (data.length < MAX_ROWS) return [...attempts.values()];
     }
-    // RLS chỉ trả attempt của chính mình
-    let query = supabase.from('attempts').select('*');
-    if (examId) query = query.eq('exam_id', examId);
-    const { data, error } = await query.order('started_at', { ascending: false });
-    if (error) throw error;
-    return data;
 }
 
 export async function getAttempt(id: string): Promise<Attempt | null> {
-    if (!(await isRemoteAttempt(id))) return readTable<Attempt>(ATTEMPTS).find((attempt) => attempt.id === id) ?? null;
+    if (!(await isRemoteAttempt(id))) return readLocalAttempts().find((attempt) => attempt.id === id) ?? null;
 
     const { data, error } = await supabase.from('attempts').select('*').eq('id', id).maybeSingle();
     // 22P02: id trên URL không phải uuid → coi như không tồn tại thay vì lỗi tải
@@ -88,12 +111,17 @@ export interface StartAttemptInput {
     exam_id: string;
     part_template_id: number | null;
     mode: AttemptMode;
-    /** Thời lượng làm bài; bỏ trống khi không giới hạn giờ (chế độ có hướng dẫn). Chỉ dùng cho khách: DB tự tính `ends_at`. */
+    /** Thời lượng làm bài; bỏ trống khi không giới hạn giờ (chế độ có hướng dẫn). Chỉ dùng cho lượt lưu trên máy: DB tự tính `ends_at`. */
     duration_sec: number | null;
+    /**
+     * Admin xem trước đề chưa phát hành: lượt làm chỉ lưu trên máy như khách. Lượt trên DB sẽ khoá đề (không sửa nội
+     * dung, không xoá, không trả về nháp được nữa).
+     */
+    preview?: boolean;
 }
 
-export async function startAttempt({ exam_id, part_template_id, mode, duration_sec }: StartAttemptInput) {
-    if (await sessionUserId()) {
+export async function startAttempt({ exam_id, part_template_id, mode, duration_sec, preview = false }: StartAttemptInput) {
+    if (!preview && (await sessionUserId())) {
         // id, user_id, ends_at do DB sinh (client không có quyền ghi các cột này)
         const { data, error } = await supabase
             .from('attempts')
@@ -107,7 +135,7 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
     const startedAt = new Date();
     const attempt: Attempt = {
         id: crypto.randomUUID(),
-        user_id: GUEST_USER_ID,
+        user_id: preview ? PREVIEW_USER_ID : GUEST_USER_ID,
         exam_id,
         part_template_id,
         mode,
@@ -122,7 +150,7 @@ export async function startAttempt({ exam_id, part_template_id, mode, duration_s
         scoring_error: null,
         scoring_started_at: null,
     };
-    writeTable(ATTEMPTS, [...readTable<Attempt>(ATTEMPTS), attempt]);
+    writeTable(ATTEMPTS, [...readLocalAttempts(), attempt]);
     return attempt;
 }
 
@@ -135,9 +163,8 @@ async function resumeOrStart(input: StartAttemptInput, retried = false): Promise
     responses: AttemptResponse[];
     isRestored: boolean;
 }> {
-    const open = (await listAttempts(input.exam_id)).filter(
-        (attempt) => attempt.part_template_id === input.part_template_id,
-    );
+    const attempts = input.preview ? listLocalAttempts(input.exam_id, true) : await listAttempts(input.exam_id);
+    const open = attempts.filter((attempt) => attempt.part_template_id === input.part_template_id);
     // Lượt `in_progress` trước: DB chỉ cho một lượt đang làm mỗi đề & Part, mở lại lượt `interrupted` khi đã có thì trùng
     const existing =
         open.find((attempt) => attempt.status === 'in_progress') ??
@@ -183,7 +210,7 @@ export async function updateAttempt(id: string, patch: AttemptPatch): Promise<At
 
 /** Khách: mọi cột của attempt (kể cả điểm) đều ghi vào localStorage. */
 function patchLocalAttempt(id: string, patch: Partial<Attempt>): Attempt {
-    const rows = readTable<Attempt>(ATTEMPTS);
+    const rows = readLocalAttempts();
     const index = rows.findIndex((attempt) => attempt.id === id);
     if (index === -1) throw new Error(`Không tìm thấy bài làm ${id}.`);
 
@@ -203,8 +230,8 @@ export async function listResponses(attemptId: string): Promise<AttemptResponse[
     return data as AttemptResponse[];
 }
 
-/** Id mỗi lượt `.in()` gọn trong URL (~3,7 KB). */
-const IN_CHUNK = 100;
+/** Số lượt mỗi request: lượt Speaking cả đề có 11 câu → 90 × 11 = 990 dòng, dưới `MAX_ROWS` nên không bị cắt. */
+const IN_CHUNK = 90;
 
 /** Câu trả lời của nhiều lượt trong ít request nhất (theo lô `IN_CHUNK`), cho thống kê. */
 export async function listResponsesOf(attemptIds: string[]): Promise<AttemptResponse[]> {
@@ -223,6 +250,10 @@ export async function listResponsesOf(attemptIds: string[]): Promise<AttemptResp
         return data as AttemptResponse[];
     });
 }
+
+/** Câu đã trả lời: Writing có chữ, Speaking không lưu audio nên chỉ có dòng khi đã chấm (có điểm). */
+export const isAnswered = (response: AttemptResponse) =>
+    Boolean(response.text_answer?.trim() || response.audio_path || response.score !== null);
 
 /** Chỉ các cột client được phép ghi (grant trên `responses`); điểm, transcript do khâu chấm ghi. */
 export type ResponsePatch = Partial<Pick<AttemptResponse, 'text_answer' | 'audio_path'>>;
@@ -280,10 +311,13 @@ type AnswerScore = Pick<
  * Người đăng nhập: server đã ghi điểm vào `responses`. Khách: lưu kết quả vào localStorage.
  */
 export async function scoreSpeakingAnswer(attemptId: string, questionId: string, audio: Blob) {
+    const isRemote = await isRemoteAttempt(attemptId);
     const form = new FormData();
     form.append('audio', audio);
     form.append('attemptId', attemptId);
     form.append('questionId', questionId);
+    // Lượt lưu trên máy (khách, admin xem trước) không có trên DB: server chỉ chấm, không ghi
+    if (!isRemote) form.append('local', '1');
     const response = await fetch('/api/speaking/score', { method: 'POST', body: form });
     if (response.status === 429) {
         const body = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -292,7 +326,7 @@ export async function scoreSpeakingAnswer(attemptId: string, questionId: string,
     if (!response.ok) throw new Error(`Scoring failed: ${response.status}`);
 
     const result = (await response.json()) as AnswerScore;
-    if (!(await isRemoteAttempt(attemptId))) saveLocalResponse(attemptId, questionId, result);
+    if (!isRemote) saveLocalResponse(attemptId, questionId, result);
     return result;
 }
 
@@ -354,7 +388,8 @@ export async function scoreWritingAttempt(attempt: Attempt, questions: ScoredQue
                     partTemplateId: attempt.part_template_id,
                     answers: pending.map((question) => ({
                         questionId: question.id,
-                        text: answerOf(question.id)?.text_answer ?? '',
+                        // Nháp cũ trước khi editor giới hạn độ dài: cắt như server, không thì route trả 400 cả bài
+                        text: (answerOf(question.id)?.text_answer ?? '').slice(0, MAX_ANSWER_CHARS),
                     })),
                 }),
             });
@@ -429,9 +464,9 @@ async function saveRemoteResponse(attemptId: string, questionId: string, patch: 
     return inserted.data as AttemptResponse;
 }
 
-/** Nhận xét của AI cho các câu trả lời; chỉ khâu chấm bài ghi bảng này. */
-export async function listAnnotations(responseIds: string[]): Promise<Annotation[]> {
-    if (!(await sessionUserId())) {
+/** Nhận xét của AI cho các câu trả lời của một lượt làm; chỉ khâu chấm bài ghi bảng này. */
+export async function listAnnotations(attemptId: string, responseIds: string[]): Promise<Annotation[]> {
+    if (!(await isRemoteAttempt(attemptId))) {
         const ids = new Set(responseIds);
         return readTable<Annotation>(ANNOTATIONS).filter((annotation) => ids.has(annotation.response_id));
     }

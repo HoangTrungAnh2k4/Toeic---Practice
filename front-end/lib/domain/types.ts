@@ -12,7 +12,7 @@ export type ExamSource = 'ets' | 'internal';
 
 export type ExamStatus = 'draft' | 'review' | 'published' | 'archived';
 
-export type AttemptMode = 'cbt' | 'timed' | 'guided';
+export type AttemptMode = 'cbt' | 'guided';
 
 export type AttemptStatus = 'in_progress' | 'submitted' | 'scoring' | 'scored' | 'interrupted';
 

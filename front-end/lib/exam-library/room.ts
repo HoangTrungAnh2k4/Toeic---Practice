@@ -16,7 +16,10 @@ export interface ExamRoom {
     parts: RoomPart[];
 }
 
-const MODES: AttemptMode[] = ['cbt', 'timed', 'guided'];
+const MODES: AttemptMode[] = ['cbt', 'guided'];
+
+/** Đề chưa phát hành chỉ admin mở được (RLS): phòng thi chạy chế độ xem trước, không tạo lượt làm trên DB. */
+export const isPreview = (exam: Exam) => exam.status === 'draft' || exam.status === 'review';
 
 /**
  * Đọc `id`, `mode`, `part` (id của Part template) của phòng thi từ URL; mode không hợp lệ rơi về thi thử CBT,

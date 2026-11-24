@@ -1,7 +1,6 @@
 import {
     LuBadgeCheck,
     LuBrain,
-    LuClock,
     LuEllipsisVertical,
     LuEye,
     LuGraduationCap,
@@ -43,7 +42,6 @@ const COLUMNS = [
 
 const MODE_ICON: Record<AttemptMode, IconType> = {
     cbt: LuBadgeCheck,
-    timed: LuClock,
     guided: LuGraduationCap,
 };
 

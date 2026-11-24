@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { Database } from '@/lib/database.types';
 import { logger, serverError } from '@/lib/logger';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
+import { MAX_ANSWER_CHARS } from '@/lib/domain/writing-text';
 import type { RequiredKeyword } from '@/lib/domain/types';
 import { ProviderQuotaError } from '@/lib/scoring/errors';
 import { scoringQuota } from '@/lib/scoring/quota';
@@ -15,8 +16,6 @@ import { createServerSupabase } from '@/lib/supabase-server';
 // Chấm song song mọi câu (cả đề tối đa 8 câu); mỗi lượt gọi LLM tối đa 20s/model
 export const maxDuration = 60;
 
-/** Bài luận Q8 ~300–500 từ; chặn bài dài bất thường để khỏi tốn token. */
-const MAX_ANSWER_CHARS = 8000;
 const WRITING_PART_IDS = PART_TEMPLATES.filter((part) => part.skill === 'writing').map((part) => part.id);
 
 const userBody = z.object({ attemptId: z.uuid() });
@@ -91,7 +90,7 @@ function scoreAll(
 /**
  * Chấm một lượt Writing đã nộp (cả đề hoặc một Part).
  * Người đăng nhập: chiếm attempt `submitted → scoring`, chấm các câu chưa có điểm, ghi `responses`, `annotations`,
- * `attempts` bằng service_role. Khách: chỉ trả kết quả từng câu, client lưu localStorage và tự tổng kết.
+ * `attempts` bằng service_role. Lượt lưu trên máy: chỉ trả kết quả từng câu, client lưu localStorage và tự tổng kết.
  */
 export async function POST(request: Request) {
     const json: unknown = await request.json().catch(() => null);
@@ -100,10 +99,12 @@ export async function POST(request: Request) {
     const userId = auth?.claims.sub ?? null;
     const quota = scoringQuota(request, userId);
 
-    if (!userId) {
-        const body = guestBody.safeParse(json);
-        if (!body.success) return fail('invalid_body', 400);
-        const { examId, partTemplateId, answers } = body.data;
+    // Lượt lưu trên máy gửi kèm bài viết (khách, admin xem trước đề nháp, lượt khách khi vừa đăng nhập ở tab khác):
+    // chỉ chấm, không ghi DB. Lượt trên DB chỉ gửi `attemptId`.
+    const guest = guestBody.safeParse(json);
+    if (!userId || guest.success) {
+        if (!guest.success) return fail('invalid_body', 400);
+        const { examId, partTemplateId, answers } = guest.data;
         if (partTemplateId !== null && !WRITING_PART_IDS.includes(partTemplateId)) return fail('invalid_body', 400);
 
         const questions = await loadQuestions(supabase, examId, partTemplateId).catch((error: unknown) => serverError('writing score: load questions failed', error, { examId }));

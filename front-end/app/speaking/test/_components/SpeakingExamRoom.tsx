@@ -6,7 +6,7 @@ import { useEffect, useEffectEvent, useState } from 'react';
 import { LuInfo, LuRotateCw, LuTriangleAlert } from 'react-icons/lu';
 import Button, { buttonVariants } from '@/components/ui/button';
 import type { AttemptMode, Exam } from '@/lib/domain/types';
-import type { RoomPart } from '@/lib/exam-library/room';
+import { isPreview, type RoomPart } from '@/lib/exam-library/room';
 import { getAttemptHref } from '@/app/setting/history/utils';
 import MicrophoneAccessNotice from './MicrophoneAccessNotice';
 import { useMicrophone } from '../_lib/useMicrophone';
@@ -63,6 +63,7 @@ export default function SpeakingExamRoom({ exam, parts, mode }: SpeakingExamRoom
         exam.id,
         mode,
         steps.map(({ question }) => question),
+        isPreview(exam),
     );
 
     if (session.loadError) {

@@ -7,6 +7,7 @@ import {
     updateAttempt,
 } from '@/lib/data/user-data';
 import type { Attempt, AttemptMode, Question } from '@/lib/domain/types';
+import { MAX_ANSWER_CHARS } from '@/lib/domain/writing-text';
 import { SaveStatus } from '../types';
 
 const AUTOSAVE_DELAY_MS = 600;
@@ -26,6 +27,8 @@ interface UseWritingAttemptOptions {
     /** Mọi câu trong phạm vi lượt làm, theo thứ tự Part; `answers` đánh index theo mảng này. */
     questions: Question[];
     partCount: number;
+    /** Admin xem trước đề chưa phát hành: lượt làm chỉ lưu trên máy (xem `StartAttemptInput.preview`). */
+    preview: boolean;
 }
 
 /** Part đang làm của lượt cả đề và lúc bắt đầu Part đó (ms): đồng hồ từng Part tính từ đây. */
@@ -94,12 +97,13 @@ function clearDrafts(attemptId: string, saved?: Omit<Draft, 'attempt_id'>) {
 }
 
 /** Lượt làm dở của đúng đề & phạm vi (hoặc lượt mới) kèm câu trả lời đã lưu; nháp chưa kịp lưu được ưu tiên. */
-async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questions, partCount }: UseWritingAttemptOptions) {
+async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questions, partCount, preview }: UseWritingAttemptOptions) {
     const { attempt, responses, isRestored } = await resumeOrStartAttempt({
         exam_id: examId,
         part_template_id: partTemplateId,
         mode,
         duration_sec: mode === 'guided' ? null : durationSec,
+        preview,
     });
     const saved = readTable<ProgressRow>(PROGRESS).find((row) => row.attempt_id === attempt.id);
     const progress: PartProgress =
@@ -110,9 +114,10 @@ async function resumeOrStart({ examId, partTemplateId, mode, durationSec, questi
     // Nháp còn lại nghĩa là lần trước chưa kịp lưu lên server → dùng nháp và đưa vào hàng chờ lưu
     const unsaved = new Map<number, string>();
     const answers = questions.map((question, index) => {
-        const draft = drafts.find((row) => row.question_id === question.id);
-        if (draft) unsaved.set(index, draft.text);
-        return draft?.text ?? responses.find((response) => response.question_id === question.id)?.text_answer ?? '';
+        // Nháp cũ trước khi giới hạn độ dài: cắt về mức DB nhận, không thì mọi lượt lưu/nộp đều bị từ chối
+        const draft = drafts.find((row) => row.question_id === question.id)?.text.slice(0, MAX_ANSWER_CHARS);
+        if (draft !== undefined) unsaved.set(index, draft);
+        return draft ?? responses.find((response) => response.question_id === question.id)?.text_answer ?? '';
     });
     return { attempt, answers, unsaved, isRestored, progress };
 }

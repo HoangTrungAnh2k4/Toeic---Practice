@@ -1,4 +1,5 @@
-import { listAttempts, listResponses } from '@/lib/data/user-data';
+import { isAnswered, listAttempts, listResponses } from '@/lib/data/user-data';
+import { isOpenAttempt } from '@/lib/exam-library/entries';
 import { PART_TEMPLATES } from '@/lib/domain/parts';
 import type { Attempt, Skill } from '@/lib/domain/types';
 import type { ExamSummary } from '@/lib/exam-library/types';
@@ -26,8 +27,13 @@ function countQuestions(attempt: Attempt, exam: ExamSummary) {
  * `examId`: chỉ nạp lượt của một đề (đủ để đánh số lần làm và chênh điểm của các lượt thuộc đề đó).
  */
 export async function loadHistoryRows(exams: ExamSummary[], examId?: string): Promise<HistoryRow[]> {
+    return toHistoryRows(await listAttempts(examId), exams);
+}
+
+/** Dựng dòng lịch sử cho `attempts` (mới nhất trước) với đề trong `exams`; lượt của đề không có trong `exams` bị bỏ. */
+export async function toHistoryRows(all: Attempt[], exams: ExamSummary[]): Promise<HistoryRow[]> {
     const examById = new Map(exams.map((exam) => [exam.id, exam]));
-    const attempts = (await listAttempts(examId)).filter((attempt) => examById.has(attempt.exam_id));
+    const attempts = all.filter((attempt) => examById.has(attempt.exam_id));
 
     // Duyệt cũ → mới để đánh số lần làm và so điểm với lượt đã chấm liền trước của cùng đề & cùng phạm vi
     // (Writing mỗi Part một lượt làm: Part 2 không so với Part 1)
@@ -48,14 +54,13 @@ export async function loadHistoryRows(exams: ExamSummary[], examId?: string): Pr
         attempts.map(async (attempt) => {
             // Có trong `examById` nhờ filter phía trên
             const exam = examById.get(attempt.exam_id) as ExamSummary;
-            const isOpen = attempt.status === 'in_progress' || attempt.status === 'interrupted';
-            const responses = isOpen ? await listResponses(attempt.id) : [];
+            const responses = isOpenAttempt(attempt) ? await listResponses(attempt.id) : [];
             return {
                 attempt,
                 exam,
                 ...(derived.get(attempt.id) ?? { attemptNo: 1, scoreDelta: null }),
                 questionCount: countQuestions(attempt, exam),
-                answeredCount: responses.filter((r) => r.text_answer?.trim() || r.audio_path).length,
+                answeredCount: responses.filter(isAnswered).length,
             };
         }),
     );

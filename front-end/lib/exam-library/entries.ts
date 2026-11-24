@@ -19,9 +19,12 @@ export const EMPTY_USER_STATE: UserExamState = {
 
 const isCompleted = (attempt: Attempt) => ['submitted', 'scoring', 'scored'].includes(attempt.status);
 
+/** Lượt chưa nộp; vào phòng thi sẽ làm tiếp lượt này (kể cả lượt đã thoát giữa chừng), không mở lượt mới. */
+export const isOpenAttempt = (attempt: Attempt) => attempt.status === 'in_progress' || attempt.status === 'interrupted';
+
 /**
  * Gom attempt theo đề. `attempts` sắp mới nhất trước; `answeredByAttempt` là số câu đã trả lời của từng attempt.
- * Lượt bị gián đoạn không tính là đã làm cũng không tính là đang làm dở.
+ * Lượt bị gián đoạn tính là đang làm dở: vào lại phòng thi là làm tiếp lượt đó theo chế độ cũ của nó.
  */
 export function buildUserStates(
     attempts: Attempt[],
@@ -38,7 +41,7 @@ export function buildUserStates(
     for (const attempt of attempts) {
         const state = stateOf(attempt.exam_id);
         // Duyệt mới → cũ: lượt dở dang cũ hơn một lượt đã nộp coi như đã bỏ
-        if (attempt.status === 'in_progress' && !state.inProgress && state.completedCount === 0) {
+        if (isOpenAttempt(attempt) && !state.inProgress && state.completedCount === 0) {
             state.inProgress = attempt;
             state.answeredCount = answeredByAttempt.get(attempt.id) ?? 0;
         } else if (isCompleted(attempt)) {

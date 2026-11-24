@@ -93,7 +93,7 @@ type AttemptInsert = {
     user_id: string;
     exam_id: string;
     part_template_id?: number | null;
-    mode?: 'cbt' | 'timed' | 'guided';
+    mode?: 'cbt' | 'guided';
     status?: 'in_progress' | 'submitted' | 'scoring' | 'scored' | 'interrupted';
     score?: number | null;
     started_at?: string;
